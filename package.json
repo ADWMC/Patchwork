@@ -6,6 +6,7 @@
   "main": "src/index.mjs",
   "files": [
     "src",
+    "hooks",
     "presets",
     "scripts",
     "docs/maintainable-coding-agent-prompt.md",
