@@ -97,6 +97,12 @@ For changes to a shared contract or user-facing workflow, verify more broadly.
 For documentation-only changes, check links, terminology, and the rendered
 structure rather than claiming a build was run.
 
+## Git 提交
+
+只有用户明确授权时才提交或推送。提交遵循
+[Git 提交规范](git-commit-conventions.md)：使用 Conventional Commits，
+一个提交只包含一个逻辑变化，并在推送前检查差异和验证结果。
+
 ## Authorization and stopping
 
 Do not commit, push, publish, deploy, alter production systems, upload data,

@@ -18,6 +18,8 @@ and the target project's conventions.
 
 - [Engineering agent guide](docs/engineering-agent-guide.md): the operating
   rules for investigation, implementation, debugging, and verification.
+- [Git commit conventions](docs/git-commit-conventions.md): Conventional
+  Commits format, scope, and authorization rules.
 - [Preset and release lessons](docs/preset-and-release-lessons.md): reusable
   lessons from deploying an agent preset into a changing host environment.
 - [Source notes](docs/source-notes.md): the materials consolidated here and
