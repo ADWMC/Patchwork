@@ -2,11 +2,13 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { basename, relative, sep } from 'node:path'
 
 const SOURCE = /\.(?:c|cc|cpp|cxx|h|hpp|java|js|jsx|mjs|ts|tsx|go|rs|py|kt|swift)$/i
 const VAGUE = /(?:^|[_-])(?:final|new|old|copy|tmp|temp|debug|test|backup|fix|v\d+)(?:\.|[_-]|$)/i
-const PROMPT = '发现结构或命名警告。请先确认职责边界，再按领域/层次拆分文件并使用表达职责的名称；不要用临时改名或继续堆叠到大文件。完成后执行最小验证。'
+const promptPath = fileURLToPath(new URL('../assets/prompts/structure-hook-warning.md', import.meta.url))
+const prompt = (await readFile(promptPath, 'utf8')).trim()
 
 export async function inspectStructure(payload = {}) {
   const cwd = payload.cwd || process.cwd()
@@ -36,5 +38,5 @@ export async function inspectStructure(payload = {}) {
   const count = previous + 1
   state[key] = count >= 30 ? 0 : count
   try { await writeFile(statePath, JSON.stringify(state)) } catch { /* advisory state */ }
-  return { ok: true, warnings, ...(previous === 0 || count >= 30 ? { prompt: PROMPT } : {}) }
+  return { ok: true, warnings, ...(previous === 0 || count >= 30 ? { prompt } : {}) }
 }

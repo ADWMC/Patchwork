@@ -11,6 +11,11 @@ test('structure hook flags root and vague source names', async () => {
   assert.deepEqual(result.warnings.map(item => item.code), ['root-source', 'vague-name'])
 })
 
+test('hook warning prompt is a separate asset', async () => {
+  const result = await inspectStructure({ cwd: process.cwd(), sessionId: 'asset-test', files: ['debug_final.cpp'] })
+  assert.match(result.prompt, /职责边界/)
+})
+
 test('structure warning prompt repeats every 30 rounds', async () => {
   const state = join(await mkdtemp(join(tmpdir(), 'patchwork-')), 'state.json')
   const old = process.env.PATCHWORK_HOOK_STATE
