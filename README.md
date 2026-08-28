@@ -35,6 +35,18 @@ and the target project's conventions.
 - [Maintenance session core](src/maintenance-session.mjs): research, scope,
   verification, and output-budget boundaries shared by Agent and Hook layers.
 
+## Agent preset
+
+安装插件后，生成并安装可在 DSH Agent 选择器中显示的 preset：
+
+```powershell
+node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
+Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
+```
+
+宿主 DSH 升级后重新运行生成命令；它会保留宿主 standard 的工具行，仅更新
+Patchwork persona。
+
 ## Intended outcome
 
 Patchwork should help with implementation, debugging, maintenance, and

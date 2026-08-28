@@ -6,6 +6,8 @@
   "main": "src/index.mjs",
   "files": [
     "src",
+    "presets",
+    "scripts",
     "docs/maintainable-coding-agent-prompt.md",
     "cordis.patch.yml"
   ],
