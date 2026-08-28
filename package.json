@@ -1,0 +1,21 @@
+{
+  "name": "@patchwork/coding-agent",
+  "version": "0.1.0",
+  "description": "Maintainable coding agent for DeepSeek Harness.",
+  "type": "module",
+  "main": "src/index.mjs",
+  "files": [
+    "src",
+    "docs/maintainable-coding-agent-prompt.md",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

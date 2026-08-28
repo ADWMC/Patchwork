@@ -15,8 +15,9 @@
 
 ## 在 DSH 中挂载
 
-在 DeepSeek Harness 源码树中创建一个临时 patch 文件，将路径替换为本仓库的
-绝对路径：
+通过本仓库的 `package.json` 和 `cordis.patch.yml` 安装后，DSH 会按 bundle
+清单加载 `patchwork-agent`。源码调试也可以在 DeepSeek Harness 源码树中创建
+临时 patch 文件，将路径替换为本仓库的绝对路径：
 
 ```yaml
 - insert:

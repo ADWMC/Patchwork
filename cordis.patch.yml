@@ -1,0 +1,3 @@
+- insert:
+    - id: patchwork-agent
+      name: '@patchwork/coding-agent'
