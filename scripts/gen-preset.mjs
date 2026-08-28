@@ -16,7 +16,7 @@ const start = standard.indexOf('- id: persona\n')
 const end = standard.indexOf('- id: agent-instructions\n', start)
 if (start < 0 || end < 0) throw new Error(`无法定位 standard persona: ${standardPath}`)
 
-const indented = prompt.split('\n').map(line => `      ${line}`).join('\n')
+const indented = prompt.split('\n').map(line => line ? `      ${line}` : '').join('\n')
 const persona = `- id: persona\n  name: '@deepseek-ai/dsh-persona'\n  config:\n    text: |\n${indented}\n\n`
 const fingerprint = createHash('sha256').update(standard).digest('hex')
 const output = `# Generated from the host standard preset. Regenerate after DSH upgrades.\n# gen-preset: host=${fingerprint}\n\n${standard.slice(0, start)}${persona}${standard.slice(end)}`
