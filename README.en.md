@@ -32,8 +32,10 @@ a DSH upgrade; it preserves the host tool rows and updates only the Patchwork pe
 
 ## Hook checks
 
-The Hook accepts JSON containing `cwd` and `files`, and returns `warnings` without
-blocking the Agent:
+The Hook supports standalone stdin invocation and DSH's native
+`tools/post-execute` lifecycle. It accepts JSON containing `cwd` and `files`,
+or extracts source paths from tool arguments, returns `warnings` and
+`additionalContexts`, and never blocks the Agent:
 
 ```powershell
 '{"event":"PostToolUse","cwd":"C:\project","files":[{"path":"C:\project\debug_final.cpp"}]}' |

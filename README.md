@@ -31,7 +31,9 @@ Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/pat
 
 ## Hook 检查
 
-Hook 接收包含 `cwd` 和 `files` 的 JSON，返回 `warnings`，不会阻断 Agent：
+Hook 同时支持独立 stdin 调用和 DSH 原生 `tools/post-execute` 生命周期。
+它接收包含 `cwd` 和 `files` 的 JSON，或从工具参数提取源码路径，返回
+`warnings`/`additionalContexts`，不会阻断 Agent：
 
 ```powershell
 '{"event":"PostToolUse","cwd":"C:\项目","files":[{"path":"C:\项目\debug_final.cpp"}]}' |

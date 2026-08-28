@@ -17,8 +17,7 @@ testing the actual deployment path.
 
 Patchwork does not copy the security-analysis domain workflow, binary-analysis
 methods, sample handling rules, domain-specific tools, or security reference
-library from `helm-d`. It also does not contain a DSH plugin, executable
-implementation, persona, installation script, or release automation yet.
+library from `helm-d`.
 
 The separation is deliberate: this repository is the design and implementation
 base for a maintainable coding plugin, not a fork of the security-analysis
@@ -26,7 +25,18 @@ product.
 
 ## Status
 
-The documents describe the first Agent + Hook foundation and its intended
-engineering behavior. The runtime plugin still needs its architecture, tests,
-installation contract, and release verification before those behaviors can be
-claimed as delivered.
+The runtime plugin is delivered as a Cordis bundle. DSH composes
+`package.json.dsh.bundle.patch`, applies `cordis.patch.yml`, and loads
+`src/index.mjs` through the profile loader. The plugin adds the full Agent
+prompt through `systemPrompt.section` and observes the native
+`tools/post-execute` waterfall. It extracts source paths from tool arguments,
+runs the advisory structure check, and appends a `dsh-llm` `UserMessage` via
+`additionalContexts`; failures are contained so the Hook never blocks a tool.
+
+The generated preset intentionally keeps the host `standard` persona. This
+avoids copying the full Agent prompt into the preset: `assets/prompts` is the
+single source of truth and is injected once by the runtime plugin.
+
+Verified against DSH `0.1.1-rc.2`: `dsh --profile web --no-open` reached the
+web server after reinstalling the local file dependency, and the repository
+test suite passed.
