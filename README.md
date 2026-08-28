@@ -39,7 +39,7 @@ Hook 接收包含 `cwd` 和 `files` 的 JSON，返回 `warnings`，不会阻断 
 ## 文档
 
 - [工程代理指南 | Engineering agent guide](docs/engineering-agent-guide.md)
-- [维护代码提示词 | Maintainable coding prompt](docs/maintainable-coding-agent-prompt.md)
+- [维护代码提示词 | Maintainable coding prompt](assets/prompts/maintainable-coding-agent-prompt.md)
 - [Hook 基础 | Hook foundation](docs/hook-foundation.md)
 - [Agent 基础 | Agent foundation](docs/agent-foundation.md)
 - [Git 提交规范 | Git commit conventions](docs/git-commit-conventions.md)

@@ -28,7 +28,7 @@ Patchwork 是一个面向 DeepSeek Harness 的写代码插件项目。第一个�
   Cordis 组合模型、生命周期和工具接入方式。
 - [helm-d](https://github.com/ADWMC/helm-d)：实际 DSH 插件的 bundle、preset、
   安装和发布经验；Patchwork 不复制其安全领域能力。
-- [可维护代码代理提示词](maintainable-coding-agent-prompt.md)：将上述文章中的
+- [可维护代码代理提示词](../assets/prompts/maintainable-coding-agent-prompt.md)：将上述文章中的
   解耦、主人翁式维护和全流程回归验证转成 Agent 可执行的行为约束。
 - 原始参考：[维护好一个复杂项目](https://github.com/ascoders/weekly/blob/master/%E5%89%8D%E6%B2%BF%E6%8A%80%E6%9C%AF/264.%E7%B2%BE%E8%AF%BB%E3%80%8A%E7%BB%B4%E6%8A%A4%E5%A5%BD%E4%B8%80%E4%B8%AA%E5%A4%8D%E6%9D%82%E9%A1%B9%E3%80%8B.md)。
 

@@ -41,7 +41,7 @@ blocking the Agent:
 ## Documentation
 
 - [Engineering agent guide](docs/engineering-agent-guide.md)
-- [Maintainable coding prompt](docs/maintainable-coding-agent-prompt.md)
+- [Maintainable coding prompt](assets/prompts/maintainable-coding-agent-prompt.md)
 - [Hook foundation](docs/hook-foundation.md)
 - [Agent foundation](docs/agent-foundation.md)
 - [Git commit conventions](docs/git-commit-conventions.md)

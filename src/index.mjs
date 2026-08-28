@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
-const promptPath = fileURLToPath(new URL('../docs/maintainable-coding-agent-prompt.md', import.meta.url))
+const promptPath = fileURLToPath(new URL('../assets/prompts/maintainable-coding-agent-prompt.md', import.meta.url))
 const prompt = readFileSync(promptPath, 'utf8').trim()
 
 export const name = 'patchwork-agent'

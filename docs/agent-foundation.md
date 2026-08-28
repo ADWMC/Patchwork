@@ -3,7 +3,7 @@
 `src/index.mjs` 是 Patchwork 的第一个 DSH Agent 插件入口。
 
 - 导出 `name = patchwork-agent`，供 Cordis 识别插件。
-- 声明依赖 `systemPrompt`，将项目的[可维护代码代理提示词](maintainable-coding-agent-prompt.md)
+- 声明依赖 `systemPrompt`，将项目的[可维护代码代理提示词](../assets/prompts/maintainable-coding-agent-prompt.md)
   注册为一个系统提示词段落。
 - 不修改 Harness 的 agent loop；Agent 行为由一次注册的完整提示词定义。
 - Hook 不参与 Agent 提示词注入，避免重复上下文和额外 token；Hook 基础只保留

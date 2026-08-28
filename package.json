@@ -9,7 +9,7 @@
     "hooks",
     "presets",
     "scripts",
-    "docs/maintainable-coding-agent-prompt.md",
+    "assets",
     "cordis.patch.yml"
   ],
   "dsh": {

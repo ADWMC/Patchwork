@@ -9,7 +9,7 @@ const standardPath = process.env.DSH_HOST_STANDARD_YML ||
   resolve(process.env.APPDATA || '', 'npm/node_modules/@deepseek-ai/dsh/config/agent-presets/standard/agent.cordis.yml')
 const outArg = process.argv.indexOf('--out')
 const outputDir = outArg >= 0 ? process.argv[outArg + 1] : resolve(root, 'presets/patchwork')
-const prompt = (await readFile(resolve(root, 'docs/maintainable-coding-agent-prompt.md'), 'utf8')).trim()
+const prompt = (await readFile(resolve(root, 'assets/prompts/maintainable-coding-agent-prompt.md'), 'utf8')).trim()
 const standard = await readFile(standardPath, 'utf8')
 
 const start = standard.indexOf('- id: persona\n')
