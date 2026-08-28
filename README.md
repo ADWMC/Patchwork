@@ -1,57 +1,79 @@
 # Patchwork
 
-Patchwork is a DeepSeek Harness plugin for writing and maintaining code.
+## 项目简介 | Overview
 
-Its first foundation is an Agent + Hook workflow: the agent handles the
-reasoning and implementation loop, while hooks enforce project maintenance
-boundaries around investigation, changes, and verification.
+Patchwork 是一个面向 DeepSeek Harness 的代码编写与维护插件。
+它采用 Agent + Hook：Agent 负责理解、实现和验证，Hook 负责可机械检查的维护警告。
 
-The project records the working rules that make an implementation agent useful
-over time: establish facts before changing code, make the smallest correct
-change, verify the affected behavior, and report what actually happened.
+Patchwork is a coding and maintenance plugin for DeepSeek Harness.
+It uses an Agent + Hook model: the Agent handles understanding, implementation,
+and verification; Hooks provide mechanically checkable maintenance warnings.
 
-The current repository documents the foundation before the runtime plugin is
-implemented. The implementation must follow the project's engineering rules
-and the target project's conventions.
+## 核心行为 | Core behavior
 
-## Documents
+- 修改前先调查事实、调用方、配置和测试。
+- 大功能先按职责/领域拆分，避免数千行单文件。
+- 命名表达业务角色，拒绝 `final_new`、`debug3`、`CommonUtils` 等兜底命名。
+- 修改后沿原路径验证，并只汇报实际证据。
+- Hook 发现结构或命名问题时提供专用提示词；同一会话同一问题每 30 轮最多提示一次。
 
-- [Engineering agent guide](docs/engineering-agent-guide.md): the operating
-  rules for investigation, implementation, debugging, and verification.
-- [Git commit conventions](docs/git-commit-conventions.md): Conventional
-  Commits format, scope, and authorization rules.
-- [Preset and release lessons](docs/preset-and-release-lessons.md): reusable
-  lessons from deploying an agent preset into a changing host environment.
-- [Source notes](docs/source-notes.md): the materials consolidated here and
-  the boundaries of this migration.
-- [DeepSeek Harness plugin development](docs/deepseek-harness-plugin-development.md):
-  a Chinese index of the upstream plugin development documentation.
-- [Positioning and references](docs/positioning.md): the product boundary and
-  the projects and writing that define this foundation.
-- [Maintainable coding agent prompt](docs/maintainable-coding-agent-prompt.md):
-  the actionable prompt distilled from the maintainability reference.
-- [Hook foundation](docs/hook-foundation.md): Patchwork's native Hook direction,
-  informed by Ponytail but implemented independently.
-- [Agent foundation](docs/agent-foundation.md): the first DSH plugin entry that
-  registers Patchwork's maintainability prompt.
-- [Maintenance session core](src/maintenance-session.mjs): research, scope,
-  verification, and output-budget boundaries shared by Agent and Hook layers.
+- Investigate facts, callers, configuration, and tests before editing.
+- Split large features by responsibility and domain; avoid thousand-line files.
+- Use names that express business roles; reject vague names such as `final_new`, `debug3`, and `CommonUtils`.
+- Verify the original path after editing and report only observed evidence.
+- When a Hook finds a structure or naming issue, it adds a focused prompt; the same issue is prompted at most once every 30 rounds per session.
 
 ## Agent preset
 
-安装插件后，生成并安装可在 DSH Agent 选择器中显示的 preset：
+安装插件后，将宿主 DSH 的 standard preset 派生为 Patchwork：
+
+After installing the plugin, derive a Patchwork preset from the host DSH standard preset:
 
 ```powershell
 node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```
 
-宿主 DSH 升级后重新运行生成命令；它会保留宿主 standard 的工具行，仅更新
-Patchwork persona。
+然后在 DSH 的 Agent Preset 选择器中选择 `Patchwork`。DSH 升级后重新运行生成命令，
+它会保留宿主工具行，只更新 Patchwork persona。
 
-## Intended outcome
+Then select `Patchwork` in the DSH Agent Preset picker. Run the generator again after
+a DSH upgrade; it preserves the host tool rows and updates only the Patchwork persona.
 
-Patchwork should help with implementation, debugging, maintenance, and
-refactoring without treating a successful-looking answer as proof. Its
-behavior is guided by the documents in this repository and by the conventions
-of the project it is asked to change.
+## Hook 检查 | Hook checks
+
+Hook 接收包含 `cwd` 和 `files` 的 JSON，返回 `warnings`，不会阻断 Agent：
+
+The Hook accepts JSON containing `cwd` and `files`, and returns `warnings` without
+blocking the Agent:
+
+```powershell
+'{"event":"PostToolUse","cwd":"C:\项目","files":[{"path":"C:\项目\debug_final.cpp"}]}' |
+  node hooks/patchwork-hook.mjs
+```
+
+## 文档 | Documentation
+
+- [工程代理指南 | Engineering agent guide](docs/engineering-agent-guide.md)
+- [维护代码提示词 | Maintainable coding prompt](docs/maintainable-coding-agent-prompt.md)
+- [Hook 基础 | Hook foundation](docs/hook-foundation.md)
+- [Agent 基础 | Agent foundation](docs/agent-foundation.md)
+- [Git 提交规范 | Git commit conventions](docs/git-commit-conventions.md)
+- [Preset 与发布经验 | Preset and release lessons](docs/preset-and-release-lessons.md)
+- [DeepSeek Harness 插件开发 | Plugin development](docs/deepseek-harness-plugin-development.md)
+
+## Git 提交与推送 | Git commits and pushes
+
+完成一个明确任务后提交一次；提交使用 Conventional Commits 格式。
+推送必须由用户明确要求；“完成代码后关机/结束”不触发推送。
+
+Commit once when a clearly scoped task is complete, using Conventional Commits.
+Pushing always requires an explicit user request; “finish the code and shut down”
+does not authorize a push.
+
+## 目标 | Goal
+
+Patchwork 的目标是让代码更容易理解、验证和继续演进，同时减少重复提示和无效 token。
+
+Patchwork aims to keep code understandable, verifiable, and evolvable while reducing
+repeated instructions and wasted tokens.
