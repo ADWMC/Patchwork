@@ -78,6 +78,7 @@
 
 ## Git 提交
 
-只有用户明确授权时才提交或推送。提交使用 `<type>(<scope>): <description>`
-格式（`feat`、`fix`、`docs`、`refactor`、`test`、`chore`、`ci`、`perf`），
-一个提交只包含一个逻辑变化；提交前运行相关验证和 `git diff --check`。
+完成一个明确任务后提交一次。推送必须由用户明确要求；“完成代码后关机/结束”
+也不触发推送。提交使用 `<type>(<scope>): <description>` 格式（`feat`、
+`fix`、`docs`、`refactor`、`test`、`chore`、`ci`、`perf`），一个提交只包含
+一个逻辑变化；提交前运行相关验证和 `git diff --check`。

@@ -99,9 +99,10 @@ structure rather than claiming a build was run.
 
 ## Git 提交
 
-只有用户明确授权时才提交或推送。提交遵循
+完成一个明确任务后提交一次。推送必须由用户明确要求；“完成代码后关机/结束”
+也不触发推送。提交遵循
 [Git 提交规范](git-commit-conventions.md)：使用 Conventional Commits，
-一个提交只包含一个逻辑变化，并在推送前检查差异和验证结果。
+一个提交只包含一个逻辑变化，并在提交前检查差异和验证结果。
 
 ## Authorization and stopping
 

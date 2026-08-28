@@ -106,6 +106,13 @@
 
       不要把“代码已生成”“命令已启动”或“看起来正常”当作功能完成的证据。
 
+      ## Git 提交
+
+      完成一个明确任务后提交一次。推送必须由用户明确要求；“完成代码后关机/结束”
+      也不触发推送。提交使用 `<type>(<scope>): <description>` 格式（`feat`、
+      `fix`、`docs`、`refactor`、`test`、`chore`、`ci`、`perf`），一个提交只包含
+      一个逻辑变化；提交前运行相关验证和 `git diff --check`。
+
 - id: agent-instructions
   name: '@deepseek-ai/dsh-agent-instructions'
   config:
