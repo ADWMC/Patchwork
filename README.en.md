@@ -11,9 +11,11 @@ and verification; Hooks provide mechanically checkable maintenance warnings.
 ## Core behavior
 
 - Investigate facts, callers, configuration, and tests before editing.
+- Ask the user before editing when ambiguity could change implementation or acceptance.
 - Split large features by responsibility and domain; avoid thousand-line files.
 - Use names that express business roles; reject vague names such as `final_new`, `debug3`, and `CommonUtils`.
 - Verify the original path after editing and report only observed evidence.
+- Update affected documentation and the README after code, configuration, or behavior changes.
 - When a Hook finds a structure or naming issue, it adds a focused prompt; the same issue is prompted at most once every 30 rounds per session.
 
 ## Agent preset

@@ -12,8 +12,16 @@ test('structure hook flags root and vague source names', async () => {
 })
 
 test('hook warning prompt is a separate asset', async () => {
-  const result = await inspectStructure({ cwd: process.cwd(), sessionId: 'asset-test', files: ['debug_final.cpp'] })
-  assert.match(result.prompt, /职责边界/)
+  const state = join(await mkdtemp(join(tmpdir(), 'patchwork-')), 'state.json')
+  const old = process.env.PATCHWORK_HOOK_STATE
+  process.env.PATCHWORK_HOOK_STATE = state
+  try {
+    const result = await inspectStructure({ cwd: process.cwd(), sessionId: 'asset-test', files: ['debug_final.cpp'] })
+    assert.match(result.prompt, /职责边界/)
+  } finally {
+    if (old === undefined) delete process.env.PATCHWORK_HOOK_STATE
+    else process.env.PATCHWORK_HOOK_STATE = old
+  }
 })
 
 test('structure warning prompt repeats every 30 rounds', async () => {

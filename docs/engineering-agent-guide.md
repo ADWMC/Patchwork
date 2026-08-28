@@ -43,6 +43,10 @@ data/configuration sources, and existing tests. The depth of investigation
 should match the risk; a local change does not require mapping the entire
 repository.
 
+When ambiguity could change the implementation, scope, or acceptance criteria,
+ask the user before editing. After a code or behavior change, update the affected
+documentation and README so usage and examples remain accurate.
+
 ### Plan proportionally
 
 Implement a single low-risk change directly. For work spanning public
