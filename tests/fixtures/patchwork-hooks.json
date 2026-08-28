@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PATCHWORK_PLUGIN_ROOT}/hooks/patchwork-hook.mjs\"",
+            "timeout": 2
+          }
+        ]
+      }
+    ]
+  }
+}
