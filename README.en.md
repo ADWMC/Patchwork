@@ -27,8 +27,9 @@ node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwor
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```
 
-Then select `Patchwork` in the DSH Agent Preset picker. Run the generator again after
-a DSH upgrade; it preserves the host tool rows and updates only the Patchwork persona.
+Then select `Patchwork` in the DSH Agent Preset picker. The preset only supplies the
+persona and instruction configuration; DSH owns the host tools, so switching agents
+within one process remains safe.
 
 ## Hook checks
 

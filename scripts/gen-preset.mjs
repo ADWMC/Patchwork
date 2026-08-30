@@ -1,20 +1,14 @@
-import { createHash } from 'node:crypto'
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const standardPath = process.env.DSH_HOST_STANDARD_YML ||
-  resolve(process.env.APPDATA || '', 'npm/node_modules/@deepseek-ai/dsh/config/agent-presets/standard/agent.cordis.yml')
+// DSH owns the standard tools in the host plane. Copying the full standard
+// preset here makes a second session register pwsh/read/etc. and fail with
+// "tool already registered" when presets are switched in one process.
 const outArg = process.argv.indexOf('--out')
-const outputDir = outArg >= 0 ? process.argv[outArg + 1] : resolve(root, 'presets/patchwork')
-const standard = await readFile(standardPath, 'utf8')
-
-const fingerprint = createHash('sha256').update(standard).digest('hex')
-const output = `# Generated from the host standard preset. Regenerate after DSH upgrades.\n# gen-preset: host=${fingerprint}\n\n${standard}`
+const outputDir = outArg >= 0 ? process.argv[outArg + 1] : resolve(new URL('../presets/patchwork', import.meta.url).pathname)
+const output = `# Minimal preset: host owns tool registrations; Patchwork is loaded by the profile bundle.\n\n- id: persona\n  name: '@deepseek-ai/dsh-persona'\n  config:\n    text: >-\n      You are a coding agent powered by the {{model}} model. Your working directory is {{cwd}}.\n\n- id: agent-instructions\n  name: '@deepseek-ai/dsh-agent-instructions'\n  config:\n    maxBytes: 65536\n`
 
 await mkdir(outputDir, { recursive: true })
 const outputPath = resolve(outputDir, 'agent.cordis.yml')
-if (!existsSync(outputPath) || await readFile(outputPath, 'utf8') !== output) await writeFile(outputPath, output)
+await writeFile(outputPath, output)
 console.log(outputPath)

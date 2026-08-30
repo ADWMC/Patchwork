@@ -26,8 +26,8 @@ node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwor
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```
 
-然后在 DSH 的 Agent Preset 选择器中选择 `Patchwork`。DSH 升级后重新运行生成命令，
-它会保留宿主工具行，只更新 Patchwork persona。
+然后在 DSH 的 Agent Preset 选择器中选择 `Patchwork`。该 preset 只提供 persona 和
+指令配置，工具由 DSH 宿主统一提供，因此可以在同一进程内安全切换其它 Agent。
 
 ## Hook 检查
 
