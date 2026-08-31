@@ -24,3 +24,9 @@ test('generated preset owns the Patchwork runtime', () => {
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+test('profile installs Patchwork as a dependency, not a host bundle', () => {
+  const profile = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'profiles/patchwork/package.json'), 'utf8'))
+  assert.equal(profile.dependencies['@patchwork/coding-agent'], '0.1.1')
+  assert.equal(profile.dsh.profile.bundles.includes('@patchwork/coding-agent'), false)
+})

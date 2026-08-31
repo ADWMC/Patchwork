@@ -16,10 +16,12 @@
 
 - DSH host：共享服务和平台实现；
 - Agent preset：从本机 Standard 派生的平台工具行；
-- Patchwork preset：额外加载一次 `@patchwork/coding-agent`；
+- Patchwork preset：按 session 作用域加载一次 `@patchwork/coding-agent`；
 - Patchwork package bundle：空 patch，只保留依赖安装入口。
 
-因此 Standard、Patchwork 和 Helmd 可以在同一 profile 中切换；Patchwork 的提示词和
+该边界消除了插件的宿主级重复加载。当前 DSH 版本若同时挂载多个包含完整 Standard
+工具行的 user preset，工具注册表仍可能在第二个 preset 报 `already registered`；这
+属于 DSH 挂载实现限制，不能通过清空插件 Bundle patch 解决。Patchwork 的提示词和
 Hook 只在 Patchwork Agent 中生效。
 
 ## 重新部署
