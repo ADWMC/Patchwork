@@ -27,7 +27,7 @@ Hook 只在 Patchwork Agent 中生效。
 ```powershell
 npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
 dsh plugin --profile web remove '@patchwork/coding-agent'
-dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.0.tgz"
+dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.1.tgz"
 node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```

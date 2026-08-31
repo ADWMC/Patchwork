@@ -24,7 +24,7 @@ Patchwork 可以与 Standard、Helmd 等 Agent 共用同一个 profile。安装�
 
 ```powershell
 npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
-dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.0.tgz"
+dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.1.tgz"
 node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```
