@@ -36,12 +36,13 @@ tool "read" is already registered
 
 ## 修复方案
 
-Patchwork preset 已改为最小配置，只保留：
+Patchwork preset 按 DSH standard 生成，保留宿主平台工具并只替换 persona：
 
-1. `@deepseek-ai/dsh-persona`：设置 Agent 身份；
-2. `@deepseek-ai/dsh-agent-instructions`：设置指令读取上限。
+1. `pwsh`/`bash`（按平台启用）：本地 shell；
+2. `read`、`write`、`edit`、文件搜索、后台任务、skills、goal、plan、subagent、workflow、ralph、ask-user、todo、web 和 compaction；
+3. `@deepseek-ai/dsh-persona` 与 `@deepseek-ai/dsh-agent-instructions`：设置身份与指令读取上限。
 
-Shell、文件系统、任务、Skills、计划、目标、子代理和网页工具继续由 DSH 宿主统一提供。Patchwork 的维护提示词和 Hook 仍由 profile bundle 中的 `@patchwork/coding-agent` 加载。
+这些平台工具行由用户 preset 暴露给 Agent，但实现仍来自 DSH 已安装包。Patchwork 的维护提示词和 Hook 仍由 profile bundle 中的 `@patchwork/coding-agent` 加载。
 
 相关实现：
 
@@ -80,4 +81,4 @@ node --test tests/*.test.mjs
 
 ## 预防
 
-DSH 升级或修改宿主 preset 后，先确认宿主工具的所有权，再生成用户 preset。用户 preset 只应声明自己的 persona、提示词或插件专属配置；不要把宿主已经注册的工具行复制进去。
+DSH 升级或修改宿主 preset 后，先确认宿主工具的所有权，再生成用户 preset。用户 preset 应复制宿主 standard 的平台工具行以暴露工具面，但不要把 profile bundle 已挂载的业务 bundle 行再次复制进去。

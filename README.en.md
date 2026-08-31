@@ -27,9 +27,9 @@ node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwor
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```
 
-Then select `Patchwork` in the DSH Agent Preset picker. The preset only supplies the
-persona and instruction configuration; DSH owns the host tools, so switching agents
-within one process remains safe.
+Then select `Patchwork` in the DSH Agent Preset picker. The preset exposes the DSH
+standard shell, filesystem, search, task, and agent tools while using host-installed
+implementations, so switching agents within one process remains safe.
 
 ## Hook checks
 

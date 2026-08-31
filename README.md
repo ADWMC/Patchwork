@@ -26,8 +26,8 @@ node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwor
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```
 
-然后在 DSH 的 Agent Preset 选择器中选择 `Patchwork`。该 preset 只提供 persona 和
-指令配置，工具由 DSH 宿主统一提供，因此可以在同一进程内安全切换其它 Agent。
+然后在 DSH 的 Agent Preset 选择器中选择 `Patchwork`。该 preset 会暴露 DSH standard
+的本地 shell、文件、搜索、任务和 Agent 工具，并可在同一进程内安全切换其它 Agent。
 
 ## Hook 检查
 
