@@ -25,15 +25,16 @@ product.
 
 ## Status
 
-The runtime plugin is delivered as a Cordis bundle. DSH composes
-`package.json.dsh.bundle.patch`, applies `cordis.patch.yml`, and loads
-`src/index.mjs` through the profile loader. The plugin adds the full Agent
+The runtime plugin is delivered in the package but mounted by the Patchwork
+agent preset. The package-level `cordis.patch.yml` is intentionally empty so
+installing the dependency does not affect every agent in the profile. The plugin adds the full Agent
 prompt through `systemPrompt.section` and observes the native
 `tools/post-execute` waterfall. It extracts source paths from tool arguments,
 runs the advisory structure check, and appends a `dsh-llm` `UserMessage` via
 `additionalContexts`; failures are contained so the Hook never blocks a tool.
 
-The generated preset intentionally keeps the host `standard` persona. This
+The generated preset keeps the host `standard` persona and adds exactly one
+`@patchwork/coding-agent` row. This
 avoids copying the full Agent prompt into the preset: `assets/prompts` is the
 single source of truth and is injected once by the runtime plugin.
 

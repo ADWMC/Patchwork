@@ -253,3 +253,6 @@
   config:
     fetch: false
     searchTimeoutMs: 60000
+
+- id: patchwork-agent
+  name: '@patchwork/coding-agent'

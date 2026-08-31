@@ -26,15 +26,15 @@ standard configuration, replacing only the agent-owned portion such as its
 persona. Validate that the generated row set matches the host's standard set
 and record a content fingerprint to identify host upgrades versus local drift.
 
-## Register shared capabilities once
+## Register capabilities in their narrowest scope
 
-A capability package that the host profile already mounts must not be declared
-again inside a user preset. Duplicate registration can fail when a long-lived
-host rebuilds an agent composition. Establish ownership boundaries explicitly:
+A capability package that registers agent tools or hooks should be mounted by
+its agent preset, not globally by the profile. Duplicate or global registration
+can prevent other presets from mounting. Establish ownership boundaries explicitly:
 
 - The host preset owns host platform tools.
-- The profile or bundle layer owns shared capability packages.
-- The agent preset owns its persona and selected host configuration.
+- The profile or bundle layer owns only genuinely shared host services.
+- The agent preset owns its persona, selected host configuration, and agent-specific package.
 
 Validate the assembled result in a real new session, not only by inspecting
 YAML or JSON.

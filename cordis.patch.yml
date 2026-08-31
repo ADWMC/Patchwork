@@ -1,3 +1,4 @@
-- insert:
-    - id: patchwork-agent
-      name: '@patchwork/coding-agent'
+# Runtime behavior is mounted by the Patchwork agent preset. Keeping this
+# bundle patch empty lets `dsh plugin add` install the package dependency
+# without injecting Patchwork into every agent in the profile.
+[]

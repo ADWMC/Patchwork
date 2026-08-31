@@ -8,6 +8,7 @@
     "src",
     "hooks",
     "presets",
+    "profiles",
     "scripts",
     "assets",
     "cordis.patch.yml"

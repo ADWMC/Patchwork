@@ -15,24 +15,17 @@
 
 ## 在 DSH 中挂载
 
-通过本仓库的 `package.json` 和 `cordis.patch.yml` 安装后，DSH 会按 bundle
-清单加载 `patchwork-agent`。源码调试也可以在 DeepSeek Harness 源码树中创建
-临时 patch 文件，将路径替换为本仓库的绝对路径：
+安装包的 `cordis.patch.yml` 保持为空，只负责让 DSH 安装和解析包依赖。
+`scripts/gen-preset.mjs` 生成的 `patchwork` preset 才加载 `patchwork-agent`：
 
 ```yaml
 - insert:
     - id: patchwork-agent
-      name: 'C:/path/to/Patchwork/src/index.mjs'
-```
-
-然后启动：
-
-```text
-pnpm dsh web --patch ./patchwork.cordis.yml
+      name: '@patchwork/coding-agent'
 ```
 
 插件加载后，`patchwork-agent` 一次注册的完整提示词会作为系统提示词段落参与
-模型请求组装；Hook 不重复注入。
+模型请求组装；Hook 不重复注入。切换到其他 preset 后，该插件随 Agent 作用域卸载。
 
 ## 最小验证
 

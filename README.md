@@ -19,27 +19,19 @@ Patchwork 是一个面向 DeepSeek Harness 的代码编写与维护插件。
 
 ## Agent preset
 
-Patchwork 的完整工具面应在独立 profile 中运行，避免与 helmd 等已经注册
-`pwsh/read/...` 的 preset 冲突。复制 `profiles/patchwork` 到 DSH profile 根目录后安装：
+Patchwork 可以与 Standard、Helmd 等 Agent 共用同一个 profile。安装包只提供依赖，
+维护提示词和 Hook 由 `patchwork` preset 在 Agent 隔离上下文中加载：
 
 ```powershell
-Copy-Item -Recurse profiles/patchwork "$env:USERPROFILE/.dsh/profiles/patchwork" -Force
-pnpm --dir "$env:USERPROFILE/.dsh/profiles/patchwork" install
-pnpm --dir "$env:USERPROFILE/.dsh/profiles/patchwork" add "file:$PWD"
-node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
-```
-
-启动独立 profile：`dsh --profile patchwork --no-open`。不要在同一个 DSH 进程内同时挂载 helmd 和 Patchwork 的完整工具 preset。
-
-安装插件后，将宿主 DSH 的 standard preset 派生为 Patchwork：
-
-```powershell
+npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
+dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.0.tgz"
 node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```
 
 然后在 DSH 的 Agent Preset 选择器中选择 `Patchwork`。该 preset 会暴露 DSH standard
-的本地 shell、文件、搜索、任务和 Agent 工具，并可在同一进程内安全切换其它 Agent。
+的本地 shell、文件、搜索、任务和 Agent 工具。切换到其他 Agent 后，Patchwork 的
+提示词和 Hook 不再生效。
 
 ## Hook 检查
 
