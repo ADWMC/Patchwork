@@ -20,6 +20,20 @@ and verification; Hooks provide mechanically checkable maintenance warnings.
 
 ## Agent preset
 
+Run the full Patchwork tool surface in its own profile so it does not collide
+with helmd or another preset that already registers `pwsh/read/...`. Copy
+`profiles/patchwork` into the DSH profile root and install it:
+
+```powershell
+Copy-Item -Recurse profiles/patchwork "$env:USERPROFILE/.dsh/profiles/patchwork" -Force
+pnpm --dir "$env:USERPROFILE/.dsh/profiles/patchwork" install
+pnpm --dir "$env:USERPROFILE/.dsh/profiles/patchwork" add "file:$PWD"
+node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
+```
+
+Start it with `dsh --profile patchwork --no-open`. Do not mount helmd and
+Patchwork full tool presets in the same DSH process.
+
 After installing the plugin, derive a Patchwork preset from the host DSH standard preset:
 
 ```powershell
