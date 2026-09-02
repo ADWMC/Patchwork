@@ -12,7 +12,7 @@ function hostStandard() {
   if (process.env.DSH_HOST_STANDARD_YML) return resolve(process.env.DSH_HOST_STANDARD_YML)
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
   const globalRoot = execFileSync(npm, ['root', '-g'], { encoding: 'utf8', shell: process.platform === 'win32' }).trim()
-  return join(globalRoot, '@deepseek-ai', 'dsh', 'config', 'agent-presets', 'standard', 'agent.cordis.yml')
+  return join(globalRoot, '@deepseek-ai', 'dsh', 'node_modules', '@deepseek-ai', 'dsh-agent-presets', 'presets', 'standard', 'agent.cordis.yml')
 }
 
 function renderPersona() {
@@ -20,13 +20,17 @@ function renderPersona() {
 }
 
 function generate(standard) {
-  if (!standard.includes('- id: persona')) throw new Error('host standard has no persona row')
-  return `${renderPersona()}\n\n- id: patchwork-agent\n  name: '@patchwork/coding-agent'\n`
+  const match = standard.match(/^- id: persona\r?\n/m)
+  if (!match || match.index === undefined) throw new Error('host standard has no persona row')
+  const next = standard.indexOf('- id: ', match.index + match[0].length)
+  const end = next < 0 ? standard.length : next
+  const host = `${standard.slice(0, match.index)}${renderPersona()}\n\n${standard.slice(end).replace(/^\r?\n+/, '')}`
+  return `${host.trimEnd()}\n\n- id: patchwork-agent\n  name: '@patchwork/coding-agent'\n`
 }
 
 const standardPath = hostStandard()
 const standard = await readFile(standardPath, 'utf8')
-const generated = `# Generated as a Patchwork overlay; host tools are intentionally reused.\n# gen-preset: host=${createHash('sha256').update(standard).digest('hex')}\n\n${generate(standard)}`
+const generated = `# Generated from DSH standard; host tools are exposed in this preset.\n# gen-preset: host=${createHash('sha256').update(standard).digest('hex')}\n\n${generate(standard)}`
 await mkdir(outputDir, { recursive: true })
 const outputPath = resolve(outputDir, 'agent.cordis.yml')
 await writeFile(outputPath, generated)

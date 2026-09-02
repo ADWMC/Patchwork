@@ -15,14 +15,13 @@
 ## 修复后的所有权
 
 - DSH host：共享服务和平台实现；
-- Agent preset：Patchwork 自身的提示词和 Hook；标准工具复用宿主已注册实例；
+- Agent preset：从本机 DSH Standard 派生标准工具，再加载 Patchwork 提示词和 Hook；
 - Patchwork preset：按 session 作用域加载一次 `@patchwork/coding-agent`；
 - Patchwork package bundle：空 patch，只保留依赖安装入口。
 
-该边界消除了插件的宿主级重复加载。当前 DSH 版本若同时挂载多个包含完整 Standard
-工具行的 user preset，工具注册表会在第二个 preset 报 `already registered`；因此
-Patchwork 不再复制 Standard 工具行，而是复用宿主当前已注册的工具。Patchwork 的
-提示词和 Hook 只在 Patchwork Agent 中生效。
+该边界消除了插件的宿主级重复加载。DSH `0.1.2-alpha.5` 的 scope 工具注册支持
+多个完整 preset 并行挂载；Patchwork 保留 Standard 工具行，因此工具能力不削弱。
+Patchwork 的提示词和 Hook 只在 Patchwork Agent 中生效。
 
 ## 重新部署
 

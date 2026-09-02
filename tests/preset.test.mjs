@@ -18,7 +18,7 @@ test('generated preset owns the Patchwork runtime', () => {
     })
     const generated = readFileSync(join(out, 'agent.cordis.yml'), 'utf8')
     assert.equal((generated.match(/@patchwork\/coding-agent/g) ?? []).length, 1)
-    assert.doesNotMatch(generated, /- id: tool-example/)
+    assert.match(generated, /- id: tool-example/)
     assert.match(generated, /name: '@patchwork\/coding-agent'/)
     assert.doesNotMatch(readFileSync(join(import.meta.dirname, '..', 'cordis.patch.yml'), 'utf8'), /@patchwork\/coding-agent/)
   } finally {
