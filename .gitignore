@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# npm pack artifacts
+*.tgz
+
+# Local run logs and dumps
+*.log
+*-dump.txt
+
+# Local DSH test instances
+dsh-test-*.yml
+.dsh-source-test/
+
+# Local tool state
+.playwright-cli/
