@@ -6,7 +6,7 @@ test('review command registers as the user-stance review entry', () => {
   const registered = []
   registerReviewCommand({ commands: { register: def => registered.push(def) } })
   assert.equal(registered.length, 1)
-  assert.equal(registered[0].name, 'review')
+  assert.equal(registered[0].name, 'patchwork-review')
   assert.match(registered[0].description, /用户/)
   assert.match(registered[0].description, /评审/)
 })

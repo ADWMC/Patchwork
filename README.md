@@ -16,7 +16,7 @@ Patchwork 是一个面向 DeepSeek Harness 的代码编写与维护插件。
 - 修改后沿原路径验证，并只汇报实际证据。
 - 代码、配置或行为变化完成后同步更新受影响文档和 README。
 - Hook 发现结构或命名问题时提供专用提示词；同一会话同一问题每 30 轮最多提示一次。
-- `/review` 命令：站在用户立场评审代码——走用户路径找 bug 与体验缺陷，兼顾商业化边界。
+- `/patchwork-review` 命令：站在用户立场评审代码——走用户路径找 bug 与体验缺陷，兼顾商业化边界。
 
 ## Agent preset
 
@@ -27,16 +27,16 @@ npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
 dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.2.tgz"
 ```
 
-安装后插件注册 `/review` 命令与维护 Hook；`scripts/gen-preset.mjs` 生成的
+安装后插件注册 `/patchwork-review` 命令与维护 Hook；`scripts/gen-preset.mjs` 生成的
 `patchwork` preset 只提供工具编排（shell、文件、任务等），用于让启用该 preset
 的 Agent 拥有完整工具面。插件与 Helmd 等 preset 可共用同一个 profile。
 
-## /review 命令
+## /patchwork-review 命令
 
 站在用户立场评审代码的主入口：
 
 ```text
-/review [评审范围]
+/patchwork-review [评审范围]
 ```
 
 Agent 会以目标用户身份走一遍首次价值路径，从用户会犯的错里找 bug，把体验差

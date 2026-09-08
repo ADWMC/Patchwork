@@ -23,7 +23,7 @@ export async function submitReview(invocation) {
 
 export function registerReviewCommand(ctx) {
   ctx.commands.register({
-    name: 'review',
+    name: 'patchwork-review',
     description: '站在用户立场评审代码：走用户路径找 bug 与体验缺陷，兼顾商业化边界',
     input: { hint: '[<评审范围>]' },
     handler: invocation => submitReview(invocation),

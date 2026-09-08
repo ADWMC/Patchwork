@@ -13,7 +13,7 @@ test('patchwork agent registers its maintainability prompt', () => {
   assert.equal(sections[0].order, 50)
   assert.match(sections[0].text, /主人翁心态/)
   assert.match(sections[0].text, /最小正确改动/)
-  assert.equal(commands.registered.name, 'review')
+  assert.equal(commands.registered.name, 'patchwork-review')
 })
 
 test('patchwork agent registers a non-blocking DSH post-execute hook', async () => {

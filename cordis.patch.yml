@@ -1,7 +1,7 @@
 # Patchwork bundle patch: registers the patchwork-agent plugin on the profile
 # root. `dsh plugin --profile <name> add @patchwork/coding-agent` installs the
 # dependency and reconciles this bundle into the profile's layer stack, so the
-# plugin (maintainability prompt, /review command, post-execute structure
+# plugin (maintainability prompt, /patchwork-review command, post-execute structure
 # hook) is registered for every agent in the profile. The `commands` service
 # this plugin injects is provided by the @deepseek-ai/dsh-base layer, which
 # every profile lists first.
