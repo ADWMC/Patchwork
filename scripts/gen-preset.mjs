@@ -25,7 +25,9 @@ function generate(standard) {
   const next = standard.indexOf('- id: ', match.index + match[0].length)
   const end = next < 0 ? standard.length : next
   const host = `${standard.slice(0, match.index)}${renderPersona()}\n\n${standard.slice(end).replace(/^\r?\n+/, '')}`
-  return `${host.trimEnd()}\n\n- id: patchwork-agent\n  name: '@patchwork/coding-agent'\n`
+  // The Patchwork plugin itself is registered by the package bundle patch
+  // (cordis.patch.yml), so the preset only carries the host tool composition.
+  return `${host.trimEnd()}\n`
 }
 
 const standardPath = hostStandard()

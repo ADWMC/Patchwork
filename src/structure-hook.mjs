@@ -5,7 +5,11 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { basename, relative, sep } from 'node:path'
 
-const SOURCE = /\.(?:c|cc|cpp|cxx|h|hpp|java|js|jsx|mjs|ts|tsx|go|rs|py|kt|swift)$/i
+export const SOURCE = /\.(?:c|cc|cpp|cxx|h|hpp|java|js|jsx|mjs|ts|tsx|go|rs|py|kt|swift)$/i
+
+export function isSourcePath(file) {
+  return SOURCE.test(file)
+}
 const VAGUE = /(?:^|[_-])(?:final|new|old|copy|tmp|temp|debug|test|backup|fix|v\d+)(?:\.|[_-]|$)/i
 const promptPath = fileURLToPath(new URL('../assets/prompts/structure-hook-warning.md', import.meta.url))
 const prompt = (await readFile(promptPath, 'utf8')).trim()

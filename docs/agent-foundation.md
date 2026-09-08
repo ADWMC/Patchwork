@@ -18,8 +18,8 @@
 
 ## 在 DSH 中挂载
 
-安装包的 `cordis.patch.yml` 保持为空，只负责让 DSH 安装和解析包依赖。
-`scripts/gen-preset.mjs` 生成的 `patchwork` preset 才加载 `patchwork-agent`：
+包通过 `dsh.bundle` 声明 bundle patch（`cordis.patch.yml`），patch 在 profile
+根插入 `patchwork-agent` 一行：
 
 ```yaml
 - insert:
@@ -27,13 +27,21 @@
       name: '@patchwork/coding-agent'
 ```
 
-插件加载后，`patchwork-agent` 一次注册的完整提示词会作为系统提示词段落参与
-模型请求组装；Hook 不重复注入。切换到其他 preset 后，该插件随 Agent 作用域卸载。
+`dsh plugin --profile <name> add @patchwork/coding-agent` 会安装依赖并把该
+bundle 并入 profile 的层栈——插件（维护提示词、`/review` 命令、结构 Hook）
+随即对 profile 内所有 agent 注册生效，无需编辑任何 preset。命令插件注入的
+`commands` 服务由每个 profile 的第一层 `@deepseek-ai/dsh-base` 提供。
+
+`scripts/gen-preset.mjs` 生成的 `patchwork` preset 只承载宿主工具编排
+（shell、文件、任务等），不再重复挂载插件本体；插件也可与 Helmd 等
+其他 preset 共用。切换 preset 不卸载插件；从 profile 移除 bundle
+（`dsh plugin --profile <name> remove`）才是卸载。
 
 ## 最小验证
 
 ```text
-node --test tests/agent.test.mjs
+node --test tests/agent.test.mjs tests/review-command.test.mjs tests/preset.test.mjs
 ```
 
-测试使用最小的 `ctx.systemPrompt.section()` 替身，只验证插件注册契约和提示词来源。
+测试验证插件注册契约、`/review` 命令契约，以及 bundle patch / preset /
+profile 三处的挂载声明一致性。

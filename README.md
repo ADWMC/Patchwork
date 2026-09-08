@@ -20,19 +20,28 @@ Patchwork 是一个面向 DeepSeek Harness 的代码编写与维护插件。
 
 ## Agent preset
 
-Patchwork 可以与 Standard、Helmd 等 Agent 共用同一个 profile。安装包只提供依赖，
-维护提示词和 Hook 由 `patchwork` preset 在 Agent 隔离上下文中加载：
+Patchwork 以 DSH bundle 插件注册：安装即对 profile 内所有 agent 生效。
 
 ```powershell
 npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
-dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.1.tgz"
-node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
-Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
+dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.2.tgz"
 ```
 
-然后在 DSH 的 Agent Preset 选择器中选择 `Patchwork`。该 preset 会暴露 DSH standard
-的本地 shell、文件、搜索、任务和 Agent 工具。切换到其他 Agent 后，Patchwork 的
-提示词和 Hook 不再生效。
+安装后插件注册 `/review` 命令与维护 Hook；`scripts/gen-preset.mjs` 生成的
+`patchwork` preset 只提供工具编排（shell、文件、任务等），用于让启用该 preset
+的 Agent 拥有完整工具面。插件与 Helmd 等 preset 可共用同一个 profile。
+
+## /review 命令
+
+站在用户立场评审代码的主入口：
+
+```text
+/review [评审范围]
+```
+
+Agent 会以目标用户身份走一遍首次价值路径，从用户会犯的错里找 bug，把体验差
+当缺陷对待，并检查商业化边界（免费核心完整性、付费边界、安装摩擦）。可当场
+修复的最小修复直接实施并沿用户路径验证，其余按已知问题/待决策项汇报。
 
 ## Hook 检查
 
