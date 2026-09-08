@@ -1,12 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { inspectStructure } from './structure-hook.mjs'
+import { registerReviewCommand } from './review-command.mjs'
 
 const promptPath = fileURLToPath(new URL('../assets/prompts/maintainable-coding-agent-prompt.md', import.meta.url))
 const prompt = readFileSync(promptPath, 'utf8').trim()
 
 export const name = 'patchwork-agent'
-export const inject = ['systemPrompt']
+export const inject = ['systemPrompt', 'commands']
 
 const SOURCE = /\.(?:c|cc|cpp|cxx|h|hpp|java|js|jsx|mjs|ts|tsx|go|rs|py|kt|swift)$/i
 
@@ -31,6 +32,7 @@ export function apply(ctx) {
     order: 50,
     text: prompt,
   })
+  registerReviewCommand(ctx)
   ctx.on?.('tools/post-execute', async (exec, _result, next) => {
     const decision = await next()
     try {
