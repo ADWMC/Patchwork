@@ -56,7 +56,7 @@ or extracts source paths from tool arguments, returns `warnings` and
 - [Git commit conventions](docs/git-commit-conventions.md)
 - [Preset and release lessons](docs/preset-and-release-lessons.md)
 - [DeepSeek Harness plugin development](docs/deepseek-harness-plugin-development.md)
-- [Commercialization plan (draft)](docs/commercialization-plan.md)
+- [Product engineering guide](docs/product-engineering-guide.md)
 
 ## Git commits and pushes
 

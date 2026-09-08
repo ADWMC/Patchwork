@@ -53,7 +53,7 @@ Hook 同时支持独立 stdin 调用和 DSH 原生 `tools/post-execute` 生命�
 - [Git 提交规范 | Git commit conventions](docs/git-commit-conventions.md)
 - [Preset 与发布经验 | Preset and release lessons](docs/preset-and-release-lessons.md)
 - [DeepSeek Harness 插件开发 | Plugin development](docs/deepseek-harness-plugin-development.md)
-- [商业化与用户方案（草案）| Commercialization plan (draft)](docs/commercialization-plan.md)
+- [产品工程指南 | Product engineering guide](docs/product-engineering-guide.md)
 
 ## Git 提交与推送
 
