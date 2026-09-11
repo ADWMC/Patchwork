@@ -1,5 +1,6 @@
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { contentHashOf, writeObject } from '../../util/content-archive.mjs'
+import { record } from '../../ui/mechanism-stats.mjs'
 import { MECHANISM_DIR } from './config.mjs'
 import { reducibleLog } from './candidate.mjs'
 import { appendJournal } from './journal.mjs'
@@ -82,6 +83,8 @@ async function attempt(exec, result, decision, ctx, config) {
     return { decision, reason: 'receipt-not-smaller', command, sourceHash }
   }
 
+  record('evidencePreservingReducer', 'receipts')
+  record('evidencePreservingReducer', 'reducedBytes', Buffer.byteLength(body, 'utf8') - Buffer.byteLength(text, 'utf8'))
   return {
     decision: { ...decision, content: [{ type: 'text', text }] },
     reason: `retained-${parsed.receipt.evidence.length}-quotes`,

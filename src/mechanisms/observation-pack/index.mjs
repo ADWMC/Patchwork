@@ -1,5 +1,6 @@
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { readObject, writeObject } from '../../util/content-archive.mjs'
+import { record } from '../../ui/mechanism-stats.mjs'
 import { appendLedger } from './ledger.mjs'
 import {
   EXCERPT_BYTES,
@@ -76,6 +77,8 @@ async function replaceWithHandle(exec, result, decision) {
     bytes: buffer.length,
     lines: lineCount,
   })
+  record('observationPack', 'packedResults')
+  record('observationPack', 'packedBytes', buffer.length)
 
   return {
     ...decision,

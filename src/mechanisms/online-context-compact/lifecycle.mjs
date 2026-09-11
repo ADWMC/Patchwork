@@ -1,5 +1,6 @@
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { KEEP_RECENT_TOKENS } from './config.mjs'
+import { record } from '../../ui/mechanism-stats.mjs'
 import { decideCompaction } from './economics.mjs'
 import { analyzeTransition } from './plan.mjs'
 import { emptyState, loadState, recordBoundary, saveState } from './state.mjs'
@@ -142,6 +143,7 @@ async function compactWhenReady(ctx, agent, { ready, boundaries, stateFor, persi
   })
 
   if (result === null || result === undefined) return
+  record('onlineContextCompact', 'compactions')
   agent.followup(
     createUserMessage({
       content: [

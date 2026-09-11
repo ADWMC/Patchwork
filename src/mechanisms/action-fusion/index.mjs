@@ -1,5 +1,6 @@
 import { createFusedDefinition } from './fused-tool.mjs'
 import { hashFile, targetUnchanged, yieldToHost } from './mutation-guard.mjs'
+import { record } from '../../ui/mechanism-stats.mjs'
 
 const FUSABLE_TOOLS = ['write', 'edit']
 const SHELL_TOOLS = ['pwsh', 'bash']
@@ -83,6 +84,10 @@ async function runThenRun({ tools, shellName, agent, command, filePath, exec }) 
       parent: exec.token,
     })
     const output = textOf(result.content)
+    // 一次真正被合并执行的调用：这就是本机制省下的那一次模型往返。
+    record('actionFusion', 'fusedCalls')
+    record('actionFusion', 'savedRequests')
+    record('actionFusion', 'fusedCommandBytes', Buffer.byteLength(output, 'utf8'))
     return result.isError
       ? { status: 'failed', command, output, reason: result.error?.message ?? 'command failed' }
       : { status: 'succeeded', command, output }
