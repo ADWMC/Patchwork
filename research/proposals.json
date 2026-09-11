@@ -1,0 +1,30 @@
+[
+  {
+    "id": "P-001-action-fusion",
+    "mechanism": "actionFusion",
+    "claim": "一次 edit/write 之后的验证命令可以在同一次调用里跑完，省掉一次模型往返。",
+    "capabilityFloor": { "taskCompletionRate": 1 },
+    "efficiencyMetrics": ["modelRequests", "tokens"]
+  },
+  {
+    "id": "P-002-observation-pack",
+    "mechanism": "observationPack",
+    "claim": "超大工具结果在后续每次请求里都被重放；换成句柄后不再重放，且原文仍可按字节精确召回。",
+    "capabilityFloor": { "taskCompletionRate": 1, "evidenceRecallable": 1 },
+    "efficiencyMetrics": ["tokens"]
+  },
+  {
+    "id": "P-003-reducer",
+    "mechanism": "evidencePreservingReducer",
+    "claim": "长诊断日志可以压成收据，只要每条保留的引用都能在归档原文中精确匹配。",
+    "capabilityFloor": { "taskCompletionRate": 1, "quotesVerifiable": 1 },
+    "efficiencyMetrics": ["tokens"]
+  },
+  {
+    "id": "P-004-online-context-compact",
+    "mechanism": "onlineContextCompact",
+    "claim": "在子任务完成处压缩，比等到窗口压力才压缩更早回收上下文，且压缩后任务能自动继续。",
+    "capabilityFloor": { "taskCompletionRate": 1 },
+    "efficiencyMetrics": ["tokens", "peakContextTokens"]
+  }
+]
