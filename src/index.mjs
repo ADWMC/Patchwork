@@ -15,6 +15,14 @@ export const inject = ['systemPrompt', 'commands', 'tools']
 export { Config }
 
 export function apply(ctx, config) {
+  // 一行启动事实：配置有没有到手、哪些机制开着。排障时比猜快得多。
+  const enabled = ['actionFusion', 'observationPack', 'evidencePreservingReducer', 'onlineContextCompact'].filter(
+    key => config?.[key] === true,
+  )
+  console.log(
+    `[patchwork] loaded; configuration ${config === undefined ? 'MISSING' : 'present'}; mechanisms: ${enabled.join(', ') || 'none'}`,
+  )
+
   ctx.systemPrompt.section({
     name,
     order: 50,
