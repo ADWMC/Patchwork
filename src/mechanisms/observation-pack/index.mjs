@@ -1,5 +1,5 @@
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
-import { readObject, writeObject } from './archive.mjs'
+import { readObject, writeObject } from '../../util/content-archive.mjs'
 import { appendLedger } from './ledger.mjs'
 import {
   EXCERPT_BYTES,

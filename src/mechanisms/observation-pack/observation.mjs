@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto'
 
+export { contentHashOf } from '../../util/content-archive.mjs'
+
 export const HANDLE_PREFIX = 'obs_'
 export const HANDLE_PATTERN = /^obs_[a-f0-9]{24}$/
 
@@ -29,10 +31,6 @@ export function textOf(content) {
 export function handleFor(toolName, callId, contentHash) {
   const digest = createHash('sha256').update(`${toolName}\u0000${callId}\u0000${contentHash}`).digest('hex')
   return `${HANDLE_PREFIX}${digest.slice(0, 24)}`
-}
-
-export function contentHashOf(body) {
-  return createHash('sha256').update(body, 'utf8').digest('hex')
 }
 
 /** 只有成功、纯文本、且足够大的结果才打包；其余一律保持原样。 */

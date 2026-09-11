@@ -13,7 +13,7 @@ import {
   shouldPack,
 } from '../src/mechanisms/observation-pack/observation.mjs'
 import { appendLedger, ledgerPath } from '../src/mechanisms/observation-pack/ledger.mjs'
-import { readObject, writeObject } from '../src/mechanisms/observation-pack/archive.mjs'
+import { readObject, writeObject } from '../src/util/content-archive.mjs'
 
 /** 每页都取回并迭代到 done，模拟 obs_recall 的真实调用序列。 */
 function recallAll(text, options) {
