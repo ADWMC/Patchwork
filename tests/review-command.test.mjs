@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { registerReviewCommand, reviewInstruction, submitReview } from '../src/review-command.mjs'
+import { registerReviewCommand, reviewInstruction, submitReview } from '../src/review/review-command.mjs'
 
 test('review command registers as the user-stance review entry', () => {
   const registered = []

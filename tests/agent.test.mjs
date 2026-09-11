@@ -5,7 +5,11 @@ import { apply, inject, name } from '../src/index.mjs'
 test('patchwork agent registers its maintainability prompt', () => {
   const sections = []
   const commands = { register: def => commands.registered = def }
-  apply({ systemPrompt: { section: value => sections.push(value) }, commands })
+  apply({
+    systemPrompt: { section: value => sections.push(value) },
+    commands,
+    on() {},
+  })
 
   assert.deepEqual(inject, ['systemPrompt', 'commands'])
   assert.equal(sections.length, 1)
@@ -28,9 +32,30 @@ test('patchwork agent registers a non-blocking DSH post-execute hook', async () 
 
   const original = { kind: 'accept' }
   const decision = await listeners.get('tools/post-execute')(
-    { arguments: {}, agent: undefined },
+    { name: 'read', arguments: {}, agent: undefined },
     { isError: false },
     async () => original,
   )
   assert.equal(decision, original)
+})
+
+test('every mechanism is off unless configuration enables it', () => {
+  const listeners = new Map()
+  apply({
+    systemPrompt: { section() {} },
+    commands: { register() {} },
+    on(event, listener) { listeners.set(event, listener) },
+  })
+  assert.deepEqual([...listeners.keys()], ['tools/post-execute'])
+})
+
+test('enabling an unavailable mechanism fails loudly instead of being skipped', () => {
+  const ctx = {
+    systemPrompt: { section() {} },
+    commands: { register() {} },
+    on() {},
+  }
+  assert.throws(() => apply(ctx, { observationPack: true }), /observationPack is enabled but/)
+  assert.throws(() => apply(ctx, { evidencePreservingReducer: true }), /evidencePreservingReducer is enabled but/)
+  assert.throws(() => apply(ctx, { onlineContextCompact: true }), /onlineContextCompact is enabled but/)
 })

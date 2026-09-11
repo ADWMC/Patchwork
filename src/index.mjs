@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { registerReviewCommand } from './review-command.mjs'
-import { registerPostExecuteHook } from './post-execute-hook.mjs'
+import { Config } from './config/plugin-config.mjs'
+import { registerReviewCommand } from './review/review-command.mjs'
+import { registerStructureHook } from './hook/post-execute-hook.mjs'
+import { registerConfiguredMechanisms } from './mechanisms/index.mjs'
 
 const promptPath = fileURLToPath(new URL('../assets/prompts/maintainable-coding-agent-prompt.md', import.meta.url))
 const prompt = readFileSync(promptPath, 'utf8').trim()
@@ -9,12 +11,15 @@ const prompt = readFileSync(promptPath, 'utf8').trim()
 export const name = 'patchwork-agent'
 export const inject = ['systemPrompt', 'commands']
 
-export function apply(ctx) {
+export { Config }
+
+export function apply(ctx, config) {
   ctx.systemPrompt.section({
     name,
     order: 50,
     text: prompt,
   })
   registerReviewCommand(ctx)
-  registerPostExecuteHook(ctx)
+  registerStructureHook(ctx)
+  registerConfiguredMechanisms(ctx, config)
 }

@@ -40,7 +40,7 @@ test('hook exits when stdin stays open', async () => {
   })
 
   assert.equal(code, 0)
-  assert.deepEqual(JSON.parse(Buffer.concat(output).toString()), { ok: true, event: null })
+  assert.deepEqual(JSON.parse(Buffer.concat(output).toString()), { ok: true, warnings: [], event: null })
 })
 
 test('hook consumes JSON input and emits structured output', async () => {
@@ -59,5 +59,5 @@ test('hook consumes JSON input and emits structured output', async () => {
     })
   })
   assert.equal(code, 0)
-  assert.deepEqual(JSON.parse(Buffer.concat(chunks).toString()), { ok: true, event: 'SessionStart' })
+  assert.deepEqual(JSON.parse(Buffer.concat(chunks).toString()), { ok: true, warnings: [], event: 'SessionStart' })
 })

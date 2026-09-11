@@ -1,7 +1,7 @@
-import { runJsonHook } from '../src/hook-stdin.mjs'
-import { inspectStructure } from '../src/structure-hook.mjs'
+import { runJsonHook } from '../src/hook/hook-stdin.mjs'
+import { buildStructureWarning } from '../src/structure/structure-warning.mjs'
 
 await runJsonHook(async payload => ({
-  ...(await inspectStructure(payload)),
+  ...(await buildStructureWarning(payload)),
   event: payload.event || null,
 }))

@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
-const promptPath = fileURLToPath(new URL('../assets/prompts/user-review-prompt.md', import.meta.url))
+const promptPath = fileURLToPath(new URL('../../assets/prompts/user-review-prompt.md', import.meta.url))
 const prompt = (await readFile(promptPath, 'utf8')).trim()
 
 const DEFAULT_SCOPE = '当前工作区最近未提交的改动；没有改动时评审产品核心用户路径'

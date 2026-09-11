@@ -1,6 +1,6 @@
 /**
- * Read a hook payload without allowing an open stdin pipe to freeze the host.
- * Timeout and stream errors resolve with the data received so far.
+ * 读取 Hook 载荷，同时不允许一个未关闭的 stdin 挂住宿主。
+ * 超时与流错误都以「已收到的内容」结束。
  */
 export function readHookStdin({ stream = process.stdin, timeoutMs = 1000 } = {}) {
   return new Promise(resolve => {
