@@ -7,10 +7,10 @@
 
 - **已完成并真实宿主验证**：职责树重构；配置层（四个开关默认关闭，类型错误显式
   失败）；结构检查拆分为纯检查与冷却状态；已确证的结构 Hook 误报修复；
-  **Action Fusion**；**ObservationPack**。
-- **进行中**：Evidence-Preserving Reducer。
-- **未开始**：Online Context Compact、auto-research 方法论、benchmark。
-- 两个未实现机制的开关在启用时会**显式报错**，不会静默跳过。
+  **Action Fusion**；**ObservationPack**；**Evidence-Preserving Reducer**。
+- **进行中**：Online Context Compact。
+- **未开始**：auto-research 方法论、benchmark。
+- 唯一未实现机制的开关在启用时会**显式报错**，不会静默跳过。
 
 ObservationPack 的生命周期按决定取**首次即换占位符**：`tools/post-execute` 的替换
 只影响首次入库的内容，所以模型从第一次请求起看到的就是占位符 + 头部摘录。SoL-Pi 的

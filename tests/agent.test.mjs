@@ -55,8 +55,20 @@ test('enabling an unavailable mechanism fails loudly instead of being skipped', 
     commands: { register() {} },
     on() {},
   }
-  assert.throws(() => apply(ctx, { evidencePreservingReducer: true }), /evidencePreservingReducer is enabled but/)
   assert.throws(() => apply(ctx, { onlineContextCompact: true }), /onlineContextCompact is enabled but/)
+})
+
+test('enabling the reducer registers its projection', () => {
+  const listeners = new Map()
+  apply(
+    {
+      systemPrompt: { section() {} },
+      commands: { register() {} },
+      on(event, listener) { listeners.set(event, listener) },
+    },
+    { evidencePreservingReducer: true },
+  )
+  assert.deepEqual([...listeners.keys()], ['tools/post-execute'])
 })
 
 test('enabling Action Fusion registers its agent hook', () => {

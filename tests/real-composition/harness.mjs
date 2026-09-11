@@ -36,7 +36,7 @@ export function hostAvailable() {
  * Loader 的 entry 是并发挂载的，所以插件在 `apply` 期间看不到兄弟 entry 的
  * 注册；必须等 boot 返回（settle）之后再创建 agent 并断言。
  */
-export async function bootPatchwork(pluginConfig = {}, { driverFile = 'agent-driver.mjs' } = {}) {
+export async function bootPatchwork(pluginConfig = {}, { driverFile = 'agent-driver.mjs', extraRows = [] } = {}) {
   const work = await mkdtemp(join(tmpdir(), 'patchwork-compose-'))
   const configPath = join(work, 'cordis.yml')
   const rows = [
@@ -49,6 +49,7 @@ export async function bootPatchwork(pluginConfig = {}, { driverFile = 'agent-dri
     ['shell-env', import.meta.resolve('@deepseek-ai/dsh-shell-env')],
     ['shell', import.meta.resolve('@deepseek-ai/dsh-pwsh-local')],
     ['tool-pwsh', import.meta.resolve('@deepseek-ai/dsh-tool-pwsh')],
+    ...extraRows,
     ['patchwork', patchworkEntry],
     ['driver', pathToFileURL(join(here, driverFile)).href],
   ]
