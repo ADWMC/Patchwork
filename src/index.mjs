@@ -9,7 +9,7 @@ const promptPath = fileURLToPath(new URL('../assets/prompts/maintainable-coding-
 const prompt = readFileSync(promptPath, 'utf8').trim()
 
 export const name = 'patchwork-agent'
-export const inject = ['systemPrompt', 'commands']
+export const inject = ['systemPrompt', 'commands', 'tools']
 
 export { Config }
 

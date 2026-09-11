@@ -11,7 +11,7 @@ test('patchwork agent registers its maintainability prompt', () => {
     on() {},
   })
 
-  assert.deepEqual(inject, ['systemPrompt', 'commands'])
+  assert.deepEqual(inject, ['systemPrompt', 'commands', 'tools'])
   assert.equal(sections.length, 1)
   assert.equal(sections[0].name, name)
   assert.equal(sections[0].order, 50)
@@ -55,7 +55,6 @@ test('enabling an unavailable mechanism fails loudly instead of being skipped', 
     commands: { register() {} },
     on() {},
   }
-  assert.throws(() => apply(ctx, { observationPack: true }), /observationPack is enabled but/)
   assert.throws(() => apply(ctx, { evidencePreservingReducer: true }), /evidencePreservingReducer is enabled but/)
   assert.throws(() => apply(ctx, { onlineContextCompact: true }), /onlineContextCompact is enabled but/)
 })
@@ -71,4 +70,20 @@ test('enabling Action Fusion registers its agent hook', () => {
     { actionFusion: true },
   )
   assert.deepEqual([...listeners.keys()].sort(), ['agent/created', 'tools/post-execute'])
+})
+
+test('enabling ObservationPack registers its projection and recall tool', () => {
+  const listeners = new Map()
+  const tools = []
+  apply(
+    {
+      systemPrompt: { section() {} },
+      commands: { register() {} },
+      tools: { register: definition => tools.push(definition) },
+      on(event, listener) { listeners.set(event, listener) },
+    },
+    { observationPack: true },
+  )
+  assert.deepEqual([...listeners.keys()], ['tools/post-execute'])
+  assert.deepEqual(tools.map(definition => definition.name), ['obs_recall'])
 })

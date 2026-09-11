@@ -48,13 +48,13 @@ function probeAccess(agent) {
   }
 }
 
-export function createAgent({ id = 'test-agent', cwd = process.cwd() } = {}) {
+export function createAgent({ id = 'test-agent', cwd = process.cwd(), sessionId = 'test-session' } = {}) {
   const agentKey = {}
   const agentScope = createScope(rootCtx, agentKey)
   const agent = {
     id,
     ctx: agentScope.ctx,
-    session: { header: { cwd } },
+    session: { header: { id: sessionId, cwd } },
     whenIdle: async () => {},
   }
 

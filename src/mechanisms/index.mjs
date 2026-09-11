@@ -1,4 +1,5 @@
 import { registerActionFusion } from './action-fusion/index.mjs'
+import { registerObservationPack } from './observation-pack/index.mjs'
 
 /** 机制的中文名与配置键一一对应，命名与 configure 键保持同一个概念一个名字。 */
 const MECHANISM_LABELS = {
@@ -11,6 +12,7 @@ const MECHANISM_LABELS = {
 /** 已实现的机制在这里登记。未登记即视为不可用。 */
 const MECHANISM_REGISTRARS = new Map([
   ['actionFusion', registerActionFusion],
+  ['observationPack', registerObservationPack],
 ])
 
 /**
