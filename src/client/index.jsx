@@ -9,12 +9,36 @@ import { PatchworkPanel, PatchworkTitle } from './PatchworkPanel.jsx'
  */
 const TAB_ID = 'patchwork-agent'
 const TAB_KIND = 'patchwork'
+const title = () => 'Patchwork'
 
-export const inject = ['@deepseek-ai/dsh-client-ui-sidebar-right', '@deepseek-ai/dsh-client-ui-session']
+/**
+ * Cordis 服务名，不是包名。
+ *
+ * 两处 inject 用途不同，容易混：
+ * - `package.json` 的 `dsh.client.inject` 是**包名**，供加载器先装载那些模块；
+ * - 这个导出是**服务名**，由客户端 Cordis 用来等待服务就绪。
+ * 填错的表现是客户端启动报 `pending (waiting for services: …)`。
+ */
+export const inject = ['slots', 'sidebarRightTabs']
 
 export function apply(ctx) {
   ctx.effect(
-    () => ctx.sidebarRightTabs.register({ id: TAB_ID, kind: TAB_KIND }),
+    () =>
+      ctx.sidebarRightTabs.register({
+        id: TAB_ID,
+        kind: TAB_KIND,
+        // title 是必填字段：标签片上的初始文字。
+        title,
+        // 没有 guide 条目，这个 page 类型就没有任何入口能被打开——它既不匹配
+        // 任何资源地址，也没有按钮。guide 就是那个入口。
+        guide: [
+          {
+            order: 50,
+            title,
+            description: () => '机制配置与本次运行的实际计量',
+          },
+        ],
+      }),
     'patchwork: sidebar tab definition',
   )
 

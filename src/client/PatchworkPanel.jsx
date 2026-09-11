@@ -33,6 +33,7 @@ const styles = {
   box: { border: '1px solid rgba(128,128,128,0.28)', borderRadius: '6px', padding: '8px 10px', marginTop: '6px' },
   mono: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: '11px' },
   muted: { opacity: 0.55, marginTop: '12px' },
+  warn: { color: '#d29922', marginTop: '6px' },
 }
 
 function readInjected() {
@@ -40,17 +41,60 @@ function readInjected() {
   return window[INJECTION_GLOBAL]
 }
 
+/**
+ * 把每次插件加载推入的条目聚合成看板的一份数据。
+ *
+ * 一个部署里插件可能被挂载多次（实测 Web profile 同进程加载过两次），其中一次
+ * 可能拿不到 profile 补丁的配置。这里把开关取「任一实例开启即为开启」，并记录
+ * 实例数与是否出现分歧——分歧本身是要报出来的事实，不该被静默合并。
+ */
+function collect(raw) {
+  const list = Array.isArray(raw) ? raw : raw ? [raw] : []
+  if (list.length === 0) return undefined
+
+  const config = {}
+  const counters = {}
+  let inconsistent = false
+
+  for (const entry of list) {
+    for (const [key, value] of Object.entries(entry?.config ?? {})) {
+      if (typeof value === 'boolean') {
+        if (key in config && config[key] !== value) inconsistent = true
+        config[key] = config[key] === true || value === true
+      } else if (!(key in config)) {
+        config[key] = value
+      }
+    }
+    for (const [mechanism, fields] of Object.entries(entry?.counters ?? {})) {
+      if (!counters[mechanism]) counters[mechanism] = {}
+      for (const [field, value] of Object.entries(fields)) {
+        counters[mechanism][field] = (counters[mechanism][field] ?? 0) + value
+      }
+    }
+  }
+
+  return { config, counters, instances: list.length, inconsistent, generatedAt: list[list.length - 1]?.generatedAt }
+}
+
 export function PatchworkTitle() {
   return createElement('span', null, 'Patchwork')
 }
 
 export function PatchworkPanel() {
-  const [data, setData] = useState(readInjected)
+  const [data, setData] = useState(() => collect(readInjected))
 
-  // 注入的是页面加载时的快照；若本组件挂载早于脚本执行，再取一次。
+  // 页面里的注入脚本可能晚于本组件挂载，而且同一进程可能注入多条。轮询重读
+  // 比依赖某一个时刻的挂载顺序可靠；看板本来就允许滞后一秒。
   useEffect(() => {
-    if (!data) setData(readInjected())
-  }, [data])
+    const timer = setInterval(() => {
+      const next = collect(readInjected)
+      if (!next) return
+      setData(previous =>
+        !previous || previous.instances !== next.instances || previous.generatedAt !== next.generatedAt ? next : previous,
+      )
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   if (!data) {
     return createElement(
@@ -90,6 +134,14 @@ export function PatchworkPanel() {
         createElement('span', { style: styles.mono }, String(data.config?.cacheWriteReadRatio ?? '—')),
       ),
     ),
+    createElement('div', { style: styles.muted }, `插件加载实例：${data.instances}`),
+    data.inconsistent
+      ? createElement(
+          'div',
+          { style: styles.warn },
+          '配置不一致：同一进程里有实例没有收到本 profile 的配置（开关取任一实例开启即为开启）。',
+        )
+      : null,
 
     createElement('div', { style: styles.h }, '实际计量'),
     active.length === 0

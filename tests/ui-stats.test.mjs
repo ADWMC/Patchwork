@@ -49,8 +49,9 @@ test('the host injects config and counters into the page instead of opening a ro
   assert.equal(taps.length, 1, 'the plugin must register exactly one index tap')
   const html = taps[0]('<html><head><title>t</title></head><body>x</body></html>')
 
-  assert.match(html, new RegExp(`window\\.${INJECTION_GLOBAL}=`))
-  assert.ok(html.indexOf('</head>') > html.indexOf(INJECTION_GLOBAL), 'the script must land inside head')
+  // 追加式注入：多次加载各推一条，而不是互相覆盖。
+  assert.match(html, /window\.__PATCHWORK__=window\.__PATCHWORK__\|\|\[\]\)\.push\(/)
+  assert.ok(html.indexOf('</head>') > html.indexOf('__PATCHWORK__'), 'the script must land inside head')
   assert.match(html, /"actionFusion":true/)
   assert.match(html, /"evidencePreservingReducer":false/, 'a mechanism that is off must read as off')
   assert.match(html, /"cacheWriteReadRatio":12\.5/)

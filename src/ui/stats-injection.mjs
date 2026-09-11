@@ -39,7 +39,10 @@ export function registerStatsInjection(ctx, config = {}) {
     }
     // 转义 `<` 与行分隔符，避免 JSON 里的内容提前闭合脚本标签。
     const safe = json.replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')
-    const script = `<script>window.${INJECTION_GLOBAL}=${safe}</script>`
+    // 追加而不是覆盖：Web profile 里本插件可能被挂载多次（实测同一进程里出现过
+    // 两次加载，其中一次拿不到 profile 补丁的配置）。覆盖会让先写进去的真实配置
+    // 被后来的默认值抹掉；追加则让看板能聚合，并把分歧显示出来。
+    const script = `<script>(function(){var p=${safe};(window.${INJECTION_GLOBAL}=window.${INJECTION_GLOBAL}||[]).push(p)})()</script>`
     const head = html.indexOf('</head>')
     return head < 0 ? `${script}${html}` : `${html.slice(0, head)}${script}${html.slice(head)}`
   })
