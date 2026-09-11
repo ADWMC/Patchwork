@@ -16,15 +16,16 @@ configuration fields and are **off by default**:
 
 | Mechanism | Config key | Status |
 |---|---|---|
-| Action Fusion | `actionFusion` | Not implemented (design settled) |
+| Action Fusion | `actionFusion` | Implemented (real-host verification pending) |
 | ObservationPack | `observationPack` | Not started |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | Not started |
 | Online Context Compact | `onlineContextCompact` | Not started |
 
 Enabling a mechanism that is not available makes plugin loading **fail
-explicitly** instead of skipping it silently — none of the switches is usable
-yet. The target contract is DSH 0.1.5-rc.1; the design and current progress are
-in the [SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md).
+explicitly** instead of skipping it silently — apart from Action Fusion, the
+other three switches still error out when turned on. The target contract is DSH
+0.1.5-rc.1; the design and current progress are in the
+[SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md).
 
 ## Core behavior
 

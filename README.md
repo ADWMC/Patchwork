@@ -14,13 +14,13 @@ Patchwork 正在复刻 [SoL-Pi](https://github.com/NVlabs/SoL-Pi) 的四个运�
 
 | 机制 | 配置键 | 状态 |
 |---|---|---|
-| Action Fusion | `actionFusion` | 未实现（设计已定） |
+| Action Fusion | `actionFusion` | 已实现（真实宿主验证待做） |
 | ObservationPack | `observationPack` | 未开始 |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | 未开始 |
 | Online Context Compact | `onlineContextCompact` | 未开始 |
 
-启用尚未实现的机制会让插件加载**显式失败**，不会静默跳过——现在打开任何一个开关
-都还不可用。目标契约为 DSH 0.1.5-rc.1，设计与进度见
+启用尚未实现的机制会让插件加载**显式失败**，不会静默跳过——除 Action Fusion 外，
+其余三个开关现在打开仍会直接报错。目标契约为 DSH 0.1.5-rc.1，设计与进度见
 [SoL-Pi 机制复刻设计](docs/solpi-mechanisms-design.md)。
 
 ## 核心行为

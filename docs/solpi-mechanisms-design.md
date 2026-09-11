@@ -6,12 +6,20 @@
 ## 实现状态
 
 - **已完成**：职责树重构；配置层（四个开关默认关闭，类型错误显式失败）；
-  结构检查拆分为纯检查与冷却状态；已确证的结构 Hook 误报修复。
-- **进行中**：Action Fusion。已确定它必须把带 `then_run` 的定义注册到
-  `agent.ctx`，否则会被 agent preset 更近作用域的原生 `write`/`edit` 遮蔽。
-- **未开始**：ObservationPack、Evidence-Preserving Reducer、
-  Online Context Compact、auto-research 方法论、benchmark。
+  结构检查拆分为纯检查与冷却状态；已确证的结构 Hook 误报修复；
+  **Action Fusion**（单元测试覆盖，真实宿主加载验证待做）。
+- **进行中**：ObservationPack。已确定它需要自建**可读**归档。
+- **未开始**：Evidence-Preserving Reducer、Online Context Compact、
+  auto-research 方法论、benchmark。
 - 三个未实现机制的开关在启用时会**显式报错**，不会静默跳过。
+
+### 已推翻的假设
+
+- 原计划「不自造归档后端，复用 `ctx.spillStore`」。核实后不成立：
+  `ctx.spillStore` 只暴露 `saveText()`，返回 locator 与召回指引，
+  **没有任何读取 API**（服务文档明确「owns NO retrieval or search API」）。
+  ObservationPack 要求按字节偏移精确分页召回，因此必须自建可读归档；
+  `ctx.spillStore` 只能在「只需 locator、不需要回读」的场合复用。
 
 ## 目标契约
 
@@ -117,8 +125,8 @@ src/
 不新增：
 
 - 不引入 TypeScript 构建链（保持既有布局）。
-- 不自造归档后端（复用 `ctx.spillStore`）。
 - 不注册新的 Cordis 服务，除非确有跨模块协调需求。
+- 归档不复用 `ctx.spillStore`（它没有读取 API，见上文「已推翻的假设」）。
 
 ## 验证策略（plugin-test）
 
