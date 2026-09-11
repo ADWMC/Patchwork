@@ -44,7 +44,8 @@ test('the host injects config and counters into the page instead of opening a ro
   reset()
   record('observationPack', 'packedResults')
   const { ctx, taps } = fakeCtx()
-  registerStatsInjection(ctx, { actionFusion: true, observationPack: true, cacheWriteReadRatio: 12.5 })
+  const config = { actionFusion: true, observationPack: true, cacheWriteReadRatio: 12.5 }
+  registerStatsInjection(ctx, { readConfig: () => config, token: 'write-token' })
 
   assert.equal(taps.length, 1, 'the plugin must register exactly one index tap')
   const html = taps[0]('<html><head><title>t</title></head><body>x</body></html>')
@@ -56,13 +57,29 @@ test('the host injects config and counters into the page instead of opening a ro
   assert.match(html, /"evidencePreservingReducer":false/, 'a mechanism that is off must read as off')
   assert.match(html, /"cacheWriteReadRatio":12\.5/)
   assert.match(html, /"observationPack":\{"packedResults":1\}/)
+  // 写入口与密钥随页面一起下发，面板保存时要用。
+  assert.match(html, /"writePath":"\/api\/patchwork\/config"/)
+  assert.match(html, /"token":"write-token"/)
+  reset()
+})
+
+test('the injected config is read fresh on every render, so a save shows without a restart', () => {
+  reset()
+  const { ctx, taps } = fakeCtx()
+  let current = { actionFusion: false }
+  registerStatsInjection(ctx, { readConfig: () => current })
+  const html = () => taps[0]('<head></head>')
+
+  assert.match(html(), /"actionFusion":false/)
+  current = { actionFusion: true }
+  assert.match(html(), /"actionFusion":true/)
   reset()
 })
 
 test('injected JSON cannot close the script tag early', () => {
   reset()
   const { ctx, taps } = fakeCtx()
-  registerStatsInjection(ctx, {})
+  registerStatsInjection(ctx, { readConfig: () => ({}) })
   // 计数器字段来自机制内部，仍按「不可信」处理：`<` 必须被转义。
   record('weird', '</script><script>alert(1)</script>', 1)
   const html = taps[0]('<head></head>')

@@ -1,10 +1,11 @@
 import { createElement, useEffect, useState } from 'react'
 
 /**
- * 看板与配置面板。
+ * 看板 + 配置编辑器。
  *
- * 样式只用产品自己的设计 token（`--dsw-*`），不写死颜色：写死就会在浅色/深色主题
- * 之间脱节，这正是上一版「跟 DSH 设计不匹配」的原因。
+ * 样式只用产品自己的设计 token（`--dsw-*`）。编辑走「暂存 → 保存」两步：机制一旦
+ * 启用/停用，行为要重启才变，所以不能在切换的一瞬间就写文件——用户得先看清自己
+ * 改了什么，再决定保存。
  */
 const STATS_SELECTOR = 'script[data-patchwork-stats]'
 
@@ -36,21 +37,15 @@ const styles = {
     height: '100%',
     overflowY: 'auto',
   },
-  title: { fontSize: '13px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' },
+  title: { fontSize: '13px', fontWeight: 600 },
   subtitle: { color: 'var(--dsw-alias-label-tertiary)', marginBottom: '14px' },
-  section: {
-    margin: '0 0 6px',
-    fontSize: '11px',
-    fontWeight: 600,
-    letterSpacing: '0.04em',
-    color: 'var(--dsw-alias-label-tertiary)',
-  },
+  section: { margin: '0 0 6px', fontSize: '11px', fontWeight: 600, letterSpacing: '0.04em', color: 'var(--dsw-alias-label-tertiary)' },
   card: {
     background: 'var(--dsw-alias-bg-layer-1)',
     border: '1px solid var(--dsw-alias-border-l1)',
     borderRadius: '8px',
     padding: '2px 10px',
-    marginBottom: '16px',
+    marginBottom: '14px',
   },
   row: {
     display: 'flex',
@@ -64,36 +59,56 @@ const styles = {
   label: { color: 'var(--dsw-alias-label-primary)' },
   hint: { color: 'var(--dsw-alias-label-tertiary)', fontSize: '11px' },
   mono: { fontFamily: 'var(--dsw-font-markdown-code-font-family)', color: 'var(--dsw-alias-label-secondary)' },
-  on: { color: 'var(--dsw-alias-state-success-primary)', fontWeight: 600 },
-  off: { color: 'var(--dsw-alias-label-tertiary)' },
   empty: { color: 'var(--dsw-alias-label-tertiary)', padding: '10px 0' },
-}
 
-/**
- * 把每次插件加载推入的条目聚合成一份数据。
- *
- * 一个部署里插件可能被挂载多次（实测 Web profile 同进程加载过两次），其中一次
- * 可能拿不到配置。开关取「任一实例开启即为开启」，计数求和。
- */
-function collect(raw) {
-  const list = Array.isArray(raw) ? raw : raw ? [raw] : []
-  if (list.length === 0) return undefined
-
-  const config = {}
-  const counters = {}
-  for (const entry of list) {
-    for (const [key, value] of Object.entries(entry?.config ?? {})) {
-      if (typeof value === 'boolean') config[key] = config[key] === true || value === true
-      else if (!(key in config)) config[key] = value
-    }
-    for (const [mechanism, fields] of Object.entries(entry?.counters ?? {})) {
-      if (!counters[mechanism]) counters[mechanism] = {}
-      for (const [field, value] of Object.entries(fields)) {
-        counters[mechanism][field] = (counters[mechanism][field] ?? 0) + value
-      }
-    }
-  }
-  return { config, counters }
+  // 开关：轨道 + 圆钮，用状态色与边框 token。
+  switchTrack: enabled => ({
+    width: '32px',
+    height: '18px',
+    borderRadius: '9px',
+    border: '1px solid var(--dsw-alias-border-l2)',
+    background: enabled ? 'var(--dsw-alias-state-success-primary)' : 'var(--dsw-alias-bg-layer-2)',
+    position: 'relative',
+    cursor: 'pointer',
+    padding: 0,
+    flex: '0 0 auto',
+  }),
+  switchKnob: enabled => ({
+    position: 'absolute',
+    top: '1px',
+    left: enabled ? '15px' : '1px',
+    width: '14px',
+    height: '14px',
+    borderRadius: '50%',
+    background: 'var(--dsw-alias-label-primary-inverted)',
+    transition: 'left 120ms ease',
+  }),
+  input: {
+    width: '68px',
+    textAlign: 'right',
+    fontFamily: 'var(--dsw-font-markdown-code-font-family)',
+    color: 'var(--dsw-alias-label-primary)',
+    background: 'var(--dsw-specific-input-major)',
+    border: '1px solid var(--dsw-alias-border-l1)',
+    borderRadius: '6px',
+    padding: '2px 6px',
+    outline: 'none',
+  },
+  inputInvalid: { borderColor: 'var(--dsw-alias-state-error-primary)' },
+  actions: { display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' },
+  button: disabled => ({
+    fontFamily: 'var(--dsw-font-family)',
+    fontSize: '12px',
+    padding: '3px 12px',
+    borderRadius: '6px',
+    border: '1px solid var(--dsw-alias-border-l1)',
+    background: disabled ? 'var(--dsw-alias-bg-layer-2)' : 'var(--dsw-alias-button-primary-fill)',
+    color: disabled ? 'var(--dsw-alias-label-tertiary)' : 'var(--dsw-alias-label-primary-inverted)',
+    cursor: disabled ? 'default' : 'pointer',
+  }),
+  badge: { color: 'var(--dsw-alias-state-warn-primary)' },
+  ok: { color: 'var(--dsw-alias-state-success-primary)' },
+  error: { color: 'var(--dsw-alias-state-error-primary)' },
 }
 
 /**
@@ -115,12 +130,44 @@ function readInjected() {
   return entries
 }
 
+/**
+ * 把多次加载推入的条目聚合成一份数据。
+ * 开关取「任一实例开启即为开启」，计数求和；写入口与密钥取最后一个非空值。
+ */
+function collect(raw) {
+  const list = Array.isArray(raw) ? raw : raw ? [raw] : []
+  if (list.length === 0) return undefined
+
+  const config = {}
+  const counters = {}
+  let writePath
+  let token
+  for (const entry of list) {
+    for (const [key, value] of Object.entries(entry?.config ?? {})) {
+      if (typeof value === 'boolean') config[key] = config[key] === true || value === true
+      else if (!(key in config)) config[key] = value
+    }
+    for (const [mechanism, fields] of Object.entries(entry?.counters ?? {})) {
+      if (!counters[mechanism]) counters[mechanism] = {}
+      for (const [field, value] of Object.entries(fields)) {
+        counters[mechanism][field] = (counters[mechanism][field] ?? 0) + value
+      }
+    }
+    if (entry?.writePath) writePath = entry.writePath
+    if (entry?.token) token = entry.token
+  }
+  return { config, counters, writePath, token }
+}
+
 export function PatchworkTitle() {
   return createElement('span', null, 'Patchwork')
 }
 
 export function PatchworkPanel() {
   const [data, setData] = useState(() => collect(readInjected))
+  // 暂存区：用户改过但还没保存的值。与 data 分开，免得每秒重读把编辑冲掉。
+  const [draft, setDraft] = useState(null)
+  const [status, setStatus] = useState(null)
 
   useEffect(() => {
     const timer = setInterval(() => setData(collect(readInjected)), 1000)
@@ -136,7 +183,40 @@ export function PatchworkPanel() {
     )
   }
 
-  const active = MECHANISMS.filter(([key]) => data.config?.[key] === true).length
+  const baseline = data.config ?? {}
+  const value = key => (draft && key in draft ? draft[key] : baseline[key])
+  const dirty = Boolean(draft) && Object.keys(draft).length > 0
+  const ratio = value('cacheWriteReadRatio')
+  const ratioInvalid = typeof ratio !== 'number' || !Number.isFinite(ratio) || ratio < 0
+
+  const stage = (key, next) => setDraft(current => ({ ...(current ?? {}), [key]: next }))
+
+  const save = async () => {
+    if (!data.writePath || !data.token) {
+      setStatus({ kind: 'error', text: '这个部署没有开放写入口。' })
+      return
+    }
+    setStatus({ kind: 'saving', text: '保存中…' })
+    try {
+      const response = await fetch(data.writePath, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-patchwork-token': data.token },
+        body: JSON.stringify(draft ?? {}),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok || payload.ok !== true) {
+        setStatus({ kind: 'error', text: `保存失败：${payload.reason ?? response.status}` })
+        return
+      }
+      setDraft(null)
+      setStatus({ kind: 'ok', text: '已保存。机制行为需重启后生效。' })
+      setData(current => (current ? { ...current, config: payload.config ?? current.config } : current))
+    } catch (error) {
+      setStatus({ kind: 'error', text: `保存失败：${String(error?.message ?? error)}` })
+    }
+  }
+
+  const active = MECHANISMS.filter(([key]) => value(key) === true).length
 
   return createElement(
     'div',
@@ -148,9 +228,8 @@ export function PatchworkPanel() {
     createElement(
       'div',
       { style: styles.card },
-      ...MECHANISMS.map(([key, label, hint], index) => {
-        const enabled = data.config?.[key] === true
-        return createElement(
+      ...MECHANISMS.map(([key, label, hint], index) =>
+        createElement(
           'div',
           { key, style: index === MECHANISMS.length - 1 ? { ...styles.row, ...styles.rowLast } : styles.row },
           createElement(
@@ -159,21 +238,71 @@ export function PatchworkPanel() {
             createElement('div', { style: styles.label }, label),
             createElement('div', { style: styles.hint }, hint),
           ),
-          createElement('span', { style: enabled ? styles.on : styles.off }, enabled ? '已启用' : '未启用'),
-        )
-      }),
+          createElement(
+            'button',
+            {
+              type: 'button',
+              role: 'switch',
+              'aria-checked': value(key) === true,
+              'aria-label': label,
+              style: styles.switchTrack(value(key) === true),
+              onClick: () => stage(key, value(key) !== true),
+            },
+            createElement('span', { style: styles.switchKnob(value(key) === true) }),
+          ),
+        ),
+      ),
     ),
 
-    createElement('div', { style: styles.section }, '本次运行的计量'),
+    createElement('div', { style: styles.section }, '压缩经济性'),
+    createElement(
+      'div',
+      { style: styles.card },
+      createElement(
+        'div',
+        { style: { ...styles.row, ...styles.rowLast } },
+        createElement(
+          'span',
+          null,
+          createElement('div', { style: styles.label }, '缓存写读比'),
+          createElement('div', { style: styles.hint }, '写入相对读取的额外代价；越高越不轻易压缩'),
+        ),
+        createElement('input', {
+          type: 'number',
+          min: '0',
+          step: '0.5',
+          'aria-label': '缓存写读比',
+          value: ratio === null || ratio === undefined ? '' : String(ratio),
+          onChange: event => {
+            const text = event.target.value
+            stage('cacheWriteReadRatio', text === '' ? null : Number(text))
+          },
+          style: ratioInvalid ? { ...styles.input, ...styles.inputInvalid } : styles.input,
+        }),
+      ),
+    ),
+
+    createElement(
+      'div',
+      { style: styles.actions },
+      createElement(
+        'button',
+        { type: 'button', style: styles.button(!dirty || ratioInvalid), disabled: !dirty || ratioInvalid, onClick: save },
+        '保存',
+      ),
+      dirty && !ratioInvalid ? createElement('span', { style: styles.badge }, '有未保存的改动') : null,
+      status && !dirty ? createElement('span', { style: status.kind === 'error' ? styles.error : styles.ok }, status.text) : null,
+    ),
+    dirty ? null : createElement('div', { style: styles.hint }, '保存后刷新页面即见；机制行为需重启后生效。'),
+
+    createElement('div', { style: { ...styles.section, marginTop: '16px' } }, '本次运行的计量'),
     createElement('div', { style: styles.card }, renderCounters(data.counters)),
   )
 }
 
 function renderCounters(counters) {
   const entries = Object.entries(counters ?? {}).filter(([, fields]) => fields && Object.keys(fields).length > 0)
-  if (entries.length === 0) {
-    return createElement('div', { style: styles.empty }, '本次运行还没有机制动手。')
-  }
+  if (entries.length === 0) return createElement('div', { style: styles.empty }, '本次运行还没有机制动手。')
 
   const rows = []
   for (const [mechanism, fields] of entries) {

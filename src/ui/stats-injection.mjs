@@ -1,34 +1,37 @@
 import { snapshot } from './mechanism-stats.mjs'
+import { CONFIG_ROUTE_PATH } from './config-route.mjs'
 
 export const STATS_ELEMENT_ATTRIBUTE = 'data-patchwork-stats'
 
 /**
- * 把配置与机制计数注入页面本身，而不是新开一个 HTTP 端点。
+ * 把配置、机制计数与写入密钥注入页面本身。
  *
- * 为什么不加路由：这个 profile 的 webserver 绑在 `0.0.0.0`，一个无鉴权的
- * `/api/...` 端点会暴露到局域网；而页面本身已经在 token 网关之后。注入的数据
- * 只有开关状态与计数，不含任何凭据。
+ * 为什么注入而不是让面板去请求：页面本身已经在应用自己的 token 网关之后，注入
+ * 天然继承了这层保护。写入口另有一条带共享密钥的 POST 路由（见 config-route）。
  *
- * 注入的是**页面加载时**的快照；页面刷新即刷新。这是刻意的取舍：避免为了
- * 实时性去开一条新的、需要自己鉴权的通道。
+ * `readConfig` 每次渲染都重新读：用户在侧边栏保存后刷新页面，看到的就是保存后的
+ * 值，不必等重启。机制**行为**的变化仍需重启才能生效，面板会写明这一点。
  */
-export function registerStatsInjection(ctx, config = {}) {
+export function registerStatsInjection(ctx, { readConfig, token } = {}) {
   const server = ctx?.get?.('webServer')
-  if (!server?.tapIndex) return
+  if (!server?.tapIndex || typeof readConfig !== 'function') return
 
-  const payload = () => ({
-    config: {
-      actionFusion: config.actionFusion === true,
-      observationPack: config.observationPack === true,
-      evidencePreservingReducer: config.evidencePreservingReducer === true,
-      onlineContextCompact: config.onlineContextCompact === true,
-      cacheWriteReadRatio: config.cacheWriteReadRatio ?? null,
-      reducerProvider: config.reducerProvider ?? null,
-      reducerModel: config.reducerModel ?? null,
-    },
-    counters: snapshot(),
-    generatedAt: new Date().toISOString(),
-  })
+  const payload = () => {
+    const config = readConfig() ?? {}
+    return {
+      config: {
+        actionFusion: config.actionFusion === true,
+        observationPack: config.observationPack === true,
+        evidencePreservingReducer: config.evidencePreservingReducer === true,
+        onlineContextCompact: config.onlineContextCompact === true,
+        cacheWriteReadRatio: typeof config.cacheWriteReadRatio === 'number' ? config.cacheWriteReadRatio : null,
+      },
+      counters: snapshot(),
+      writePath: CONFIG_ROUTE_PATH,
+      token: token ?? null,
+      generatedAt: new Date().toISOString(),
+    }
+  }
 
   server.tapIndex(html => {
     let json
