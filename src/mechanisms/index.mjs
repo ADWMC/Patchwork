@@ -1,3 +1,5 @@
+import { registerActionFusion } from './action-fusion/index.mjs'
+
 /** 机制的中文名与配置键一一对应，命名与 configure 键保持同一个概念一个名字。 */
 const MECHANISM_LABELS = {
   actionFusion: 'Action Fusion',
@@ -7,7 +9,9 @@ const MECHANISM_LABELS = {
 }
 
 /** 已实现的机制在这里登记。未登记即视为不可用。 */
-const MECHANISM_REGISTRARS = new Map()
+const MECHANISM_REGISTRARS = new Map([
+  ['actionFusion', registerActionFusion],
+])
 
 /**
  * 按配置注册机制。默认全部关闭。
