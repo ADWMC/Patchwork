@@ -7,8 +7,11 @@
 
 - **已完成**：职责树重构；配置层；结构检查拆分与误报修复；四个运行时机制
   （Action Fusion、ObservationPack、Evidence-Preserving Reducer、
-  Online Context Compact）。
-- **未开始**：auto-research 方法论、规范形态的 benchmark 考题。
+  Online Context Compact）；auto-research 方法论（`research/`）；benchmark 度量
+  （`benchmark/`）。
+- **依据规范主动不做**：规范形态的考题。`dsh-benchmark-case` 的 Stage 0 要求
+  「装旧形态必有可观察故障」，实测旧形态在目标宿主上**能正常激活**，故不成题；
+  判决固化为 `tests/real-composition/pre-migration-form.test.mjs`。
 
 验证边界（逐个机制，不夸大）：
 
@@ -50,6 +53,25 @@ ObservationPack 的生命周期按决定取**首次即换占位符**：`tools/po
   事件**去遮蔽更早的消息事件（原生 `dsh-compaction-tool-result-pruner` 正是此机制）。
   这条路可用来复刻 SoL-Pi「前 N 次全量、之后换占位符」的生命周期；
   `tools/post-execute` 的 `{kind:'accept', content}` 则只影响**首次**入库的内容。
+
+### 未执行的验证（含原因）
+
+- **真实产品入口的隔离 profile 冷启动**：`plugin-test` 要求「用真实产品入口冷启动目标
+  版本」。打包与隔离 home 均已就绪（`patchwork-coding-agent-0.1.2.tgz`），但在从
+  **本会话内**执行 `dsh --profile … --from-default-profile` 时宿主会话被扰动并中断；
+  事后核实仓库与真实 `~/.dsh` 均未损坏。为不再冒同样的风险，这一步留待独立终端执行：
+
+  ```powershell
+  $env:DSH_HOME = "$env:TEMP\patchwork-verify-home"     # 已存在，仅部分初始化
+  dsh --profile verify --from-default-profile web
+  dsh plugin --profile verify add "<patchwork-coding-agent-0.1.2.tgz 的绝对路径>"
+  dsh --profile verify --dump-config                    # 期望树里出现 patchwork-agent 行
+  dsh --profile verify --no-open                        # 期望启动到监听，而非 plugin tree failed
+  ```
+
+  判据取宿主侧信号：出现 `plugin tree failed` / `pending (waiting for service: …)` 即
+  失败；启动到需要凭据或开始监听即视为插件树整体激活。仓库内现有的验证**全部是进程内
+  真实 Loader 组合**，不等于这一步。
 
 ### 已推翻的假设
 
