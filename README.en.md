@@ -16,7 +16,7 @@ configuration fields and are **off by default**:
 
 | Mechanism | Config key | Status |
 |---|---|---|
-| Action Fusion | `actionFusion` | Implemented (real-host verification pending) |
+| Action Fusion | `actionFusion` | Implemented and verified on the real host |
 | ObservationPack | `observationPack` | Not started |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | Not started |
 | Online Context Compact | `onlineContextCompact` | Not started |

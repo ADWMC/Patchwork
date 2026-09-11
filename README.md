@@ -14,7 +14,7 @@ Patchwork 正在复刻 [SoL-Pi](https://github.com/NVlabs/SoL-Pi) 的四个运�
 
 | 机制 | 配置键 | 状态 |
 |---|---|---|
-| Action Fusion | `actionFusion` | 已实现（真实宿主验证待做） |
+| Action Fusion | `actionFusion` | 已实现并真实宿主验证 |
 | ObservationPack | `observationPack` | 未开始 |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | 未开始 |
 | Online Context Compact | `onlineContextCompact` | 未开始 |

@@ -5,13 +5,32 @@
 
 ## 实现状态
 
-- **已完成**：职责树重构；配置层（四个开关默认关闭，类型错误显式失败）；
-  结构检查拆分为纯检查与冷却状态；已确证的结构 Hook 误报修复；
-  **Action Fusion**（单元测试覆盖，真实宿主加载验证待做）。
+- **已完成并真实宿主验证**：职责树重构；配置层（四个开关默认关闭，类型错误显式
+  失败）；结构检查拆分为纯检查与冷却状态；已确证的结构 Hook 误报修复；
+  **Action Fusion**。
 - **进行中**：ObservationPack。已确定它需要自建**可读**归档。
 - **未开始**：Evidence-Preserving Reducer、Online Context Compact、
   auto-research 方法论、benchmark。
 - 三个未实现机制的开关在启用时会**显式报错**，不会静默跳过。
+
+### 已验证的宿主事实
+
+以下都由 `tests/real-composition/` 的真实 Loader 组合实测得到，并固化为测试：
+
+- **嵌套作用域可遮蔽祖先同名工具**（`ACCEPTED`），而**同作用域重名注册抛错**
+  （`tool "X" is already registered in this scope`）。遮蔽只作用于该作用域：
+  根层与其它作用域仍解析到原生定义。
+- **`agent.ctx.tools` 可访问**。原先担心 Cordis 的「未声明 inject 就拿不到服务属性」
+  会挡住这条路，实测不成立：作用域上下文继承了上层 ctx 的 inject 链。
+- **Loader 的 entry 是并发挂载的**：插件 `apply` 期间兄弟 entry（如 `dsh-tool-fs`）
+  尚未注册工具。因此 agent 必须在 boot settle **之后**创建——这也符合真实部署
+  （agent 在会话开始时才创建）。
+- **真实组合需要完整 shell 链**：`dsh-subprocess-local`（提供 `subprocess`）→
+  `dsh-pwsh-local`（提供 `shell`）→ `dsh-shell-env`（提供 `shellEnv`）→
+  `dsh-tool-pwsh`（注册 `pwsh` 工具）。缺任一环 entry 都会 pending，
+  `boot` 会以 `entries did not activate` 失败。
+- **`cordis.yml` 里 DSH 包必须写成 `file://` URL**：不传 `bareModuleBaseUrl` 时
+  Loader 用的是普通 `Include`，不把绝对路径转成 file URL。
 
 ### 已推翻的假设
 
