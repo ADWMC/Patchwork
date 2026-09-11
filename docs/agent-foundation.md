@@ -5,7 +5,7 @@
 - 导出 `name = patchwork-agent`，供 Cordis 识别插件。
 - 声明依赖 `systemPrompt`，将项目的[可维护代码代理提示词](../assets/prompts/maintainable-coding-agent-prompt.md)
   注册为一个系统提示词段落。
-- 声明依赖 `commands`，注册 `/patchwork-review` 斜杠命令（`src/review-command.mjs`）：
+- 声明依赖 `commands`，注册 `/patchwork-review` 斜杠命令（`src/review/review-command.mjs`）：
   站在用户立场评审代码的主入口。命令把[用户视角评审提示词](../assets/prompts/user-review-prompt.md)
   作为一条用户消息经 `agent.followup` 提交给 Agent 执行，支持可选的评审范围参数。
 - 不修改 Harness 的 agent loop；Agent 行为由一次注册的完整提示词定义。
@@ -40,8 +40,8 @@ bundle 并入 profile 的层栈——插件（维护提示词、`/patchwork-revi
 ## 最小验证
 
 ```text
-node --test tests/agent.test.mjs tests/review-command.test.mjs tests/preset.test.mjs
+node --test
 ```
 
-测试验证插件注册契约、`/patchwork-review` 命令契约，以及 bundle patch / preset /
-profile 三处的挂载声明一致性。
+测试验证插件注册契约、`/patchwork-review` 命令契约、配置校验、结构警告的冷却与
+工作区过滤，以及 bundle patch / preset / profile 三处的挂载声明一致性。

@@ -12,23 +12,27 @@
 先注册工具，之后 Standard、Patchwork 或 Helmd preset 在自己的 Agent 作用域挂载时，
 同名工具发生冲突。
 
-## 修复后的所有权
+## 当前所有权
 
 - DSH host：共享服务和平台实现；
-- Agent preset：从本机 DSH Standard 派生标准工具，再加载 Patchwork 提示词和 Hook；
-- Patchwork preset：按 session 作用域加载一次 `@patchwork/coding-agent`；
-- Patchwork package bundle：空 patch，只保留依赖安装入口。
+- Agent preset：承载宿主工具编排（shell、文件、任务等），不重复挂载插件本体；
+- Patchwork package bundle：`cordis.patch.yml` 在 profile 根插入一行
+  `@patchwork/coding-agent`，安装即对 profile 内所有 agent 生效。
 
-该边界消除了插件的宿主级重复加载。DSH `0.1.2-alpha.5` 的 scope 工具注册支持
-多个完整 preset 并行挂载；Patchwork 保留 Standard 工具行，因此工具能力不削弱。
-Patchwork 的提示词和 Hook 只在 Patchwork Agent 中生效。
+该边界消除了插件的宿主级重复加载。DSH 的 scope 工具注册支持多个完整 preset
+并行挂载；Patchwork 保留 Standard 工具行，因此工具能力不削弱。
+
+本次修复当时采用的边界是「preset 按 session 作用域加载插件、bundle patch 置空」；
+后续改为由 bundle patch 注册，preset 因此不再承载插件本体。`scripts/gen-preset.mjs`
+生成的 preset 只保留宿主工具行，`tests/preset.test.mjs` 断言它不含
+`@patchwork/coding-agent`。切换 preset 不卸载插件；从 profile 移除 bundle 才卸载。
 
 ## 重新部署
 
 ```powershell
 npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
 dsh plugin --profile web remove '@patchwork/coding-agent'
-dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.1.tgz"
+dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.2.tgz"
 node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
 Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
 ```

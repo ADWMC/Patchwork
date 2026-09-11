@@ -62,6 +62,7 @@ or extracts source paths from tool arguments, returns `warnings` and
 ## Documentation
 
 - [Engineering agent guide](docs/engineering-agent-guide.md)
+- [SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md)
 - [Maintainable coding prompt](assets/prompts/maintainable-coding-agent-prompt.md)
 - [Hook foundation](docs/hook-foundation.md)
 - [Agent foundation](docs/agent-foundation.md)

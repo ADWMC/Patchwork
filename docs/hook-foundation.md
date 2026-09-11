@@ -11,9 +11,15 @@ Agent 的完整提示词由 `src/index.mjs` 一次注册，Hook 不负责 Agent 
 未来如果需要 Hook，应只承载 Agent 之外的独立生命周期能力，并先以 DSH 原生
 Cordis 事件契约为准实现。
 
-当前已加入两项可复用基础：`src/hook-stdin.mjs` 提供带超时的 JSON Hook 运行器，
+当前已加入两项可复用基础：`src/hook/hook-stdin.mjs` 提供带超时的 JSON Hook 运行器，
 在 stdin 未关闭时返回并释放监听；`tests/hooks-windows.test.mjs` 验证真实入口可在
 PowerShell 和 POSIX shell 中直接运行，且不会使用 bash 专属包装语法。
+
+## 触发范围
+
+结构检查只对**会改动文件**的工具触发（`write`、`edit`），并且只检查**工作区内**的
+文件。读取第三方依赖、其他仓库或用户目录下的大文件不属于本项目的结构契约，
+检查它们只会给出 Agent 无法执行的建议。
 
 ## 待实现的流程门
 

@@ -57,6 +57,7 @@ Hook 同时支持独立 stdin 调用和 DSH 原生 `tools/post-execute` 生命�
 ## 文档
 
 - [工程代理指南 | Engineering agent guide](docs/engineering-agent-guide.md)
+- [SoL-Pi 机制复刻设计 | SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md)
 - [维护代码提示词 | Maintainable coding prompt](assets/prompts/maintainable-coding-agent-prompt.md)
 - [Hook 基础 | Hook foundation](docs/hook-foundation.md)
 - [Agent 基础 | Agent foundation](docs/agent-foundation.md)
