@@ -31,6 +31,13 @@
   `boot` 会以 `entries did not activate` 失败。
 - **`cordis.yml` 里 DSH 包必须写成 `file://` URL**：不传 `bareModuleBaseUrl` 时
   Loader 用的是普通 `Include`，不把绝对路径转成 file URL。
+- **DSH 没有「按请求重写历史消息」的投影钩子**：`agent/request` 明确
+  「cannot mutate messages」，`agent/pre-step` 只能替换进站的 user 消息。
+  因此改变**未来请求**所见工具结果内容的唯一公开途径，是
+  `Session.append(type, data, { surfaceOp, sourceEventSeqs })` 追加一个**表面替换
+  事件**去遮蔽更早的消息事件（原生 `dsh-compaction-tool-result-pruner` 正是此机制）。
+  这条路可用来复刻 SoL-Pi「前 N 次全量、之后换占位符」的生命周期；
+  `tools/post-execute` 的 `{kind:'accept', content}` 则只影响**首次**入库的内容。
 
 ### 已推翻的假设
 
