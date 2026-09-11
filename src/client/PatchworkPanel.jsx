@@ -1,8 +1,14 @@
 import { createElement, useEffect, useState } from 'react'
 
-const INJECTION_GLOBAL = '__PATCHWORK__'
+/**
+ * 看板与配置面板。
+ *
+ * 样式只用产品自己的设计 token（`--dsw-*`），不写死颜色：写死就会在浅色/深色主题
+ * 之间脱节，这正是上一版「跟 DSH 设计不匹配」的原因。
+ */
+const STATS_SELECTOR = 'script[data-patchwork-stats]'
 
-const SWITCHES = [
+const MECHANISMS = [
   ['actionFusion', 'Action Fusion', '改文件与验证命令合并为一次调用'],
   ['observationPack', 'ObservationPack', '大结果换成句柄，可按字节精确召回'],
   ['evidencePreservingReducer', 'Evidence-Preserving Reducer', '诊断日志压成收据（会调用模型）'],
@@ -17,36 +23,57 @@ const COUNTER_LABELS = {
   receipts: '收据',
   reducedBytes: '压缩掉的字节',
   compactions: '压缩次数',
-  boundaries: '语义边界',
-  fallbacks: '降级次数',
 }
 
 const styles = {
-  root: { padding: '12px 14px', fontFamily: 'ui-sans-serif, system-ui, sans-serif', fontSize: '12px', lineHeight: 1.6 },
-  h: { fontSize: '13px', fontWeight: 600, margin: '14px 0 6px' },
-  h1: { fontSize: '14px', fontWeight: 700, margin: '0 0 4px' },
-  sub: { opacity: 0.6, marginBottom: '10px' },
-  row: { display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '3px 0' },
-  name: { opacity: 0.9 },
-  on: { color: '#2ea043', fontWeight: 600 },
-  off: { opacity: 0.45 },
-  box: { border: '1px solid rgba(128,128,128,0.28)', borderRadius: '6px', padding: '8px 10px', marginTop: '6px' },
-  mono: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: '11px' },
-  muted: { opacity: 0.55, marginTop: '12px' },
-  warn: { color: '#d29922', marginTop: '6px' },
-}
-
-function readInjected() {
-  if (typeof window === 'undefined') return undefined
-  return window[INJECTION_GLOBAL]
+  root: {
+    padding: '12px 14px 20px',
+    fontFamily: 'var(--dsw-font-family)',
+    fontSize: '12px',
+    lineHeight: 1.6,
+    color: 'var(--dsw-alias-label-primary)',
+    background: 'var(--dsw-alias-bg-base)',
+    height: '100%',
+    overflowY: 'auto',
+  },
+  title: { fontSize: '13px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' },
+  subtitle: { color: 'var(--dsw-alias-label-tertiary)', marginBottom: '14px' },
+  section: {
+    margin: '0 0 6px',
+    fontSize: '11px',
+    fontWeight: 600,
+    letterSpacing: '0.04em',
+    color: 'var(--dsw-alias-label-tertiary)',
+  },
+  card: {
+    background: 'var(--dsw-alias-bg-layer-1)',
+    border: '1px solid var(--dsw-alias-border-l1)',
+    borderRadius: '8px',
+    padding: '2px 10px',
+    marginBottom: '16px',
+  },
+  row: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+    padding: '7px 0',
+    borderBottom: '1px solid var(--dsw-alias-border-l1)',
+  },
+  rowLast: { borderBottom: 'none' },
+  label: { color: 'var(--dsw-alias-label-primary)' },
+  hint: { color: 'var(--dsw-alias-label-tertiary)', fontSize: '11px' },
+  mono: { fontFamily: 'var(--dsw-font-markdown-code-font-family)', color: 'var(--dsw-alias-label-secondary)' },
+  on: { color: 'var(--dsw-alias-state-success-primary)', fontWeight: 600 },
+  off: { color: 'var(--dsw-alias-label-tertiary)' },
+  empty: { color: 'var(--dsw-alias-label-tertiary)', padding: '10px 0' },
 }
 
 /**
- * 把每次插件加载推入的条目聚合成看板的一份数据。
+ * 把每次插件加载推入的条目聚合成一份数据。
  *
  * 一个部署里插件可能被挂载多次（实测 Web profile 同进程加载过两次），其中一次
- * 可能拿不到 profile 补丁的配置。这里把开关取「任一实例开启即为开启」，并记录
- * 实例数与是否出现分歧——分歧本身是要报出来的事实，不该被静默合并。
+ * 可能拿不到配置。开关取「任一实例开启即为开启」，计数求和。
  */
 function collect(raw) {
   const list = Array.isArray(raw) ? raw : raw ? [raw] : []
@@ -54,16 +81,10 @@ function collect(raw) {
 
   const config = {}
   const counters = {}
-  let inconsistent = false
-
   for (const entry of list) {
     for (const [key, value] of Object.entries(entry?.config ?? {})) {
-      if (typeof value === 'boolean') {
-        if (key in config && config[key] !== value) inconsistent = true
-        config[key] = config[key] === true || value === true
-      } else if (!(key in config)) {
-        config[key] = value
-      }
+      if (typeof value === 'boolean') config[key] = config[key] === true || value === true
+      else if (!(key in config)) config[key] = value
     }
     for (const [mechanism, fields] of Object.entries(entry?.counters ?? {})) {
       if (!counters[mechanism]) counters[mechanism] = {}
@@ -72,8 +93,26 @@ function collect(raw) {
       }
     }
   }
+  return { config, counters }
+}
 
-  return { config, counters, instances: list.length, inconsistent, generatedAt: list[list.length - 1]?.generatedAt }
+/**
+ * 从注入的 data 元素里读，而不是读全局变量。
+ *
+ * 全局变量有竞态：后来的实例会覆盖先写的，组件挂载与脚本执行的先后也不保证。
+ * DOM 元素按加载次数累积，面板每次重读都拿到完整的集合。
+ */
+function readInjected() {
+  if (typeof document === 'undefined') return []
+  const entries = []
+  for (const node of document.querySelectorAll(STATS_SELECTOR)) {
+    try {
+      entries.push(JSON.parse(node.textContent))
+    } catch {
+      // 单个元素损坏不应让整块看板失去数据
+    }
+  }
+  return entries
 }
 
 export function PatchworkTitle() {
@@ -83,16 +122,8 @@ export function PatchworkTitle() {
 export function PatchworkPanel() {
   const [data, setData] = useState(() => collect(readInjected))
 
-  // 页面里的注入脚本可能晚于本组件挂载，而且同一进程可能注入多条。轮询重读
-  // 比依赖某一个时刻的挂载顺序可靠；看板本来就允许滞后一秒。
   useEffect(() => {
-    const timer = setInterval(() => {
-      const next = collect(readInjected)
-      if (!next) return
-      setData(previous =>
-        !previous || previous.instances !== next.instances || previous.generatedAt !== next.generatedAt ? next : previous,
-      )
-    }, 1000)
+    const timer = setInterval(() => setData(collect(readInjected)), 1000)
     return () => clearInterval(timer)
   }, [])
 
@@ -100,72 +131,63 @@ export function PatchworkPanel() {
     return createElement(
       'div',
       { style: styles.root },
-      createElement('div', { style: styles.h1 }, 'Patchwork'),
-      createElement('div', { style: styles.sub }, '这一页没有拿到宿主注入的数据。刷新一次页面即可。'),
+      createElement('div', { style: styles.title }, 'Patchwork'),
+      createElement('div', { style: styles.subtitle }, '正在等待宿主数据…'),
     )
   }
 
-  const counters = data.counters ?? {}
-  const active = Object.entries(counters).filter(([, value]) => value && Object.keys(value).length > 0)
+  const active = MECHANISMS.filter(([key]) => data.config?.[key] === true).length
 
   return createElement(
     'div',
     { style: styles.root },
-    createElement('div', { style: styles.h1 }, 'Patchwork'),
-    createElement('div', { style: styles.sub }, '机制配置与本次运行的实际计量'),
+    createElement('div', { style: styles.title }, 'Patchwork'),
+    createElement('div', { style: styles.subtitle }, `${active} / ${MECHANISMS.length} 个机制已启用`),
 
-    createElement('div', { style: styles.h }, '配置'),
+    createElement('div', { style: styles.section }, '机制'),
     createElement(
       'div',
-      { style: styles.box },
-      ...SWITCHES.map(([key, label, hint]) => {
-        const on = data.config?.[key] === true
+      { style: styles.card },
+      ...MECHANISMS.map(([key, label, hint], index) => {
+        const enabled = data.config?.[key] === true
         return createElement(
           'div',
-          { key, style: styles.row, title: hint },
-          createElement('span', { style: styles.name }, label),
-          createElement('span', { style: on ? styles.on : styles.off }, on ? '开' : '关'),
+          { key, style: index === MECHANISMS.length - 1 ? { ...styles.row, ...styles.rowLast } : styles.row },
+          createElement(
+            'span',
+            null,
+            createElement('div', { style: styles.label }, label),
+            createElement('div', { style: styles.hint }, hint),
+          ),
+          createElement('span', { style: enabled ? styles.on : styles.off }, enabled ? '已启用' : '未启用'),
         )
       }),
-      createElement(
-        'div',
-        { style: { ...styles.row, marginTop: '4px' } },
-        createElement('span', { style: styles.name }, '缓存写读比'),
-        createElement('span', { style: styles.mono }, String(data.config?.cacheWriteReadRatio ?? '—')),
-      ),
     ),
-    createElement('div', { style: styles.muted }, `插件加载实例：${data.instances}`),
-    data.inconsistent
-      ? createElement(
-          'div',
-          { style: styles.warn },
-          '配置不一致：同一进程里有实例没有收到本 profile 的配置（开关取任一实例开启即为开启）。',
-        )
-      : null,
 
-    createElement('div', { style: styles.h }, '实际计量'),
-    active.length === 0
-      ? createElement('div', { style: styles.box }, '本次运行还没有机制动手。')
-      : createElement(
-          'div',
-          { style: styles.box },
-          ...active.map(([mechanism, fields]) =>
-            createElement(
-              'div',
-              { key: mechanism, style: { padding: '4px 0' } },
-              createElement('div', { style: { fontWeight: 600 } }, mechanism),
-              ...Object.entries(fields).map(([field, value]) =>
-                createElement(
-                  'div',
-                  { key: field, style: styles.row },
-                  createElement('span', { style: styles.name }, COUNTER_LABELS[field] ?? field),
-                  createElement('span', { style: styles.mono }, String(value)),
-                ),
-              ),
-            ),
-          ),
-        ),
-
-    createElement('div', { style: styles.muted }, `数据快照：${data.generatedAt ?? '未知'}（刷新页面即刷新）`),
+    createElement('div', { style: styles.section }, '本次运行的计量'),
+    createElement('div', { style: styles.card }, renderCounters(data.counters)),
   )
+}
+
+function renderCounters(counters) {
+  const entries = Object.entries(counters ?? {}).filter(([, fields]) => fields && Object.keys(fields).length > 0)
+  if (entries.length === 0) {
+    return createElement('div', { style: styles.empty }, '本次运行还没有机制动手。')
+  }
+
+  const rows = []
+  for (const [mechanism, fields] of entries) {
+    rows.push(createElement('div', { key: `${mechanism}-name`, style: { ...styles.label, paddingTop: '8px' } }, mechanism))
+    for (const [field, value] of Object.entries(fields)) {
+      rows.push(
+        createElement(
+          'div',
+          { key: `${mechanism}-${field}`, style: styles.row },
+          createElement('span', { style: styles.hint }, COUNTER_LABELS[field] ?? field),
+          createElement('span', { style: styles.mono }, String(value)),
+        ),
+      )
+    }
+  }
+  return rows
 }

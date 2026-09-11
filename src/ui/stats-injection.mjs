@@ -1,6 +1,6 @@
 import { snapshot } from './mechanism-stats.mjs'
 
-export const INJECTION_GLOBAL = '__PATCHWORK__'
+export const STATS_ELEMENT_ATTRIBUTE = 'data-patchwork-stats'
 
 /**
  * 把配置与机制计数注入页面本身，而不是新开一个 HTTP 端点。
@@ -39,11 +39,11 @@ export function registerStatsInjection(ctx, config = {}) {
     }
     // 转义 `<` 与行分隔符，避免 JSON 里的内容提前闭合脚本标签。
     const safe = json.replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')
-    // 追加而不是覆盖：Web profile 里本插件可能被挂载多次（实测同一进程里出现过
-    // 两次加载，其中一次拿不到 profile 补丁的配置）。覆盖会让先写进去的真实配置
-    // 被后来的默认值抹掉；追加则让看板能聚合，并把分歧显示出来。
-    const script = `<script>(function(){var p=${safe};(window.${INJECTION_GLOBAL}=window.${INJECTION_GLOBAL}||[]).push(p)})()</script>`
+    // 用 data 元素而不是全局变量。全局会被后来的实例覆盖，而且「组件挂载」与
+    // 「脚本执行」的先后顺序无法保证——实测两者都出过问题。DOM 元素按加载次数
+    // 自然累积，面板只依赖解析顺序。
+    const element = `<script type="application/json" ${STATS_ELEMENT_ATTRIBUTE}>${safe}</script>`
     const head = html.indexOf('</head>')
-    return head < 0 ? `${script}${html}` : `${html.slice(0, head)}${script}${html.slice(head)}`
+    return head < 0 ? `${element}${html}` : `${html.slice(0, head)}${element}${html.slice(head)}`
   })
 }

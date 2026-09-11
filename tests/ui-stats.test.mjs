@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { record, reset, snapshot } from '../src/ui/mechanism-stats.mjs'
-import { INJECTION_GLOBAL, registerStatsInjection } from '../src/ui/stats-injection.mjs'
+import { registerStatsInjection, STATS_ELEMENT_ATTRIBUTE } from '../src/ui/stats-injection.mjs'
 
 function fakeCtx() {
   const taps = []
@@ -49,9 +49,9 @@ test('the host injects config and counters into the page instead of opening a ro
   assert.equal(taps.length, 1, 'the plugin must register exactly one index tap')
   const html = taps[0]('<html><head><title>t</title></head><body>x</body></html>')
 
-  // 追加式注入：多次加载各推一条，而不是互相覆盖。
-  assert.match(html, /window\.__PATCHWORK__=window\.__PATCHWORK__\|\|\[\]\)\.push\(/)
-  assert.ok(html.indexOf('</head>') > html.indexOf('__PATCHWORK__'), 'the script must land inside head')
+  // 注入的是 data 元素而不是可执行脚本：多个实例自然累积，也没有覆盖竞态。
+  assert.match(html, new RegExp(`<script type="application/json" ${STATS_ELEMENT_ATTRIBUTE}>`))
+  assert.ok(html.indexOf('</head>') > html.indexOf(STATS_ELEMENT_ATTRIBUTE), 'the data element must land inside head')
   assert.match(html, /"actionFusion":true/)
   assert.match(html, /"evidencePreservingReducer":false/, 'a mechanism that is off must read as off')
   assert.match(html, /"cacheWriteReadRatio":12\.5/)
