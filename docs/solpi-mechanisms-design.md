@@ -8,7 +8,12 @@
 - **已完成并真实宿主验证**：职责树重构；配置层（四个开关默认关闭，类型错误显式
   失败）；结构检查拆分为纯检查与冷却状态；已确证的结构 Hook 误报修复；
   **Action Fusion**。
-- **进行中**：ObservationPack。已确定它需要自建**可读**归档。
+- **进行中**：ObservationPack。内核（可读归档、内容寻址句柄、字节精确分页、ledger）
+  已完成并有测试；注册层（`tools/post-execute` 投影 + `obs_recall` 工具）待做。
+  生命周期按决定取**首次即换占位符**：`tools/post-execute` 的替换只影响首次入库的
+  内容，所以模型从第一次请求起看到的就是占位符 + 头部摘录。SoL-Pi 的「前 N 次全量」
+  需要追加**表面替换事件**（见下方宿主事实），这是同一机制内可选的后续增强，
+  不是宿主限制。
 - **未开始**：Evidence-Preserving Reducer、Online Context Compact、
   auto-research 方法论、benchmark。
 - 三个未实现机制的开关在启用时会**显式报错**，不会静默跳过。
