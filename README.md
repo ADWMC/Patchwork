@@ -7,6 +7,22 @@ English version: [README.en.md](README.en.md)
 Patchwork 是一个面向 DeepSeek Harness 的代码编写与维护插件。
 它采用 Agent + Hook：Agent 负责理解、实现和验证，Hook 负责可机械检查的维护警告。
 
+## SoL-Pi 机制复刻状态
+
+Patchwork 正在复刻 [SoL-Pi](https://github.com/NVlabs/SoL-Pi) 的四个运行时机制。
+四个开关都是 Cordis 配置项，且**默认关闭**：
+
+| 机制 | 配置键 | 状态 |
+|---|---|---|
+| Action Fusion | `actionFusion` | 未实现（设计已定） |
+| ObservationPack | `observationPack` | 未开始 |
+| Evidence-Preserving Reducer | `evidencePreservingReducer` | 未开始 |
+| Online Context Compact | `onlineContextCompact` | 未开始 |
+
+启用尚未实现的机制会让插件加载**显式失败**，不会静默跳过——现在打开任何一个开关
+都还不可用。目标契约为 DSH 0.1.5-rc.1，设计与进度见
+[SoL-Pi 机制复刻设计](docs/solpi-mechanisms-design.md)。
+
 ## 核心行为
 
 - 修改前先调查事实、调用方、配置和测试。

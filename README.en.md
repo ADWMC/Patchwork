@@ -8,6 +8,24 @@ Patchwork is a coding and maintenance plugin for DeepSeek Harness.
 It uses an Agent + Hook model: the Agent handles understanding, implementation,
 and verification; Hooks provide mechanically checkable maintenance warnings.
 
+## SoL-Pi mechanism status
+
+Patchwork is replicating the four runtime mechanisms of
+[SoL-Pi](https://github.com/NVlabs/SoL-Pi). All four switches are Cordis
+configuration fields and are **off by default**:
+
+| Mechanism | Config key | Status |
+|---|---|---|
+| Action Fusion | `actionFusion` | Not implemented (design settled) |
+| ObservationPack | `observationPack` | Not started |
+| Evidence-Preserving Reducer | `evidencePreservingReducer` | Not started |
+| Online Context Compact | `onlineContextCompact` | Not started |
+
+Enabling a mechanism that is not available makes plugin loading **fail
+explicitly** instead of skipping it silently — none of the switches is usable
+yet. The target contract is DSH 0.1.5-rc.1; the design and current progress are
+in the [SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md).
+
 ## Core behavior
 
 - Investigate facts, callers, configuration, and tests before editing.
@@ -17,6 +35,7 @@ and verification; Hooks provide mechanically checkable maintenance warnings.
 - Verify the original path after editing and report only observed evidence.
 - Update affected documentation and the README after code, configuration, or behavior changes.
 - When a Hook finds a structure or naming issue, it adds a focused prompt; the same issue is prompted at most once every 30 rounds per session.
+- The `/patchwork-review` command reviews code from the user's standpoint: walking user paths for bugs and UX defects, including commercial boundaries.
 
 ## Agent preset
 
