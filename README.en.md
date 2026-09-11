@@ -19,7 +19,7 @@ configuration fields and are **off by default**:
 | Action Fusion | `actionFusion` | Implemented and verified on the real host |
 | ObservationPack | `observationPack` | Implemented and verified on the real host |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | Implemented and verified on the real host |
-| Online Context Compact | `onlineContextCompact` | Implemented; the real `compactNow` path is not verified |
+| Online Context Compact | `onlineContextCompact` | Implemented and verified on the real host, except for the real compaction implementation |
 
 All four switches are Cordis configuration fields and are **off by default**.
 Enabling them no longer fails loading; each mechanism's verification boundary is

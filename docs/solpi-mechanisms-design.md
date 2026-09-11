@@ -17,7 +17,7 @@
 | Action Fusion | 单元 + 真实组合（遮蔽生效、经真实 `ctx.fs` 写文件） | — |
 | ObservationPack | 单元 + 真实组合（归档逐字节相同、分页拼回一致） | 与原生 `dsh-spill-policy` 同时挂载时的组合行为 |
 | Evidence-Preserving Reducer | 单元 + 真实组合（脚本化 reducer、真实诊断命令、判断日志落盘） | 真实模型产出的收据质量；`cacheWriteReadRatio` 之外的缓存语义 |
-| Online Context Compact | 单元（计划/经济性/时序全部覆盖）+ 真实组合（`update_plan` 经真实管线执行、无压缩服务时事件被安静吸收） | **真实 `compactNow` 路径**：触发窗口压力需要一段真实长会话，本机无法在不调用模型的情况下构造 |
+| Online Context Compact | 单元（计划/经济性/时序全覆盖）+ 真实组合（`update_plan` 经真实管线执行；挂上压缩服务后**边界确实触发一次压缩并 `followup` 续跑**；无压缩服务时事件被安静吸收） | **真实压缩实现**（`dsh-compaction-basic` 的实际摘要）：触发窗口压力需要一段真实长会话，本机无法在不调用模型的情况下构造 |
 
 ObservationPack 的生命周期按决定取**首次即换占位符**：`tools/post-execute` 的替换
 只影响首次入库的内容，所以模型从第一次请求起看到的就是占位符 + 头部摘录。SoL-Pi 的

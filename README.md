@@ -17,7 +17,7 @@ Patchwork 正在复刻 [SoL-Pi](https://github.com/NVlabs/SoL-Pi) 的四个运�
 | Action Fusion | `actionFusion` | 已实现并真实宿主验证 |
 | ObservationPack | `observationPack` | 已实现并真实宿主验证 |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | 已实现并真实宿主验证 |
-| Online Context Compact | `onlineContextCompact` | 已实现；真实 `compactNow` 路径未验证 |
+| Online Context Compact | `onlineContextCompact` | 已实现并真实宿主验证（真实压缩实现除外） |
 
 四个开关都是 Cordis 配置项，且**默认关闭**。开启后插件加载不再报错；各机制的
 验证边界见 [SoL-Pi 机制复刻设计](docs/solpi-mechanisms-design.md)。目标契约为
