@@ -36,9 +36,13 @@
     "@deepseek-ai/dsh-fs-local": "0.1.5-rc.1",
     "@deepseek-ai/dsh-pwsh-local": "0.1.5-rc.1",
     "@deepseek-ai/dsh-scope": "0.1.5-rc.1",
+    "@deepseek-ai/dsh-session-log-export": "0.1.5-rc.1",
+    "@deepseek-ai/dsh-session-persistence-jsonl": "0.1.5-rc.1",
+    "@deepseek-ai/dsh-session-projection": "0.1.5-rc.1",
     "@deepseek-ai/dsh-shell-env": "0.1.5-rc.1",
     "@deepseek-ai/dsh-subprocess-local": "0.1.5-rc.1",
     "@deepseek-ai/dsh-system-prompt": "0.1.5-rc.1",
+    "@deepseek-ai/dsh-token-meter": "0.1.5-rc.1",
     "@deepseek-ai/dsh-tool-fs": "0.1.5-rc.1",
     "@deepseek-ai/dsh-tool-pwsh": "0.1.5-rc.1",
     "@deepseek-ai/dsh-tools": "0.1.5-rc.1"
