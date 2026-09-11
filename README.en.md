@@ -19,13 +19,12 @@ configuration fields and are **off by default**:
 | Action Fusion | `actionFusion` | Implemented and verified on the real host |
 | ObservationPack | `observationPack` | Implemented and verified on the real host |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | Implemented and verified on the real host |
-| Online Context Compact | `onlineContextCompact` | Not started |
+| Online Context Compact | `onlineContextCompact` | Implemented; the real `compactNow` path is not verified |
 
-Enabling a mechanism that is not available makes plugin loading **fail
-explicitly** instead of skipping it silently — only `onlineContextCompact` still
-errors out when turned on. The target contract is DSH 0.1.5-rc.1; the design and
-current progress are in the
-[SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md).
+All four switches are Cordis configuration fields and are **off by default**.
+Enabling them no longer fails loading; each mechanism's verification boundary is
+recorded in the [SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md). The
+target contract is DSH 0.1.5-rc.1.
 
 ## Core behavior
 

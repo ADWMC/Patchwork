@@ -5,12 +5,19 @@
 
 ## 实现状态
 
-- **已完成并真实宿主验证**：职责树重构；配置层（四个开关默认关闭，类型错误显式
-  失败）；结构检查拆分为纯检查与冷却状态；已确证的结构 Hook 误报修复；
-  **Action Fusion**；**ObservationPack**；**Evidence-Preserving Reducer**。
-- **进行中**：Online Context Compact。
-- **未开始**：auto-research 方法论、benchmark。
-- 唯一未实现机制的开关在启用时会**显式报错**，不会静默跳过。
+- **已完成**：职责树重构；配置层；结构检查拆分与误报修复；四个运行时机制
+  （Action Fusion、ObservationPack、Evidence-Preserving Reducer、
+  Online Context Compact）。
+- **未开始**：auto-research 方法论、规范形态的 benchmark 考题。
+
+验证边界（逐个机制，不夸大）：
+
+| 机制 | 已验证 | 未验证 |
+|---|---|---|
+| Action Fusion | 单元 + 真实组合（遮蔽生效、经真实 `ctx.fs` 写文件） | — |
+| ObservationPack | 单元 + 真实组合（归档逐字节相同、分页拼回一致） | 与原生 `dsh-spill-policy` 同时挂载时的组合行为 |
+| Evidence-Preserving Reducer | 单元 + 真实组合（脚本化 reducer、真实诊断命令、判断日志落盘） | 真实模型产出的收据质量；`cacheWriteReadRatio` 之外的缓存语义 |
+| Online Context Compact | 单元（计划/经济性/时序全部覆盖）+ 真实组合（`update_plan` 经真实管线执行、无压缩服务时事件被安静吸收） | **真实 `compactNow` 路径**：触发窗口压力需要一段真实长会话，本机无法在不调用模型的情况下构造 |
 
 ObservationPack 的生命周期按决定取**首次即换占位符**：`tools/post-execute` 的替换
 只影响首次入库的内容，所以模型从第一次请求起看到的就是占位符 + 头部摘录。SoL-Pi 的

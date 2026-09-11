@@ -51,17 +51,21 @@ function probeAccess(agent) {
 export function createAgent({ id = 'test-agent', cwd = process.cwd(), sessionId = 'test-session' } = {}) {
   const agentKey = {}
   const agentScope = createScope(rootCtx, agentKey)
+  const followups = []
   const agent = {
     id,
     ctx: agentScope.ctx,
-    session: { header: { id: sessionId, cwd } },
+    session: { header: { id: sessionId, cwd }, requestContext: () => ({ contextWindow: 200_000 }) },
     whenIdle: async () => {},
+    runMaintenance: task => task(new AbortController().signal),
+    followup: message => followups.push(message),
   }
 
   const { warnings, emitError } = dispatch({ agent })
 
   observed.agentKey = agentKey
   observed.agent = agent
+  observed.followups = followups
   observed.tools = rootCtx.tools
   observed.warnings = warnings
   observed.emitError = emitError
@@ -69,5 +73,5 @@ export function createAgent({ id = 'test-agent', cwd = process.cwd(), sessionId 
   observed.rootToolNames = rootCtx.tools.schemas().map(schema => schema.name)
   observed.agentToolNames = rootCtx.tools.schemas(agentKey).map(schema => schema.name)
 
-  return { agent, agentKey, tools: rootCtx.tools }
+  return { agent, agentKey, tools: rootCtx.tools, followups }
 }

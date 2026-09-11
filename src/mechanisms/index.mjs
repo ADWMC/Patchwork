@@ -1,6 +1,7 @@
 import { registerActionFusion } from './action-fusion/index.mjs'
 import { registerObservationPack } from './observation-pack/index.mjs'
 import { registerEvidencePreservingReducer } from './evidence-preserving-reducer/index.mjs'
+import { registerOnlineContextCompact } from './online-context-compact/index.mjs'
 
 /** 机制的中文名与配置键一一对应，命名与 configure 键保持同一个概念一个名字。 */
 const MECHANISM_LABELS = {
@@ -15,6 +16,7 @@ const MECHANISM_REGISTRARS = new Map([
   ['actionFusion', registerActionFusion],
   ['observationPack', registerObservationPack],
   ['evidencePreservingReducer', registerEvidencePreservingReducer],
+  ['onlineContextCompact', registerOnlineContextCompact],
 ])
 
 /**

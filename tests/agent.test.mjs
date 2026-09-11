@@ -49,13 +49,31 @@ test('every mechanism is off unless configuration enables it', () => {
   assert.deepEqual([...listeners.keys()], ['tools/post-execute'])
 })
 
-test('enabling an unavailable mechanism fails loudly instead of being skipped', () => {
-  const ctx = {
-    systemPrompt: { section() {} },
-    commands: { register() {} },
-    on() {},
-  }
-  assert.throws(() => apply(ctx, { onlineContextCompact: true }), /onlineContextCompact is enabled but/)
+test('every mechanism the plugin advertises can actually be enabled', () => {
+  const definitions = []
+  const listeners = new Map()
+  apply(
+    {
+      systemPrompt: { section() {} },
+      commands: { register() {} },
+      tools: { register: definition => definitions.push(definition) },
+      on(event, listener) { listeners.set(event, listener) },
+    },
+    {
+      actionFusion: true,
+      observationPack: true,
+      evidencePreservingReducer: true,
+      onlineContextCompact: true,
+    },
+  )
+  assert.deepEqual(definitions.map(definition => definition.name).sort(), ['obs_recall', 'update_plan'])
+  assert.deepEqual([...listeners.keys()].sort(), [
+    'agent/created',
+    'agent/request',
+    'agent/status',
+    'agent/turn-stopping',
+    'tools/post-execute',
+  ])
 })
 
 test('enabling the reducer registers its projection', () => {

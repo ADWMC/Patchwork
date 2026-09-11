@@ -17,11 +17,11 @@ Patchwork 正在复刻 [SoL-Pi](https://github.com/NVlabs/SoL-Pi) 的四个运�
 | Action Fusion | `actionFusion` | 已实现并真实宿主验证 |
 | ObservationPack | `observationPack` | 已实现并真实宿主验证 |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | 已实现并真实宿主验证 |
-| Online Context Compact | `onlineContextCompact` | 未开始 |
+| Online Context Compact | `onlineContextCompact` | 已实现；真实 `compactNow` 路径未验证 |
 
-启用尚未实现的机制会让插件加载**显式失败**，不会静默跳过——只有
-`onlineContextCompact` 打开时仍会直接报错。目标契约为 DSH 0.1.5-rc.1，
-设计与进度见 [SoL-Pi 机制复刻设计](docs/solpi-mechanisms-design.md)。
+四个开关都是 Cordis 配置项，且**默认关闭**。开启后插件加载不再报错；各机制的
+验证边界见 [SoL-Pi 机制复刻设计](docs/solpi-mechanisms-design.md)。目标契约为
+DSH 0.1.5-rc.1。
 
 ## 核心行为
 
