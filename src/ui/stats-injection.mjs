@@ -18,6 +18,7 @@ export function registerStatsInjection(ctx, { readConfig, token } = {}) {
 
   const payload = () => {
     const config = readConfig() ?? {}
+    const counters = snapshot()
     return {
       config: {
         actionFusion: config.actionFusion === true,
@@ -26,7 +27,9 @@ export function registerStatsInjection(ctx, { readConfig, token } = {}) {
         onlineContextCompact: config.onlineContextCompact === true,
         cacheWriteReadRatio: typeof config.cacheWriteReadRatio === 'number' ? config.cacheWriteReadRatio : null,
       },
-      counters: snapshot(),
+      counters,
+      // 维护提醒计数与机制计数器同源（进程内、不落盘）。
+      maintenance: counters.maintenance ?? {},
       writePath: CONFIG_ROUTE_PATH,
       token: token ?? null,
       generatedAt: new Date().toISOString(),

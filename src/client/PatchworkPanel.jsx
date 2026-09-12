@@ -1,11 +1,13 @@
 import { createElement, useEffect, useState } from 'react'
 
 /**
- * 看板 + 配置编辑器。
+ * 三屏看板：实测节省 → 配置 → 维护提醒。
  *
- * 样式只用产品自己的设计 token（`--dsw-*`）。编辑走「暂存 → 保存」两步：机制一旦
- * 启用/停用，行为要重启才变，所以不能在切换的一瞬间就写文件——用户得先看清自己
- * 改了什么，再决定保存。
+ * 第一屏回答产品价值的问题「它到底省了什么」：只放本次运行**实测**的计数，不放
+ * 反事实预估；第二屏是配置（暂存 → 保存两步，机制行为重启才变）；第三屏是结构
+ * Hook 给出的维护提醒次数（内容只进会话上下文，这里只留一个可数的事实）。
+ *
+ * 样式只用产品自己的设计 token（`--dsw-*`）。
  */
 const STATS_SELECTOR = 'script[data-patchwork-stats]'
 
@@ -60,6 +62,10 @@ const styles = {
   hint: { color: 'var(--dsw-alias-label-tertiary)', fontSize: '11px' },
   mono: { fontFamily: 'var(--dsw-font-markdown-code-font-family)', color: 'var(--dsw-alias-label-secondary)' },
   empty: { color: 'var(--dsw-alias-label-tertiary)', padding: '10px 0' },
+
+  // 第一屏的主数字：大字号，回答「省了多少」。
+  hero: { fontSize: '22px', fontWeight: 700, lineHeight: 1.2, color: 'var(--dsw-alias-label-primary)' },
+  heroHint: { fontSize: '11px', color: 'var(--dsw-alias-label-tertiary)', marginTop: '2px' },
 
   // 开关：轨道 + 圆钮，用状态色与边框 token。
   switchTrack: enabled => ({
@@ -140,6 +146,7 @@ function collect(raw) {
 
   const config = {}
   const counters = {}
+  const maintenance = {}
   let writePath
   let token
   for (const entry of list) {
@@ -148,15 +155,98 @@ function collect(raw) {
       else if (!(key in config)) config[key] = value
     }
     for (const [mechanism, fields] of Object.entries(entry?.counters ?? {})) {
+      if (mechanism === 'maintenance') continue
       if (!counters[mechanism]) counters[mechanism] = {}
       for (const [field, value] of Object.entries(fields)) {
         counters[mechanism][field] = (counters[mechanism][field] ?? 0) + value
       }
     }
+    for (const [field, value] of Object.entries(entry?.maintenance ?? {})) {
+      maintenance[field] = (maintenance[field] ?? 0) + value
+    }
     if (entry?.writePath) writePath = entry.writePath
     if (entry?.token) token = entry.token
   }
-  return { config, counters, writePath, token }
+  return { config, counters, maintenance, writePath, token }
+}
+
+function bytesText(value) {
+  if (!Number.isFinite(value) || value <= 0) return ''
+  if (value < 1024) return `${value} B`
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KiB`
+  return `${(value / 1024 / 1024).toFixed(1)} MiB`
+}
+
+/**
+ * 第一屏：本次实测节省。数字全部来自机制真正动手时记下的计数，
+ * 不放反事实预估——「省了多少」必须是可复核的事实。
+ */
+function renderStatsPower(counters) {
+  const af = counters.actionFusion ?? {}
+  const op = counters.observationPack ?? {}
+  const epr = counters.evidencePreservingReducer ?? {}
+  const occ = counters.onlineContextCompact ?? {}
+  const savedRequests = af.savedRequests ?? 0
+
+  const contributions = []
+  if ((af.fusedCalls ?? 0) > 0) contributions.push(['Action Fusion', `${af.fusedCalls} 次读写+验证合并为一次调用`])
+  if ((op.packedResults ?? 0) > 0) {
+    const archived = bytesText(op.packedBytes)
+    contributions.push(['ObservationPack', `${op.packedResults} 个大结果换成句柄${archived ? ` · 归档 ${archived}` : ''}`])
+  }
+  if ((epr.receipts ?? 0) > 0) {
+    const reduced = bytesText(epr.reducedBytes)
+    contributions.push(['Evidence-Preserving Reducer', `${epr.receipts} 份诊断收据${reduced ? ` · 压缩 ${reduced}` : ''}`])
+  }
+  if ((occ.compactions ?? 0) > 0) contributions.push(['Online Context Compact', `${occ.compactions} 次上下文压缩`])
+
+  return createElement(
+    'div',
+    { style: styles.card },
+    createElement(
+      'div',
+      { style: { ...styles.row, ...styles.rowLast } },
+      createElement(
+        'span',
+        null,
+        createElement('div', { style: styles.hero }, savedRequests > 0 ? `省去 ${savedRequests} 次模型请求` : '还没省下请求'),
+        createElement('div', { style: styles.heroHint }, '本会话实测计数，不是预估；长任务进行中看这里'),
+      ),
+    ),
+    contributions.length === 0
+      ? createElement('div', { style: styles.empty }, '还没有机制动手。保存配置并继续跑任务，这里会显示实际省下的请求与归档量。')
+      : contributions.map(([name, text], index) =>
+          createElement(
+            'div',
+            { key: name, style: index === contributions.length - 1 ? { ...styles.row, ...styles.rowLast } : styles.row },
+            createElement('span', { style: styles.label }, name),
+            createElement('span', { style: styles.hint }, text),
+          ),
+        ),
+  )
+}
+
+/**
+ * 第三屏：维护提醒。内容只进会话上下文（模型可见、可从日志重建），
+ * 这里只留一个可数的事实：它提醒过几次。
+ */
+function renderMaintenance(maintenance) {
+  const count = maintenance.structureWarnings ?? 0
+  return createElement(
+    'div',
+    { style: styles.card },
+    createElement(
+      'div',
+      { style: { ...styles.row, ...styles.rowLast } },
+      createElement('span', null, createElement('div', { style: styles.label }, '结构维护提醒')),
+      createElement('span', { style: styles.mono }, `${count} 次`),
+    ),
+    createElement(
+      'div',
+      { style: { ...styles.hint, paddingBottom: '8px' } },
+      '修正结构或命名问题时 Hook 给的提醒次数；提醒内容进入该次会话上下文，不在此落盘。',
+    ),
+  )
 }
 
 export function PatchworkTitle() {
@@ -224,6 +314,11 @@ export function PatchworkPanel() {
     createElement('div', { style: styles.title }, 'Patchwork'),
     createElement('div', { style: styles.subtitle }, `${active} / ${MECHANISMS.length} 个机制已启用`),
 
+    // 第一屏：本次实测节省
+    createElement('div', { style: styles.section }, '本次实测节省'),
+    renderStatsPower(data.counters, styles),
+
+    // 第二屏：配置
     createElement('div', { style: styles.section }, '机制'),
     createElement(
       'div',
@@ -295,28 +390,8 @@ export function PatchworkPanel() {
     ),
     dirty ? null : createElement('div', { style: styles.hint }, '保存后刷新页面即见；机制行为需重启后生效。'),
 
-    createElement('div', { style: { ...styles.section, marginTop: '16px' } }, '本次运行的计量'),
-    createElement('div', { style: styles.card }, renderCounters(data.counters)),
+    // 第三屏：维护提醒
+    createElement('div', { style: { ...styles.section, marginTop: '16px' } }, '维护提醒'),
+    renderMaintenance(data.maintenance),
   )
-}
-
-function renderCounters(counters) {
-  const entries = Object.entries(counters ?? {}).filter(([, fields]) => fields && Object.keys(fields).length > 0)
-  if (entries.length === 0) return createElement('div', { style: styles.empty }, '本次运行还没有机制动手。')
-
-  const rows = []
-  for (const [mechanism, fields] of entries) {
-    rows.push(createElement('div', { key: `${mechanism}-name`, style: { ...styles.label, paddingTop: '8px' } }, mechanism))
-    for (const [field, value] of Object.entries(fields)) {
-      rows.push(
-        createElement(
-          'div',
-          { key: `${mechanism}-${field}`, style: styles.row },
-          createElement('span', { style: styles.hint }, COUNTER_LABELS[field] ?? field),
-          createElement('span', { style: styles.mono }, String(value)),
-        ),
-      )
-    }
-  }
-  return rows
 }

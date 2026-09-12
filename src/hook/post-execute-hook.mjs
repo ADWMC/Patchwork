@@ -1,5 +1,6 @@
 import { buildStructureWarning, isMutationTool } from '../structure/structure-warning.mjs'
 import { isSourcePath } from '../structure/structure-check.mjs'
+import { record } from '../ui/mechanism-stats.mjs'
 
 /**
  * 只从「会改动文件」的工具参数里取路径。读取不属于结构检查的范围：
@@ -30,6 +31,8 @@ export function registerStructureHook(ctx) {
       if (!cwd || !files.length) return decision
       const check = await buildStructureWarning({ cwd, sessionId: exec.agent?.id, files })
       if (!check.prompt) return decision
+      // 面板第三屏的「维护提醒」计数：告警内容只进会话上下文，这里只留一个可数的事实。
+      record('maintenance', 'structureWarnings')
       const context = await warningContext(check.prompt)
       return { ...decision, additionalContexts: [...(decision.additionalContexts || []), context] }
     } catch {
