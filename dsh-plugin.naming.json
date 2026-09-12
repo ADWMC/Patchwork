@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "policy": "dsh-plugin-naming/v1",
+  "plugin": {
+    "namespace": "patchwork",
+    "name": "coding-agent",
+    "coordinate": "patchwork/coding-agent",
+    "packageName": "@patchwork/coding-agent"
+  },
+  "names": {
+    "pluginNames": ["patchwork-agent"],
+    "loaderIds": ["patchwork-agent"],
+    "services": [],
+    "tools": ["obs_recall", "update_plan"],
+    "commands": ["patchwork-review"],
+    "skills": [],
+    "skillProviders": [],
+    "events": [],
+    "settingsNamespaces": [],
+    "routes": [{ "kind": "exact", "path": "/api/patchwork/config" }]
+  }
+}

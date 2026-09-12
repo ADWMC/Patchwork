@@ -10,18 +10,19 @@ Patchwork 是一个面向 DeepSeek Harness 的代码编写与维护插件。
 ## SoL-Pi 机制复刻状态
 
 Patchwork 正在复刻 [SoL-Pi](https://github.com/NVlabs/SoL-Pi) 的四个运行时机制。
-四个开关都是 Cordis 配置项，且**默认关闭**：
+开关都是 Cordis 配置项；**actionFusion 默认开启**（它不改变模型可见内容，装上即省
+token），其余三个默认关闭：
 
 | 机制 | 配置键 | 状态 |
 |---|---|---|
 | Action Fusion | `actionFusion` | 已实现并真实宿主验证 |
 | ObservationPack | `observationPack` | 已实现并真实宿主验证 |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | 已实现并真实宿主验证 |
-| Online Context Compact | `onlineContextCompact` | 已实现并真实宿主验证（真实压缩实现除外） |
+| Online Context Compact | `onlineContextCompact` | 已实现并真实宿主验证 |
 
-四个开关都是 Cordis 配置项，且**默认关闭**。开启后插件加载不再报错；各机制的
+actionFusion 缺省即启用且加载正常；其余机制按需开启后加载亦不再报错。各机制的
 验证边界见 [SoL-Pi 机制复刻设计](docs/solpi-mechanisms-design.md)。目标契约为
-DSH 0.1.5-rc.1。
+DSH 0.1.5-rc.2。
 
 ## 核心行为
 

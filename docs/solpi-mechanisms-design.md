@@ -83,7 +83,7 @@ ObservationPack 的生命周期按决定取**首次即换占位符**：`tools/po
 
 ## 目标契约
 
-- 目标宿主：**DSH 0.1.5-rc.1**，唯一 target。本机全局安装即此版本。
+- 目标宿主：**DSH 0.1.5-rc.2**，唯一 target。本机全局安装即此版本。
 - 只使用该版本 `lib/types/*.d.ts` 声明过的导出与事件；不使用 Pi 的 API。
 - 保持 Patchwork 既有形态：纯 ESM、无构建步骤、`src/` 直接作为包入口。
 
@@ -163,7 +163,7 @@ src/
 | Action Fusion | `ctx.tools.register`：先 `ctx.tools.get('edit'/'write')` 取原生定义，再注册**同 scope 遮蔽**的新定义，透传原 `execute` 并在其后跑 `then_run` | 同 scope 重复注册工具名会失败；scoped 注册遮蔽 global。`tools/pre-execute` **不能**改参数（参数已入库并呈现），所以必须换定义而不是拦截 |
 | ObservationPack | `tools/post-execute` 返回 `{kind:'accept', content}` 替换模型侧内容；另注册 `obs_recall` 工具 | `accept` 可替换 `content` 而保留程序可用的 `value`。必须与 `dsh-spill-policy` 组合：它的 `next()` 结果再被有界化 |
 | Evidence-Preserving Reducer | `tools/post-execute` + 嵌套模型调用 | 只处理 diagnostic 命令的长输出；任何校验失败都必须原样放行（fail-open） |
-| Online Context Compact | 自注册 `update_plan` 工具 + 压缩服务 + `agent/*` 事件 | 需先确认 0.1.5-rc.1 的压缩服务与上下文计量 API（核实中） |
+| Online Context Compact | 自注册 `update_plan` 工具 + 压缩服务 + `agent/*` 事件 | 压缩 API 已按 rc.2 d.ts 核实：`ctx.compaction.compactNow(agent, signal)` 配合 `agent.runMaintenance`/`followup`；真实组合测试用 scripted compaction 后端跑通「边界 → idle → 压缩 → 续跑」全路径 |
 
 ## 取舍记录
 
@@ -194,7 +194,7 @@ src/
 - 注册契约（工具名、事件名、disposer 清理）→ 单元测试 + HMR 安全测试（dispose 后资源消失）。
 - 机制行为（内容替换、fail-open、遮蔽后仍能改文件）→ 真实组合测试，走真实 Loader。
 - 模型可见行为（Schema、渲染文本）→ 免凭据快照。
-- 打包产物 → 打包后在**隔离 profile** 内用真实 DSH 0.1.5-rc.1 冷启动，跑一次核心路径。
+- 打包产物 → 打包后在**隔离 profile** 内用真实 DSH 0.1.5-rc.2 冷启动，跑一次核心路径。
 
 真实验证不得在本会话所用的 web profile 上进行（它用的是已安装 tarball 且
 `patchReload: live`）；必须建隔离 profile。

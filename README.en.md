@@ -11,20 +11,21 @@ and verification; Hooks provide mechanically checkable maintenance warnings.
 ## SoL-Pi mechanism status
 
 Patchwork is replicating the four runtime mechanisms of
-[SoL-Pi](https://github.com/NVlabs/SoL-Pi). All four switches are Cordis
-configuration fields and are **off by default**:
+[SoL-Pi](https://github.com/NVlabs/SoL-Pi). The switches are Cordis configuration
+fields; **Action Fusion is on by default** (it does not change model-visible
+content, so installing already starts saving tokens) and the other three are **off by default**:
 
 | Mechanism | Config key | Status |
 |---|---|---|
 | Action Fusion | `actionFusion` | Implemented and verified on the real host |
 | ObservationPack | `observationPack` | Implemented and verified on the real host |
 | Evidence-Preserving Reducer | `evidencePreservingReducer` | Implemented and verified on the real host |
-| Online Context Compact | `onlineContextCompact` | Implemented and verified on the real host, except for the real compaction implementation |
+| Online Context Compact | `onlineContextCompact` | Implemented and verified on the real host |
 
-All four switches are Cordis configuration fields and are **off by default**.
-Enabling them no longer fails loading; each mechanism's verification boundary is
+Action Fusion is enabled by default and loads normally; enabling the other
+switches also no longer fails loading. Each mechanism's verification boundary is
 recorded in the [SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md). The
-target contract is DSH 0.1.5-rc.1.
+target contract is DSH 0.1.5-rc.2.
 
 ## Core behavior
 
