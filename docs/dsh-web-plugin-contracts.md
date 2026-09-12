@@ -4,6 +4,13 @@
 （`~/.dsh/profiles/**/node_modules`、全局 `@deepseek-ai/dsh`、以及前端产物
 `dsh-web-frontend/dist/assets/*.js`），不是从示例推导的。
 
+> **状态（2026-09-12）**：以下契约实测自 **0.1.5-rc.1**。插件目标契约已升级到
+> **0.1.5-rc.2**（仓库依赖与全局 CLI 均已同步）。rc.1→rc.2 的核对已完成：
+> 对照升级版本卡（DSH-0.1.5-RC2-01~06）与本仓库七类触点扫描，Host 面零变化、
+> 本插件未命中 feedback/FileTypeIcon/turnTail 等 Web Client 面；打包产物已在
+> 隔离 profile `pw-iso-rc2`（DSH 0.1.5-rc.2）冷启动，`[patchwork] loaded` 正常。
+> 本文件的契约条目在 rc.2 上仍成立，无需改动。
+
 ## 1. 浏览器半边必须被打包
 
 它不是普通 ESM，而是模块加载器载荷：
