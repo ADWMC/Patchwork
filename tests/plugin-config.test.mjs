@@ -2,9 +2,9 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { Config } from '../src/config/plugin-config.mjs'
 
-test('every mechanism defaults to disabled', () => {
+test('actionFusion defaults to enabled, the rest disabled', () => {
   const config = Config({})
-  assert.equal(config.actionFusion, false)
+  assert.equal(config.actionFusion, true)
   assert.equal(config.observationPack, false)
   assert.equal(config.evidencePreservingReducer, false)
   assert.equal(config.onlineContextCompact, false)
@@ -16,7 +16,7 @@ test('the reducer route stays unset unless configured', () => {
   assert.equal(config.reducerProvider, undefined)
   assert.equal(config.reducerModel, undefined)
   assert.deepEqual(Config({ reducerProvider: 'p', reducerModel: 'm' }), {
-    actionFusion: false,
+    actionFusion: true,
     observationPack: false,
     evidencePreservingReducer: false,
     onlineContextCompact: false,

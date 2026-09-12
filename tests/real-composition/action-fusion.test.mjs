@@ -55,8 +55,9 @@ test('the fused definition still writes through the real filesystem service', { 
   }
 })
 
-test('with Action Fusion disabled the agent scope keeps the native write tool', { skip }, async () => {
-  const { dispose } = await bootPatchwork({})
+test('with Action Fusion explicitly disabled the agent scope keeps the native write tool', { skip }, async () => {
+  // 显式关闭：默认值已改为开启，空配置现在会注册这个机制，所以这个用例必须显式关。
+  const { dispose } = await bootPatchwork({ actionFusion: false })
   try {
     const { createAgent } = await loadDriver()
     const { agentKey, tools } = createAgent()
