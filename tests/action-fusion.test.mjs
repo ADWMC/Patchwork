@@ -201,3 +201,30 @@ test('a missing shell tool leaves the native tools untouched', () => {
     console.warn = original
   }
 })
+
+test('a second plugin instance skips an already shadowed agent', () => {
+  // profile 补丁与 agent preset 各加载一份插件，同一 agent 会触发两份
+  // agent/created 监听器。共享的遮蔽记录保证只有第一份实例真正动手。
+  const firstListeners = new Map()
+  const secondListeners = new Map()
+  registerActionFusion({ on: (event, listener) => firstListeners.set(event, listener) })
+  registerActionFusion({ on: (event, listener) => secondListeners.set(event, listener) })
+
+  const registered = []
+  const agent = {
+    ctx: {
+      tools: {
+        get: (name, scope) => {
+          if (name === 'write') return nativeWriteTool()
+          if (name === 'pwsh') return { name: 'pwsh' }
+          return undefined
+        },
+        register: definition => registered.push(definition),
+      },
+    },
+  }
+  firstListeners.get('agent/created')({ agent })
+  secondListeners.get('agent/created')({ agent })
+
+  assert.equal(registered.length, 1, 'the second instance must not shadow the same scope again')
+})

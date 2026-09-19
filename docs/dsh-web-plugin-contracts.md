@@ -108,3 +108,15 @@ the browser, and the tab pairs the two without ever learning what the namespace 
   `… mechanisms: none` 同时出现。
 - **web profile 里插件会被加载多次**，其中一次可能拿不到 profile 补丁的配置。因此
   注入与展示必须**按多实例聚合**，并把分歧显示出来，而不是让后写者覆盖先写者。
+- **同一个 webServer 上配置路由只能注册一次**：插件会在 profile 补丁与 agent preset
+  两个作用域各加载一份，且 preset 隔离 realm 里 `ctx.get('webServer')` 解析到的是
+  **不同的服务实例**——但这些实例共享同一张路由表，`exact` 路由
+  `/api/plugins/patchwork-coding-agent/config` 重复注册会直接失败
+  （`webserver: duplicate exact route`，实测于「切换到 patchwork preset」时报
+  `failed to apply loader entry patchwork-agent`）。注册必须用**进程级路由注册表
+  去重**（按 `kind + path` 记一次，后到的实例跳过；按服务实例去重拦不住隔离 realm
+  的不同实例），且**写密钥进程级共享**——所有实例注入同一个密钥，与首个注册实例
+  的校验一致，否则面板保存会 403。同类问题不止路由：**机制的事件监听器同样需要
+  进程级协调**——Action Fusion 的 `agent/created` 遮蔽记录若按实例私有，同一 agent
+  会被两份实例各处理一次，后到的在已遮蔽的 scope 上注册同名工具而失败
+  （实测 `tool "write" is already registered in this scope`），须共享为进程级。

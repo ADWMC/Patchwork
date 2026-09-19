@@ -5,6 +5,12 @@ import { record } from '../../ui/mechanism-stats.mjs'
 const FUSABLE_TOOLS = ['write', 'edit']
 const SHELL_TOOLS = ['pwsh', 'bash']
 
+// 进程级遮蔽记录：插件会在 profile 补丁与 agent preset 隔离 realm 各加载一份，
+// 每个实例各监听一次 agent/created。若按实例各自记录，同一 agent 会被两份实例
+// 各处理一次，后到的遮蔽同 scope 已注册的工具而失败（fail-open 保住了功能，但
+// 产生噪音且行为依赖实例到达顺序）。共享记录让「每个 agent 只被第一个实例处理」。
+const registeredAgents = new WeakSet()
+
 function textOf(content) {
   return (content ?? [])
     .filter(block => block?.type === 'text')
@@ -24,8 +30,6 @@ function messageOf(error) {
  * agent preset 注册在更近的作用域，DSH 里近者胜，注册在根会被反过来遮蔽。
  */
 export function registerActionFusion(ctx) {
-  const registeredAgents = new WeakSet()
-
   ctx.on('agent/created', ({ agent }) => {
     if (!agent || registeredAgents.has(agent)) return
     registeredAgents.add(agent)

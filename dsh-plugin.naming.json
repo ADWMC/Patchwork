@@ -17,6 +17,6 @@
     "skillProviders": [],
     "events": [],
     "settingsNamespaces": [],
-    "routes": [{ "kind": "exact", "path": "/api/patchwork/config" }]
+    "routes": [{ "kind": "exact", "path": "/api/plugins/patchwork-coding-agent/config" }]
   }
 }

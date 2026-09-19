@@ -282,6 +282,11 @@ export function PatchworkPanel() {
   const stage = (key, next) => setDraft(current => ({ ...(current ?? {}), [key]: next }))
 
   const save = async () => {
+    if (!dirty) {
+      // 按钮不再禁用：点一个灰按钮会让人以为坏了。没改动时点击给一句明确反馈。
+      setStatus({ kind: 'info', text: '没有未保存的改动。' })
+      return
+    }
     if (!data.writePath || !data.token) {
       setStatus({ kind: 'error', text: '这个部署没有开放写入口。' })
       return
@@ -382,11 +387,11 @@ export function PatchworkPanel() {
       { style: styles.actions },
       createElement(
         'button',
-        { type: 'button', style: styles.button(!dirty || ratioInvalid), disabled: !dirty || ratioInvalid, onClick: save },
+        { type: 'button', style: styles.button(ratioInvalid), disabled: ratioInvalid, onClick: save },
         '保存',
       ),
       dirty && !ratioInvalid ? createElement('span', { style: styles.badge }, '有未保存的改动') : null,
-      status && !dirty ? createElement('span', { style: status.kind === 'error' ? styles.error : styles.ok }, status.text) : null,
+      status && !dirty ? createElement('span', { style: status.kind === 'error' ? styles.error : status.kind === 'info' ? styles.hint : styles.ok }, status.text) : null,
     ),
     dirty ? null : createElement('div', { style: styles.hint }, '保存后刷新页面即见；机制行为需重启后生效。'),
 

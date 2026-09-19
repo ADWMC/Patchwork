@@ -10,7 +10,12 @@ process.env.DSH_HOME = await mkdtemp(join(tmpdir(), 'patchwork-user-config-'))
 const { effectiveConfig, mergeUserConfig, readUserConfig, userConfigPath, validatePatch } = await import(
   '../src/config/user-config.mjs'
 )
-const { CONFIG_ROUTE_PATH, CONFIG_TOKEN_HEADER, registerConfigRoute } = await import('../src/ui/config-route.mjs')
+const { CONFIG_ROUTE_PATH, CONFIG_TOKEN_HEADER, registerConfigRoute, resetRouteRegistry } = await import(
+  '../src/ui/config-route.mjs'
+)
+
+// 路由注册表是进程级的：每个测试必须从干净状态开始。
+test.beforeEach(() => resetRouteRegistry())
 
 test('only known writable keys with the right types are accepted', () => {
   assert.equal(validatePatch({ actionFusion: true }).ok, true)
@@ -142,4 +147,25 @@ test('without a webserver or a token the route is a silent no-op', () => {
   assert.doesNotThrow(() => registerConfigRoute({ get: () => undefined }, { token: 'x' }))
   assert.doesNotThrow(() => registerConfigRoute({ get: () => fakeServer().server }, {}))
   assert.doesNotThrow(() => registerConfigRoute(undefined, { token: 'x' }))
+})
+
+test('registering twice on the same web server is idempotent', () => {
+  const { routes, server } = fakeServer()
+  const ctx = { get: name => (name === 'webServer' ? server : undefined) }
+  registerConfigRoute(ctx, { token: 'first' })
+  registerConfigRoute(ctx, { token: 'second' })
+  assert.equal(routes.length, 1, 'a second registration must not duplicate the exact route')
+  assert.equal(routes[0].path, CONFIG_ROUTE_PATH)
+})
+
+test('a different web-server instance still cannot register the route again', () => {
+  // 真实场景：profile 根 realm 与 agent preset 隔离 realm 解析到不同的 webServer
+  // 服务实例，但它们共享同一张路由表——第二次注册（哪怕在不同实例上）也必须跳过。
+  const first = fakeServer()
+  registerConfigRoute({ get: name => (name === 'webServer' ? first.server : undefined) }, { token: 'one' })
+  assert.equal(first.routes.length, 1)
+
+  const second = fakeServer()
+  registerConfigRoute({ get: name => (name === 'webServer' ? second.server : undefined) }, { token: 'two' })
+  assert.equal(second.routes.length, 0, 'a second server instance must not register the shared exact route')
 })

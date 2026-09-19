@@ -60,7 +60,7 @@ test('the host injects config and counters into the page instead of opening a ro
   // 维护提醒计数与机制计数器同源注入，供面板第三屏展示。
   assert.match(html, /"maintenance":\{\}/)
   // 写入口与密钥随页面一起下发，面板保存时要用。
-  assert.match(html, /"writePath":"\/api\/patchwork\/config"/)
+  assert.match(html, /"writePath":"\/api\/plugins\/patchwork-coding-agent\/config"/)
   assert.match(html, /"token":"write-token"/)
   reset()
 })
