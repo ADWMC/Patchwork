@@ -22,7 +22,7 @@ node benchmark/analyze.mjs [--cwd Patchwork] [--limit 5] [--json]
 - `--limit`：取最大的 N 个会话。
 - `--json`：输出机器可读结果。
 
-需要 `@deepseek-ai/dsh@0.1.7-alpha.2` 的若干包（见 `package.json` 的 devDependencies）。
+需要 `@deepseek-ai/dsh@0.1.7-rc.1` 的若干包（见 `package.json` 的 devDependencies）。
 脚本会启动一个只挂载「会话持久化 + 投影 + token 计量」的最小 DSH 组合，读完后立即
 销毁，不落任何工作产物。
 
@@ -97,7 +97,7 @@ node --test tests/real-composition/pre-migration-form.test.mjs
 
 | 决定 | 取值 | 说明 |
 |---|---|---|
-| 宿主版本 | **`0.1.7-alpha.2`** | **对规范的显式偏离**：规范把 Dockerfile 钉死 `@deepseek-ai/dsh@0.1.2-alpha.2` 并写明「改了等于换题」。本仓库的插件 target 就是本机全局安装的宿主版本（2026-09 为 `0.1.7-alpha.2`）。 |
+| 宿主版本 | **`0.1.7-rc.1`** | **对规范的显式偏离**：规范把 Dockerfile 钉死 `@deepseek-ai/dsh@0.1.2-alpha.2` 并写明「改了等于换题」。本仓库的插件 target 就是本机全局安装的宿主版本（2026-09 为 `0.1.7-rc.1`）。 |
 | 交付位置 | 本仓库 `benchmark/`（按目标要求） | 规范原文的落点是 skill 仓库（走 fork+PR）。 |
 | 容器验证 | 不做 | 本机无 docker/harbor，规范的「oracle 在容器里跑出 100/100」与「不绿不交付」无法满足。 |
 

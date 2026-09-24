@@ -1,7 +1,7 @@
 # 设计方案：Patchwork v2 — 少 Token 的可维护编码插件
 
 > 状态：**方案草案（未实现）**  
-> 基座：当前 `@patchwork/coding-agent` 0.1.2 · DSH 0.1.7-alpha.2  
+> 基座：当前 `@patchwork/coding-agent` 0.1.2 · DSH 0.1.7-rc.1  
 > 目标：在**不牺牲正确性与可维护性**的前提下，显著降低长会话 token 消耗  
 > 参考（本地收集夹）：SoL-Pi 四机制、天枢 CVM/审查纪律、superpowers、工程标准 skill
 
