@@ -25,7 +25,11 @@ export function registerStatsInjection(ctx, { readConfig, token } = {}) {
         observationPack: config.observationPack === true,
         evidencePreservingReducer: config.evidencePreservingReducer === true,
         onlineContextCompact: config.onlineContextCompact === true,
-        cacheWriteReadRatio: typeof config.cacheWriteReadRatio === 'number' ? config.cacheWriteReadRatio : null,
+        // 缺失时注入 Schema 默认值而不是 null：面板用 null 会判非法并曾直接禁用保存。
+        cacheWriteReadRatio:
+          typeof config.cacheWriteReadRatio === 'number' && Number.isFinite(config.cacheWriteReadRatio)
+            ? config.cacheWriteReadRatio
+            : 12.5,
       },
       counters,
       // 维护提醒计数与机制计数器同源（进程内、不落盘）。

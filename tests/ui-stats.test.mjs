@@ -78,6 +78,17 @@ test('the injected config is read fresh on every render, so a save shows without
   reset()
 })
 
+test('a missing cacheWriteReadRatio injects the schema default instead of null', () => {
+  // 回归：注入 null 会让面板把输入框标红并禁用保存按钮。
+  reset()
+  const { ctx, taps } = fakeCtx()
+  registerStatsInjection(ctx, { readConfig: () => ({ actionFusion: true }) })
+  const html = taps[0]('<head></head>')
+  assert.match(html, /"cacheWriteReadRatio":12\.5/)
+  assert.doesNotMatch(html, /"cacheWriteReadRatio":null/)
+  reset()
+})
+
 test('injected JSON cannot close the script tag early', () => {
   reset()
   const { ctx, taps } = fakeCtx()

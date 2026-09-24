@@ -11,6 +11,9 @@ import { createElement, useEffect, useState } from 'react'
  */
 const STATS_SELECTOR = 'script[data-patchwork-stats]'
 
+/** Schema 默认值：注入缺失时面板仍要能显示一个可编辑的合法数。 */
+const DEFAULT_RATIO = 12.5
+
 const MECHANISMS = [
   ['actionFusion', 'Action Fusion', '改文件与验证命令合并为一次调用'],
   ['observationPack', 'ObservationPack', '大结果换成句柄，可按字节精确召回'],
@@ -138,7 +141,10 @@ function readInjected() {
 
 /**
  * 把多次加载推入的条目聚合成一份数据。
+ *
  * 开关取「任一实例开启即为开启」，计数求和；写入口与密钥取最后一个非空值。
+ * 数值字段优先保留有限数：先到的实例可能注入 `null`，若按「键已存在就不覆盖」
+ * 会让 null 锁死后续的 12.5，输入框变红并禁用保存。
  */
 function collect(raw) {
   const list = Array.isArray(raw) ? raw : raw ? [raw] : []
@@ -151,8 +157,15 @@ function collect(raw) {
   let token
   for (const entry of list) {
     for (const [key, value] of Object.entries(entry?.config ?? {})) {
-      if (typeof value === 'boolean') config[key] = config[key] === true || value === true
-      else if (!(key in config)) config[key] = value
+      if (typeof value === 'boolean') {
+        config[key] = config[key] === true || value === true
+      } else if (typeof value === 'number' && Number.isFinite(value)) {
+        const existing = config[key]
+        const existingFinite = typeof existing === 'number' && Number.isFinite(existing)
+        if (!existingFinite || existing === null || existing === undefined) config[key] = value
+      } else if (!(key in config)) {
+        config[key] = value
+      }
     }
     for (const [mechanism, fields] of Object.entries(entry?.counters ?? {})) {
       if (mechanism === 'maintenance') continue
@@ -283,19 +296,52 @@ export function PatchworkPanel() {
   const baseline = data.config ?? {}
   const value = key => (draft && key in draft ? draft[key] : baseline[key])
   const dirty = Boolean(draft) && Object.keys(draft).length > 0
-  const ratio = value('cacheWriteReadRatio')
-  const ratioInvalid = typeof ratio !== 'number' || !Number.isFinite(ratio) || ratio < 0
+  const ratioTouched = Boolean(draft) && 'cacheWriteReadRatio' in draft
+  const baselineRatio =
+    typeof baseline.cacheWriteReadRatio === 'number' && Number.isFinite(baseline.cacheWriteReadRatio)
+      ? baseline.cacheWriteReadRatio
+      : DEFAULT_RATIO
+  const ratioRaw = value('cacheWriteReadRatio')
+  // 只有用户动过输入框且值非法才标红；注入缺失时显示 Schema 默认值，不锁死保存。
+  const ratioInvalid =
+    ratioTouched &&
+    (ratioRaw === null ||
+      ratioRaw === undefined ||
+      typeof ratioRaw !== 'number' ||
+      !Number.isFinite(ratioRaw) ||
+      ratioRaw < 0)
+  const ratioDisplay = ratioTouched
+    ? ratioRaw === null || ratioRaw === undefined
+      ? ''
+      : String(ratioRaw)
+    : String(baselineRatio)
 
   const stage = (key, next) => setDraft(current => ({ ...(current ?? {}), [key]: next }))
 
   const save = async () => {
     if (!dirty) {
-      // 按钮不再禁用：点一个灰按钮会让人以为坏了。没改动时点击给一句明确反馈。
       setStatus({ kind: 'info', text: '没有未保存的改动。' })
+      return
+    }
+    if (ratioInvalid) {
+      setStatus({ kind: 'error', text: '缓存写读比必须是 ≥ 0 的数字。' })
       return
     }
     if (!data.writePath || !data.token) {
       setStatus({ kind: 'error', text: '这个部署没有开放写入口。' })
+      return
+    }
+    // 只提交合法字段：清空 ratio 时不把 null 发给服务端（服务端会 400）。
+    const body = {}
+    for (const [key, item] of Object.entries(draft ?? {})) {
+      if (key === 'cacheWriteReadRatio') {
+        if (typeof item === 'number' && Number.isFinite(item) && item >= 0) body[key] = item
+        continue
+      }
+      body[key] = item
+    }
+    if (Object.keys(body).length === 0) {
+      setStatus({ kind: 'info', text: '没有未保存的改动。' })
       return
     }
     setStatus({ kind: 'saving', text: '保存中…' })
@@ -303,7 +349,7 @@ export function PatchworkPanel() {
       const response = await fetch(data.writePath, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-patchwork-token': data.token },
-        body: JSON.stringify(draft ?? {}),
+        body: JSON.stringify(body),
       })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok || payload.ok !== true) {
@@ -379,7 +425,7 @@ export function PatchworkPanel() {
           min: '0',
           step: '0.5',
           'aria-label': '缓存写读比',
-          value: ratio === null || ratio === undefined ? '' : String(ratio),
+          value: ratioDisplay,
           onChange: event => {
             const text = event.target.value
             stage('cacheWriteReadRatio', text === '' ? null : Number(text))
@@ -394,11 +440,21 @@ export function PatchworkPanel() {
       { style: styles.actions },
       createElement(
         'button',
-        { type: 'button', style: styles.button(ratioInvalid), disabled: ratioInvalid, onClick: save },
+        // 保存不再被 ratio 校验禁用：非法值在点击时给出明确错误，开关改动仍可提交。
+        { type: 'button', style: styles.button(false), disabled: false, onClick: save },
         '保存',
       ),
-      dirty && !ratioInvalid ? createElement('span', { style: styles.badge }, '有未保存的改动') : null,
-      status && !dirty ? createElement('span', { style: status.kind === 'error' ? styles.error : status.kind === 'info' ? styles.hint : styles.ok }, status.text) : null,
+      dirty ? createElement('span', { style: styles.badge }, '有未保存的改动') : null,
+      status && !dirty
+        ? createElement(
+            'span',
+            { style: status.kind === 'error' ? styles.error : status.kind === 'info' ? styles.hint : styles.ok },
+            status.text,
+          )
+        : null,
+      status && dirty && status.kind === 'error'
+        ? createElement('span', { style: styles.error }, status.text)
+        : null,
     ),
     dirty ? null : createElement('div', { style: styles.hint }, '保存后刷新页面即见；机制行为需重启后生效。'),
 
