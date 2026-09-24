@@ -124,7 +124,7 @@ test('facts are extracted from the real event shapes', () => {
         data: {
           turn: 1,
           step: 1,
-          message: { source: { kind: 'tool', callId: 'c1' }, content: [{ type: 'tool-result', toolCallId: 'c1', isError: true, content: [{ type: 'text', text: 'boom' }] }] },
+          message: { role: 'tool', id: 'm18', source: { kind: 'tool', callId: 'c1' }, toolCallId: 'c1', isError: true, content: [{ type: 'text', text: 'boom' }] },
         },
       }),
       JSON.stringify({ type: 'assistant/message', seq: 19, data: { turn: 1, step: 1, usage: { inputTokens: 5, outputTokens: 6, totalTokens: 11, cacheReadTokens: 7 } } }),

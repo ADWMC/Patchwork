@@ -194,7 +194,8 @@ test('a boundary under window pressure compacts once and continues the task', as
 
   assert.equal(h.compactions.length, 1, 'the boundary must compact exactly once')
   assert.equal(h.followups.length, 1, 'the task must continue after compaction')
-  assert.equal(h.followups[0].source.kind, 'plugin')
+  // kind 必须是生产者自己的名字：session log v4 的写入断言拒绝 catch-all 'plugin'。
+  assert.equal(h.followups[0].source.kind, 'patchwork')
   assert.match(h.followups[0].content[0].text, /Rebuild your plan/)
   assert.equal(h.followups[0].role, 'user')
 })

@@ -54,9 +54,12 @@ export function extractFacts(events, estimate) {
     }
 
     if (event.type === 'tool/result') {
-      const callId = data.message?.source?.callId
+      const message = data.message ?? {}
+      // session log v4：工具结果是一等 `role:'tool'` 消息，callId 与 isError 都在消息上，
+      // 已退役的 `tool-result` 内容包装不会再出现（写入侧直接拒绝它）。
+      const callId = message.toolCallId
       const call = calls.get(callId)
-      const text = collectText(data.message?.content)
+      const text = collectText(message.content)
       results.push({
         seq: event.seq,
         turn: data.turn,
@@ -64,7 +67,7 @@ export function extractFacts(events, estimate) {
         callId,
         toolName: call?.name ?? null,
         command: call?.command ?? null,
-        isError: readIsError(data.message?.content),
+        isError: message.isError === true,
         bytes: Buffer.byteLength(text, 'utf8'),
         // token 一律来自宿主估算器；没有它就记 null，分析侧不得假装知道。
         tokens: estimate ? estimate(text) : null,
@@ -79,23 +82,9 @@ function collectText(content) {
   if (!Array.isArray(content)) return ''
   const parts = []
   for (const block of content) {
-    if (block?.type === 'tool-result' && Array.isArray(block.content)) {
-      for (const inner of block.content) {
-        if (inner?.type === 'text' && typeof inner.text === 'string') parts.push(inner.text)
-      }
-    } else if (block?.type === 'text' && typeof block.text === 'string') {
-      parts.push(block.text)
-    }
+    if (block?.type === 'text' && typeof block.text === 'string') parts.push(block.text)
   }
   return parts.join('\n')
-}
-
-function readIsError(content) {
-  if (!Array.isArray(content)) return false
-  for (const block of content) {
-    if (block?.type === 'tool-result' && block.isError === true) return true
-  }
-  return false
 }
 
 function numberOr0(value) {

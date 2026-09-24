@@ -232,19 +232,26 @@ function renderStatsPower(counters) {
  */
 function renderMaintenance(maintenance) {
   const count = maintenance.structureWarnings ?? 0
+  const evidence = maintenance.evidenceBlocks ?? 0
   return createElement(
     'div',
     { style: styles.card },
     createElement(
       'div',
-      { style: { ...styles.row, ...styles.rowLast } },
+      { style: styles.row },
       createElement('span', null, createElement('div', { style: styles.label }, '结构维护提醒')),
       createElement('span', { style: styles.mono }, `${count} 次`),
     ),
     createElement(
       'div',
+      { style: { ...styles.row, ...styles.rowLast } },
+      createElement('span', null, createElement('div', { style: styles.label }, '完成证据拦截')),
+      createElement('span', { style: styles.mono }, `${evidence} 次`),
+    ),
+    createElement(
+      'div',
       { style: { ...styles.hint, paddingBottom: '8px' } },
-      '修正结构或命名问题时 Hook 给的提醒次数；提醒内容进入该次会话上下文，不在此落盘。',
+      'Hook 注入的一行提醒计数；提醒内容进入该次会话上下文，不在此落盘。',
     ),
   )
 }

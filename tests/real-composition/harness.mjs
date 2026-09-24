@@ -11,6 +11,7 @@ const REQUIRED_HOST_PACKAGES = [
   '@deepseek-ai/dsh-app-boot',
   '@deepseek-ai/dsh-system-prompt',
   '@deepseek-ai/dsh-commands',
+  '@deepseek-ai/dsh-skill',
   '@deepseek-ai/dsh-tools',
   '@deepseek-ai/dsh-fs-local',
   '@deepseek-ai/dsh-tool-fs',
@@ -45,6 +46,9 @@ export async function bootPatchwork(
   const rows = [
     ['system-prompt', import.meta.resolve('@deepseek-ai/dsh-system-prompt')],
     ['commands', import.meta.resolve('@deepseek-ai/dsh-commands')],
+    // Patchwork injects 'skills'；真实 CLI 组合还挂 tool-skill（需 agents 服务），
+    // 本 harness 无 agents，故只挂提供 ctx.skills 的注册表本体。
+    ['skill', import.meta.resolve('@deepseek-ai/dsh-skill')],
     ['tools', import.meta.resolve('@deepseek-ai/dsh-tools')],
     ['fs', import.meta.resolve('@deepseek-ai/dsh-fs-local')],
     ['tool-fs', import.meta.resolve('@deepseek-ai/dsh-tool-fs')],

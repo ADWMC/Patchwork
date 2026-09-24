@@ -23,6 +23,8 @@ test('the reducer route stays unset unless configured', () => {
     cacheWriteReadRatio: 12.5,
     reducerProvider: 'p',
     reducerModel: 'm',
+    skillsEnabled: true,
+    evidenceGate: true,
   })
 })
 

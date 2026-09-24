@@ -3,129 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Patchwork · 合作者插件架构</title>
+  <title>Patchwork · DSH Skill 架构</title>
   <link rel="stylesheet" href="./index.css" />
 </head>
 <body>
   <header class="hero">
     <p class="eyebrow">@patchwork/coding-agent · DSH 插件</p>
-    <h1>Patchwork 架构预览</h1>
+    <h1>最低导航 + 最少提示词</h1>
     <p class="lead">
-      工程合作者，不是应声虫。系统提示<strong>零注入</strong>；
-      技能<strong>融合 → 拆分 → 精准释放</strong>；内置反 AI 垃圾、Web/UI、架构、决策与自有规范。
+      零 systemPrompt。技能走 DSH 原生 <strong>ctx.skills 渐进披露</strong>：
+      目录仅 name+description，正文按需 <code>skill()</code> 加载。
+      七包融合改写，不整仓搬运外部 skill。
     </p>
     <div class="badges">
       <span class="badge">MIT · 开源</span>
-      <span class="badge">非商用友好</span>
       <span class="badge">No systemPrompt</span>
-      <span class="badge">SoL-Pi mechanisms</span>
+      <span class="badge">7 lean skills</span>
+      <span class="badge">EvidenceGate</span>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <h2>硬约束</h2>
+      <h2>硬约束（DSH 源码否决 systemPrompt 段）</h2>
       <ul class="rules">
-        <li><code>ctx.systemPrompt.section</code> — <strong>禁止</strong>（本插件不注册任何段）</li>
-        <li>技能只走：命令 body · Hook lead · 证据短码</li>
-        <li>完成 = 运行时命令证据（EvidenceGate）</li>
-        <li>规范唯一源：<code>docs/*</code> + <code>assets/skills/standards</code></li>
+        <li>禁止 <code>ctx.systemPrompt.section</code> · <code>inject = skills, commands, tools</code></li>
+        <li>常驻成本 = 7 ×（name + description ≤500）目录 reminder</li>
+        <li>正文 &lt;4KB，仅 <code>skill({name})</code> 加载</li>
+        <li>Hook 只注入一行：[pw:structure] / [pw:evidence]</li>
       </ul>
     </section>
 
     <section class="card">
-      <h2>装配层</h2>
+      <h2>释放通道</h2>
       <div class="flow">
-        <div class="node">apply(ctx, config)</div>
+        <div class="node accent">skill 目录<br /><small>user-role system-reminder</small></div>
         <div class="arrow">→</div>
-        <div class="node">commands<br /><small>/patchwork-skill · review · standards</small></div>
+        <div class="node">skill tool<br /><small>按需正文</small></div>
         <div class="arrow">→</div>
-        <div class="node">hooks<br /><small>post-execute · structure · evidence</small></div>
+        <div class="node">post-execute<br /><small>一行短码</small></div>
         <div class="arrow">→</div>
-        <div class="node">SoL-Pi<br /><small>fusion · pack · reducer · compact</small></div>
+        <div class="node">commands<br /><small>/patchwork-review</small></div>
         <div class="arrow">→</div>
-        <div class="node accent">skill router<br /><small>精准释放 lead</small></div>
+        <div class="node">SoL-Pi<br /><small>fusion · pack · …</small></div>
       </div>
+      <p class="note">systemPrompt：恒空。</p>
     </section>
 
     <section class="card">
-      <h2>Skill packs（拆分）</h2>
+      <h2>七包（融合改写）</h2>
       <div class="grid packs" id="packs"></div>
     </section>
 
     <section class="card">
-      <h2>精准释放通道</h2>
-      <table>
-        <thead>
-          <tr><th>通道</th><th>触发</th><th>释放</th><th>默认</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>系统提示词</td><td>—</td><td><em>无</em></td><td class="ok">恒关闭</td>
-          </tr>
-          <tr>
-            <td>命令 body</td><td><code>/patchwork-skill</code></td><td>完整 pack</td><td class="ok">开</td>
-          </tr>
-          <tr>
-            <td>Hook lead</td><td>write/edit 命中 trigger</td><td>1 段短 lead + 冷却</td><td class="ok">开</td>
-          </tr>
-          <tr>
-            <td>EvidenceGate</td><td>完成断言无 shell</td><td><code>[pw:evidence]</code></td><td class="ok">开</td>
-          </tr>
-          <tr>
-            <td>结构短码</td><td>大文件 / 坏命名</td><td><code>[pw:structure]</code></td><td class="ok">开</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="card">
-      <h2>合作者姿态</h2>
-      <div class="stance">
-        <article>
-          <h3>反迎合</h3>
-          <p>事实优先于附和；不表演道歉；冲突给 A/B 选项。</p>
-        </article>
-        <article>
-          <h3>会决策</h3>
-          <p>默认带推荐与取舍；避免空转追问。</p>
-        </article>
-        <article>
-          <h3>有证据</h3>
-          <p>无命令+退出码不得称完成；fail-closed。</p>
-        </article>
-        <article>
-          <h3>有规范</h3>
-          <p>standards pack 唯一权威；结构 Hook 机械检查。</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>模块职责树</h2>
-      <pre class="tree">src/
-  index.mjs              # 装配 · 无 systemPrompt
-  skills/                # registry · router · loader · command
-  quality/               # evidence-gate · stance
-  economy/               # reread · token-ledger
-  structure/             # 既有检查 → 短码
-  hook/                  # 组合释放
-  review/ mechanisms/ ui/
-assets/skills/           # anti-slop · web-ui · architecture
-                         # collaborator · standards · evidence</pre>
-    </section>
-
-    <section class="card">
-      <h2>实施阶段（设计 → 写码）</h2>
+      <h2>实施阶段</h2>
       <ol class="phases" id="phases"></ol>
-      <p class="note">当前交付：架构设计 + 本预览页。运行时改造待确认 Phase 0 后开工。</p>
     </section>
   </main>
 
   <footer>
-    <p>Patchwork · MIT · 设计文档 <code>docs/architecture-collaborator-skills.md</code></p>
+    <p>依据 <code>deepseek-harness/docs/subsystems/skills.zh.md</code> · 设计 <code>docs/architecture-collaborator-skills.md</code></p>
   </footer>
-
   <script src="./index.js"></script>
 </body>
 </html>

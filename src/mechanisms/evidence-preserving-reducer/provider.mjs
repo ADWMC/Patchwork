@@ -1,8 +1,6 @@
 import { BlockAssembler, createUserMessage } from '@deepseek-ai/dsh-llm'
 import { MAX_OUTPUT_TOKENS, REDUCER_TIMEOUT_MS } from './config.mjs'
 
-export const PLUGIN_NAME = 'patchwork-agent'
-
 /**
  * reducer 走哪条路由：配置显式给出 provider/model 时用它，否则回退到宿主的
  * 默认模型选择。凭证与 baseUrl 全部由宿主适配器管理，插件不接触。
@@ -46,7 +44,7 @@ export async function callReducer(llm, { route, system, userText, signal, sessio
       messages: [
         createUserMessage({
           content: [{ type: 'text', text: userText }],
-          source: { kind: 'plugin', plugin: PLUGIN_NAME, form: 'notice', summary: 'Evidence-Preserving Reducer request' },
+          source: { kind: 'patchwork', form: 'notice', summary: 'Evidence-Preserving Reducer request' },
         }),
       ],
       maxTokens: MAX_OUTPUT_TOKENS,

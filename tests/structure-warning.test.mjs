@@ -64,7 +64,8 @@ test('hook warning prompt is a separate asset', async () => {
       sessionId: 'asset-test',
       files: ['debug_final.cpp'],
     })
-    assert.match(result.prompt, /职责边界/)
+    assert.match(result.prompt, /\[pw:structure\]/)
+    assert.match(result.prompt, /skill: architecture/)
   })
 })
 

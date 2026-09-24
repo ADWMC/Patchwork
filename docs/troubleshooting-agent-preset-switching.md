@@ -27,15 +27,30 @@
 生成的 preset 只保留宿主工具行，`tests/preset.test.mjs` 断言它不含
 `@patchwork/coding-agent`。切换 preset 不卸载插件；从 profile 移除 bundle 才卸载。
 
+0.1.7-alpha.2 起，preset 本身也必须由 bundle patch 声明：`package.json` 的
+`dsh.bundle.patch` 现在列两个文件——`./cordis.patch.yml`（插件本体）与
+`./presets/patchwork.patch.yml`（`@deepseek-ai/dsh-agent-preset` 声明行）。
+`$DSH_HOME/.agent-presets/` 目录已经没有读者了，装好新 bundle 后要删掉旧的
+`.agent-presets/patchwork/`，否则界面上看不到的是「preset 消失」而不是「没装对」。
+
 ## 重新部署
 
 ```powershell
 npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
 dsh plugin --profile web remove '@patchwork/coding-agent'
 dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.2.tgz"
-node scripts/gen-preset.mjs --out "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
-Copy-Item presets/patchwork/preset.yml "$env:USERPROFILE/.dsh/.agent-presets/patchwork/preset.yml" -Force
+Remove-Item -Recurse -Force "$env:USERPROFILE/.dsh/.agent-presets/patchwork"
 ```
+
+改过宿主 standard 后重新生成声明文件（默认写回 `presets/patchwork.patch.yml`）：
+
+```powershell
+node scripts/gen-preset.mjs
+```
+
+profile 的 bundle 版本要跟宿主同走廊（`@deepseek-ai/dsh-base`、
+`@deepseek-ai/dsh-web-app` 都取 `alpha` tag），否则 `dsh-agent-preset` 这类
+宿主包在 profile 的解析树里根本不存在。
 
 完全退出旧 DSH 进程后重启。运行中的 standing preset mount 不保证安全热替换。
 

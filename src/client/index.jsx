@@ -33,6 +33,8 @@ export function apply(ctx) {
         // 任何资源地址，也没有按钮。guide 就是那个入口。
         guide: [
           {
+            // id 是 guide 条目的稳定标识（注册时按它查重），必须给。
+            id: TAB_KIND,
             order: 50,
             title,
             description: () => '机制配置与本次运行的实际计量',

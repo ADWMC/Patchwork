@@ -1,287 +1,156 @@
-# Patchwork 架构设计 v2 — 合作者插件（精准释放）
+# Patchwork 架构设计 v2 — DSH 原生 Skill · 最少导航
 
-> 状态：**设计定稿 → 再实现**  
-> 包名：`@patchwork/coding-agent`（不变）  
-> 许可证：MIT · 非商用友好、开源  
-> 硬约束：**不向 systemPrompt 注入任何插件提示词**
-
----
-
-## 1. 产品定位
-
-Patchwork 是 DeepSeek Harness 上的 **工程合作者**，不是顺从的代码生成器。
-
-| 维度 | 目标 |
-|---|---|
-| 代码质量 | 可维护结构、命名、验证路径 |
-| Token | 系统提示零注入；技能按需释放；结构警告短码 |
-| 姿态 | 反迎合、敢异议、会决策、有规范 |
-| 内置能力 | 反 AI 垃圾 · Web/UI 设计 · 架构设计 · 协作决策 · 自有规范 |
+> 状态：**按 DSH 源码修订 → 可实现**  
+> 包名：`@patchwork/coding-agent` · MIT · 非商用  
+> 硬约束：**零 systemPrompt 注入**  
+> 依据：`deepseek-harness` `docs/subsystems/skills.zh.md`、`packages/skill/*`、`.agents/.../skill-system.zh.md`
 
 ---
 
-## 2. 设计原则
+## 1. DSH 官方否决 systemPrompt 段
 
-1. **零 systemPrompt** — 不用 `systemPrompt.section`；技能只经命令 / Hook 附加上下文 / 工具结果侧路释放。  
-2. **融合 → 拆分 → 精准释放** — 外部仓只取规则要点，拆成独立 skill pack，按触发条件加载。  
-3. **确定性优先** — 能规则判断的不进模型；进模型的尽量一行短码。  
-4. **合作者而非应声虫** — 完成必须有证据；用户说法与代码事实冲突时指出分歧并给选项。  
-5. **一包一事** — 每个 skill 只覆盖一种工作姿态，避免大杂烩提示词。
+Skill 系统决策原文要点：
+
+- **否决**「把完整 skill 正文注入每条系统提示词」——破坏渐进披露，每轮为无关指令付费。
+- **否决**「使用 system prompt 段落」——目录应是 **user-role `<system-reminder>`**，不是 system 字符串。
+
+**结论**：Patchwork **禁止** `ctx.systemPrompt.section`。Agent 仍可用：宿主默认 system prompt + skill 目录 + 按需 `skill` 工具 + 一行 Hook。
 
 ---
 
-## 3. 概览图
+## 2. 最低导航（DSH 原生通道）
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │  DSH Profile · cordis.patch.yml     │
-                    │  @patchwork/coding-agent            │
-                    └─────────────────┬───────────────────┘
-                                      │ apply()
-          ┌───────────────────────────┼───────────────────────────┐
-          │                           │                           │
-          ▼                           ▼                           ▼
-   ┌─────────────┐            ┌──────────────┐            ┌──────────────┐
-   │ Commands    │            │ Hooks        │            │ Mechanisms   │
-   │ /patchwork-*│            │ post-execute │            │ SoL-Pi 四件套│
-   └──────┬──────┘            └──────┬───────┘            │ + economy    │
-          │                          │                    └──────────────┘
-          │    ┌─────────────────────┴─────────────────────┐
-          │    │           Skill Router（精准释放）         │
-          │    │  trigger → packId → short snippet         │
-          │    └─────────────────────┬─────────────────────┘
-          │                          │
-          ▼                          ▼
-   ┌─────────────────────────────────────────────────────┐
-   │  assets/skills/   （拆分后的 skill packs）           │
-   │  anti-slop · web-ui · architecture ·                │
-   │  collaborator · standards · evidence                │
-   └─────────────────────────────────────────────────────┘
+常驻（唯一固定成本）
+  skill 目录 = name + description（每条 ≤500 字符）
+  形状：agent/pre-step · user-role system-reminder
+  不含正文 / 路径 / 触发提示
 
-   systemPrompt: 【空 — 不注册任何 section】
+按需
+  skill({ name }) → <skill_content> 正文
+  userInvocable → TUI 斜杠（无需自造列表命令）
+
+机械一行
+  tools/post-execute → [pw:structure] / [pw:evidence]
 ```
 
----
-
-## 4. 模块地图（职责树）
-
-```
-src/
-  index.mjs                 # 装配；去掉 systemPrompt.section
-  config/plugin-config.mjs  # skill 开关与释放策略
-  skills/                   # [NEW] 技能领域
-    registry.mjs            # pack 元数据：id、路径、触发器
-    router.mjs              # 触发 → 该不该释放、释放哪段
-    loader.mjs              # 读 markdown、截取 lead、冷却
-    command.mjs             # /patchwork-skill · /patchwork-standards
-  quality/                  # [NEW] 合作者行为
-    evidence-gate.mjs       # 完成声明 vs shell 证据
-    stance.mjs              # 反迎合 stance 短指令
-  economy/                  # [NEW] 省 token
-    reread-guard.mjs
-    token-ledger.mjs
-  structure/                # 既有结构检查（警告改短码）
-  hook/post-execute-hook.mjs
-  review/                   # 既有 /patchwork-review
-  mechanisms/               # 既有 SoL-Pi
-  ui/                       # 既有面板
-
-assets/
-  skills/                   # [NEW] 拆分后的 pack 正文
-    anti-slop/SKILL.md
-    web-ui/SKILL.md
-    architecture/SKILL.md
-    collaborator/SKILL.md
-    standards/SKILL.md
-    evidence/SKILL.md
-  prompts/                  # 仅命令用完整长文；**不进 systemPrompt**
-```
-
----
-
-## 5. Skill Packs（融合 · 拆分 · 精准释放）
-
-### 5.1 融合来源（本地收集夹要点，非整仓拷贝）
-
-| Pack | 主要来源（摘规则，不整文件粘贴） | 要点 |
-|---|---|---|
-| `anti-slop` | hallmark · taste-skill · unslop-ui-skill · De-AI-… | 拒 generic 布局/套话/谄媚文风 |
-| `web-ui` | hallmark · frontend-architecture-skill · web design skill | 视觉层次、对比、组件边界、非模板 UI |
-| `architecture` | adr-skill · DDD skills · 天枢职责分层 · Patchwork 结构提示 | 职责树、边界、ADR 何时写 |
-| `collaborator` | 天枢 CVM/审查纪律 · frank · agents-md · engineering-agent-guide | 反迎合、证据、决策选项 |
-| `standards` | 本项目 engineering-agent-guide · git-commit · naming | **自有规范**唯一权威 |
-| `evidence` | 天枢 DeliveryGate · 审查纪律 fail-closed | 无命令输出不得称完成 |
-
-**许可**：收集夹多为 MIT/Apache；CC BY-NC-ND（天枢文档）只**转述规则**不抄长文。本插件 MIT。
-
-### 5.2 拆分形态
-
-每个 pack：
-
-```markdown
----
-id: web-ui
-title: Web/UI 设计
-triggers: [file:.css,.scss,.html,.jsx,.tsx, path:src/ui/, path:components/]
-lead: 20 行以内可注入摘要
-body: 完整规则（仅 /patchwork-skill web-ui 全量拉入）
----
-```
-
-- **lead**：Hook / 自动释放用（短）  
-- **body**：命令按需全量（长）
-
-### 5.3 精准释放（无 systemPrompt）
-
-| 通道 | 何时 | 释放什么 | 占窗口 |
-|---|---|---|---|
-| **命令** | 用户 `/patchwork-skill <id>` 或 `/patchwork-standards` | 对应 pack 的 **body** | 用户主动，一次 |
-| **命令** | `/patchwork-review [范围]` | 既有 user-review 提示 | 已有 |
-| **Hook 自动** | `write`/`edit` 命中 trigger | pack **lead**（冷却去重） | 极低 |
-| **Hook 证据** | 完成断言且无 shell 证据 | `[pw:evidence]` 一行 | 极低 |
-| **Hook 结构** | 大文件/坏命名 | `[pw:structure]` 短码 | 极低 |
-| **standoff stance** | 冲突/改口场景（后续） | collaborator lead | 按需 |
-
-**禁止**：任何 `ctx.systemPrompt.section(...)`。
-
-### 5.4 触发器设计
+### 注册契约
 
 ```js
-// registry.mjs 概念
-triggers: {
-  fileExts: ['.css', '.html', '.jsx', '.tsx', '.vue'],
-  pathIncludes: ['/ui/', '/components/', '/styles/'],
-  toolNames: ['write', 'edit'],
-}
-// router.shouldRelease(session, { files, tool }) → packId | null
-// 同一 session 同 pack：冷却 N 轮（复用 warning-cooldown）
-```
+export const inject = ['skills', 'commands', 'tools']  // 无 systemPrompt
 
-多 pack 同时命中 → **优先级**：`standards` < `anti-slop` < `web-ui` / `architecture` < `evidence`；**一次只注入一个 lead**（防刷屏）。
-
----
-
-## 6. 合作者姿态（反迎合 · 决策）
-
-### 6.1 行为契约（进 collaborator pack body + evidence hook）
-
-1. **不空口同意**：用户说法与代码/测试冲突时，先给 **可验证事实**，再给选项 A/B。  
-2. **会决策**：默认给出推荐 + 一句取舍，不问「你想怎样」空转。  
-3. **不表演道歉**：纠错只陈述改了什么、如何验证。  
-4. **完成 = 证据**：EvidenceGate 强制。  
-5. **规范唯一**：`assets` + `docs/*` 是规范源；不引入第二套互相打架的标准。
-
-### 6.2 EvidenceGate
-
-- 记录 session 内最近成功 shell（`pwsh`/`bash`/`run_tests`）。  
-- 检测完成类断言（中英 pattern 可配）。  
-- 无证据 → additionalContext：`[pw:evidence] …`  
-- 默认开；不阻断工具。
-
----
-
-## 7. 配置（Schemastery）
-
-```js
-export const Config = Schema.object({
-  // SoL-Pi（既有）
-  actionFusion: Schema.boolean().default(true),
-  observationPack: Schema.boolean().default(true),   // v2 建议默认开
-  evidencePreservingReducer: Schema.boolean().default(false),
-  onlineContextCompact: Schema.boolean().default(false),
-  reducerProvider: Schema.string(),
-  reducerModel: Schema.string(),
-  cacheWriteReadRatio: Schema.number().default(12.5),
-
-  // 技能释放 v2
-  skillAutoRelease: Schema.boolean().default(true),  // Hook 精准释放 lead
-  evidenceGate: Schema.boolean().default(true),
-  skillCooldownRounds: Schema.number().default(30),
-  // 总闸：关则全部新技能行为静默
-  tokenEfficiency: Schema.boolean().default(true),
+ctx.skills.register({
+  name,            // kebab-case
+  description,     // 目录唯一文案，≤500
+  content,         // 仅 skill 工具加载
+  invocation: { modelInvocable: true, userInvocable: true },
 })
 ```
 
-**无** `injectSystemPrompt` 类开关——系统提示注入被架构移除，不是可选项。
+参考实现：`packages/skill/skill-badge/src/index.ts`。
+
+### 体量纪律（DSH progressive disclosure 教训）
+
+- description：**≤160 字符**（目标）
+- 正文：**≤3KB**（曾有 skill 超 8192 被修剪器截断）
+- **禁止**整仓粘贴 hallmark / taste / 天枢等外部 SKILL.md
 
 ---
 
-## 8. 命令面
+## 3. 七 Skill（融合改写，不搬运）
 
-| 命令 | 作用 |
-|---|---|
-| `/patchwork-skill [id]` | 列出 pack 或注入某 pack body |
-| `/patchwork-standards` | 注入自有规范全文（standards pack） |
-| `/patchwork-review [scope]` | 既有用户视角评审 |
-| `/patchwork-skills` | 同 skill 列表别名（可选） |
+| name | 目录 description（导航） | 正文来源 |
+|---|---|---|
+| `patchwork` | 任务开始先加载：总规则（身份+不变量）与技能导航 | 原提示词身份/工作原则 + 六技能索引 |
+| `anti-slop` | 写文案/汇报时拒模板句与谄媚 | 外部反 slop **规则改写** |
+| `web-ui` | 改界面时：层次/对比/反模板 | 设计 skill **要点改写** |
+| `architecture` | 职责树、拆分、命名、何时 ADR | 本仓结构提示压缩 |
+| `collaborator` | 冲突时事实优先，A/B+推荐 | engineering-guide + 反迎合契约 |
+| `standards` | 提交/命名/验证/文档唯一权威 | `docs/*` 清单化 |
+| `evidence` | 完成必须命令+退出码 | 审查纪律 fail-closed |
 
----
-
-## 9. 与 SoL-Pi / 经济性关系
-
-| 层 | 内容 |
-|---|---|
-| 省 token（会话固定开销） | **去掉 systemPrompt 注入**（最大头） |
-| 省 token（动态） | skill lead 短码 + 冷却 + 结构短码 + reread/obs 分页 |
-| 语义质量 | skills + evidence + 既有 review |
-| 既有四机制 | 保留；actionFusion 默认开 |
+旧 86 行 `maintainable-coding-agent-prompt.md` **不再进 systemPrompt**，拆进上述 skill。
 
 ---
 
-## 10. 信息流（释放时序）
+## 4. 模块职责树
 
-```mermaid
-sequenceDiagram
-  participant U as 用户
-  participant A as Agent
-  participant H as post-execute Hook
-  participant S as Skill Router
-  participant L as Skill Loader
+```
+src/
+  index.mjs              # apply：skills + commands + hook；禁 systemPrompt
+  skills/register.mjs    # 读 assets/skills/*/SKILL.md → register
+  quality/evidence-gate.mjs
+  structure/             # 短码警告
+  hook/post-execute-hook.mjs
+  review/ mechanisms/ ui/ config/
 
-  U->>A: 任务（系统提示=宿主默认，无 Patchwork 段）
-  A->>H: write(src/ui/Button.tsx)
-  H->>S: files+tool 触发?
-  S->>L: web-ui pack lead + 冷却
-  L-->>H: 1 行 lead 或跳过
-  H-->>A: additionalContext [pw:skill:web-ui] …
-  A->>H: 输出含「已完成」
-  H->>H: EvidenceGate 无 shell?
-  H-->>A: [pw:evidence] 跑验收命令
-  U->>A: /patchwork-standards
-  A->>L: standards body 一次注入
+assets/skills/<name>/SKILL.md   # frontmatter + 短正文
 ```
 
 ---
 
-## 11. 实施顺序（设计定稿后）
+## 5. 信息流
 
-| Phase | 内容 | 验收 |
-|---|---|---|
-| **0** | 去掉 `systemPrompt.section`；`inject` 去掉 `systemPrompt` | 启动无 Patchwork 提示词；测试改断言 |
-| **1** | `assets/skills/*` 六 pack + `registry/loader/router` | 单测：lead 长度、冷却、优先级 |
-| **2** | `/patchwork-skill` `/patchwork-standards` | 命令注入 body |
-| **3** | Hook 接入 router + EvidenceGate + 结构短码 | 真实 post-execute 路径 |
-| **4** | 配置默认值 + 面板计数 + README/设计同步 | `node --test` 全绿 |
-| **5** | 浏览器预览 `index.html`（架构产品页） | cwd 可打开 |
-
-**先设计后写**：本文件 + `index.html` 架构页 = 设计交付；**未改插件运行时代码**直至你确认 Phase 0 开工。
+1. 会话首轮：DSH 注入 6 条 name+description 目录。  
+2. 模型需要规则 → `skill({name})` 拉正文（一次性）。  
+3. write/edit 结构问题 → 一行 `[pw:structure] skill: architecture`。  
+4. 输出含完成断言且无 shell 证据 → 一行 `[pw:evidence]`。  
+5. systemPrompt：**无 Patchwork 段**。
 
 ---
 
-## 12. 开源与边界
+## 6. 配置
 
-- 许可证：**MIT**（与现包一致）  
-- 非商用：用户声明不商用；我们不添加 NC 限制，保持可开源协作  
-- 不引入 Copyleft 依赖正文；融合内容以**改写规则要点**为主，避免 CC BY-NC-ND 长文粘贴  
+```js
+Config = {
+  actionFusion: true,
+  observationPack: false, // 可后续默认 true
+  evidencePreservingReducer: false,
+  onlineContextCompact: false,
+  skillsEnabled: true,
+  evidenceGate: true,
+}
+```
+
+无 systemPrompt 开关（架构移除，不可选）。
 
 ---
 
-## 13. 成功定义
+## 7. 命令
 
-1. 插件加载后 **systemPrompt 中无 patchwork 段**。  
-2. 用户可用命令拉齐规范与五大技能包。  
-3. 编辑 UI/架构相关文件时，**仅**多出一条带冷却的 skill lead。  
-4. 无证据的「完成」会被 `[pw:evidence]` 拦一次。  
-5. 六 pack 可独立改文案，互不耦合。  
-6. `index.html` 可预览本架构。  
-7. 测试全绿；未要求不 push。
+| 命令 | 作用 |
+|---|---|
+| `/patchwork-review` | 用户视角评审（followup） |
+| DSH 原生 skill 斜杠 | userInvocable skill，不自造 `/patchwork-skill` |
+
+---
+
+## 8. 实施顺序
+
+| Phase | 内容 |
+|---|---|
+| 0 | 去掉 systemPrompt；inject 改 skills/commands/tools |
+| 1 | 七 SKILL.md + register.mjs |
+| 2 | 结构一行码 + EvidenceGate |
+| 3 | 测试断言更新 |
+| 4 | README / index.html 对齐 |
+
+---
+
+## 9. 成功定义
+
+1. `sections.length === 0`（测试断言）。  
+2. 恰 7 个 skill；description ≤500；正文 <4KB。  
+3. 结构/证据 Hook ≤1 行。  
+4. `node --test` 全绿。  
+5. 未要求不 push。
+
+---
+
+## 10. DSH 源码索引（本地）
+
+- `deepseek-harness/docs/subsystems/skills.zh.md`
+- `deepseek-harness/packages/skill/skill/README.zh.md`
+- `deepseek-harness/packages/skill/skill-badge/src/index.ts`
+- `.agents/notes/archived/feature/2026-07-05-skill-system.zh.md`
+- `.agents/notes/implemented/architecture/2026-09-21-creator-skills-progressive-disclosure.zh.md`

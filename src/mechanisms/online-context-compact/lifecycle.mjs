@@ -6,8 +6,6 @@ import { analyzeTransition } from './plan.mjs'
 import { emptyState, loadState, recordBoundary, saveState } from './state.mjs'
 import { registerPlanTool } from './tools.mjs'
 
-export const PLUGIN_NAME = 'patchwork-agent'
-
 function sessionIdOf(agent) {
   const id = agent?.session?.header?.id
   return typeof id === 'string' && id !== '' ? id : undefined
@@ -152,7 +150,7 @@ async function compactWhenReady(ctx, agent, { ready, boundaries, stateFor, persi
           text: 'The context was compacted at a completed plan step. Rebuild your plan from the current state and continue the task; do not restate work that is already done.',
         },
       ],
-      source: { kind: 'plugin', plugin: PLUGIN_NAME, form: 'notice', summary: 'context compacted; rebuild the plan' },
+      source: { kind: 'patchwork', form: 'notice', summary: 'context compacted; rebuild the plan' },
     }),
   )
 }

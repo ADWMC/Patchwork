@@ -1,8 +1,36 @@
-# DSH Web 插件契约（0.1.5-rc.1 实测）
+# DSH Web 插件契约（0.1.5-rc.1 实测，0.1.7-alpha.2 复核）
 
 本文件记录构建 Patchwork 的 Web 半边时**实测出来**的宿主契约。每条都来自本机安装
 （`~/.dsh/profiles/**/node_modules`、全局 `@deepseek-ai/dsh`、以及前端产物
 `dsh-web-frontend/dist/assets/*.js`），不是从示例推导的。
+
+> **状态（2026-09-23）**：目标契约升级到 **0.1.7-alpha.2**（npm `alpha` tag；
+> `latest` 仍停在 0.1.5-rc.2，`next` 是 0.1.5-rc.3）。rc.2→alpha.2 这段走廊
+> 在升级技能里没有版本卡，以下五条逐条取自安装产物的声明与写入断言：
+>
+> 1. **会话日志 v4 要求生产者自己的 `source.kind`**。`dsh-session-format-catalog`
+>    的 `currentVersion` 已是 4，写入侧 `assertV4MessageSources` 直接拒绝 catch-all
+>    `'plugin'`（`SessionFormatError: format v4 message requires a producer-owned
+>    source kind`）。插件注入的上下文消息因此改用 `kind: 'patchwork'`。
+> 2. **`tool-result` 内容包装退役**，工具结果是一等 `role:'tool'` 消息，
+>    `toolCallId`/`isError` 提升到消息上；`tool/result` 事件类型本身保留。
+> 3. **`@deepseek-ai/dsh-persona` 的 `prefix` 变成必填**，`suffix` 才有默认值，
+>    旧的单一 `text` 字段不再被接受。
+> 4. **`@deepseek-ai/dsh-workflow-worker-thread` 包消失**，同类行换成
+>    `@deepseek-ai/dsh-workflow-ptc`。
+> 5. **preset 只能由 bundle patch 里的 `@deepseek-ai/dsh-agent-preset` 声明行承载**；
+>    整个安装产物里没有任何代码再读 `$DSH_HOME/.agent-presets/`。宿主自带的
+>    standard preset 现在是 `dsh-web-app/presets/standard.patch.yml`
+>    （`@deepseek-ai/dsh-agent-presets` 包不再存在）。
+>
+> 未变的契约（复核过）：`window.__ModuleLoader__` 载荷、`ctx.sidebarRightTabs` 与
+> `sidebar.right.pane.tab`/`.title` 槽位、`ctx.commands.register`/`ctx.tools.register`、
+> `webServer.register({ kind, path, handler })` 与 `tapIndex`、
+> `agent/created`/`agent/request`/`agent/status`/`agent/turn-stopping`/`tools/post-execute`
+> 事件、`additionalContexts?: UserMessage[]`、`compactNow`、`tokenMeter.measure`、
+> `ctx.get('agentDefaultModel').currentSelection()`、`dshHomePath(...)`、
+> `skills.register({ …, source: 'runtime' })`。新增的可选项：`dshCachePath(...)`、
+> `sidebarRight` guide 条目除 `id` 外还可带 `injections`。
 
 > **状态（2026-09-12）**：以下契约实测自 **0.1.5-rc.1**。插件目标契约已升级到
 > **0.1.5-rc.2**（仓库依赖与全局 CLI 均已同步）。rc.1→rc.2 的核对已完成：

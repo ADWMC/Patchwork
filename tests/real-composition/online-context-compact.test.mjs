@@ -108,7 +108,7 @@ test('with a compaction service the boundary compacts and the task continues', {
     assert.equal(calls.at(-1).aborted, false, 'compaction must receive a live signal')
 
     assert.equal(observed.followups.length, 1, 'the task must continue after compaction')
-    assert.equal(observed.followups[0].source.kind, 'plugin')
+    assert.equal(observed.followups[0].source.kind, 'patchwork')
     assert.match(observed.followups[0].content[0].text, /Rebuild your plan/)
   } finally {
     await boot.dispose()

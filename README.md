@@ -5,7 +5,9 @@ English version: [README.en.md](README.en.md)
 ## 项目简介
 
 Patchwork 是一个面向 DeepSeek Harness 的代码编写与维护插件。
-它采用 Agent + Hook：Agent 负责理解、实现和验证，Hook 负责可机械检查的维护警告。
+它采用 Skill + Hook：七条按需加载的 DSH 技能约束可维护编码行为（零 systemPrompt
+注入，目录仅 name + description，正文按需拉取），Hook 负责可机械检查的维护警告与
+完成证据门禁。
 
 ## SoL-Pi 机制复刻状态
 
@@ -22,7 +24,24 @@ token），其余三个默认关闭：
 
 actionFusion 缺省即启用且加载正常；其余机制按需开启后加载亦不再报错。各机制的
 验证边界见 [SoL-Pi 机制复刻设计](docs/solpi-mechanisms-design.md)。目标契约为
-DSH 0.1.5-rc.2。
+DSH 0.1.7-alpha.2（npm `alpha` tag；`latest` 仍是 0.1.5-rc.2）。
+
+## 技能包（零 systemPrompt）
+
+行为规则不进系统提示词，拆成七个 DSH 原生 skill，经 `ctx.skills` 渐进披露：
+
+| skill | 何时加载 |
+|---|---|
+| `patchwork` | 任何任务开始前：总规则（身份+不变量）与技能导航 |
+| `anti-slop` | 写文案、汇报、PR 描述：拒模板句与谄媚 |
+| `web-ui` | 改界面：层次、对比、反模板布局 |
+| `architecture` | 跨模块改动：职责树、拆分、命名 |
+| `collaborator` | 冲突与取舍：事实优先，给 A/B 与推荐 |
+| `standards` | 提交、改名、补测试、改文档的规范清单 |
+| `evidence` | 完成断言必须带命令与退出码 |
+
+`skillsEnabled: false` 可整体关闭技能注册；设计依据见
+[协作技能架构](docs/architecture-collaborator-skills.md)。
 
 ## 核心行为
 
@@ -32,7 +51,8 @@ DSH 0.1.5-rc.2。
 - 命名表达业务角色，拒绝 `final_new`、`debug3`、`CommonUtils` 等兜底命名。
 - 修改后沿原路径验证，并只汇报实际证据。
 - 代码、配置或行为变化完成后同步更新受影响文档和 README。
-- Hook 发现结构或命名问题时提供专用提示词；同一会话同一问题每 30 轮最多提示一次。
+- Hook 发现结构或命名问题时注入一行 `[pw:structure]` 短码（指向对应技能）；同一会话同一问题每 30 轮最多提示一次。
+- EvidenceGate（`evidenceGate`，默认开）：输出出现完成断言而近期无成功 shell 时，注入一行 `[pw:evidence]` 要求补命令与退出码，每会话最多一次。
 - `/patchwork-review` 命令：站在用户立场评审代码——走用户路径找 bug 与体验缺陷，兼顾商业化边界。
 
 ## Agent preset
@@ -44,9 +64,12 @@ npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
 dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.2.tgz"
 ```
 
-安装后插件注册 `/patchwork-review` 命令与维护 Hook；`scripts/gen-preset.mjs` 生成的
-`patchwork` preset 只提供工具编排（shell、文件、任务等），用于让启用该 preset
-的 Agent 拥有完整工具面。插件与 Helmd 等 preset 可共用同一个 profile。
+安装后插件注册 `/patchwork-review` 命令与维护 Hook。同一个 bundle 还声明
+`patchwork` agent preset（`presets/patchwork.patch.yml`，由
+`scripts/gen-preset.mjs` 逐行搬运宿主 standard）：它只提供工具编排（shell、
+文件、任务等），用于让选用该 preset 的 Agent 拥有完整工具面。0.1.7 起 preset
+不再靠往 `$DSH_HOME/.agent-presets/` 拷文件生效。插件与 Helmd 等 preset 可共用
+同一个 profile。
 
 ## /patchwork-review 命令
 
@@ -75,7 +98,8 @@ Hook 同时支持独立 stdin 调用和 DSH 原生 `tools/post-execute` 生命�
 
 - [工程代理指南 | Engineering agent guide](docs/engineering-agent-guide.md)
 - [SoL-Pi 机制复刻设计 | SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md)
-- [维护代码提示词 | Maintainable coding prompt](assets/prompts/maintainable-coding-agent-prompt.md)
+- [协作技能架构 | Collaborator skill architecture](docs/architecture-collaborator-skills.md)
+- [维护代码提示词（技能正文来源） | Maintainable coding prompt](assets/prompts/maintainable-coding-agent-prompt.md)
 - [Hook 基础 | Hook foundation](docs/hook-foundation.md)
 - [Agent 基础 | Agent foundation](docs/agent-foundation.md)
 - [Git 提交规范 | Git commit conventions](docs/git-commit-conventions.md)

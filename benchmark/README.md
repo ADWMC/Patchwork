@@ -22,7 +22,7 @@ node benchmark/analyze.mjs [--cwd Patchwork] [--limit 5] [--json]
 - `--limit`：取最大的 N 个会话。
 - `--json`：输出机器可读结果。
 
-需要 `@deepseek-ai/dsh@0.1.5-rc.2` 的若干包（见 `package.json` 的 devDependencies）。
+需要 `@deepseek-ai/dsh@0.1.7-alpha.2` 的若干包（见 `package.json` 的 devDependencies）。
 脚本会启动一个只挂载「会话持久化 + 投影 + token 计量」的最小 DSH 组合，读完后立即
 销毁，不落任何工作产物。
 
@@ -80,8 +80,9 @@ context peak 512,287 tokens
 `systemPrompt` / `commands` 正常解析，工具面 `read/write/edit/pwsh` 完整。
 
 既然旧形态装上去就能跑，**就不存在必需迁移**，这道题不成题。按规范应当退回升级卡
-形态而不是编一道；而升级卡属于 skill 仓库的知识体系（现有卡只到 `v0.1.3-alpha.2`，
-没有 `0.1.5-rc.2` 的卡），在 Patchwork 内没有对应载体。
+形态而不是编一道；而升级卡属于 skill 仓库的知识体系（当时现有卡只到 `v0.1.3-alpha.2`，
+没有 `0.1.5-rc.2` 的卡；2026-09 那批卡止于 `0.1.5-rc.2`，`rc.2 → 0.1.7-alpha.2`
+依旧无卡，本次迁移因此改从安装产物取证），在 Patchwork 内没有对应载体。
 
 判决由测试固化，不是断言：
 
@@ -96,7 +97,7 @@ node --test tests/real-composition/pre-migration-form.test.mjs
 
 | 决定 | 取值 | 说明 |
 |---|---|---|
-| 宿主版本 | **`0.1.5-rc.2`** | **对规范的显式偏离**：规范把 Dockerfile 钉死 `@deepseek-ai/dsh@0.1.2-alpha.2` 并写明「改了等于换题」。本仓库的插件 target 就是 `0.1.5-rc.2`。 |
+| 宿主版本 | **`0.1.7-alpha.2`** | **对规范的显式偏离**：规范把 Dockerfile 钉死 `@deepseek-ai/dsh@0.1.2-alpha.2` 并写明「改了等于换题」。本仓库的插件 target 就是本机全局安装的宿主版本（2026-09 为 `0.1.7-alpha.2`）。 |
 | 交付位置 | 本仓库 `benchmark/`（按目标要求） | 规范原文的落点是 skill 仓库（走 fork+PR）。 |
 | 容器验证 | 不做 | 本机无 docker/harbor，规范的「oracle 在容器里跑出 100/100」与「不绿不交付」无法满足。 |
 

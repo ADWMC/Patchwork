@@ -8,10 +8,9 @@ import { createScope } from '@deepseek-ai/dsh-scope'
  * 兄弟 entry（这里是 `dsh-tool-fs`）还没注册工具。真实部署里 agent 也是在
  * boot settle 之后、会话开始时才创建。
  *
- * agent 作用域用 `createScope` 构造。`dsh-agent-presets` 把 agent 自己的作用域键
- * 的父亲设为 preset 的 standing 键（`lib/index.js:779` 的说明与
- * `:1504/:1538/:1702` 的 `bindScopeParent` 调用），本例的父就是根，等价于
- * 「继承根层注册的工具」这一关系。
+ * agent 作用域用 `createScope` 构造。`@deepseek-ai/dsh-agent-preset-registry` 把
+ * agent 自己的作用域键的父亲设为 preset 的 standing 键（`bindScopeParent` 调用），
+ * 本例的父就是根，等价于「继承根层注册的工具」这一关系。
  */
 export const name = 'patchwork-agent-driver'
 export const inject = ['tools']
