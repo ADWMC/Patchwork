@@ -22,3 +22,5 @@ dsh-test-*.yml
 # Local tool state
 .playwright-cli/
 .workbuddy/
+\
+.dsh-save-*.png

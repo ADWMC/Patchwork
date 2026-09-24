@@ -293,7 +293,11 @@ export function PatchworkPanel() {
     )
   }
 
-  const baseline = data.config ?? {}
+  // 每次渲染都重读注入：挂载时若脚本尚未就位，或 1s 轮询跟不上，
+  // 旧 data 会让开关显示 0/4、保存误报「没有写入口」。draft 仍只由用户编辑产生。
+  const live = collect(readInjected())
+  const source = live ?? data
+  const baseline = source.config ?? {}
   const value = key => (draft && key in draft ? draft[key] : baseline[key])
   const dirty = Boolean(draft) && Object.keys(draft).length > 0
   const ratioTouched = Boolean(draft) && 'cacheWriteReadRatio' in draft
@@ -327,7 +331,11 @@ export function PatchworkPanel() {
       setStatus({ kind: 'error', text: '缓存写读比必须是 ≥ 0 的数字。' })
       return
     }
-    if (!data.writePath || !data.token) {
+    // 提交前再读一次注入，避免 state 陈旧导致误报没有写入口。
+    const endpoint = collect(readInjected()) ?? live ?? data
+    const writePath = endpoint?.writePath
+    const token = endpoint?.token
+    if (!writePath || !token) {
       setStatus({ kind: 'error', text: '这个部署没有开放写入口。' })
       return
     }
@@ -346,9 +354,9 @@ export function PatchworkPanel() {
     }
     setStatus({ kind: 'saving', text: '保存中…' })
     try {
-      const response = await fetch(data.writePath, {
+      const response = await fetch(writePath, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-patchwork-token': data.token },
+        headers: { 'content-type': 'application/json', 'x-patchwork-token': token },
         body: JSON.stringify(body),
       })
       const payload = await response.json().catch(() => ({}))
@@ -358,7 +366,12 @@ export function PatchworkPanel() {
       }
       setDraft(null)
       setStatus({ kind: 'ok', text: '已保存。机制行为需重启后生效。' })
-      setData(current => (current ? { ...current, config: payload.config ?? current.config } : current))
+      const next = collect(readInjected()) ?? endpoint
+      setData(current =>
+        current
+          ? { ...current, config: payload.config ?? next?.config ?? current.config, writePath, token }
+          : next,
+      )
     } catch (error) {
       setStatus({ kind: 'error', text: `保存失败：${String(error?.message ?? error)}` })
     }
