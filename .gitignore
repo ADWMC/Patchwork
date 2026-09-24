@@ -8,6 +8,13 @@ node_modules/
 *.log
 *-dump.txt
 
+# DSH web runtime artifacts (contain auth tokens / screenshots)
+.dsh-web.*.log
+.dsh-web.token.txt
+.dsh-web-verify.png
+.tmp-*.ps1
+.tmp-*.mjs
+
 # Local DSH test instances
 dsh-test-*.yml
 .dsh-source-test/
