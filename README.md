@@ -24,7 +24,7 @@ token），其余三个默认关闭：
 
 actionFusion 缺省即启用且加载正常；其余机制按需开启后加载亦不再报错。各机制的
 验证边界见 [SoL-Pi 机制复刻设计](docs/solpi-mechanisms-design.md)。目标契约为
-DSH 0.1.7-rc.1（npm `next` tag；`latest` 仍是 0.1.5-rc.3）。
+DSH 0.2.0-rc.2（npm `next` tag；`latest` 各包不一且都更旧）。
 
 ## 技能包（零 systemPrompt）
 

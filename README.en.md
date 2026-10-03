@@ -27,7 +27,7 @@ content, so installing already starts saving tokens) and the other three are **o
 Action Fusion is enabled by default and loads normally; enabling the other
 switches also no longer fails loading. Each mechanism's verification boundary is
 recorded in the [SoL-Pi mechanisms design](docs/solpi-mechanisms-design.md). The
-target contract is DSH 0.1.7-rc.1 (npm `next` tag; `latest` is still 0.1.5-rc.3).
+target contract is DSH 0.2.0-rc.2 (npm `next` tag; `latest` lags behind on every package).
 
 ## Skill packs (zero systemPrompt)
 

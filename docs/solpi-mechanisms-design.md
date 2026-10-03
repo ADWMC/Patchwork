@@ -83,7 +83,7 @@ ObservationPack 的生命周期按决定取**首次即换占位符**：`tools/po
 
 ## 目标契约
 
-- 目标宿主：**DSH 0.1.7-rc.1**，唯一 target。本机全局安装即此版本。
+- 目标宿主：**DSH 0.2.0-rc.2**，唯一 target。本机全局安装即此版本。
 - 只使用该版本 `lib/types/*.d.ts` 声明过的导出与事件；不使用 Pi 的 API。
 - 保持 Patchwork 既有形态：纯 ESM、无构建步骤、`src/` 直接作为包入口。
 
@@ -195,7 +195,7 @@ src/
 - 注册契约（工具名、事件名、disposer 清理）→ 单元测试 + HMR 安全测试（dispose 后资源消失）。
 - 机制行为（内容替换、fail-open、遮蔽后仍能改文件）→ 真实组合测试，走真实 Loader。
 - 模型可见行为（Schema、渲染文本）→ 免凭据快照。
-- 打包产物 → 打包后在**隔离 profile** 内用真实 DSH 0.1.7-rc.1 冷启动，跑一次核心路径。
+- 打包产物 → 打包后在**隔离 profile** 内用真实 DSH 0.2.0-rc.2 冷启动，跑一次核心路径。
 
 真实验证不得在本会话所用的 web profile 上进行（它用的是已安装 tarball 且
 `patchReload: live`）；必须建隔离 profile。
