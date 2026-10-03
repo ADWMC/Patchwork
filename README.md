@@ -61,7 +61,7 @@ Patchwork 以 DSH bundle 插件注册：安装即对 profile 内所有 agent 生
 
 ```powershell
 npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
-dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.1.2.tgz"
+dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.2.0.tgz"
 ```
 
 安装后插件注册 `/patchwork-review` 命令与维护 Hook。同一个 bundle 还声明

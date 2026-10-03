@@ -2,7 +2,7 @@
 
 > 状态：**方案草案（未实现）**
 >
-> 基座：当前 `@patchwork/coding-agent` 0.1.2 · DSH 0.2.0-rc.2
+> 基座：当前 `@patchwork/coding-agent` 0.2.0 · DSH 0.2.0-rc.2
 >
 > 目标：在**不牺牲正确性与可维护性**的前提下，显著降低长会话 token 消耗
 >

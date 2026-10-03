@@ -64,7 +64,7 @@ ObservationPack 的生命周期按决定取**首次即换占位符**：`tools/po
   ```powershell
   $env:DSH_HOME = "$env:TEMP\patchwork-verify-home"     # 已存在，仅部分初始化
   dsh --profile verify --from-default-profile web
-  dsh plugin --profile verify add "<patchwork-coding-agent-0.1.2.tgz 的绝对路径>"
+  dsh plugin --profile verify add "<patchwork-coding-agent-0.2.0.tgz 的绝对路径>"
   dsh --profile verify --dump-config                    # 期望树里出现 patchwork-agent 行
   dsh --profile verify --no-open                        # 期望启动到监听，而非 plugin tree failed
   ```
