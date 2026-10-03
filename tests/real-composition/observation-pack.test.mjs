@@ -1,8 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { readFile } from 'node:fs/promises'
+import { mkdtemp, readFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { bootPatchwork, hostAvailable, loadDriver } from './harness.mjs'
+
+// 归档与用户配置落在宿主用户数据根下；指到临时目录，测试不读到开发机 ~/.dsh 里的开关。
+process.env.DSH_HOME = await mkdtemp(join(tmpdir(), 'patchwork-obs-host-home-'))
 
 const skip = hostAvailable() ? false : 'DSH host packages are not installed'
 

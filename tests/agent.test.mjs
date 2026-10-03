@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { mkdtemp } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { apply, inject, name } from '../src/index.mjs'
+
+// 用户配置落在宿主用户数据根下；指到临时目录，测试不读到开发机 ~/.dsh 里的开关。
+process.env.DSH_HOME = await mkdtemp(join(tmpdir(), 'patchwork-agent-home-'))
 
 function mockCtx() {
   const sections = []
