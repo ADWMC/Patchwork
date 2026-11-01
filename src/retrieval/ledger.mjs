@@ -1,6 +1,7 @@
 import { fingerprint } from '../logging/schema.mjs'
 import { nativeSessionApi } from '../logging/session-log.mjs'
 import { isPatchworkAgent } from '../scope.mjs'
+import { evidenceSnapshot } from './evidence.mjs'
 
 export const RETRIEVAL_RECORD = 'plugin:patchwork/retrieval'
 export const RETRIEVAL_LIMIT = 100
@@ -29,6 +30,7 @@ function safeUrl(value) {
 }
 
 function operationId(value) {
+  if (typeof value === 'string' && /^retr_[a-f0-9]{24}$/.test(value)) return value
   const seed = typeof value === 'string' && value ? value : `retrieval-${Date.now()}-${Math.random()}`
   return `retr_${fingerprint(seed).slice(0, 24)}`
 }
@@ -63,7 +65,7 @@ export function normalizeRetrievalRecord(input = {}) {
     scope: 'current-session',
     trust: VALID_TRUST.has(input.trust) ? input.trust : 'external-untrusted',
     status,
-    recordedAt: new Date().toISOString(),
+    recordedAt: typeof input.recordedAt === 'string' && Number.isFinite(Date.parse(input.recordedAt)) ? input.recordedAt : new Date().toISOString(),
   }
   if (typeof input.queryFingerprint === 'string' && /^[a-f0-9]{64}$/.test(input.queryFingerprint)) data.queryFingerprint = input.queryFingerprint
   if (typeof input.provider === 'string') data.provider = input.provider.slice(0, 64)
@@ -125,5 +127,5 @@ export function retrievalSnapshot(agent) {
   }
   state.cursor = end
   const entries = [...state.history, ...state.recent].sort((a, b) => String(b.at ?? b.recordedAt).localeCompare(String(a.at ?? a.recordedAt))).slice(0, RETRIEVAL_LIMIT)
-  return { schemaVersion: 1, persistence: state.persistence, failures: state.failures, limit: RETRIEVAL_LIMIT, entries }
+  return { schemaVersion: 1, persistence: state.persistence, failures: state.failures, limit: RETRIEVAL_LIMIT, entries, evidence: evidenceSnapshot(agent) }
 }

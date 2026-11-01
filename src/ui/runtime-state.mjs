@@ -9,6 +9,9 @@ import { superagentSnapshot } from '../superagent/controller.mjs'
 import { retrievalSnapshot } from '../retrieval/ledger.mjs'
 import { memorySnapshot } from '../memory/store.mjs'
 import { improvementSnapshot, recordIncident } from '../improvement/store.mjs'
+import { registerSourceReceipt } from '../improvement/provenance.mjs'
+import { revokePolicies } from '../improvement/policy.mjs'
+import { revokeMemoryOperations } from '../memory/store.mjs'
 
 export const STATE_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/state'
 const sessions = webRuntime.sessions
@@ -30,6 +33,7 @@ function sessionState(agent) {
 }
 
 export function collectToolEvidence(exec, result) {
+  if (result?.value?.receipt?.id) exec = { ...exec, callId: `browser:${result.value.receipt.id}` }
   const state = sessionState(exec?.agent)
   if (!state || state.seen.has(exec.callId)) return
   state.seen.add(exec.callId)
@@ -37,7 +41,9 @@ export function collectToolEvidence(exec, result) {
   const value = result?.value
   const canonical = value?.thenRun ?? value
   const exitCode = Number.isInteger(canonical?.exitCode) ? canonical.exitCode : null
-  const outcome = result?.isError || canonical?.status === 'failed' || canonical?.timedOut || canonical?.aborted || (exitCode !== null && exitCode !== 0) ? 'failed' : canonical?.status === 'skipped' || canonical?.status === 'unverified' ? canonical.status : 'completed'
+  const receipt = canonical?.receipt
+  const outcome = result?.isError || ['postcondition-mismatch', 'error'].includes(receipt?.outcome) || receipt?.noProgress === true || canonical?.status === 'failed' || canonical?.timedOut || canonical?.aborted || (exitCode !== null && exitCode !== 0) ? 'failed' : canonical?.status === 'skipped' || canonical?.status === 'unverified' ? canonical.status : 'completed'
+  registerSourceReceipt(state.agent, { id: exec.callId, outcome })
   state.events.push({
     id: exec.callId, rootCallId: exec.rootCallId ?? null, at: new Date().toISOString(), tool: exec.name,
     callIdHash: fingerprint(exec.callId), rootCallIdHash: fingerprint(exec.rootCallId ?? exec.callId),
@@ -77,6 +83,7 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
     scope: 'current-process-session', status: state?.status ?? 'not-started',
     config: effectiveConfig(rowConfig, readUserConfig()), loadedConfig,
     revision: configRevision(), context,
+    skills: { names: [...state.skillNames ?? []], mode: loadedConfig.skillsMode ?? 'core', bodies: 'on-demand' },
     mechanisms: Object.fromEntries(keys.map(key => [key, {
       configured: loadedConfig[key] === true,
       // Runtime capability is only asserted when the agent tool contract proves it.
@@ -85,17 +92,30 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
     events: state ? [...state.events].reverse() : [],
     diagnostics: diagnosticSnapshot(state.agent),
     retrieval: retrievalSnapshot(state.agent),
-    memory: memorySnapshot(state.agent),
+    memory: memorySnapshot(state.agent, { includeValue: false, includeProject: false }),
     improvements: improvementSnapshot(state.agent),
     task: taskProjection(state.agent),
     superagent: superagentSnapshot(state.agent),
   }
 }
 
-export function registerRuntimeCollector(ctx, { rowConfig = {}, loadedConfig = {} } = {}) {
+export function registerRuntimeCollector(ctx, { rowConfig = {}, loadedConfig = {}, skillNames = [] } = {}) {
+  const ownedAgents = new Set()
+  const sinks = globalThis[Symbol.for('@patchwork/browser/receipt-sinks/v1')] ??= new Set()
+  const receive = (agent, receipt) => {
+    if (!isPatchworkAgent(agent)) return
+    track(agent)
+    collectToolEvidence({ agent, name: 'patchwork_browser', callId: `browser:${receipt.id}`, arguments: {} }, { value: { receipt } })
+  }
+  sinks.add(receive)
+  ctx.effect?.(() => () => {
+    sinks.delete(receive)
+    for (const agent of ownedAgents) { revokePolicies(agent); revokeMemoryOperations(agent.ctx); if (sessions.get(idOf(agent))?.agent === agent) sessions.delete(idOf(agent)) }
+    ownedAgents.clear()
+  }, 'patchwork: optional browser receipt bridge and scope teardown')
   function track(agent) {
     const state = sessionState(agent)
-    if (state) Object.assign(state, { rowConfig, loadedConfig })
+    if (state) { ownedAgents.add(agent); Object.assign(state, { rowConfig, loadedConfig, skillNames }) }
     return state
   }
   ctx.on('agent/created', ({ agent }) => {
@@ -106,9 +126,10 @@ export function registerRuntimeCollector(ctx, { rowConfig = {}, loadedConfig = {
   ctx.on('tools/result', (exec, result) => { track(exec?.agent); collectToolEvidence(exec, result) })
   ctx.on('agent-preset/selected', sessionId => {
     const agent = ctx.get?.('agents')?.get?.(sessionId)
-    if (!isPatchworkAgent(agent)) sessions.delete(sessionId)
+    if (!isPatchworkAgent(agent)) { if (agent) { revokePolicies(agent); revokeMemoryOperations(agent.ctx); ownedAgents.delete(agent) }; sessions.delete(sessionId) }
     else track(agent)
   })
+  ctx.on('agent/disposed', ({ agent }) => { revokePolicies(agent); revokeMemoryOperations(agent.ctx); ownedAgents.delete(agent); sessions.delete(idOf(agent)) })
 }
 
 export function registerRuntimeState(ctx, { token }) {

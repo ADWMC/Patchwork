@@ -1,20 +1,42 @@
-import { EmptyState, PanelIcon, SectionHeading, TechnicalDetails } from './panel-elements.jsx'
-
-const statusLabels = { retrieved: '已检索', partial: '部分成功', failed: '失败', admitted: '已准入', sent: '已发送', cited: '已引用', verified: '已验证', rejected: '已拒绝' }
+import { useRef, useEffect, useState } from 'react'
+import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Select } from './controls.jsx'
+import { EmptyState, SectionHeading, TechnicalDetails } from './panel-elements.jsx'
+import { CopyButton, Facets, RecordStatus, SearchField, SummaryStrip } from './workspace-elements.jsx'
+import { safePublicLink, textMatches } from './workspace-model.mjs'
+const statusLabels = { retrieved: '已检索', partial: '部分成功', failed: '失败', admitted: '已准入', sent: '已发送', cited: '已引用', verified: '字段一致', rejected: '已拒绝' }
 const healthLabels = { healthy: '正常', zero_result: '零结果', parser_drift: '解析漂移', blocked: '被阻断', transport_error: '传输失败' }
-
-function RetrievalEntry({ entry }) {
-  return <article className="pw-candidate">
-    <span className="pw-eyebrow">{statusLabels[entry.status] ?? entry.status} · {entry.type === 'fetch' ? '抓取' : '搜索'} · {entry.trust === 'external-untrusted' ? '外部不可信数据' : entry.trust}</span>
-    <h3>{entry.provider ?? 'Patchwork 检索'}</h3>
-    <p>{entry.resultCount ?? 0} 条结果 · {entry.elapsedMs ?? '未知'} ms{entry.failureCode ? ` · ${entry.failureCode}` : ''}</p>
-    {entry.providerHealth?.length > 0 && <TechnicalDetails title="Provider 状态"><dl className="pw-facts">{entry.providerHealth.map(item => <div key={item.provider}><dt>{item.provider}</dt><dd>{healthLabels[item.status] ?? item.status} · {item.resultCount ?? 0} 条</dd></div>)}</dl></TechnicalDetails>}
-    {entry.sources?.length > 0 && <TechnicalDetails title="来源"><ul className="pw-source-list">{entry.sources.map(source => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a><small>{source.url}</small>{source.snippet && <p>{source.snippet}</p>}</li>)}</ul></TechnicalDetails>}
-    <TechnicalDetails title="检索元数据"><dl className="pw-facts"><div><dt>操作 ID</dt><dd className="pw-mono">{entry.operationId}</dd></div><div><dt>范围</dt><dd>{entry.scope}</dd></div>{entry.queryFingerprint && <div><dt>查询指纹</dt><dd className="pw-mono">{entry.queryFingerprint}</dd></div>}</dl></TechnicalDetails>
-  </article>
-}
-
+function SourceLink({ value, children }) { const href = safePublicLink(value); return href ? <a href={href} target="_blank" rel="noreferrer">{children ?? value}</a> : <span>{children ?? value ?? '无可用来源链接'}</span> }
 export function RetrievalPanel({ data }) {
-  const entries = data.retrieval?.entries ?? []
-  return <><div className="pw-page-heading"><h2>检索证据</h2><p>显示本会话实际检索到的来源和 provider 状态；网页内容仍按外部不可信数据处理。</p></div><section className="pw-section"><SectionHeading title="检索记录"><span className="pw-muted">{entries.length} 条 · {data.retrieval?.persistence === 'native' ? '已写入会话' : '本次运行'}</span></SectionHeading>{entries.length ? entries.map(entry => <RetrievalEntry key={entry.operationId + (entry.seq ?? '')} entry={entry}/>) : <EmptyState title="还没有检索记录" icon="search"><p>执行 Patchwork 搜索后，来源和失败状态会显示在这里。</p></EmptyState>}</section><p className="pw-live-note"><PanelIcon name="info"/> 检索结果不会自动进入长期记忆、规则或权限。</p></>
+  const [query, setQuery] = useState(''), [view, setView] = useState('sources'), [provider, setProvider] = useState('all'), [selectedId, setSelectedId] = useState(null)
+  const [sourcePage, setSourcePage] = useState(0)
+  const ref = useRef(null), entries = data.retrieval?.entries ?? [], evidence = data.retrieval?.evidence ?? []
+  const sources = entries.flatMap(entry => (entry.sources ?? []).map((source, index) => ({ ...source, id: `${entry.operationId}:${entry.seq ?? ''}:${index}`, entry })))
+  const providers = [...new Set(entries.map(entry => entry.provider).filter(Boolean))]
+  const matches = (entry, ...text) => (provider === 'all' || entry?.provider === provider) && textMatches(query, ...text)
+  const visible = sources.filter(source => matches(source.entry, source.title, source.url, source.snippet, source.entry.provider))
+  const lastPage = Math.max(0, Math.ceil(visible.length / 30) - 1), page = Math.min(sourcePage, lastPage), pageSources = visible.slice(page * 30, (page + 1) * 30)
+  const selected = pageSources.find(item => item.id === selectedId) ?? pageSources[0]
+  const visibleRecords = entries.filter(entry => matches(entry, entry.operationId, entry.provider, entry.failureCode, entry.status))
+  const related = selected ? evidence.filter(item => item.source === selected.url) : []
+  const visibleEvidence = evidence.filter(item => (provider === 'all' || sources.some(source => source.url === item.source && source.entry.provider === provider)) && textMatches(query, item.title, item.source, item.excerptPreview, item.citation?.claim, item.id))
+  useEffect(() => { if (selectedId) ref.current?.scrollIntoView({ block: 'nearest' }) }, [selectedId])
+  useEffect(() => { setSourcePage(0); setSelectedId(null) }, [query, provider])
+  return <>
+    <div className="pw-page-heading"><h2>检索工作台</h2><p>从来源查看摘录与引用，从失败记录判断搜索通道是否可用。</p></div>
+    <SummaryStrip label="检索统计" items={[{ label: '检索记录', value: entries.length }, { label: '来源条目', value: sources.length }, { label: '已读摘录', value: evidence.filter(item => ['sent', 'cited', 'verified'].includes(item.status)).length }, { label: '失败记录', value: entries.filter(item => ['failed', 'partial'].includes(item.status)).length }]}/>
+    <SearchField label="搜索检索证据" value={query} onChange={setQuery} placeholder="搜索来源、摘录或引用主张"/>
+    <div className="pw-toolbar"><Select aria-label="检索来源筛选" value={provider} onChange={setProvider} options={[{ value: 'all', label: '全部 Provider' }, ...providers.map(value => ({ value, label: value }))]}/><span className="pw-muted">{data.retrieval?.persistence === 'native' ? '已写入会话' : '当前运行快照'}</span></div>
+    <Facets label="检索视图" value={view} onChange={setView} items={[{ value: 'sources', label: '来源', count: visible.length }, { value: 'evidence', label: '摘录与引用', count: visibleEvidence.length }, { value: 'records', label: '检索记录', count: entries.filter(entry => matches(entry, entry.operationId, entry.provider, entry.failureCode, entry.status)).length }]}/>
+    {view === 'sources' && <div className="pw-master-detail"><section className="pw-record-list" aria-label="检索来源列表">{visible.length ? pageSources.map(source => <button type="button" className="pw-record-row" key={source.id} aria-label={`查看来源 ${source.title}`} aria-pressed={selected?.id === source.id} onClick={() => setSelectedId(source.id)}><span className="pw-record-title">{source.title}</span><span className="pw-record-subtitle">{safePublicLink(source.url) ? new URL(source.url).hostname : '链接不可用'} · {source.entry.provider ?? '未知 Provider'}</span><span className="pw-record-subtitle">{source.snippet?.slice(0, 90) ?? '无搜索摘要'}</span></button>) : <EmptyState title={sources.length ? '没有匹配的来源' : '还没有检索来源'}>执行 Patchwork 搜索后在此查看。搜索摘要不等于已读取页面。</EmptyState>}</section>
+      {selected && <article ref={ref} className="pw-detail-pane" aria-label="来源详情"><SectionHeading title={selected.title}/><p className="pw-source-url"><SourceLink value={selected.url}/></p><div className="pw-inline-facts"><RecordStatus>{statusLabels[selected.entry.status] ?? selected.entry.status}</RecordStatus><span>外部不可信数据</span></div><h3>搜索摘要</h3><p className="pw-body-copy">{selected.snippet ?? '未返回摘要。'}</p><p className="pw-live-note">这是搜索摘要，不是网页全文；只有读取并实际发送的摘录才能用于引用。</p><div className="pw-actions"><CopyButton label="复制来源链接" value={selected.url}/></div><section className="pw-detail-section"><h3>关联摘录</h3>{related.length ? related.map(item => <EvidenceDetail item={item} key={item.id}/>) : <p className="pw-muted">当前没有绑定该来源的摘录证据。</p>}</section></article>}
+    </div>}
+    {view === 'evidence' && <section className="pw-section"><SectionHeading title="摘录证据生命周期"/>{visibleEvidence.length ? visibleEvidence.map(item => <EvidenceDetail key={item.id} item={item}/>) : <EmptyState title="没有匹配的摘录">网页读取后才能形成摘录；不把搜索命中计为已验证事实。</EmptyState>}</section>}
+    {view === 'records' && <section className="pw-section"><SectionHeading title="检索记录"/>{visibleRecords.map(entry => <article className="pw-detail-section" key={entry.operationId + (entry.seq ?? '')}><div className="pw-heading-actions"><h3>{entry.provider ?? 'Patchwork 检索'}</h3><RecordStatus tone={entry.status === 'failed' ? 'warn' : undefined}>{statusLabels[entry.status] ?? entry.status}</RecordStatus></div><p className="pw-muted">{entry.type === 'fetch' ? '抓取' : '搜索'} · {entry.resultCount ?? '未知'} 条结果 · {entry.elapsedMs ?? '未知'} ms</p>{entry.failureCode && <p className="pw-warning">{entry.failureCode}</p>}<TechnicalDetails title="Provider 状态与元数据">{entry.providerHealth?.map(item => <div className="pw-row" key={item.provider}><span className="pw-copy">{item.provider}</span><span>{healthLabels[item.status] ?? item.status} · {item.resultCount ?? '未知'} 条</span></div>)}<code className="pw-task-path">{entry.operationId}</code><p>范围：{entry.scope}</p>{entry.queryFingerprint && <code className="pw-task-path">{entry.queryFingerprint}</code>}</TechnicalDetails></article>)}{!visibleRecords.length && <EmptyState title={entries.length ? '没有匹配的检索记录' : '还没有检索记录'}>调整筛选，或执行搜索与公开网页抓取后查看。</EmptyState>}</section>}
+    {view === 'sources' && visible.length > 30 && <div className="pw-toolbar" aria-label="来源分页"><Button size="sm" variant="outline" disabled={page === 0} onClick={() => { setSourcePage(page - 1); setSelectedId(null) }}>上一页来源</Button><span className="pw-muted">{page * 30 + 1}–{Math.min((page + 1) * 30, visible.length)} / {visible.length}</span><Button size="sm" variant="outline" disabled={page >= lastPage} onClick={() => { setSourcePage(page + 1); setSelectedId(null) }}>下一页来源</Button></div>}
+    <p className="pw-live-note">字段一致性检查不保证外部事实真实；来源不会自动进入长期记忆、规则或权限。当前预览最多 {data.retrieval?.limit ?? 100} 条检索记录。</p>
+  </>
+}
+function EvidenceDetail({ item }) {
+  return <article className="pw-detail-section"><h3>{item.title}</h3><div className="pw-inline-facts"><RecordStatus>{statusLabels[item.status] ?? item.status}</RecordStatus><span>{({ supported: '字段一致', conflict: '来源冲突', unknown: '结论未知' })[item.verification?.result] ?? '尚未交叉核验'}</span></div><ol className="pw-lifecycle" aria-label="摘录状态历程">{(item.timeline ?? []).map((event, index) => <li key={index}>{statusLabels[event.status] ?? event.status}</li>)}</ol><TechnicalDetails title="摘录与引用绑定"><p className="pw-body-copy">{item.excerptPreview}</p><p className="pw-source-url"><SourceLink value={item.source}/></p><code className="pw-task-path">{item.id}<br/>{item.excerptHash}</code>{item.citation && <><p>主张：{item.citation.claim}</p><blockquote>{item.citation.quote}</blockquote></>}{item.verification && <p>{item.verification.method} · {item.verification.note}</p>}</TechnicalDetails></article>
 }

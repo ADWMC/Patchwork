@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">Patchwork</title>
+  <desc id="desc">Coding workflows for DeepSeek Harness: tasks, context and evidence, scoped to your session. An interlocking patchwork of colored tiles illustrates the modular design.</desc>
+  <rect x="1" y="1" width="1198" height="298" rx="18" fill="#171e1b" stroke="#354039"/>
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
+    <text x="52" y="58" fill="#a1b0a3" font-size="12" font-weight="600" letter-spacing="2.3">DEEPSEEK HARNESS / CODING AGENT</text>
+    <text x="48" y="132" fill="#f0f1e9" font-size="68" font-weight="650" letter-spacing="-2.6">Patchwork</text>
+    <text x="52" y="173" fill="#b6c3b7" font-size="19">Tasks, context and evidence. Scoped to your session.</text>
+    <path d="M52 211H740" stroke="#354039"/>
+    <g font-size="12" font-weight="600" letter-spacing="1.4">
+      <text x="52" y="247" fill="#90c9ad">01 / TASK</text>
+      <text x="282" y="247" fill="#b6c3b7">02 / WORK</text>
+      <text x="512" y="247" fill="#b6c3b7">03 / EVIDENCE</text>
+    </g>
+  </g>
+  <g transform="translate(858 42)">
+    <rect width="216" height="216" rx="12" fill="#29352d"/>
+    <g fill="#79b79a">
+      <rect x="8" y="8" width="64" height="64" rx="4"/>
+      <rect x="80" y="80" width="64" height="64" rx="4"/>
+      <rect x="152" y="152" width="56" height="56" rx="4"/>
+    </g>
+    <path d="M80 8h128v64H80z" fill="#caa46b"/>
+    <path d="M8 80h64v128H8z" fill="#546e5d"/>
+    <rect x="152" y="80" width="56" height="64" rx="4" fill="#bd8470"/>
+    <rect x="80" y="152" width="64" height="56" rx="4" fill="#858568"/>
+    <path d="M80 8v64m64-64v64M8 144h64" stroke="#171e1b" stroke-width="3"/>
+  </g>
+</svg>

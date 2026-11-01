@@ -2,6 +2,8 @@ import { initialTask, readTaskCheckpoint, reduceTask, TASK_RECORD } from './stat
 import { nativeSessionApi } from '../logging/session-log.mjs'
 import { isPatchworkAgent, requirePatchworkAgent } from '../scope.mjs'
 import { statSync, realpathSync } from 'node:fs'
+import { registerSourceReceipt } from '../improvement/provenance.mjs'
+import { recordIncident, proposeCandidate } from '../improvement/store.mjs'
 
 const states = new WeakMap()
 const pending = new WeakMap()
@@ -48,6 +50,13 @@ export function transitionTask(agent, event) {
   const data = structuredClone(next)
   if (Buffer.byteLength(JSON.stringify(data)) > 100000) throw new Error('task checkpoint size limit reached')
   record.state = next
+  if (event.kind === 'receipt') registerSourceReceipt(agent, { id: event.receipt.id, outcome: event.receipt.outcome, kind: 'acceptance', revision: event.receipt.revision })
+  if (event.kind === 'correct' || event.kind === 'candidate' || event.kind === 'incoming' && event.sourceKind === 'user' && next.title) {
+    const sourceId = event.kind === 'candidate' ? event.data.sourceReceiptId : `task:${next.taskId}:revision:${next.revision}`
+    if (event.kind !== 'candidate') registerSourceReceipt(agent, { id: sourceId, outcome: 'correction', kind: 'task-correction', revision: next.revision })
+    const incident = recordIncident(agent, { kind: 'correction', sourceReceiptIds: [sourceId], trigger: event.kind === 'candidate' ? event.data.trigger : '任务收到纠正或新的用户输入；需重新核对当前版本', action: '复核当前版本和逐项验收' })
+    if (event.kind === 'candidate' && incident.incident) proposeCandidate(agent, { incidentIds: [incident.incident.id], object: 'rule', trigger: event.data.trigger, hypothesis: event.data.label, changeScope: '当前会话的交付复核提醒', patch: { version: 1, setting: 'verifyBeforeDelivery', value: true } })
+  }
   const tail = (pending.get(agent.session) ?? Promise.resolve()).then(() => {
     if (!isPatchworkAgent(agent)) return
     const api = nativeSessionApi(agent.session)

@@ -9,15 +9,19 @@ import { bootPatchwork, loadDriver } from '../../../tests/real-composition/harne
 import { browserClient } from '../src/browser/tool.mjs'
 import { readComponent } from '../src/browser/components/store.mjs'
 import { BrowserProfiles } from '../src/browser/profiles.mjs'
+import { sourceFingerprint } from '../../../scripts/source-fingerprint.mjs'
 import { ALIASMODE_BROWSER_VERSION } from '../src/browser/components/catalog.mjs'
 const args = process.argv.slice(2)
 const home = args[args.indexOf('--home') + 1], output = args[args.indexOf('--output') + 1]
 if (!args.includes('--home') || !args.includes('--output') || !isAbsolute(home) || !isAbsolute(output)) throw new Error('Explicit absolute --home and --output are required')
 const root = join(home, 'patchwork/browser')
+const componentRoot = args.includes('--component-root') ? args[args.indexOf('--component-root') + 1] : root
+if (!isAbsolute(componentRoot)) throw new Error('--component-root must be absolute')
 process.env.DSH_HOME = home
-assert.ok((await readComponent(root, 'aliasmode', { verify: true }))?.installed, 'Explicitly install the pinned AliasMode component first')
+assert.ok((await readComponent(componentRoot, 'aliasmode', { verify: true }))?.installed, 'Explicitly install the pinned AliasMode component first')
 const probeUrl = new URL('./helpers/native-probe-plugin.mjs', import.meta.url).href
 const report = { schema: 1, date: new Date().toISOString(), realDshRegistries: true, fullDshClient: false, modelRequests: 0, hostBrowserUsed: false, platform: process.platform, checks: [], unmeasured: ['exit-IP', 'TLS', 'WebRTC', 'cross-origin iframe', 'service worker', 'external anti-bot acceptance'] }
+const {files: sourceFiles,...fingerprint}=await sourceFingerprint();report.sourceFingerprint=fingerprint
 const server = createServer((req, res) => {
   res.setHeader('content-type', 'text/html; charset=utf-8'); res.setHeader('cache-control', 'no-store')
   res.end('<!doctype html><meta charset="utf-8"><title>家电验收</title><label>设备名称<input aria-label="设备名称"></label><label><input type="checkbox" aria-label="省电模式">省电模式</label><button aria-label="客厅灯" aria-pressed="false" onclick="this.setAttribute(\'aria-pressed\',this.getAttribute(\'aria-pressed\')===\'true\'?\'false\':\'true\')">客厅灯</button>')
@@ -54,7 +58,7 @@ async function login(page) {
   })
 }
 try {
-  boot = await bootPatchwork({ root }, { pluginEntry: probeUrl }); probe = await import(probeUrl)
+  boot = await bootPatchwork({ root, componentRoot }, { pluginEntry: probeUrl }); probe = await import(probeUrl)
   const driver = await loadDriver(), run = randomUUID().slice(0, 8)
   const a = driver.createAgent({ id: `native-a-${run}`, sessionId: `native-a-${run}`, preset: 'standard', cwd: home })
   const b = driver.createAgent({ id: `native-b-${run}`, sessionId: `native-b-${run}`, preset: 'standard', cwd: home })
@@ -64,12 +68,15 @@ try {
   probe.manager.enable(b.agent, 'standard')
   const ca = browserClient(a.agent), cb = browserClient(b.agent)
   const first = (await ca.action({ action: 'createProfile', revision: 0, profile: { name: '原生 A', backend: 'aliasmode', mode: 'fingerprint', persistStorage: true } })).profiles.at(-1)
-  const second = (await cb.action({ action: 'createProfile', revision: 0, profile: { name: '原生 B', backend: 'aliasmode', mode: 'fingerprint' } })).profiles.at(-1)
+  const second = (await cb.action({ action: 'createProfile', revision: 0, profile: { name: '原生 B', backend: 'aliasmode', mode: 'fingerprint', deviceScaleFactor: 2 } })).profiles.at(-1)
   await ca.action({ action: 'useProfile', profileId: first.id }); await ca.action({ action: 'control', control: 'agent' }); await tool(a, { action: 'navigate', url })
   await cb.action({ action: 'useProfile', profileId: second.id }); await cb.action({ action: 'control', control: 'agent' }); await tool(b, { action: 'navigate', url })
   let pageA = activeContext(first.id).pages()[0], pageB = activeContext(second.id).pages()[0]
   report.engine = (await ca.status()).engineVersion; assert.equal(report.engine, ALIASMODE_BROWSER_VERSION)
   const baseline = await measure(pageA), baselineB = await measure(pageB)
+  assert.equal(baseline.screen[2], first.deviceScaleFactor)
+  assert.equal(baselineB.screen[2], second.deviceScaleFactor)
+  report.checks.push('two native random seeds honor explicit DPR 1 and 2 instead of overriding profile configuration')
   report.checks.push('real DSH tool registry requires explicit per-session authorization; two private native engines coexist')
   let observed = await tool(a, { action: 'snapshot' })
   await tool(a, { action: 'fill', target: { by: 'label', value: '设备名称' }, observationId: observed.observationId, value: '客厅主灯' })
@@ -123,7 +130,13 @@ try {
   assert.equal(browserClient(a.agent), undefined); assert.equal(a.tools.schemas(a.agent).some(x => x.name === 'patchwork_browser'), false)
   await assert.rejects(ca.action({ action: 'profiles' }), /authorized|browser|Browser|授权/)
   assert.deepEqual(await measure(pageB), baselineB)
-  report.checks.push('revoking one session removes its tool and process; the other session remains usable')
+  probe.manager.enable(a.agent, 'standard')
+  const resumed = browserClient(a.agent)
+  await resumed.action({ action: 'useProfile', profileId: first.id }); await resumed.action({ action: 'navigate', url })
+  assert.deepEqual(await login(activeContext(first.id).pages()[0]), originalLogin)
+  await probe.manager.disable(a.agent)
+  assert.deepEqual(await measure(pageB), baselineB)
+  report.checks.push('graceful disable removes tool/process, reopening restores encrypted cookies/localStorage/IndexedDB; the other session remains usable')
   report.measurements = { original: baseline, replacement: changed, secondSession: baselineB }
   report.nativeToolCalls = calls; report.peakEngines = probe.peakEngines; report.status = 'passed'
 } catch (error) { report.status = 'failed'; report.failure = error.stack; process.exitCode = 1 }

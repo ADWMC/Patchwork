@@ -119,7 +119,7 @@ test('every mechanism the plugin advertises can actually be enabled', async () =
     evidencePreservingReducer: true,
     onlineContextCompact: true,
   })
-  assert.deepEqual(m.tools.registered.map(d => d.name).sort(), ['obs_recall', 'patchwork_fetch', 'patchwork_improvement', 'patchwork_memory', 'patchwork_search', 'patchwork_superagent', 'patchwork_task', 'update_plan'])
+  assert.deepEqual(m.tools.registered.map(d => d.name).sort(), ['obs_recall', 'patchwork_evidence', 'patchwork_fetch', 'patchwork_improvement', 'patchwork_memory', 'patchwork_search', 'patchwork_superagent', 'patchwork_task', 'update_plan'])
   assert.deepEqual([...m.listeners.keys()].sort(), [
     'agent-preset/selected',
     'agent/assistant-stream',
@@ -151,7 +151,7 @@ test('enabling ObservationPack registers its projection and recall tool', async 
   const m = mockCtx()
   await apply(m.ctx, { observationPack: true })
   assert.deepEqual([...m.listeners.keys()], ['agent/created', 'agent/disposed', 'agent-preset/selected', 'tools/pre-execute', 'agent/inbox/inserted', 'agent/pre-step', 'tools/result', 'agent/turn-stopping', 'agent/status', 'tools/post-execute'])
-  assert.deepEqual(m.tools.registered.map(d => d.name), ['patchwork_task', 'patchwork_superagent', 'patchwork_search', 'patchwork_fetch', 'patchwork_memory', 'patchwork_improvement', 'obs_recall'])
+  assert.deepEqual(m.tools.registered.map(d => d.name), ['patchwork_task', 'patchwork_superagent', 'patchwork_evidence', 'patchwork_search', 'patchwork_fetch', 'patchwork_memory', 'patchwork_improvement', 'obs_recall'])
 })
 
 test('profile bridge never registers skills, tools, commands, or model listeners', async () => {

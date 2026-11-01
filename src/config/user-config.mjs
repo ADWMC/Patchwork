@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, rename, writeFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
+import { SETTING_FIELDS, validateSettings } from './fields.mjs'
 
 /**
  * 用户在侧边栏里改的那部分配置。
@@ -11,9 +12,9 @@ import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
  * 目录下而不是去改 profile 的 YAML：写 YAML 需要手工拼接、出错会毁掉用户的 profile，
  * 而这里只写我们自己的一个 JSON 文件。
  */
-export const BOOLEAN_KEYS = ['actionFusion', 'observationPack', 'evidencePreservingReducer', 'onlineContextCompact']
-export const NUMBER_KEYS = ['cacheWriteReadRatio']
-export const WRITABLE_KEYS = [...BOOLEAN_KEYS, ...NUMBER_KEYS]
+export const BOOLEAN_KEYS = SETTING_FIELDS.filter(field => field.type === 'boolean').map(field => field.key)
+export const NUMBER_KEYS = SETTING_FIELDS.filter(field => ['integer', 'number'].includes(field.type)).map(field => field.key)
+export const WRITABLE_KEYS = SETTING_FIELDS.map(field => field.key)
 
 export function userConfigPath() {
   return dshHomePath('patchwork', 'config.json')
@@ -42,22 +43,7 @@ export function effectiveConfig(rowConfig = {}, userConfig = readUserConfig()) {
  * 以为改了、实际没改。
  */
 export function validatePatch(raw) {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, reason: 'body-not-an-object' }
-
-  const value = {}
-  for (const [key, item] of Object.entries(raw)) {
-    if (!WRITABLE_KEYS.includes(key)) return { ok: false, reason: `unknown-key:${key}` }
-    if (BOOLEAN_KEYS.includes(key)) {
-      if (typeof item !== 'boolean') return { ok: false, reason: `${key}-must-be-boolean` }
-      value[key] = item
-      continue
-    }
-    if (typeof item !== 'number' || !Number.isFinite(item) || item < 0) {
-      return { ok: false, reason: `${key}-must-be-a-finite-non-negative-number` }
-    }
-    value[key] = item
-  }
-  return { ok: true, value }
+  return validateSettings(raw)
 }
 
 /**

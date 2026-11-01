@@ -1,12 +1,14 @@
 import { createElement, useState, useSyncExternalStore } from 'react'
 import { Button, SegmentedTabs } from '@deepseek-ai/dsh-client-ui-primitives'
 import { usePatchworkState } from './use-patchwork-state.mjs'
+import { SuperagentPanel } from './SuperagentPanel.jsx'
+import { validateSettings } from '../config/fields.mjs'
 import { LogPanel } from './LogPanel.jsx'
 import { EmptyState, PanelIcon } from './panel-elements.jsx'
 import { EvidencePanel, MechanismsPanel, OverviewPanel, SettingsPanel, settingsKeys } from './WorkspacePanels.jsx'
 import { logTime } from './log-presentation.mjs'
 
-const tabs = [['overview', '总览'], ['mechanisms', '机制'], ['evidence', '证据'], ['logs', '日志'], ['settings', '设置']]
+const tabs = [['overview', '总览'], ['queue', '主控'], ['mechanisms', '机制'], ['evidence', '证据'], ['logs', '日志'], ['settings', '设置']]
 const connectionLabels = { loading: '连接中', connected: '已连接', offline: '连接中断', unavailable: '等待会话' }
 
 export function PatchworkTitle() { return createElement('span', null, 'Patchwork') }
@@ -23,7 +25,7 @@ export function PatchworkPanel({ sessionId, sessionStore, useTabInfo }) {
 }
 
 function SessionPanel({ sessionId }) {
-  const { snapshot: data, connection, error, save, refresh, exportLogs, memoryAction, improvementAction } = usePatchworkState(sessionId)
+  const { snapshot: data, connection, error, save, refresh, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction } = usePatchworkState(sessionId)
   const [tab, setTab] = useState('overview')
   const [evidenceView, setEvidenceView] = useState('current')
   const [draft, setDraft] = useState({})
@@ -33,14 +35,14 @@ function SessionPanel({ sessionId }) {
   const [conflict, setConflict] = useState(null)
   const desired = data?.config ?? {}, loaded = data?.loadedConfig ?? {}
   const dirty = Object.keys(draft).length
-  const pending = settingsKeys.filter(key => desired[key] !== loaded[key]).length
+  const pending = settingsKeys.filter(key => JSON.stringify(desired[key]) !== JSON.stringify(loaded[key])).length
   const ratio = draft.cacheWriteReadRatio ?? desired.cacheWriteReadRatio ?? 12.5
-  const invalid = ratio === '' || !Number.isFinite(Number(ratio)) || Number(ratio) < 0
+  const invalid = !validateSettings(draft).ok || ratio === '' || !Number.isFinite(Number(ratio)) || Number(ratio) < 0
   const prefix = 'pw-' + String(sessionId ?? 'none').replace(/[^a-zA-Z0-9-]/g, '')
   function navigate(next, view) { setTab(next); if (view) setEvidenceView(view) }
   function edit(key, value) {
     if (!dirty) setBaseRevision(data?.revision)
-    setDraft(previous => { const next = { ...previous }; if (value === desired[key]) delete next[key]; else next[key] = value; return next })
+    setDraft(previous => { const next = { ...previous }; if (JSON.stringify(value) === JSON.stringify(desired[key])) delete next[key]; else next[key] = value; return next })
     setMessage('')
   }
   async function persist() {
@@ -62,8 +64,9 @@ function SessionPanel({ sessionId }) {
       {connection === 'loading' && !data && <div aria-busy="true"><EmptyState title="正在连接会话">正在读取 DSH 的真实运行状态。</EmptyState></div>}
       {data && <section className={'pw-page pw-page-' + tab} id={prefix + '-panel'} role="tabpanel" aria-labelledby={prefix + '-' + tab}>
         {tab === 'overview' && <OverviewPanel data={data} pending={pending} navigate={navigate}/>}
+        {tab === 'queue' && <SuperagentPanel data={data} superagentAction={superagentAction}/>}
         {tab === 'mechanisms' && <MechanismsPanel data={data}/>}
-        {tab === 'evidence' && <EvidencePanel data={data} view={evidenceView} setView={setEvidenceView} prefix={prefix} memoryAction={memoryAction} improvementAction={improvementAction}/>}
+        {tab === 'evidence' && <EvidencePanel data={data} view={evidenceView} setView={setEvidenceView} prefix={prefix} memoryAction={memoryAction} memoryQuery={memoryQuery} improvementAction={improvementAction} superagentAction={superagentAction}/>}
         {tab === 'logs' && <LogPanel diagnostics={data.diagnostics} exportLogs={exportLogs} connected={connection === 'connected'}/>}
         {tab === 'settings' && <SettingsPanel {...{data, draft, saving, invalid, ratio, conflict, dirty, message, pending, prefix, edit, persist, discard}} connected={connection === 'connected'}/>}
       </section>}

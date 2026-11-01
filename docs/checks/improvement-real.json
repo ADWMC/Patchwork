@@ -1,11 +1,13 @@
 {
   "schemaVersion": 1,
-  "executedAt": "2026-10-31T04:18:32.807Z",
+  "executedAt": "2026-11-01T14:06:22.089Z",
   "host": "official-dsh-composition",
   "isolation": {
-    "dshHome": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-real-improvement-orl7np",
-    "workspace": "C:\\Users\\Administrator\\Documents\\GitHub\\Patchwork",
-    "mainDshTouched": false
+    "dshHome": "<temporary-dsh-home>",
+    "workspace": "<repository>",
+    "mainDshTouched": false,
+    "modelRequests": 0,
+    "confirmation": "explicit-test-fixture"
   },
   "checks": {
     "catalogIsolation": {
@@ -19,11 +21,19 @@
     },
     "list": {
       "isError": false,
-      "incidentCount": 1,
+      "incidentCount": 2,
       "automaticActivation": "disabled"
     },
     "stolenReference": {
       "rejected": true
+    },
+    "policy": {
+      "experiment": "isolated-policy-contract",
+      "eligible": true,
+      "unconfirmedRejected": true,
+      "applied": true,
+      "ordinaryUnchanged": true,
+      "rolledBack": true
     }
   }
 }

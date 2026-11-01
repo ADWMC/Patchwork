@@ -31,7 +31,10 @@ export function createBrowserManager(ctx, config = {}, dependencies = {}) {
       let runtime, unregisterSkill
       try {
         // Register against the Agent's own native tool scope, never the root.
-        runtime = registerBrowserTool(agent.ctx, { ...dependencies, expectedAgent: agent, listen: false, resourcePolicy: config })
+        runtime = registerBrowserTool(agent.ctx, { ...dependencies, expectedAgent: agent, listen: false, resourcePolicy: config, onReceipt: receipt => {
+          dependencies.onReceipt?.(receipt)
+          for (const sink of globalThis[Symbol.for('@patchwork/browser/receipt-sinks/v1')] ?? []) { try { sink(agent, receipt) } catch {} }
+        } })
         unregisterSkill = registerBrowserSkill(agent.ctx)
         enabled.set(agent, { runtime, revoke, unregisterSkill, preset: expectedPreset, accessId: randomUUID() })
       } catch (error) {
@@ -45,24 +48,27 @@ export function createBrowserManager(ctx, config = {}, dependencies = {}) {
         throw error
       }
     },
-    async disable(agent) {
+    async disable(agent, { graceful = true } = {}) {
       if (closing.has(agent)) return closing.get(agent)
       const item = enabled.get(agent)
       if (!item) return
-      enabled.delete(agent); item.revoke(); item.unregisterSkill?.()
-      const work = item.runtime.dispose().finally(() => { closing.delete(agent) })
+      enabled.delete(agent); item.unregisterSkill?.()
+      if (!graceful) item.revoke()
+      // dispose synchronously freezes new actions before its first await. Keep
+      // the saving capability only for an explicitly requested graceful close.
+      const work = item.runtime.dispose().finally(() => { item.revoke(); closing.delete(agent) })
       closing.set(agent, work)
       return work
     },
     async dispose() {
       disposed = true
-      await Promise.all([...enabled.keys()].map(agent => manager.disable(agent)).concat([...closing.values()]))
+      await Promise.all([...enabled.keys()].map(agent => manager.disable(agent, { graceful: false })).concat([...closing.values()]))
     },
   }
-  ctx.on?.('agent/disposed', ({ agent }) => manager.disable(agent))
+  ctx.on?.('agent/disposed', ({ agent }) => manager.disable(agent, { graceful: false }))
   ctx.on?.('agent-preset/selected', id => {
     const agent = ctx.get?.('agents')?.get?.(id)
-    if (agent) return manager.disable(agent)
+    if (agent) return manager.disable(agent, { graceful: false })
   })
   return manager
 }

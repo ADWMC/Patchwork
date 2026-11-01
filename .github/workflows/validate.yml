@@ -50,6 +50,10 @@ jobs:
           node packages/browser/scripts/build-client.mjs --check
       - name: Run regression tests
         run: npm test
+      - name: Check local documentation links
+        run: npm run check:docs
+      - name: Validate coding task oracles
+        run: npm run test:benchmark
       - name: Check coding-agent package
         run: npm run check:release
       - name: Check optional browser package

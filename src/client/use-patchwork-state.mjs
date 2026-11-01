@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function readConnectionMetadata() {
   const rows = [...document.querySelectorAll('script[data-patchwork-stats]')]
@@ -17,9 +17,10 @@ export function usePatchworkState(sessionId) {
   const active = useRef(false)
   const exportController = useRef(null)
   const saveController = useRef(null)
+  const mutations = useRef(new Set())
   useEffect(() => {
     active.current = true
-    return () => { active.current = false; exportController.current?.abort(); saveController.current?.abort() }
+    return () => { active.current = false; exportController.current?.abort(); saveController.current?.abort(); for (const controller of mutations.current) controller.abort(); mutations.current.clear() }
   }, [sessionId])
   useEffect(() => {
     const metadata = readConnectionMetadata()
@@ -90,29 +91,41 @@ export function usePatchworkState(sessionId) {
     if (!active.current || controller.signal.aborted || !response.ok || !data.ok) throw new Error('logs-forbidden-or-unavailable')
     return data
   }
-  async function memoryAction(action, id, expectedRevision) {
+  const memoryQuery = useCallback(async (params = {}, signal) => {
     const metadata = readConnectionMetadata()
-    if (!active.current || !metadata?.memoryPath || !sessionId || connection !== 'connected') throw new Error('memory-unavailable')
-    const response = await fetch(metadata.memoryPath+'?sessionId='+encodeURIComponent(sessionId), {
+    if (!active.current || !metadata?.memoryPath || !sessionId) throw new Error('memory-unavailable')
+    const controller = new AbortController(); mutations.current.add(controller)
+    try {
+      const query = new URLSearchParams({ sessionId, ...params })
+      const response = await fetch(metadata.memoryPath + '?' + query, { headers: { 'x-patchwork-token': metadata.token }, signal: signal ? AbortSignal.any([signal, controller.signal]) : controller.signal, cache: 'no-store' })
+      const value = await response.json()
+      if (!active.current || controller.signal.aborted) throw new Error('session-changed')
+      if (!response.ok || !value.ok) throw new Error(value.failureCode ?? value.reason ?? 'memory-unavailable')
+      return value
+    } finally { mutations.current.delete(controller) }
+  }, [sessionId])
+  async function memoryAction(action, id, expectedRevision, fields = {}) {
+    return mutate('memoryPath', { action, id, expectedRevision, ...fields })
+  }
+  async function mutate(path, body) {
+    const metadata = readConnectionMetadata()
+    if (!active.current || !metadata?.[path] || !sessionId || connection !== 'connected') throw new Error('management-unavailable')
+    const controller = new AbortController(); mutations.current.add(controller)
+    try {
+    const response = await fetch(metadata[path]+'?sessionId='+encodeURIComponent(sessionId), {
       method: 'POST', headers: { 'content-type': 'application/json', 'x-patchwork-token': metadata.token },
-      body: JSON.stringify({ action, id, expectedRevision }),
+      body: JSON.stringify(body), signal: controller.signal,
     })
     const data = await response.json()
-    if (!response.ok || !data.ok) { const error = new Error(data.reason ?? 'memory-action-failed'); error.conflict = response.status === 409 ? data : null; throw error }
+    if (!active.current || controller.signal.aborted) throw new Error('session-changed')
+    if (!response.ok || !data.ok) { const error = new Error(data.failureCode ?? data.reason ?? 'management-action-failed'); error.conflict = response.status === 409 ? data : null; throw error }
     refresh(x => x + 1)
     return data
+    } finally { mutations.current.delete(controller) }
   }
   async function improvementAction(action, candidateId, expectedRevision) {
-    const metadata = readConnectionMetadata()
-    if (!active.current || !metadata?.improvementPath || !sessionId || connection !== 'connected') throw new Error('improvement-unavailable')
-    const response = await fetch(metadata.improvementPath+'?sessionId='+encodeURIComponent(sessionId), {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-patchwork-token': metadata.token },
-      body: JSON.stringify({ action, candidateId, expectedRevision }),
-    })
-    const data = await response.json()
-    if (!response.ok || !data.ok) { const error = new Error(data.reason ?? 'improvement-action-failed'); error.conflict = response.status === 409 ? data : null; throw error }
-    refresh(x => x + 1)
-    return data
+    return mutate('improvementPath', { action, candidateId, incidentId: action === 'propose' ? candidateId : undefined, expectedRevision })
   }
-  return { snapshot, connection, error, save, exportLogs, memoryAction, improvementAction, refresh: () => refresh(x => x+1) }
+  const superagentAction = body => mutate('superagentPath', body)
+  return { snapshot, connection, error, save, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction, refresh: () => refresh(x => x+1) }
 }

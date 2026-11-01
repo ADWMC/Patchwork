@@ -14,6 +14,7 @@ import { browserClient } from '../src/browser/tool.mjs'
 import { registerBrowserRoute, BROWSER_ROUTE_PATH } from '../src/browser/route.mjs'
 import { browserRetrieve } from '../../../src/retrieval/browser-bridge.mjs'
 import { registerRetrievalTools } from '../../../src/retrieval/tool.mjs'
+import { sourceFingerprint } from '../../../scripts/source-fingerprint.mjs'
 
 const argv = process.argv.slice(2), option = name => argv.includes(name) ? argv[argv.indexOf(name) + 1] : undefined
 const componentRoot = option('--component-root'), dshSource = option('--dsh-source'), output = option('--output')
@@ -30,6 +31,7 @@ const report = { schema: 1, date: new Date().toISOString(), status: 'running', h
 const addChecks=report.checks.push.bind(report.checks);report.checks.push=(...items)=>{console.log('PASS',...items);return addChecks(...items)}
 const fixture = `<!doctype html><meta charset="utf-8"><title>交互验收</title><style>body{margin:0;font:16px Arial}header{height:160px;position:sticky;top:0;background:#fff;z-index:2;padding:12px;box-sizing:border-box}input[type=text]{width:300px;height:32px}input[type=range]{width:300px}#color{position:fixed;right:0;top:0;width:32px;height:32px;background:rgb(20,80,160);z-index:9}#horizontal{width:400px;overflow:auto;white-space:nowrap;height:30px}#horizontal>span{display:inline-block;width:1800px}li{height:26px}#double{position:absolute;left:700px;top:70px}</style><div id=color></div><header><label>设备名称<input type=text id=name aria-label="设备名称" oninput="color.style.background='rgb('+(20+this.value.length*11%210)+',80,160)'"></label><label><input type=checkbox aria-label="省电模式">省电模式</label><label>方案<select aria-label="运行方案"><option value=eco>节能</option><option value=comfort>舒适</option></select></label><br><input type=range aria-label="亮度" min=0 max=100 value=20><div id=horizontal><span>横向内容</span></div><button id=double ondblclick="this.dataset.count=Number(this.dataset.count||0)+1">双击测试</button></header><main><p id=delayed>准备就绪</p><ul>${Array.from({ length: 2000 }, (_, i) => `<li>第 ${i + 1} 行 <button>操作 ${i + 1}</button></li>`).join('')}</ul></main><script>window.animation=false;let n=0;function animate(){if(window.animation)color.style.background='rgb('+(20+(n++*11)%210)+',80,160)';requestAnimationFrame(animate)}requestAnimationFrame(animate)</script>`
 let uiBundle
+const { files: sourceFiles, ...fingerprint } = await sourceFingerprint(); report.sourceFingerprint = fingerprint
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost'), route = routes.get(url.pathname)
@@ -149,6 +151,37 @@ try {
   await viewer.evaluate(()=>document.body.setAttribute('data-ds-dark-theme',''));report.darkToken = await viewer.locator('.pw-browser').evaluate(element=>getComputedStyle(element).backgroundColor)
   report.checks.push('displayed-frame FPS measured during real scrolling; static stream stays connected, expand/Escape, 100% zoom and host dark tokens')
 
+  // Management interactions run after transport timing, and cancel before
+  // anything could close the controlled target page or change its identity.
+  await viewer.getByRole('button', { name: '环境与指纹', exact: true }).click()
+  await viewer.getByRole('searchbox', { name: '搜索浏览器环境', exact: true }).fill('not-present')
+  await viewer.getByText('没有匹配的环境。', { exact: true }).waitFor()
+  await viewer.getByRole('searchbox', { name: '搜索浏览器环境', exact: true }).fill('')
+  await viewer.getByRole('button', { name: '浏览器环境', exact: true }).click()
+  await viewer.getByRole('menuitem', { name: '临时环境', exact: true }).click()
+  await viewer.getByRole('region', { name: '浏览器环境操作确认' }).waitFor()
+  assert.equal(await viewer.locator('.pw-browser-environment-diff').evaluate(node => getComputedStyle(node).display), 'grid')
+  if (screenshotDir) { await mkdir(screenshotDir, { recursive: true }); await viewer.screenshot({ path: join(screenshotDir, 'environment-comparison-dark.png') }) }
+  await viewer.setViewportSize({ width: 360, height: 900 })
+  assert.ok(await viewer.evaluate(() => document.documentElement.scrollWidth <= 360))
+  if (screenshotDir) await viewer.screenshot({ path: join(screenshotDir, 'environment-comparison-narrow-dark.png') })
+  await viewer.setViewportSize({ width: 1360, height: 1000 })
+  assert.equal((await ca.status()).profileId, profile.id)
+  await viewer.getByRole('button', { name: '取消操作', exact: true }).click()
+  await viewer.getByRole('button', { name: '清除登录', exact: true }).click()
+  await viewer.getByRole('button', { name: '确认清除登录', exact: true }).waitFor()
+  await viewer.getByRole('button', { name: '取消操作', exact: true }).click()
+  assert.equal(await page.evaluate(() => localStorage.getItem('private_login')), 'must-not-leak')
+  if (screenshotDir) { await mkdir(screenshotDir, { recursive: true }); await viewer.screenshot({ path: join(screenshotDir, 'environment-manager-dark.png') }) }
+  await viewer.getByRole('button', { name: '环境与指纹', exact: true }).click()
+  await viewer.getByRole('button', { name: '浏览器菜单', exact: true }).click(); await viewer.getByRole('menuitem', { name: '资源管理', exact: true }).click()
+  await viewer.getByRole('button', { name: '回收当前浏览器', exact: true }).click()
+  await viewer.getByRole('button', { name: '取消回收', exact: true }).click()
+  assert.equal((await ca.status()).active, true)
+  if (screenshotDir) await viewer.screenshot({ path: join(screenshotDir, 'resource-manager-dark.png') })
+  await viewer.getByRole('button', { name: '浏览器菜单', exact: true }).click(); await viewer.getByRole('menuitem', { name: '资源管理', exact: true }).click()
+  report.checks.push('browser environment search, current/target switch comparison, inline switch/login-clear/reclaim confirmations cancelled without changing identity, login or target process')
+
   if (screenshotDir) {
     await mkdir(screenshotDir, { recursive: true })
     await viewer.evaluate(() => document.body.removeAttribute('data-ds-dark-theme'))
@@ -182,8 +215,12 @@ try {
   const takeover=browserRetrieve(agent.agent,{url,authorizeTarget:policy,waitText:'never visible'}).then(()=>null,error=>error)
   await until(()=>Promise.resolve(engine.contexts().length>beforeContexts));const started=performance.now();await ca.action({action:'control',control:'user'});assert.ok(await takeover);await until(()=>Promise.resolve(engine.contexts().length===beforeContexts));report.measurements.retrievalTakeoverMs=Math.round(performance.now()-started);assert.equal(engine.contexts().length,beforeContexts)
   await ca.action({action:'control',control:'agent'})
-  const waiting=browserRetrieve(agent.agent,{url,authorizeTarget:policy,waitText:'never visible'}).then(()=>null,error=>error)
-  await until(()=>Promise.resolve(engine.contexts().some(context=>context!==viewerContext&&context!==page.context()&&context.pages().some(current=>current.url()===url))))
+  let waitingFinished = false, waitingFailure
+  const waiting=browserRetrieve(agent.agent,{url,authorizeTarget:policy,waitText:'never visible'}).then(()=>{waitingFinished=true;return null},error=>{waitingFinished=true;waitingFailure=error;return error})
+  await until(()=>{
+    if (waitingFinished) throw waitingFailure ?? new Error('Retrieval unexpectedly finished before the takeover test')
+    return Promise.resolve(engine.contexts().some(context=>context!==viewerContext&&context!==page.context()&&context.pages().some(current=>current.url()===url)))
+  }, 15000)
   const waitingStart=performance.now();await ca.action({action:'control',control:'user'});assert.ok(await waiting);await until(()=>Promise.resolve(engine.contexts().length===beforeContexts));report.measurements.retrievalWaitingTakeoverMs=Math.round(performance.now()-waitingStart)
   report.checks.push('same private engine retrieval renders in disposable context; bounded output, unchanged selected tab and login, policy denial, abort and immediate user takeover cleanup')
 

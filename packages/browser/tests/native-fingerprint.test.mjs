@@ -32,9 +32,11 @@ test('native identity accepts only the pinned schema and positive uint32 seed', 
   }
   assertNativeEngineVersion(ALIASMODE_BROWSER_VERSION)
   assert.throws(() => assertNativeEngineVersion('155.0.8059.84'), /version differs/)
-  const profile = { ...nativeInput, engineIdentity: identity, locale: 'zh-CN', timezoneId: 'Asia/Shanghai', screen: { width: 1920, height: 1080 } }
+  const profile = { ...nativeInput, engineIdentity: identity, locale: 'zh-CN', timezoneId: 'Asia/Shanghai', screen: { width: 1920, height: 1080 }, deviceScaleFactor: 1 }
   assert.ok(nativeLaunchArgs(profile).includes(`--fingerprint=${identity.seed}`))
   assert.ok(nativeLaunchArgs(profile).includes('--fingerprint-noise'))
+  for (const deviceScaleFactor of [1, 1.25, 2, 3]) assert.ok(nativeLaunchArgs({ ...profile, deviceScaleFactor }).includes(`--force-device-scale-factor=${deviceScaleFactor}`))
+  for (const deviceScaleFactor of [undefined, 0, 3.1, NaN, Infinity, '1 --no-sandbox']) assert.throws(() => nativeLaunchArgs({ ...profile, deviceScaleFactor }), /pixel ratio/)
   for (const change of [{ backend: 'chromium' }, { fingerprint: {} }, { locale: 'en-US --flag' }, { screen: { width: 0, height: 1080 } }]) assert.throws(() => nativeLaunchArgs({ ...profile, ...change }))
   assert.equal(safeBrowserError(new Error(`launch --fingerprint=${identity.seed} --fingerprint-timezone=Asia/Shanghai`)).includes(identity.seed), false)
 })

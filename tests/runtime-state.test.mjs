@@ -10,15 +10,15 @@ const { registerRuntimeState, registerRuntimeCollector, runtimeSnapshot, collect
 
 function boot() {
   const listeners = new Map()
-  let route, dispose
+  let route; const disposers = []
   const ctx = {
     get: key => key === 'webServer' ? { register: value => { route = value; return () => {} } } : key === 'agents' ? { get: id => agent(id) } : undefined,
     on: (key, fn) => listeners.set(key, fn),
-    effect: fn => { dispose = fn() },
+    effect: fn => { disposers.push(fn()) },
   }
   registerRuntimeState(ctx, { token: 'test-only', rowConfig: { observationPack: false }, loadedConfig: { actionFusion: true } })
-  registerRuntimeCollector(ctx, { loadedConfig: { actionFusion: true } })
-  return { route, listeners, dispose }
+  registerRuntimeCollector(ctx, { loadedConfig: { actionFusion: true, skillsMode: 'expanded' }, skillNames: ['web-ui', 'retrieval'] })
+  return { route, listeners, dispose: () => disposers.forEach(dispose => dispose?.()) }
 }
 function agent(id) {
   return scopedAgent({ session: { header: { id }, requestContext: () => ({ contextWindow: 1000 }) }, ctx: {
@@ -67,6 +67,7 @@ test('same directory sessions keep evidence separate and canonical failures surv
     assert.equal(state.events[0].command, 'exit 7')
     assert.equal(state.context.tokens, 123)
     assert.equal(state.context.window, 1000)
+    assert.deepEqual(state.skills, { names: ['web-ui', 'retrieval'], mode: 'expanded', bodies: 'on-demand' })
     assert.equal(state.mechanisms.actionFusion.active, true)
     assert.equal(runtimeSnapshot('B').events.length, 0)
     assert.equal(runtimeSnapshot('A').retrieval.entries.length, 0)

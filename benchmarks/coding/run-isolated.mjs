@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { aggregate, aggregateAgent, loadManifest, scoreAgentRun, scoreRun } from './scorers/coding-scorer.mjs'
+import { diffFileSnapshots } from './scorers/file-diff.mjs'
+import { verifyDriverEvidence } from './scorers/driver-evidence.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(here, '../..')
@@ -37,6 +39,7 @@ async function filesUnder(root) {
   async function walk(current) {
     for (const entry of await readdir(current, { withFileTypes: true })) {
       const path = join(current, entry.name)
+      if (entry.isSymbolicLink()) throw new Error('Benchmark workspace must not contain symbolic links')
       if (entry.isDirectory()) await walk(path)
       else output.push(relative(root, path).replaceAll('\\', '/'))
     }
@@ -44,7 +47,6 @@ async function filesUnder(root) {
   await walk(root); return output.sort()
 }
 
-async function lineCount(path) { return (await readFile(path, 'utf8')).split(/\r?\n/).length - 1 }
 
 const reportRoot = await mkdtemp(join(tmpdir(), 'patchwork-coding-benchmark-'))
 function sanitizeOutput(value) {
@@ -62,8 +64,8 @@ for (const taskPath of manifest.tasks) {
   const workspace = join(caseRoot, 'workspace')
   await cp(join(dirname(join(here, taskPath)), 'workspace'), workspace, { recursive: true })
   const oracle = join(dirname(join(here, taskPath)), 'oracle')
-  await cp(oracle, join(workspace, 'oracle'), { recursive: true, force: true })
-  const before = Object.fromEntries(await Promise.all((await filesUnder(workspace)).map(async file => [file, { bytes: (await readFile(join(workspace, file))).length, lines: await lineCount(join(workspace, file)), content: await readFile(join(workspace, file), 'utf8') }])))
+  if (mode === 'oracle') await cp(oracle, join(workspace, 'oracle'), { recursive: true, force: true })
+  const before = Object.fromEntries(await Promise.all((await filesUnder(workspace)).map(async file => [file, { content: await readFile(join(workspace, file)) }])))
   let score
   if (mode === 'oracle') {
     const solution = join(dirname(join(here, taskPath)), 'solution')
@@ -72,13 +74,8 @@ for (const taskPath of manifest.tasks) {
     await cp(oracle, join(workspace, 'oracle'), { recursive: true, force: true })
     const reference = await runNode(['--test', 'test/public.test.mjs', 'oracle/hidden.test.mjs'], workspace)
     const afterFiles = await filesUnder(workspace)
-    const changedFiles = []
-    for (const file of afterFiles) {
-      const current = await readFile(join(workspace, file), 'utf8')
-      if (before[file] && before[file].content !== current) changedFiles.push(file)
-    }
-    let changedLines = 0
-    for (const file of changedFiles) changedLines += Math.abs((before[file]?.lines ?? 0) - await lineCount(join(workspace, file)))
+    const after = Object.fromEntries(await Promise.all(afterFiles.map(async file => [file, { content: await readFile(join(workspace, file)) }])))
+    const { changedFiles, changedLines } = await diffFileSnapshots(before, after)
     score = scoreRun({ task, baseline, solution: reference, changedFiles, changedLines })
     score.baseline.stdout = sanitizeOutput(score.baseline.stdout)
     score.baseline.stderr = sanitizeOutput(score.baseline.stderr)
@@ -100,26 +97,33 @@ for (const taskPath of manifest.tasks) {
     } catch (error) {
       driverResult = { status: 'driver-error', error: error instanceof Error ? error.message : String(error) }
     }
-    const tests = await runNode(['--test', 'test/public.test.mjs', 'oracle/hidden.test.mjs'], workspace, { DSH_HOME: dshHome, PATCHWORK_CODING_ROOT: caseRoot, PATCHWORK_CODING_TASK: task.id })
+    // Withhold oracle files from the work directory until the trusted driver exits.
+    // Separate directories are not an OS security sandbox against malicious drivers.
+    const judgeRoot = await mkdtemp(join(tmpdir(), 'patchwork-judge-'))
+    await cp(workspace, judgeRoot, { recursive: true })
+    await cp(oracle, join(judgeRoot, 'oracle'), { recursive: true, force: true })
+    const tests = await runNode(['--test', 'test/public.test.mjs', 'oracle/hidden.test.mjs'], judgeRoot, { DSH_HOME: join(judgeRoot, '.dsh-home') })
+    await rm(judgeRoot, { recursive: true, force: true })
     const afterFiles = await filesUnder(workspace)
-    const changedFiles = []
-    for (const file of afterFiles) {
-      const current = await readFile(join(workspace, file), 'utf8')
-      if (!before[file] || before[file].content !== current) changedFiles.push(file)
-    }
+    const after = Object.fromEntries(await Promise.all(afterFiles.map(async file => [file, { content: await readFile(join(workspace, file)) }])))
+    const diff = await diffFileSnapshots(before, after)
+    const changedFiles = diff.changedFiles
     const unauthorizedFiles = changedFiles.filter(file => !task.allowedPaths.includes(file))
-    let changedLines = 0
-    for (const file of changedFiles) changedLines += Math.abs((before[file]?.lines ?? 0) - await lineCount(join(workspace, file)))
+    const changedLines = diff.changedLines
     const driverMeta = {
-      status: driverResult?.status ?? 'completed',
+      status: driverResult?.status ?? 'missing-status',
       model: driverResult?.model ?? null,
       dshVersion: driverResult?.dshVersion ?? null,
       requestCount: Number.isFinite(driverResult?.requestCount) ? driverResult.requestCount : null,
       durationMs: Number.isFinite(driverResult?.durationMs) ? driverResult.durationMs : Date.now() - started,
-      runId: driverResult?.runId ?? runId,
+      runId,
       error: driverResult?.error ?? null,
+      mode: driverResult?.mode ?? 'unverified',
+      evidenceVerified: false,
     }
+    Object.assign(driverMeta, await verifyDriverEvidence(resultsDir, driverResult, { ...driverMeta, taskId: task.id }))
     score = scoreAgentRun({ task, tests, changedFiles, unauthorizedFiles, changedLines, driver: driverMeta })
+    score.changes = diff.files
     score.hiddenTests.stdout = sanitizeOutput(score.hiddenTests.stdout)
     score.hiddenTests.stderr = sanitizeOutput(score.hiddenTests.stderr)
     if (!json) console.log(`${score.passed ? 'PASS' : 'FAIL'} ${task.id} hidden=${tests.exitCode} changedFiles=${changedFiles.length} unauthorized=${unauthorizedFiles.length} changedLines=${changedLines}`)
@@ -142,7 +146,7 @@ const report = {
     agentTaskPassRate: mode === 'agent' ? aggregateAgent(scores).agentTaskPassRate : null,
     claim: mode === 'oracle'
       ? '题集质量验证；不代表模型完成率。'
-      : '真实 Agent 运行结果；必须同时发布模型、DSH 版本、隔离工作区、隐藏测试输出和 run id。',
+      : '受信驱动的 Agent 运行结果；须发布模型、DSH 版本、run id、原生请求记录和裁判输出。哈希/身份一致性不等于独立证明模型调用。',
   },
   evidence: { retained: keep, root: keep ? reportRoot : null },
 }

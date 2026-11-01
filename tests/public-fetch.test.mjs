@@ -37,8 +37,8 @@ test('robots denial, unsupported content and bounded response have machine codes
   const deny = await fetchNativePage({ url: 'https://example.com/secret', lookupImpl: publicLookup, fetchImpl: async url => String(url).endsWith('/robots.txt') ? response('User-agent: *\nDisallow: /secret', { contentType: 'text/plain', url: String(url) }) : response('<p>secret</p>') })
     .then(() => null, error => error)
   assert.equal(deny.code, 'FETCH_ROBOTS_DENIED')
-  await assert.rejects(fetchNativePage({ url: 'https://example.com/file', robots: false, lookupImpl: publicLookup, fetchImpl: async () => response('binary', { contentType: 'application/pdf' }) }), error => error.code === 'FETCH_UNSUPPORTED_CONTENT_TYPE')
-  await assert.rejects(fetchNativePage({ url: 'https://example.com/large', robots: false, maxBytes: 1024, lookupImpl: publicLookup, fetchImpl: async () => response('x'.repeat(2048)) }), error => error.code === 'FETCH_RESPONSE_TOO_LARGE')
+  await assert.rejects(fetchNativePage({ url: 'https://example.com/file', robots: false, lookupImpl: publicLookup, fetchImpl: async url => response('binary', { contentType: 'application/pdf', url: String(url) }) }), error => error.code === 'FETCH_UNSUPPORTED_CONTENT_TYPE')
+  await assert.rejects(fetchNativePage({ url: 'https://example.com/large', robots: false, maxBytes: 1024, lookupImpl: publicLookup, fetchImpl: async url => response('x'.repeat(2048), { url: String(url) }) }), error => error.code === 'FETCH_RESPONSE_TOO_LARGE')
 })
 
 test('redirects are rechecked against the fetch scope and cancellation is preserved', async () => {

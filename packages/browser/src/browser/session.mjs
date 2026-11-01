@@ -72,10 +72,11 @@ async function isolatedContext(browser, profile, storageState, proxyOverride) {
 }
 
 export class BrowserSession {
-  constructor(agent, { launch = launchBackend, root, keyProvider, resources, resourcePolicy, onReceipt = () => {} } = {}) {
+  constructor(agent, { launch = launchBackend, root, componentRoot = root, keyProvider, resources, resourcePolicy, onReceipt = () => {} } = {}) {
     this.agent = agent
     this.launch = launch
     this.root = root
+    this.componentRoot = componentRoot
     this.profiles = new BrowserProfiles(agent, { root, keyProvider, isActive: () => !this.ended && (!this.ending || this.savingOnDispose) })
     this.artifacts = new BrowserArtifacts(agent, () => this.check())
     this.trace = new BrowserTrace()
@@ -194,9 +195,9 @@ export class BrowserSession {
     }
     const backendId = this.profile?.backend ?? 'chromium'
     const [profiles, backend, nativeBackend, recorder] = await Promise.all([
-      this.profiles.list({ forUser }), cached(backendId, () => backendAvailability(backendId, this.root)),
-      forUser ? cached('aliasmode', () => backendAvailability('aliasmode', this.root)) : undefined,
-      cached('recorder', () => recorderAvailability(this.root)),
+      this.profiles.list({ forUser }), cached(backendId, () => backendAvailability(backendId, this.componentRoot)),
+      forUser ? cached('aliasmode', () => backendAvailability('aliasmode', this.componentRoot)) : undefined,
+      cached('recorder', () => recorderAvailability(this.componentRoot)),
     ])
     this.check()
     const page = this.page()
@@ -230,7 +231,7 @@ export class BrowserSession {
     browser = this.browser?.isConnected?.() !== false ? this.browser : null
     if (!browser) {
       lease = await this.resources?.reserve(this)
-      browser = await this.launch({ backend: profile.backend ?? 'chromium', root: this.root, ...(profile.backend === 'aliasmode' ? { nativeProfile: profile } : {}), ...((profile.backend ?? 'chromium') === 'chromium' ? { channel: process.platform === 'win32' ? 'msedge' : 'chrome' } : {}), headless: true, env: browserEnvironment() })
+      browser = await this.launch({ backend: profile.backend ?? 'chromium', root: this.componentRoot, ...(profile.backend === 'aliasmode' ? { nativeProfile: profile } : {}), ...((profile.backend ?? 'chromium') === 'chromium' ? { channel: process.platform === 'win32' ? 'msedge' : 'chrome' } : {}), headless: true, env: browserEnvironment() })
       created = true
       lease?.activate(browser)
     }
@@ -446,8 +447,8 @@ export class BrowserSession {
     if (this.transfers || this.downloadArm?.until > Date.now()) throw new Error('请先结束文件传输和下载授权，再切换原生指纹')
     if (profile.backend === 'aliasmode') {
       nativeLaunchArgs(profile)
-      if (!(await readComponent(this.root ?? browserProfilesRoot(), 'aliasmode', { verify: true }))?.installed) throw new Error('请先在当前隔离实例安装 AliasMode 可选内核；当前页面保持不变')
-    } else if (!(await backendAvailability(profile.backend ?? 'chromium', this.root)).installed) throw new Error('目标内核尚未安装；当前页面保持不变')
+      if (!(await readComponent(this.componentRoot ?? browserProfilesRoot(), 'aliasmode', { verify: true }))?.installed) throw new Error('请先在当前隔离实例安装 AliasMode 可选内核；当前页面保持不变')
+    } else if (!(await backendAvailability(profile.backend ?? 'chromium', this.componentRoot)).installed) throw new Error('目标内核尚未安装；当前页面保持不变')
     this.check()
     const previous = { id: this.profileId, profile: this.profile, urls: [...this.tabs.values()].map(tab => tab.page?.url() ?? tab.savedUrl), recoverable: this.recoverable }
     const rollbackStorage = this.context ? await this.context.storageState({ indexedDB: true }) : undefined

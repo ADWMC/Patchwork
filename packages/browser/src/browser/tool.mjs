@@ -12,12 +12,14 @@ const retrieval = globalThis[Symbol.for('@patchwork/browser/retrieval/v1')] ??= 
 
 export function browserClient(agent) { return isBrowserAgent(agent) ? clients.get(agent) : undefined }
 
-export function registerBrowserTool(ctx, { launch = launchBackend, root, keyProvider, resources = sharedBrowserResources(), resourcePolicy, expectedAgent, listen = true, onReceipt = () => {} } = {}) {
+export function registerBrowserTool(ctx, { launch = launchBackend, root, componentRoot, keyProvider, resources = sharedBrowserResources(), resourcePolicy, expectedAgent, listen = true, onReceipt = () => {} } = {}) {
   const sessions = new Map()
+  let disposing = false
   const attach = agent => {
+    if (disposing) throw new Error('Browser access is closing')
     if (!isBrowserAgent(agent)) return
     if (sessions.has(agent)) return sessions.get(agent)
-    const session = new BrowserSession(agent, { launch, root, keyProvider, resources, resourcePolicy, onReceipt })
+    const session = new BrowserSession(agent, { launch, root, componentRoot, keyProvider, resources, resourcePolicy, onReceipt })
     const input = new BrowserInput(session)
     sessions.set(agent, session)
     const readPublic = options => { requireBrowserAgent(agent); return session.readPublic(options) }
@@ -115,5 +117,5 @@ export function registerBrowserTool(ctx, { launch = launchBackend, root, keyProv
     },
   })
   if (expectedAgent) attach(expectedAgent)
-  return { async dispose() { unregister?.(); await Promise.all([...sessions.keys()].map(detach)) } }
+  return { async dispose() { disposing = true; unregister?.(); await Promise.all([...sessions.keys()].map(detach)) } }
 }

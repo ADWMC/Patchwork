@@ -1,4 +1,5 @@
 import { nativeFetch } from './http-client.mjs'
+import { fetchPublicResponse } from './public-fetch.mjs'
 import { parseBingResults, parseBraveResults, parseDuckDuckGoResults, providerParsers } from './provider-parsers.mjs'
 import { createHash } from 'node:crypto'
 
@@ -62,7 +63,8 @@ function normalizeProviderList(providers) {
 
 async function searchHtmlProvider({ provider, query, maxResults, timeoutMs, signal, fetchImpl, endpoint }) {
   const started = Date.now()
-  const response = await fetchImpl(providerUrl(provider, query, endpoint), {
+  const requester = fetchImpl === nativeFetch ? fetchPublicResponse : fetchImpl
+  const response = await requester(providerUrl(provider, query, endpoint), {
     method: 'GET',
     headers: { accept: 'text/html,application/xhtml+xml', 'user-agent': USER_AGENT },
     timeoutMs,

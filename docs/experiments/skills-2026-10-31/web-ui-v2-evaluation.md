@@ -41,12 +41,12 @@
 | 同会话纠偏，8192 输出 token | 1 次请求、118.9 秒，全部输出用于推演，`max-tokens`；仍未写目标文件。 |
 | 同会话直接写入提醒，16384 输出 token | 11 次请求、900.0 秒后隔离超时 `aborted`；7 次针对目标 HTML 的 `write` 都被 `restate the current task after new input before mutation` 拒绝。模型末尾调用 `patchwork_task define`，但超时前未再次写入。 |
 
-为便于审查，已从第三阶段最后一次被拒绝的 `write` 调用参数中**原样回收** HTML，保存为 [`artifacts/earth-explorer-step5-v2-raw.html`](../../../artifacts/earth-explorer-step5-v2-raw.html)。回收文件 27,117 字节，SHA256 为 `872279bcdb3f4369665edf08d0fa9c61c06a8a37bc7602ac1a5f468f2a7d778d`，与会话参数逐字一致。它是模型生成的候选产物，**不是 DSH Agent 成功写出的交付物**。
+为便于审查，已从第三阶段最后一次被拒绝的 `write` 调用参数中**原样回收** HTML，保存为 [`artifacts/earth-explorer-step5-v2-raw.html`](../../archive/removed-evidence.md#earth-explorer-raw)。回收文件 27,117 字节，SHA256 为 `872279bcdb3f4369665edf08d0fa9c61c06a8a37bc7602ac1a5f468f2a7d778d`，与会话参数逐字一致。它是模型生成的候选产物，**不是 DSH Agent 成功写出的交付物**。
 
 静态检查：内联 JavaScript 可解析，无运行时 HTTP(S) URL 或 `fetch`。独立 Playwright 驱动 Edge 以 1440×900 和 390×844 打开回收文件，WebGL context 存在、无页面异常或外部请求、无横向溢出；按钮状态、鼠标/触控拖动和暂停/继续的内部状态会变化。但两张实际截图都只有星空，**地球不可见，主验收失败**。`draw()` 把像素尺寸 `R` 直接用于视场角 `2*atan(R*0.5*1.06/dist)`；在两种视口下球体投影半径约 0.94 像素。地点按钮会选中城市，伦敦和纽约的标记文字仍停在“北京”，因此地点呈现也未通过。独立截图和 `earth-v2-validation.json` 留在上述隔离目录。
 
 ## 用户反馈后的本地修订
 
-用户指出页面左上角的操作提示既小又不适合放在作品界面。修订版为 [`artifacts/earth-explorer-step5-v2.html`](../../../artifacts/earth-explorer-step5-v2.html)，26,450 字节，SHA256 为 `d6f89e42c306186fe2e98eb0d3f2a762a5bc3ffeab7346b68ff6fecf7877cce1`。它删除左上角副标题和底部快捷键提示，放大保留的页面标题；同时修正球体投影、纹理东西方向、地点朝向和标记投影。**这些修改由本地人工修订完成，不属于 DSH Agent 的原始交付，也不能计入该次技能评测成绩。**
+用户指出页面左上角的操作提示既小又不适合放在作品界面。修订版为 [`artifacts/earth-explorer-step5-v2.html`](../../archive/removed-evidence.md#earth-explorer-revision)，26,450 字节，SHA256 为 `d6f89e42c306186fe2e98eb0d3f2a762a5bc3ffeab7346b68ff6fecf7877cce1`。它删除左上角副标题和底部快捷键提示，放大保留的页面标题；同时修正球体投影、纹理东西方向、地点朝向和标记投影。**这些修改由本地人工修订完成，不属于 DSH Agent 的原始交付，也不能计入该次技能评测成绩。**
 
 同一 Playwright 脚本在 Edge 中复测修订版：1440×900 和 390×844 截图均可见地球，页面没有横向溢出、运行时异常或外部请求；三个城市的按钮选中状态与标记文字一致，暂停后 yaw 不变、继续后变化，鼠标和触控拖动改变视角。截图和 `earth-v2-validation.json` 在 `C:\Users\Administrator\AppData\Local\Temp\patchwork-earth-v2-fix-20261031`。原稿使用手绘简化海岸线，城市与大陆的地理准确性仍需人工审查；本轮复测不代表原始模型产物通过验收。

@@ -1,5 +1,6 @@
-import { realpathSync, statSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { realpathSync, statSync, readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { resolve, relative, isAbsolute } from 'node:path'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { isPatchworkAgent, requirePatchworkAgent } from '../scope.mjs'
 import { taskProjection, flushTasks } from '../task/store.mjs'
@@ -9,6 +10,7 @@ import { executorPrompt } from './prompt.mjs'
 
 const controllers = new WeakMap(), live = new Set(), workers = new Map(), workspaceLocks = new Map()
 const activeStatuses = new Set(['starting', 'running'])
+const digest = value => createHash('sha256').update(typeof value === 'string' || Buffer.isBuffer(value) ? value : JSON.stringify(value)).digest('hex')
 function workspaceKey(cwd) {
   let path
   try { path = realpathSync(cwd) } catch { path = resolve(cwd) }
@@ -170,7 +172,12 @@ export class SuperagentController {
         && task.requirements.filter(r => r.required).every(r => r.status === 'passed')
       job.status = result.stopReason !== 'completed' ? 'failed' : job.report?.status === 'ready' && verified ? 'done'
         : ['waiting', 'blocked', 'failed'].includes(job.report?.status) ? job.report.status : 'review'
-      job.evidence = { taskId: task?.taskId ?? null, revision: task?.revision ?? null, status: task?.status ?? 'unverified', verified }
+      const artifacts = (task?.artifacts ?? []).filter(a => a.status === 'current').map(a => ({ ...a, hash: artifactsCurrent ? digest(readFileSync(a.path)) : null }))
+      const machineChecks = task?.requirements?.filter(r => r.required && r.kind !== 'semantic') ?? []
+      job.evidence = { taskId: task?.taskId ?? null, revision: task?.revision ?? null, status: task?.status ?? 'unverified', verified,
+        reviewable: result.stopReason === 'completed' && task?.persistence === 'native' && task?.understandingStatus === 'stated' && artifactsCurrent && machineChecks.length > 0 && machineChecks.every(r => r.status === 'passed'),
+        artifacts, semantic: task?.requirements?.filter(r => r.kind === 'semantic').map(r => ({ id: r.id, status: r.status })) ?? [] }
+      job.evidence.version = digest(job.evidence)
       next.revision++
       if (next.jobs.every(j => j.status === 'done')) next.status = 'completed'
       await this.commit(next, epoch)
@@ -254,6 +261,26 @@ export class SuperagentController {
       this.assertRevision(revision); this.assertScope()
       if (this.state.status !== 'paused') throw new Error('only paused queues can resume')
       const next = structuredClone(this.state); next.status = 'active'; next.revision++; await this.commit(next)
+    })
+    this.kick(); return this.snapshot()
+  }
+  async review(id, revision, { userConfirmed = false, accept = false, evidenceVersion } = {}) {
+    if (!userConfirmed) throw new Error('Explicit user confirmation is required')
+    await this.serial(async () => {
+      this.assertRevision(revision); this.assertScope()
+      const next = structuredClone(this.state), job = next.jobs.find(j => j.id === id)
+      if (!job || job.status !== 'review' || !job.evidence?.reviewable || evidenceVersion !== job.evidence.version) throw new Error('Current reviewable evidence version required')
+      for (const artifact of accept ? job.evidence.artifacts ?? [] : []) {
+        const within = relative(this.workspace, realpathSync(artifact.path))
+        if (!within || within === '..' || within.startsWith('..' + (process.platform === 'win32' ? '\\' : '/')) || isAbsolute(within)) throw new Error('Artifact is outside the controller workspace')
+        const s = statSync(artifact.path)
+        if (realpathSync(artifact.path) !== artifact.path || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
+      }
+      job.disposition = { source: 'user-confirmed', accepted: accept === true, evidenceVersion, at: new Date().toISOString() }
+      job.status = accept ? 'done' : 'blocked'; job.recovery = accept ? null : 'User rejected this result; correct and retry'
+      next.revision++
+      if (next.jobs.every(j => j.status === 'done')) next.status = 'completed'
+      await this.commit(next)
     })
     this.kick(); return this.snapshot()
   }

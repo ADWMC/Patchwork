@@ -31,7 +31,7 @@ test('native search executes for Patchwork and rejects another preset', async ()
 test('native search can be disabled by Patchwork runtime configuration', () => {
   const registered = []
   registerRetrievalTools({ tools: { register(definition) { registered.push(definition) } } }, { nativeSearch: false })
-  assert.deepEqual(registered.map(item => item.name), [PATCHWORK_FETCH_TOOL])
+  assert.deepEqual(registered.map(item => item.name), ['patchwork_evidence', PATCHWORK_FETCH_TOOL])
 })
 
 test('native fetch is independent from search and is scope guarded', async () => {

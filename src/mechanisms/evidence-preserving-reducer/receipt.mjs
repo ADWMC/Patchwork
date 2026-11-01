@@ -6,6 +6,8 @@ import {
   RECEIPT_MARKER,
   RECEIPT_SCHEMA,
 } from './config.mjs'
+import { LIKELY_SECRET } from './config.mjs'
+import { redactPreview } from '../../logging/redact.mjs'
 
 const INSTRUCTIONS = [
   'You reduce one diagnostic command log into a machine-checkable receipt.',
@@ -17,6 +19,8 @@ const INSTRUCTIONS = [
 ].join('\n')
 
 export function buildRequest({ command, body, sourceHash, isError }) {
+  // Recheck at the send boundary as callers can bypass reducibleLog.
+  if (LIKELY_SECRET.test(body) || redactPreview(body) !== body || redactPreview(command) !== command) throw new Error('EPR_SENSITIVE_INPUT')
   const userText = [
     `command: ${command}`,
     `source_sha256: ${sourceHash}`,

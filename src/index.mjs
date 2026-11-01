@@ -6,6 +6,7 @@ import { webRuntime } from './ui/web-runtime.mjs'
 import { registerDiagnosticRoute } from './logging/route.mjs'
 import { registerMemoryRoute } from './memory/route.mjs'
 import { registerImprovementRoute } from './improvement/route.mjs'
+import { registerSuperagentRoute } from './superagent/route.mjs'
 
 // The profile installs only the web bridge. Agent behavior belongs exclusively
 // to the Patchwork preset's standing composition (./runtime).
@@ -23,6 +24,7 @@ export function apply(ctx) {
     registerDiagnosticRoute(webCtx, { token: sharedWriteToken })
     registerMemoryRoute(webCtx, { token: sharedWriteToken })
     registerImprovementRoute(webCtx, { token: sharedWriteToken })
+    registerSuperagentRoute(webCtx, { token: sharedWriteToken })
     registerStatsInjection(webCtx, { token: sharedWriteToken })
   }
   // The web server can start after the agent registries. Follow the host's

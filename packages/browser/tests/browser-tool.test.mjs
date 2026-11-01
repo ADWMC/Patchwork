@@ -16,7 +16,7 @@ import { BrowserSession } from '../src/browser/session.mjs'
 import { imageSize } from '../src/browser/evidence.mjs'
 const keyProvider = async () => Buffer.alloc(32, 17)
 
-function fixture() {
+function fixture({ componentRoot } = {}) {
   const listeners = new Map()
   const agents = new Map()
   const launches = []
@@ -32,7 +32,7 @@ function fixture() {
       if (name === 'attachments') return { saveImage: async () => ({ attachmentId: 'image-1', mediaType: 'image/png', bytes: 4, width: 1, height: 1 }) }
     },
   }
-  registerBrowserTool(ctx, { root, keyProvider, launch: async options => {
+  registerBrowserTool(ctx, { root, componentRoot, keyProvider, launch: async options => {
     launchOptions.push(options)
     const browser = {
       closed: false,
@@ -91,6 +91,18 @@ function fixture() {
   const call = (owner, args) => definition.execute(args, { agent: owner, signal: new AbortController().signal })
   return { agent, call, definition, listeners, launches, launchOptions, agents, root }
 }
+
+test('component installation root is independent from private session profile storage', async () => {
+  const componentRoot = join(tmpdir(), 'patchwork-read-only-component-fixture')
+  const f = fixture({ componentRoot }), owner = f.agent('separate-component-root')
+  f.listeners.get('agent/created')({ agent: owner })
+  const result = await browserClient(owner).action({ action: 'createProfile', revision: 0, profile: { name: 'Private profile', mode: 'native' } })
+  assert.equal(result.profiles.length, 2)
+  await f.call(owner, { action: 'navigate', url: 'https://example.com/' })
+  assert.equal(f.launchOptions[0].root, componentRoot)
+  assert.equal((await new BrowserProfiles(owner, { root: f.root, keyProvider }).read()).profiles.length, 1)
+  assert.notEqual(f.root, componentRoot)
+})
 
 test('browser state belongs to one Patchwork Agent and is closed on preset switch', async () => {
   const { agent, call, definition, listeners, launches, launchOptions } = fixture()

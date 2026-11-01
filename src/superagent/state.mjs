@@ -69,7 +69,9 @@ export function restoreSuperagent(input, owner) {
     return { ...j, attempt: prior.attempt, childId: prior.childId, inputs: [...prior.inputs],
       status: ['starting', 'running'].includes(prior.status) ? 'blocked' : prior.status === 'done' ? 'review' : prior.status,
       result: prior.result ? { stopReason: bounded(prior.result.stopReason, 40, 'stopReason'), summary: String(prior.result.summary ?? '').slice(0, 4000) } : null,
-      report: null, recovery: ['starting', 'running', 'done'].includes(prior.status) ? 'recovered; inspect original child and current artifacts before explicit retry; no automatic replay' : null }
+      evidence: prior.evidence && typeof prior.evidence.version === 'string' && Array.isArray(prior.evidence.artifacts) && prior.evidence.artifacts.length <= 24 ? structuredClone(prior.evidence) : null,
+      disposition: null,
+      report: null, recovery: ['starting', 'running', 'done'].includes(prior.status) ? 'recovered; inspect original child and current artifacts before explicit review or retry; no automatic replay' : null }
   })
   return next
 }

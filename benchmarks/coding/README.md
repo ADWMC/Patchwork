@@ -10,7 +10,7 @@
 证明题目可复现，不能证明模型完成率。
 
 `agent` 模式才计入营销成绩：真实 Patchwork Agent 在独立临时工作区中读取 issue、修改
-代码、执行测试，runner 只根据隐藏验收和实际 diff 评分。模型没有完成或越界修改，都计
+代码、执行测试；可信驱动返回后才在独立裁判副本加入 oracle。runner 同时检查驱动状态、运行身份、请求数、证据一致性、隐藏验收和实际 diff。模型没有完成或越界修改，都计
 为失败并保留证据。
 
 ## 运行题目质量验证
@@ -37,7 +37,7 @@ node benchmarks/coding/run-isolated.mjs `
 
 真实 Agent 运行后，建议发布：
 
-- `agentTaskPassRate`：隐藏测试通过的任务数 / 执行任务数；
+- `agentTaskPassRate`：驱动证据合格、隐藏测试通过且范围干净的任务数 / 尝试任务数；
 - `publicTestPassRate`：公开测试通过率；
 - `scopeLeakageRate`：越过当前工作区或调用未授权能力的次数 / 尝试次数；
 - `unnecessaryChangeRate`：修改验收范围外文件的任务比例；
@@ -59,8 +59,12 @@ runner 不内置模型凭据，也不会读取或复制主 DSH。通过 `--drive
 
 ```js
 export async function runTask({ task, issuePath, workspace, dshHome, resultsDir, runId, env }) {
-  // 启动隔离 DSH，选择 Patchwork preset，让 Agent 读取 issuePath 并修改 workspace。
-  return { status: 'completed', model: 'configured-model', dshVersion: '0.2.x', requestCount: 0, runId }
+  // 这是驱动合同示意，需自行实现真实 DSH 调用，不能直接返回示例成绩。
+  // 在 resultsDir 保存脱敏的 evidence.json，包含 mode:'real-host'、runId、
+  // taskId:task.id、实际 model/dshVersion/requestCount，并返回相同身份字段。
+  // 必须返回 status、mode、model、dshVersion、requestCount>0、runId、
+  // evidenceRef（resultsDir 内文件）及原始字节的 SHA256 evidenceHash。
+  throw new Error('Implement a trusted isolated DSH driver and native request evidence')
 }
 ```
 
@@ -77,3 +81,9 @@ node benchmarks/coding/run-isolated.mjs `
 Agent 分数同时要求隐藏测试通过和只修改 `allowedPaths`；越界改动计入
 `scopeLeakageRate`。driver 返回值只写入经过白名单过滤的模型、DSH 版本、请求数、耗时、
 状态和 run id，凭据、提示词和完整工具原文不会进入报告。
+
+## 证据与统计边界（2026-11-01）
+
+驱动异常、缺少 status、无模型请求、身份字段不符、证据文件越过 resultsDir（含 symlink）、哈希不符、裁判超时或失败均不能得到合格模型成绩。driver 是明确受信的本地程序；即使内容/哈希一致，也不能独立证明其调用了真实模型，发布成绩须附原生请求记录。独立目录不是防恶意 driver 的 OS 沙箱。
+
+改动统计使用 before/after 文件并集和 Buffer 字节，git numstat 覆盖新增、删除及等长改写；二进制单列、保存前后 SHA256，不伪造行数。重命名计作删除+新增。`hiddenTestPassRate` 覆盖全部提交的测试结果；`eligibleHiddenTestPassRate` 只统计驱动证据合格的提交，分母为零时为 null。oracle 运行异常/超时不算基线预期失败。完整验收见[闭环指南](../../docs/closure-2026-11-01.md)。

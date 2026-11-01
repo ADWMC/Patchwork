@@ -1,4 +1,4 @@
-import { isAbsolute, resolve } from 'node:path'
+import { isAbsolute, resolve, relative } from 'node:path'
 import { mkdir } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 
@@ -17,6 +17,8 @@ export function validateIsolationSpec(spec = {}, { currentDshHome = process.env.
   const paths = Object.fromEntries(PATH_KEYS.map(key => [key, pathValue(spec[key])]))
   for (const key of PATH_KEYS) if (!paths[key]) reasons.push(`missing-or-relative:${key}`)
   if (new Set(Object.values(paths).filter(Boolean)).size !== PATH_KEYS.length) reasons.push('paths-must-be-distinct')
+  const entries = Object.values(paths).filter(Boolean)
+  if (entries.some((a, i) => entries.some((b, j) => { if (i === j || a === b) return false; const child = relative(a, b); return child && !isAbsolute(child) && child !== '..' && !child.startsWith('../') && !child.startsWith('..\\') }))) reasons.push('paths-must-not-overlap')
   if (currentDshHome && paths.dshHome && paths.dshHome === pathValue(currentDshHome)) reasons.push('must-not-use-current-dsh-home')
   if (!Number.isInteger(spec.port) || spec.port < 1024 || spec.port > 65535) reasons.push('isolated-port-required')
   if (typeof spec.model !== 'string' || !spec.model.trim()) reasons.push('model-required')
@@ -33,14 +35,15 @@ export function isolatedEnvironment(spec, options) {
 }
 
 /** Run one bounded, shell-free process inside a validated experiment boundary. */
-export async function runIsolatedCommand(spec, { command, args = [], timeoutMs = 120000, maxOutputBytes = 65536 } = {}, options) {
+export async function runIsolatedCommand(spec, { command, args = [], timeoutMs = 120000, maxOutputBytes = 65536, signal: abortSignal, cleanEnvironment = false } = {}, options) {
   const prepared = isolatedEnvironment(spec, options)
   if (!prepared.ok) return { status: 'rejected', reasons: prepared.reasons }
   if (typeof command !== 'string' || !command.trim() || !Array.isArray(args) || args.some(item => typeof item !== 'string')) return { status: 'rejected', reasons: ['command-and-args-required'] }
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 900000) return { status: 'rejected', reasons: ['invalid-timeout'] }
   await Promise.all(Object.values(prepared.boundary.paths).map(path => mkdir(path, { recursive: true })))
   return await new Promise(resolveResult => {
-    const child = spawn(command, args, { cwd: prepared.boundary.paths.workspace, env: prepared.env, shell: false, windowsHide: true })
+    const env = cleanEnvironment ? Object.fromEntries(Object.entries(prepared.env).filter(([key]) => ['PATH', 'Path', 'SystemRoot', 'SYSTEMROOT', 'TEMP', 'TMP', 'WINDIR', 'DSH_HOME'].includes(key) || key.startsWith('PATCHWORK_EVOLUTION_'))) : prepared.env
+    const child = spawn(command, args, { cwd: prepared.boundary.paths.workspace, env, shell: false, windowsHide: true, signal: abortSignal })
     const stdout = [], stderr = []; let outBytes = 0; let errBytes = 0; let timedOut = false; let settled = false
     const take = (target, chunk, current) => { if (current >= maxOutputBytes) return current; const value = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)); const remaining = maxOutputBytes - current; target.push(value.subarray(0, remaining)); return current + Math.min(value.length, remaining) }
     child.stdout?.on('data', chunk => { outBytes = take(stdout, chunk, outBytes) })

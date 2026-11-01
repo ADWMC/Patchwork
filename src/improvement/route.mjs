@@ -1,6 +1,6 @@
 import { resolvePatchworkAgent } from '../scope.mjs'
 import { webRuntime } from '../ui/web-runtime.mjs'
-import { decideCandidate, improvementSnapshot, rollbackCandidate } from './store.mjs'
+import { decideCandidate, improvementSnapshot, rollbackCandidate, runCandidateExperiment, proposeCandidate } from './store.mjs'
 
 export const IMPROVEMENT_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/improvements'
 const routeKey = `exact\u0000${IMPROVEMENT_ROUTE_PATH}`
@@ -21,8 +21,15 @@ export function registerImprovementRoute(ctx, { token } = {}) {
       if (req.method !== 'POST') return reply(405, { ok: false, reason: 'method-not-allowed' })
       let body
       try { body = JSON.parse(await readBody(req)) } catch { return reply(400, { ok: false, reason: 'body-not-json' }) }
+      if (resolvePatchworkAgent(ctx, id) !== agent) return reply(403, { ok: false, reason: 'patchwork-agent-required' })
+      if (!Number.isSafeInteger(body?.expectedRevision) || body.expectedRevision !== improvementSnapshot(agent).revision) return reply(409, { ok: false, failureCode: 'IMPROVEMENT_REVISION_CONFLICT' })
+      const cancellation = new AbortController()
+      req.on('aborted', () => cancellation.abort())
+      res.on?.('close', () => { if (!res.writableEnded) cancellation.abort() })
       let result
-      if (body?.action === 'trial' || body?.action === 'approve') result = decideCandidate(agent, body.candidateId, body.expectedRevision, { mode: body.action === 'trial' ? 'trial' : 'enabled', userConfirmed: true })
+      if (body?.action === 'experiment') result = await runCandidateExperiment(agent, body.candidateId, body.expectedRevision, { signal: cancellation.signal })
+      else if (body?.action === 'propose') result = proposeCandidate(agent, { incidentIds: [body.incidentId], object: 'rule', trigger: '交付前复核当前验收证据', hypothesis: '提醒复核可减少遗漏；效果由用户审查，不宣称模型收益。', changeScope: '当前会话交付提醒', patch: { version: 1, setting: 'verifyBeforeDelivery', value: true } })
+      else if (body?.action === 'trial' || body?.action === 'approve') result = decideCandidate(agent, body.candidateId, body.expectedRevision, { mode: body.action === 'trial' ? 'trial' : 'enabled', userConfirmed: true })
       else if (body?.action === 'rollback') result = rollbackCandidate(agent, body.candidateId, body.expectedRevision, { userConfirmed: true })
       else return reply(400, { ok: false, reason: 'unsupported-improvement-action' })
       if (result.status === 'failed') return reply(result.failureCode === 'IMPROVEMENT_REVISION_CONFLICT' ? 409 : 400, { ok: false, ...result })

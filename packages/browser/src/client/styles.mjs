@@ -37,10 +37,11 @@ export const BROWSER_CSS = String.raw`
 .pw-browser-icon { display:block; width:18px; height:18px; flex:none }
 .pw-browser-environment { display:flex; align-items:center; gap:8px; padding:10px; border-bottom:1px solid var(--pw-line); flex-wrap:wrap }
 .pw-browser-profiles { flex:0 1 auto; padding:12px; border-bottom:1px solid var(--pw-line); max-height:50vh; overflow:auto }
-.pw-browser-profiles p,.pw-browser-profile-form p { font-size:11px; color:var(--pw-muted); line-height:1.8; margin:0 0 10px }
+.pw-browser-profiles p,.pw-browser-profile-form p { font-size:12px; color:var(--pw-muted); line-height:1.8; margin:0 0 10px }
+.pw-browser-profiles h3 { margin:0 0 6px }
 .pw-browser-profile-row { display:flex; align-items:center; gap:6px; padding:8px 0; border-bottom:1px solid var(--pw-line); margin-bottom:8px; font-size:12px }
 .pw-browser-profile-row>span { min-width:0; flex:1; overflow-wrap:anywhere }
-.pw-browser-profile-row small { display:block; font-size:10px; color:var(--pw-muted); margin-top:4px }
+.pw-browser-profile-row small { display:block; font-size:11px; color:var(--pw-muted); margin-top:4px }
 .pw-browser-profile-form { display:grid; gap:10px; margin-top:12px }
 .pw-browser-profile-form label { display:grid; gap:5px; color:var(--pw-secondary); font-size:11px }
 .pw-browser-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
@@ -110,8 +111,17 @@ export const BROWSER_CSS = String.raw`
 .pw-browser-status>span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 .pw-browser .pw-browser-inspect { flex:0 1 auto; min-height:70px; max-height:42vh; overflow:auto; padding:10px 12px; border-bottom:1px solid var(--pw-line); font-size:11px; color:var(--pw-secondary); line-height:1.7 }
 .pw-browser-inspect-actions { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px }
-.pw-browser .pw-browser-resources { flex:0 1 auto; overflow:auto; max-height:44vh; border-bottom:1px solid var(--pw-line); padding:0 12px; font-size:11px; line-height:1.7; color:var(--pw-secondary) }
+.pw-browser .pw-browser-resources { flex:0 1 auto; overflow:auto; max-height:44vh; border-bottom:1px solid var(--pw-line); padding:0 12px; font-size:12px; line-height:1.7; color:var(--pw-secondary) }
 .pw-browser-resources .pw-facts { margin:0 0 10px }
+.pw-browser-resource-summary { display:flex; flex-wrap:wrap; gap:12px 24px; margin:10px 0; padding-bottom:10px; border-bottom:1px solid var(--pw-line) }
+.pw-browser-resource-summary dt { color:var(--pw-muted) }
+.pw-browser-resource-summary dd { margin:0; font-weight:600; color:var(--dsw-alias-label-primary) }
+.pw-browser-management-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:12px 0 4px }
+.pw-browser-management-toolbar > * { flex:1 1 150px; min-width:0 }
+.pw-browser-identity-confirm>.pw-browser-environment-diff { display:grid; grid-template-columns:minmax(52px,.7fr) repeat(2,minmax(0,1fr)); gap:6px; margin:10px 0; overflow-wrap:anywhere }
+.pw-browser-diff-row { display:contents }
+.pw-browser-diff-row > * { padding-block:4px; border-top:1px solid var(--pw-line) }
+.pw-browser-protection { padding:8px; background:var(--pw-soft); border-radius:var(--dsw-radius-md) }
 .pw-browser-resources p { margin:8px 0 10px }
 .pw-browser-health { display:flex; flex-wrap:wrap; gap:4px 12px; margin-block:8px }
 .pw-browser-health p { flex-basis:100%; color:var(--pw-muted) }

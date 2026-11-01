@@ -44,7 +44,7 @@ export function reducibleLog(exec, result, contentOverride) {
   if (bytes < MIN_BYTES) return { ok: false, reason: 'below-threshold' }
 
   // 疑似密钥一律不外发。这是预防而不是完整的密钥扫描器。
-  if (LIKELY_SECRET.test(body) || redactPreview(command) !== command) return { ok: false, reason: 'likely-secret' }
+  if (LIKELY_SECRET.test(body) || redactPreview(body) !== body || redactPreview(command) !== command) return { ok: false, reason: 'likely-secret' }
 
   return { ok: true, command, body, isError: commandFailed(result, body) }
 }

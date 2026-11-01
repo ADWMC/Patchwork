@@ -4,6 +4,7 @@ import { registerActionChecks } from './action-check.mjs'
 import { executeAcceptance, registerArtifact } from './acceptance.mjs'
 import { flushTasks, taskProjection, taskSummary, transitionTask } from './store.mjs'
 import { HANDOFF_SOURCE, hasTaskHandoff, taskHandoff, taskHandoffText } from './handoff.mjs'
+import { currentPolicy, policyOutputs, revokePolicies } from '../improvement/policy.mjs'
 
 const item = { type: 'object', properties: {
   id: { type: 'string', description: 'Stable acceptance id, later used as check.id.' }, label: { type: 'string' }, kind: { type: 'string', enum: ['command', 'artifact', 'semantic'] },
@@ -20,7 +21,8 @@ export function registerTaskLifecycle(ctx, config = {}) {
   ctx.on('agent/pre-step', async ({ agent }, next) => {
     const decision = await next()
     if (!isPatchworkAgent(agent) || decision.kind !== 'enter') return decision
-    const summary = taskHandoffText(agent)
+    const policy = policyOutputs(currentPolicy(agent), { hasTask: Boolean(taskProjection(agent)?.title) })
+    const summary = taskHandoffText(agent) + (policy.deliveryReminder ? '\n' + policy.deliveryReminder : '')
     if (hasTaskHandoff(agent, summary, decision.messages)) return decision
     return { ...decision, messages: [...decision.messages, createUserMessage({
       content: [{ type: 'text', text: summary }], source: { kind: 'patchwork', form: 'notice', summary: HANDOFF_SOURCE },

@@ -22,7 +22,7 @@ export async function recorderAvailability(root = browserProfilesRoot()) {
 export class BrowserRecorder {
   static async start(session) {
     if (!session.page()) throw new Error('请先打开浏览器页面再开启录像')
-    const root = session.root ?? browserProfilesRoot(), release = await leaseComponent(root, 'recorder')
+    const root = session.componentRoot ?? session.root ?? browserProfilesRoot(), release = await leaseComponent(root, 'recorder')
     let directory
     try {
       const component = await readComponent(root, 'recorder', { verify: true })

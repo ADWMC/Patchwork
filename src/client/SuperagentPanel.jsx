@@ -1,0 +1,39 @@
+import { useRef, useEffect, useState } from 'react'
+import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Select } from './controls.jsx'
+import { EmptyState, TechnicalDetails, SectionHeading } from './panel-elements.jsx'
+import { CopyButton, Facets, RecordStatus, SearchField, SummaryStrip } from './workspace-elements.jsx'
+import { queueBucket, textMatches } from './workspace-model.mjs'
+const labels = { queued: '排队', starting: '启动中', running: '执行中', waiting: '等待输入', review: '等待复核', blocked: '阻塞', failed: '失败', cancelled: '取消', done: '完成', active: '运行中', paused: '暂停', completed: '全部完成', idle: '空闲' }
+const buckets = [['all', '全部'], ['attention', '需处理'], ['review', '待复核'], ['running', '执行中'], ['queued', '排队'], ['finished', '已结束']]
+export function SuperagentPanel({ data, superagentAction }) {
+  const [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [confirm, setConfirm] = useState(null)
+  const [query, setQuery] = useState(''), [filter, setFilter] = useState('all'), [mode, setMode] = useState('all'), [selectedId, setSelectedId] = useState(null)
+  const detailRef = useRef(null), queue = data.superagent, jobs = queue?.jobs ?? []
+  const visible = jobs.filter(job => (filter === 'all' || queueBucket(job.status) === filter) && (mode === 'all' || job.mode === mode) && textMatches(query, job.title, job.id, job.dependencies, job.childId, job.recovery))
+  const selected = visible.find(job => job.id === selectedId) ?? visible[0]
+  useEffect(() => { if (selectedId) detailRef.current?.scrollIntoView({ block: 'nearest' }) }, [selectedId])
+  async function act(action, job, accept, baseRevision = queue.revision) {
+    setBusy(true); setMessage('')
+    try { await superagentAction({ action, id: job?.id, baseRevision, accept, evidenceVersion: job?.evidence?.version }); setConfirm(null); setMessage('已更新队列。') }
+    catch (error) { setMessage(error.message) } finally { setBusy(false) }
+  }
+  return <>
+    <div className="pw-page-heading"><h2>主控队列</h2><p>先看需要处理的执行器，再核对依赖和验收。模型结束回合不代表结果通过。</p></div>
+    <SummaryStrip label="队列统计" items={[{ label: '执行中', value: jobs.filter(job => queueBucket(job.status) === 'running').length }, { label: '待复核', value: jobs.filter(job => job.status === 'review').length }, { label: '需处理', value: jobs.filter(job => queueBucket(job.status) === 'attention').length }, { label: '完成', value: jobs.filter(job => job.status === 'done').length }]}/>
+    {!jobs.length ? <EmptyState title="尚未安排执行器">需要拆分任务时，Agent 可通过 patchwork_superagent 登记队列。</EmptyState> : <>
+      <section className="pw-card pw-queue-control"><div className="pw-heading-actions"><div><RecordStatus tone={queue.status === 'paused' ? 'warn' : undefined}>{labels[queue.status] ?? queue.status}</RecordStatus><p className="pw-live-note">并发 {queue.concurrency} · r{queue.revision} · {queue.persistence === 'native' ? '会话持久记录' : queue.persistence ?? '运行快照'}</p></div><div className="pw-actions">{queue.status === 'active' && <Button size="sm" variant="outline" disabled={busy} onClick={() => act('pause')}>暂停</Button>}{queue.status === 'paused' && <Button size="sm" variant="outline" disabled={busy} onClick={() => act('resume')}>继续队列</Button>}{!['completed', 'cancelled'].includes(queue.status) && <Button size="sm" variant="ghost" disabled={busy} onClick={() => setConfirm({ action: 'cancel', revision: queue.revision })}>取消队列</Button>}</div></div></section>
+      {confirm && <section className="pw-card pw-memory-confirm" aria-label="确认队列操作"><h3>{confirm.action === 'cancel' ? '取消当前队列？' : '重新执行此任务？'}</h3><p>{confirm.action === 'cancel' ? '将停止当前会话队列。已生成的文件不会自动回滚。' : '重试会启动新执行器，可能再次修改文件；先检查旧产物和依赖。'}</p><div className="pw-actions"><Button size="sm" variant="primary" disabled={busy} onClick={() => act(confirm.action, confirm.job, undefined, confirm.revision)}>确认队列操作</Button><Button size="sm" variant="ghost" onClick={() => setConfirm(null)}>返回查看</Button></div></section>}
+      <SearchField label="搜索执行器" value={query} onChange={setQuery} placeholder="搜索任务、执行器 ID 或依赖"/>
+      <Facets label="队列状态筛选" value={filter} onChange={setFilter} items={buckets.map(([value, label]) => ({ value, label, count: value === 'all' ? jobs.length : jobs.filter(job => queueBucket(job.status) === value).length }))}/>
+      <div className="pw-heading-actions"><span className="pw-muted">{visible.length} / {jobs.length} 个任务</span><Select aria-label="执行器读写模式" value={mode} onChange={setMode} options={[{ value: 'all', label: '全部模式' }, { value: 'read', label: '只读任务' }, { value: 'write', label: '写入任务' }]}/></div>
+      <div className="pw-master-detail"><section className="pw-record-list" aria-label="执行器列表">{visible.length ? visible.map(job => <button type="button" className="pw-record-row" aria-label={`查看执行器 ${job.title}`} aria-pressed={selected?.id === job.id} key={job.id} onClick={() => setSelectedId(job.id)}><span className="pw-record-title">{job.title}</span><span className="pw-record-subtitle">{job.mode === 'write' ? '写入' : '只读'} · 尝试 {job.attempt}/3</span><RecordStatus tone={['failed', 'blocked'].includes(job.status) ? 'warn' : job.status === 'done' ? 'success' : undefined}>{labels[job.status] ?? job.status}</RecordStatus></button>) : <EmptyState title="没有匹配的执行器">调整搜索条件或状态筛选。</EmptyState>}</section>
+      {selected && <article ref={detailRef} className="pw-detail-pane" aria-label="执行器详情"><SectionHeading title={selected.title}><CopyButton label="复制任务 ID" value={selected.id}/></SectionHeading><div className="pw-inline-facts"><RecordStatus>{labels[selected.status] ?? selected.status}</RecordStatus><span>{selected.mode === 'write' ? '写入任务 · 本模块串行' : '只读任务'}</span></div>{selected.recovery && <p className="pw-warning">{selected.recovery}</p>}
+        <section className="pw-detail-section"><h3>依赖关系</h3>{selected.dependencies.length ? selected.dependencies.map(id => { const dependency = jobs.find(job => job.id === id); return <button type="button" className="pw-knowledge-row" key={id} onClick={() => { setFilter('all'); setMode('all'); setQuery(''); setSelectedId(id) }}><span><strong>{dependency?.title ?? id}</strong><small>{labels[dependency?.status] ?? '依赖不可用'}{dependency?.status !== 'done' ? ' · 尚未放行此任务' : ''}</small></span></button> }) : <p className="pw-muted">无前置任务。</p>}</section>
+        <dl className="pw-facts"><div><dt>执行器</dt><dd>{selected.childId ?? '尚未分配'}</dd></div><div><dt>登记检查</dt><dd>{selected.evidence?.verified ? '机器验收通过' : '未全部通过'}</dd></div><div><dt>语义接纳</dt><dd>{selected.disposition?.accepted ? '用户已确认当前版本' : '未确认'}</dd></div><div><dt>重试次数</dt><dd>{selected.attempt} / 3</dd></div></dl>
+        <TechnicalDetails title="执行与验收"><p>{selected.result?.summary ?? '尚无结果摘要。'}</p><code className="pw-task-path">{selected.evidence?.version ?? '尚无证据版本'}</code>{(selected.evidence?.artifacts ?? []).map((artifact, index) => <code className="pw-task-path" key={index}>{typeof artifact === 'string' ? artifact : artifact.path ?? artifact.id}</code>)}</TechnicalDetails>
+        <div className="pw-actions pw-detail-actions">{selected.status === 'review' && selected.evidence?.reviewable && <><Button size="sm" variant="primary" disabled={busy} onClick={() => act('review', selected, true)}>接纳当前结果</Button><Button size="sm" variant="outline" disabled={busy} onClick={() => act('review', selected, false)}>退回修改</Button></>}{['failed', 'blocked', 'waiting', 'review'].includes(selected.status) && selected.attempt < 3 && <Button size="sm" variant="outline" disabled={busy} onClick={() => setConfirm({ action: 'retry', job: selected, revision: queue.revision })}>重试</Button>}</div>
+      </article>}</div>
+    </>}{message && <p className="pw-live-note" role="status">{message}</p>}
+  </>
+}

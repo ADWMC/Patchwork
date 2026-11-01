@@ -47,7 +47,7 @@ export function aggregateTask(state) {
   if (state.persistence === 'failed' || state.understandingStatus === 'needs-clarification') return 'blocked'
   const required = state.requirements.filter(r => r.required)
   if (!state.title || required.length === 0 || state.understandingStatus !== 'stated') return 'in-progress'
-  if (required.every(r => r.status === 'passed')) return 'ready'
+  if (required.every(r => r.status === 'passed' || r.kind === 'semantic' && r.status === 'accepted')) return 'ready'
   if (required.some(r => r.failures >= 3 && r.status === 'failed')) return 'blocked'
   return required.some(r => r.status !== 'pending') ? 'partial' : 'in-progress'
 }
@@ -105,7 +105,7 @@ export function readTaskCheckpoint(input, sessionId, workspace) {
   return next
 }
 function stale(requirement) {
-  return { ...requirement, status: requirement.evidence.length || requirement.status === 'passed' ? 'stale' : 'pending', evidence: [], failures: 0 }
+  return { ...requirement, status: requirement.evidence.length || ['passed', 'accepted'].includes(requirement.status) ? 'stale' : 'pending', evidence: [], userAcceptance: null, failures: 0 }
 }
 /** Pure transitions. Model declarations narrow policy; they never grant host permissions. */
 export function reduceTask(state, event) {
@@ -189,6 +189,15 @@ export function reduceTask(state, event) {
       if (!['supported', 'contradicted', 'unknown'].includes(event.verdict)) throw new Error('invalid semantic verdict')
       r.assessment = { verdict: event.verdict, source: 'model-stated' }
       r.status = 'unknown'
+      break
+    }
+    case 'user-review': {
+      if (event.userConfirmed !== true || event.baseRevision !== next.revision) throw new Error('current user review required')
+      const requirement = next.requirements.find(r => r.id === event.id && r.kind === 'semantic')
+      if (!requirement || next.understandingStatus !== 'stated' || next.artifacts.some(a => a.status === 'changed')) throw new Error('current semantic requirement required')
+      requirement.userAcceptance = { source: 'user-confirmed', accepted: event.accept === true, revision: next.revision, artifacts: next.artifacts.filter(a => a.status === 'current').map(a => ({ id: a.id, version: a.version })), at: event.at }
+      requirement.status = event.accept ? 'accepted' : 'unknown'
+      next.revision++
       break
     }
     case 'candidate': {

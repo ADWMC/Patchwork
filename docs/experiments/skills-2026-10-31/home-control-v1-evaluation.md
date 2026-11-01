@@ -6,7 +6,7 @@
 
 使用隔离的 DSH `0.2.1-rc.2`、Patchwork preset 和 StepFun `step-5-preview`，在独立工作目录运行；主 DSH 未修改。前两轮各只有一次模型请求，分别在 219,374 ms 和 195,970 ms 后以 `max-tokens` 结束，均未写出 HTML。第三轮同会话直接要求先写文件：模型调用工具生成了 `home-control.html`，但 900,000 ms 隔离超时后本轮以 `aborted` 结束，不能称为 Agent 完成任务。三轮原始事件分别保存在隔离目录的 `home-control-run.json`、`home-control-resume.json`、`home-control-final.json`；凭据未写入仓库或这些报告。
 
-模型写出的文件原样复制到 [`artifacts/home-control-step5-v1.html`](../../../artifacts/home-control-step5-v1.html)，20,032 字节，SHA256 `6c174ce3d88ef0e0c9492ad8fb432b1014caaefdb4d0fb6a07fe04e19232702c`，与隔离工作目录文件一致。未对这个产物进行人工修复。本次只有单组运行，不能推断技能提升幅度。
+模型写出的文件原样复制到 [`artifacts/home-control-step5-v1.html`](../../archive/removed-evidence.md#home-control-v1)，20,032 字节，SHA256 `6c174ce3d88ef0e0c9492ad8fb432b1014caaefdb4d0fb6a07fe04e19232702c`，与隔离工作目录文件一致。未对这个产物进行人工修复。本次只有单组运行，不能推断技能提升幅度。
 
 ## 独立验收
 

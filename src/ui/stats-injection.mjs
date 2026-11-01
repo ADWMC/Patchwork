@@ -3,6 +3,7 @@ import { STATE_ROUTE_PATH } from './runtime-state.mjs'
 import { LOGS_ROUTE_PATH } from '../logging/route.mjs'
 import { MEMORY_ROUTE_PATH } from '../memory/route.mjs'
 import { IMPROVEMENT_ROUTE_PATH } from '../improvement/route.mjs'
+import { SUPERAGENT_ROUTE_PATH } from '../superagent/route.mjs'
 
 export const STATS_ELEMENT_ATTRIBUTE = 'data-patchwork-stats'
 
@@ -23,6 +24,7 @@ export function registerStatsInjection(ctx, { token } = {}) {
       logsPath: LOGS_ROUTE_PATH,
       memoryPath: MEMORY_ROUTE_PATH,
       improvementPath: IMPROVEMENT_ROUTE_PATH,
+      superagentPath: SUPERAGENT_ROUTE_PATH,
       token: token ?? null,
       generatedAt: new Date().toISOString(),
     }

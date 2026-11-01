@@ -1,4 +1,5 @@
 import { createElement } from 'react'
+import { Disclosure } from './controls.jsx'
 import { icons } from './panel-icons.mjs'
 
 export function PanelIcon({ name, className = '', ...props }) {
@@ -11,5 +12,5 @@ export function SectionHeading({ title, description, children }) {
   return <div className="pw-section-heading"><div><h3>{title}</h3>{description && <p>{description}</p>}</div>{children}</div>
 }
 export function TechnicalDetails({ children, title = '技术字段', open }) {
-  return <details className="pw-technical" open={open}><summary><PanelIcon name="chevron" className="pw-event-chevron"/>{title}</summary>{children}</details>
+  return <Disclosure title={title} initialOpen={open}>{children}</Disclosure>
 }

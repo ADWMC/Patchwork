@@ -4,6 +4,7 @@ import { NativeSearchError, NATIVE_SEARCH_DEFAULTS, searchNativeWeb } from './pu
 import { fetchNativePage, authorizeBrowserTarget, NativeFetchError, NATIVE_FETCH_DEFAULTS } from './public-fetch.mjs'
 import { recordRetrieval } from './ledger.mjs'
 import { browserRetrieve } from './browser-bridge.mjs'
+import { admitPageEvidence, markEvidenceSent, registerEvidenceTool } from './evidence.mjs'
 
 export const PATCHWORK_SEARCH_TOOL = 'patchwork_search'
 export const PATCHWORK_FETCH_TOOL = 'patchwork_fetch'
@@ -76,6 +77,7 @@ function boundedFetchNumber(value, configured, min, max, name) {
 }
 
 export function registerRetrievalTools(ctx, config = {}, { fetchImpl, lookupImpl } = {}) {
+  registerEvidenceTool(ctx)
   if (config.nativeSearch !== false) {
     const configuredMax = config.nativeSearchMaxResults ?? NATIVE_SEARCH_DEFAULTS.maxResults
     const configuredTimeout = config.nativeSearchTimeoutMs ?? NATIVE_SEARCH_DEFAULTS.timeoutMs
@@ -168,11 +170,12 @@ export function registerRetrievalTools(ctx, config = {}, { fetchImpl, lookupImpl
             robots: { type: 'object', properties: { checked: { type: 'boolean' }, allowed: { type: 'boolean' }, source: { type: 'string' } }, required: ['checked', 'allowed'], additionalProperties: false },
             retrievedAt: { type: 'string' }, trust: { type: 'string' },
             transport: { type: 'string' },
+            evidenceId: { type: 'string' },
           },
           required: ['url', 'finalUrl', 'status', 'contentType', 'title', 'excerpt', 'truncated', 'robots', 'retrievedAt', 'trust'],
           additionalProperties: false,
         },
-        render: (_args, value) => renderFetch(value),
+        render: (_args, value) => { if (!markEvidenceSent(value.evidenceId, value.excerpt)) return [{ type: 'text', text: '[patchwork_fetch] evidence unavailable or scope revoked' }]; return [...renderFetch(value), { type: 'text', text: `evidenceId=${value.evidenceId}; cite an exact quote with patchwork_evidence.` }] },
       },
       async execute(args, exec) {
         const agent = requirePatchworkAgent(exec?.agent)
@@ -195,6 +198,9 @@ export function registerRetrievalTools(ctx, config = {}, { fetchImpl, lookupImpl
           })
           requirePatchworkAgent(agent)
           result.transport = transport
+          const evidence = admitPageEvidence(agent, result, operationId)
+          if (evidence.status === 'rejected') throw new NativeFetchError('excerpt rejected by evidence admission policy', 'FETCH_SENSITIVE_CONTENT')
+          result.evidenceId = evidence.id
           recordRetrieval(agent, { type: 'fetch', status: 'sent', operationId, provider: 'patchwork-native-fetch', trust: result.trust, sources: [{ title: result.title, url: result.finalUrl, snippet: result.excerpt }], resultCount: 1, providerCount: 1, elapsedMs: Date.now() - started })
           logDiagnostic(ctx, exec, { mechanism: 'fetch', event: 'success', reason: 'fetch-completed', provider: 'patchwork-native-fetch', elapsedMs: Date.now() - started, resultCount: 1, providerCount: 1 })
           return result

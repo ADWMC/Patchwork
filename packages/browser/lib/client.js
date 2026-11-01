@@ -404,23 +404,39 @@ var labels = { "user-control": "\u4F60\u6B63\u5728\u63A5\u7BA1", busy: "\u6709\u
 var states = { dormant: "\u672A\u542F\u52A8", starting: "\u542F\u52A8\u4E2D", active: "\u8FD0\u884C\u4E2D", hibernated: "\u5DF2\u56DE\u6536", ended: "\u5DF2\u7ED3\u675F" };
 function BrowserResources({ state, busy, act }) {
   const [open, setOpen] = (0, import_react3.useState)(true);
+  const [confirmReclaim, setConfirmReclaim] = (0, import_react3.useState)(false);
+  const confirmationRef = (0, import_react3.useRef)(null);
+  (0, import_react3.useEffect)(() => {
+    confirmationRef.current?.scrollIntoView({ block: "nearest" });
+  }, [confirmReclaim]);
   const resources = state.resources;
   if (!resources?.host) return null;
   const { host, memory } = resources;
   const memoryText = memory?.status === "measured" ? `${memory.privateWorkingSetMiB} MiB \u79C1\u6709\u9A7B\u7559` : memory?.status === "not-running" ? "\u672A\u8FD0\u884C" : "\u672A\u6D4B\u91CF";
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(Disclosure, { className: "pw-browser-resources", title: "\u8D44\u6E90\u7BA1\u7406", count: `${states[resources.state] ?? "\u672A\u77E5"} \xB7 ${memoryText}`, open, onToggle: () => setOpen((previous) => !previous), children: [
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dl", { className: "pw-facts", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dl", { className: "pw-browser-resource-summary", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dt", { children: "\u5F53\u524D\u6D4F\u89C8\u5668" }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dt", { children: "\u672C\u4F1A\u8BDD" }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dd", { children: states[resources.state] ?? "\u672A\u77E5" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dt", { children: "\u6807\u7B7E\u9875" }),
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dd", { children: [
-          states[resources.state] ?? "\u672A\u77E5",
-          " \xB7 ",
           state.tabs.length,
-          "/",
-          resources.maxTabs,
-          " \u4E2A\u6807\u7B7E"
+          " / ",
+          resources.maxTabs
         ] })
       ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dt", { children: "\u5B9E\u4F8B\u5E76\u53D1" }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dd", { children: [
+          host.running,
+          " / ",
+          host.maxInstances
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dl", { className: "pw-facts", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dt", { children: "\u5F53\u524D\u91C7\u6837" }),
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dd", { children: [
@@ -437,15 +453,6 @@ function BrowserResources({ state, busy, act }) {
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dt", { children: "\u5B9E\u4F8B\u5E76\u53D1" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dd", { children: [
-          host.running,
-          "/",
-          host.maxInstances,
-          " \u4E2A\u6D4F\u89C8\u5668"
-        ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dt", { children: "\u8F6F\u5185\u5B58\u76EE\u6807" }),
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dd", { children: [
           host.memoryTargetMiB,
@@ -459,24 +466,37 @@ function BrowserResources({ state, busy, act }) {
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dt", { children: "\u81EA\u52A8\u56DE\u6536" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("dd", { children: [
-          resources.autoReclaim ? `\u7A7A\u95F2 ${Math.round(resources.idleTimeoutMs / 6e4 * 10) / 10} \u5206\u949F\u540E` : "\u5173\u95ED",
-          resources.protection?.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("small", { children: [
-            " \xB7 \u4FDD\u62A4\u4E2D\uFF1A",
-            resources.protection.filter((key) => key !== "busy").map((key) => labels[key]).join("\u3001") || "\u64CD\u4F5C\u4E2D"
-          ] })
-        ] })
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("dd", { children: resources.autoReclaim ? `\u7A7A\u95F2 ${Math.round(resources.idleTimeoutMs / 6e4 * 10) / 10} \u5206\u949F\u540E` : "\u5173\u95ED" })
       ] })
     ] }),
     host.pressure === "high" && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { role: "status", children: "\u8FD1\u671F\u91C7\u6837\u5DF2\u8D85\u8FC7\u8F6F\u76EE\u6807\uFF0C\u8BF7\u56DE\u6536\u95F2\u7F6E\u6D4F\u89C8\u5668\uFF1B\u53D7\u4FDD\u62A4\u9875\u9762\u4E0D\u4F1A\u88AB\u5F3A\u5236\u5173\u95ED\u3002" }),
     /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pw-browser-inspect-actions", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Button, { type: "button", disabled: busy || resources.state !== "active", onClick: () => act("measureResources"), children: "\u91C7\u6837\u5185\u5B58" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Button, { type: "button", disabled: busy || resources.state !== "active" || state.recording, onClick: () => act("hibernate"), children: "\u56DE\u6536\u5F53\u524D\u6D4F\u89C8\u5668" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Button, { type: "button", disabled: busy || resources.state !== "active" || state.recording, onClick: () => setConfirmReclaim(true), children: "\u56DE\u6536\u5F53\u524D\u6D4F\u89C8\u5668" }),
       state.recoverableTabs > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(Button, { type: "button", disabled: busy, onClick: () => act("recoverTabs"), children: [
         "\u6062\u590D ",
         state.recoverableTabs,
         " \u4E2A\u6807\u7B7E"
       ] })
+    ] }),
+    confirmReclaim && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { ref: confirmationRef, className: "pw-browser-identity-confirm", role: "group", "aria-label": "\u786E\u8BA4\u56DE\u6536\u6D4F\u89C8\u5668", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("strong", { children: "\u56DE\u6536\u672C\u4F1A\u8BDD\u6D4F\u89C8\u5668\uFF1F" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { children: [
+        "\u5C06\u5173\u95ED\u672C\u4F1A\u8BDD ",
+        state.tabs.length,
+        " \u4E2A\u6807\u7B7E\u5E76\u91CA\u653E\u8FDB\u7A0B\u3002\u7F51\u5740\u53EF\u6062\u590D\uFF0C\u672A\u63D0\u4EA4\u8868\u5355\u3001\u9875\u9762\u6EDA\u52A8\u548C\u4E34\u65F6\u9875\u9762\u72B6\u6001\u4E0D\u4FDD\u5B58\u3002\u5176\u4ED6\u4F1A\u8BDD\u4E0D\u53D7\u6B64\u6B21\u64CD\u4F5C\u5F71\u54CD\u3002"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "pw-actions", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Button, { disabled: busy || resources.state !== "active" || state.recording, onClick: async () => {
+          if (await act("hibernate")) setConfirmReclaim(false);
+        }, children: "\u786E\u8BA4\u56DE\u6536" }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Button, { disabled: busy, onClick: () => setConfirmReclaim(false), children: "\u53D6\u6D88\u56DE\u6536" })
+      ] })
+    ] }),
+    resources.protection?.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { className: "pw-browser-protection", role: "status", children: [
+      "\u81EA\u52A8\u56DE\u6536\u4FDD\u62A4\uFF1A",
+      resources.protection.map((key) => labels[key] ?? "\u64CD\u4F5C\u4E2D").join("\u3001"),
+      "\u3002"
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Toggle, { label: "\u5141\u8BB8\u672C\u4F1A\u8BDD\u7A7A\u95F2\u6216\u5BB9\u91CF\u4E0D\u8DB3\u65F6\u81EA\u52A8\u56DE\u6536", checked: resources.autoReclaim, disabled: busy, onChange: (value) => act("resourceMode", { autoReclaim: value }) }),
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("p", { className: "pw-muted", children: "\u56DE\u6536\u4FDD\u7559\u7F51\u5740\uFF0C\u672A\u63D0\u4EA4\u8868\u5355\u4E0D\u4FDD\u5B58\u3002\u63A5\u7BA1\u3001\u67E5\u770B\u3001\u5F55\u50CF\u548C\u4F20\u8F93\u671F\u95F4\u4E0D\u81EA\u52A8\u56DE\u6536\u3002\u5185\u5B58\u76EE\u6807\u4E0D\u662F\u7CFB\u7EDF\u786C\u4E0A\u9650\uFF1B\u672A\u91C7\u6837\u90E8\u5206\u6309\u672A\u77E5\u5904\u7406\u3002" })
@@ -824,18 +844,40 @@ var import_react6 = require("react");
 var import_jsx_runtime6 = require("react/jsx-runtime");
 var MODES = { native: "\u539F\u751F\u73AF\u5883", device: "\u8BBE\u5907\u53C2\u6570\u6A21\u677F", fingerprint: "JS \u6307\u7EB9\uFF08\u5B9E\u9A8C\uFF09" };
 var modeLabel = (profile) => profile?.fingerprintKind === "native-engine" || profile?.backend === "aliasmode" ? "\u539F\u751F\u5185\u6838\u6307\u7EB9\uFF08\u5B9E\u9A8C\uFF09" : MODES[profile?.mode] ?? "\u539F\u751F\u73AF\u5883";
+var environmentFields = [
+  ["\u5185\u6838", (profile) => profile?.backend ?? "chromium"],
+  ["\u8BED\u8A00 / \u65F6\u533A", (profile) => `${profile?.locale ?? "\u5BBF\u4E3B\u9ED8\u8BA4"} / ${profile?.timezoneId ?? "\u5BBF\u4E3B\u9ED8\u8BA4"}`],
+  ["\u89C6\u53E3 / \u50CF\u7D20\u6BD4", (profile) => profile?.viewport ? `${profile.viewport.width} \xD7 ${profile.viewport.height} / ${profile.deviceScaleFactor ?? 1}` : "\u5BBF\u4E3B\u9ED8\u8BA4"],
+  ["\u767B\u5F55\u5B58\u50A8", (profile) => profile?.persistStorage ? "\u672C\u73AF\u5883\u52A0\u5BC6\u4FDD\u5B58" : "\u4E34\u65F6\u5B58\u50A8"]
+];
 function BrowserEnvironments({ state, busy, act, Form }) {
   const [editing, setEditing] = (0, import_react6.useState)(null), [rotation, setRotation] = (0, import_react6.useState)(null), [notice, setNotice] = (0, import_react6.useState)("");
+  const [query, setQuery] = (0, import_react6.useState)(""), [filter, setFilter] = (0, import_react6.useState)("all"), [confirmation, setConfirmation] = (0, import_react6.useState)(null);
+  const [helpOpen, setHelpOpen] = (0, import_react6.useState)(false);
+  const confirmationRef = (0, import_react6.useRef)(null);
+  (0, import_react6.useEffect)(() => {
+    confirmationRef.current?.scrollIntoView({ block: "nearest" });
+  }, [confirmation]);
   const current = state.profiles.find((profile) => profile.id === state.profileId);
   const full = state.profiles.length >= 9;
   const mismatch = (profile) => profile.mode === "fingerprint" && state.engineVersion && (profile.backend ?? "chromium") === (current?.backend ?? "chromium") && profile.fingerprintBrowserMajor !== Number(state.engineVersion.split(".")[0]);
   const unavailable = (profile) => profile.backend === "aliasmode" && state.nativeBackend?.installed === false;
-  async function use(profileId) {
-    const result = await act("useProfile", { profileId });
+  const visible = state.profiles.filter((profile) => profile.id !== "native" && (filter === "all" || profile.mode === filter) && `${profile.name} ${profile.backend ?? "chromium"} ${profile.locale ?? ""} ${profile.timezoneId ?? ""}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const request = (action, profile) => {
+    setConfirmation({ action, profile, revision: state.revision, currentId: state.profileId });
+    setEditing(null);
+    setRotation(null);
+    setNotice("");
+  };
+  async function confirm() {
+    if (confirmation.revision !== state.revision || confirmation.currentId !== state.profileId) {
+      setNotice("\u73AF\u5883\u5DF2\u53D8\u5316\uFF0C\u8BF7\u53D6\u6D88\u540E\u91CD\u65B0\u9009\u62E9\u64CD\u4F5C\u3002");
+      return;
+    }
+    const result = await act(confirmation.action, { profileId: confirmation.profile.id, revision: confirmation.revision });
     if (result) {
-      setNotice("\u5DF2\u5207\u6362\u73AF\u5883\u3002\u65E7\u6807\u7B7E\u9875\u5DF2\u5173\u95ED\uFF0C\u65B0\u9875\u9762\u4F7F\u7528\u6B64\u73AF\u5883\u3002");
-      setEditing(null);
-      setRotation(null);
+      setNotice({ useProfile: "\u5DF2\u5207\u6362\u73AF\u5883\u3002\u65E7\u6807\u7B7E\u9875\u5DF2\u5173\u95ED\uFF0C\u65B0\u9875\u9762\u4F7F\u7528\u6B64\u73AF\u5883\u3002", clearStorage: "\u6B64\u73AF\u5883\u4FDD\u5B58\u7684\u767B\u5F55\u72B6\u6001\u5DF2\u6E05\u9664\u3002", deleteProfile: "\u73AF\u5883\u5DF2\u5220\u9664\u3002" }[confirmation.action]);
+      setConfirmation(null);
     }
   }
   async function regenerate() {
@@ -848,9 +890,12 @@ function BrowserEnvironments({ state, busy, act, Form }) {
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pw-browser-environment", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("label", { children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: "\u5F53\u524D\u73AF\u5883" }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Select, { "aria-label": "\u6D4F\u89C8\u5668\u73AF\u5883", value: state.profileId, disabled: busy, onChange: use, options: state.profiles.map((profile) => ({ value: profile.id, label: profile.name, disabled: mismatch(profile) || unavailable(profile) })) })
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Select, { "aria-label": "\u6D4F\u89C8\u5668\u73AF\u5883", value: state.profileId, disabled: busy, onChange: (id) => {
+        if (id !== state.profileId) request("useProfile", state.profiles.find((profile) => profile.id === id));
+      }, options: state.profiles.map((profile) => ({ value: profile.id, label: profile.name, disabled: mismatch(profile) || unavailable(profile) })) })
     ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("section", { className: "pw-browser-profiles", "aria-label": "\u73AF\u5883\u4E0E\u6307\u7EB9\u7BA1\u7406", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("h3", { children: "\u73AF\u5883\u4E0E\u6307\u7EB9" }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("p", { children: [
         "\u5F53\u524D\uFF1A",
         modeLabel(current),
@@ -858,18 +903,31 @@ function BrowserEnvironments({ state, busy, act, Form }) {
         state.engineVersion ? `\u5185\u6838 ${state.engineVersion}` : "\u5185\u6838\u5C1A\u672A\u542F\u52A8",
         current?.fingerprintId ? ` \xB7 ${current.mode === "fingerprint" ? "\u6307\u7EB9" : "\u8BBE\u5907\u53C2\u6570"} ID ${current.fingerprintId}` : " \xB7 \u4FDD\u7559\u771F\u5B9E\u8BBE\u5907\u8EAB\u4EFD"
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: "\u5207\u6362\u73AF\u5883\u4F1A\u5173\u95ED\u5F53\u524D\u6807\u7B7E\u9875\u3002\u66F4\u6362\u6307\u7EB9\u5148\u751F\u6210\u72EC\u7ACB\u65B0\u73AF\u5883\uFF0C\u4E0D\u590D\u5236\u65E7\u767B\u5F55\uFF1B\u70B9\u51FB\u201C\u4F7F\u7528\u201D\u540E\u624D\u751F\u6548\u3002\u8BBE\u5907\u53C2\u6570\u6A21\u677F\u53EA\u8C03\u6574\u5C4F\u5E55\u3001\u50CF\u7D20\u6BD4\u7B49\u8BBE\u7F6E\uFF0C\u4E0D\u7B49\u4E8E\u66F4\u6362 CPU\u3001GPU \u6216 Canvas \u6307\u7EB9\u3002" }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("p", { role: "status", children: [
         "AliasMode \u53EF\u9009\u5185\u6838\uFF1A",
         state.nativeBackend?.installed ? `\u5DF2\u5B89\u88C5 ${state.nativeBackend.version ?? ""}` : "\u672A\u5B89\u88C5\uFF0C\u9700\u5728\u6B64\u5B9E\u4F8B\u72EC\u7ACB\u5B89\u88C5\u540E\u4F7F\u7528",
-        "\u3002\u539F\u751F\u6307\u7EB9\u5207\u6362\u4F1A\u91CD\u542F\u672C\u4F1A\u8BDD\u5185\u6838\uFF0C\u672A\u63D0\u4EA4\u8868\u5355\u4E0D\u4FDD\u7559\u3002"
+        "\u3002"
       ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Disclosure, { title: "\u73AF\u5883\u5207\u6362\u4E0E\u767B\u5F55\u8303\u56F4", open: helpOpen, onToggle: () => setHelpOpen((previous) => !previous), children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: "\u5207\u6362\u73AF\u5883\u4F1A\u5173\u95ED\u5F53\u524D\u6807\u7B7E\u9875\uFF1B\u539F\u751F\u6307\u7EB9\u5207\u6362\u4F1A\u91CD\u542F\u672C\u4F1A\u8BDD\u5185\u6838\uFF0C\u672A\u63D0\u4EA4\u8868\u5355\u4E0D\u4FDD\u7559\u3002\u66F4\u6362\u6307\u7EB9\u5148\u751F\u6210\u72EC\u7ACB\u65B0\u73AF\u5883\uFF0C\u4E0D\u590D\u5236\u65E7\u767B\u5F55\uFF1B\u70B9\u51FB\u201C\u4F7F\u7528\u201D\u540E\u624D\u751F\u6548\u3002\u8BBE\u5907\u53C2\u6570\u6A21\u677F\u53EA\u8C03\u6574\u5C4F\u5E55\u3001\u50CF\u7D20\u6BD4\u7B49\u8BBE\u7F6E\uFF0C\u4E0D\u7B49\u4E8E\u66F4\u6362 CPU\u3001GPU \u6216 Canvas \u6307\u7EB9\u3002" }) }),
       state.nativeBackend?.installed === false && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("p", { className: "pw-muted", children: [
         "\u5B89\u88C5\u547D\u4EE4\uFF1A",
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("code", { children: "patchwork-browser-components install aliasmode --home <\u9694\u79BB\u5B9E\u4F8B\u76EE\u5F55>" }),
         "\uFF08\u4EC5 Windows x64\uFF0C\u4E0D\u968F\u4E3B\u5305\u4E0B\u8F7D\uFF09"
       ] }),
-      state.profiles.filter((profile) => profile.id !== "native").map((profile) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pw-browser-profile-row", role: "group", "aria-label": `\u73AF\u5883 ${profile.name}`, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pw-browser-management-toolbar", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Input, { "aria-label": "\u641C\u7D22\u6D4F\u89C8\u5668\u73AF\u5883", type: "search", value: query, placeholder: "\u641C\u7D22\u73AF\u5883\u3001\u8BED\u8A00\u6216\u5185\u6838", onChange: (event) => setQuery(event.target.value) }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Select, { "aria-label": "\u73AF\u5883\u7C7B\u578B\u7B5B\u9009", value: filter, onChange: setFilter, options: [{ value: "all", label: "\u5168\u90E8\u73AF\u5883" }, { value: "device", label: "\u8BBE\u5907\u53C2\u6570" }, { value: "fingerprint", label: "\u6307\u7EB9\u73AF\u5883" }] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("p", { className: "pw-muted", children: [
+        "\u663E\u793A ",
+        visible.length,
+        " / ",
+        state.profiles.filter((profile) => profile.id !== "native").length,
+        " \u4E2A\u81EA\u5B9A\u4E49\u73AF\u5883\u3002\u5F53\u524D\u73AF\u5883\uFF1A",
+        current?.name ?? "\u672A\u77E5",
+        "\u3002"
+      ] }),
+      visible.map((profile) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pw-browser-profile-row", role: "group", "aria-label": `\u73AF\u5883 ${profile.name}`, children: [
         /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("span", { children: [
           profile.name,
           /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("small", { children: [
@@ -884,20 +942,55 @@ function BrowserEnvironments({ state, busy, act, Form }) {
           ] }),
           profile.mode === "fingerprint" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("small", { children: profile.backend === "aliasmode" ? unavailable(profile) ? "\u65E0\u6CD5\u542F\u7528\uFF1A\u8BF7\u5148\u5B89\u88C5\u53EF\u9009\u5185\u6838" : `${profile.engineRelease} \xB7 \u542F\u7528\u65F6\u6309\u8EAB\u4EFD\u91CD\u542F` : mismatch(profile) ? `\u65E0\u6CD5\u542F\u7528\uFF1A\u6837\u672C Chromium ${profile.fingerprintBrowserMajor ?? "\u672A\u77E5"} \u4E0E\u5F53\u524D\u5185\u6838\u4E0D\u5339\u914D` : `\u6837\u672C Chromium ${profile.fingerprintBrowserMajor ?? "\u672A\u77E5"} \xB7 \u542F\u7528\u524D\u6838\u5BF9\u5185\u6838` })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || profile.id === state.profileId || mismatch(profile) || unavailable(profile), onClick: () => use(profile.id), children: profile.id === state.profileId ? "\u4F7F\u7528\u4E2D" : "\u4F7F\u7528" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || profile.id === state.profileId || mismatch(profile) || unavailable(profile), onClick: () => request("useProfile", profile), children: profile.id === state.profileId ? "\u4F7F\u7528\u4E2D" : "\u4F7F\u7528" }),
         profile.mode !== "native" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || full, onClick: () => {
           setRotation({ ...profile, revision: state.revision });
           setEditing(null);
+          setConfirmation(null);
           setNotice("");
         }, children: profile.mode === "fingerprint" ? "\u66F4\u6362\u6307\u7EB9" : "\u66F4\u6362\u8BBE\u5907\u53C2\u6570" }),
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || profile.id === state.profileId, onClick: () => {
-          setEditing(profile);
+          setEditing({ ...profile, revision: state.revision });
           setRotation(null);
+          setConfirmation(null);
           setNotice("");
         }, children: "\u7F16\u8F91" }),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy, onClick: () => act("clearStorage", { profileId: profile.id }), children: "\u6E05\u9664\u767B\u5F55" }),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || profile.id === state.profileId, onClick: () => act("deleteProfile", { profileId: profile.id, revision: state.revision }), children: "\u5220\u9664" })
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy, onClick: () => request("clearStorage", profile), children: "\u6E05\u9664\u767B\u5F55" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || profile.id === state.profileId, onClick: () => request("deleteProfile", profile), children: "\u5220\u9664" })
       ] }, profile.id)),
+      !visible.length && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { role: "status", children: query || filter !== "all" ? "\u6CA1\u6709\u5339\u914D\u7684\u73AF\u5883\u3002" : "\u8FD8\u6CA1\u6709\u81EA\u5B9A\u4E49\u73AF\u5883\u3002\u65B0\u589E\u540E\u53EF\u9884\u89C8\u5DEE\u5F02\uFF0C\u518D\u51B3\u5B9A\u662F\u5426\u5207\u6362\u3002" }),
+      confirmation && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("section", { ref: confirmationRef, className: "pw-browser-identity-confirm", "aria-label": "\u6D4F\u89C8\u5668\u73AF\u5883\u64CD\u4F5C\u786E\u8BA4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("strong", { children: [
+          { useProfile: "\u5207\u6362\u5230", clearStorage: "\u6E05\u9664\u767B\u5F55\u72B6\u6001", deleteProfile: "\u5220\u9664\u73AF\u5883" }[confirmation.action],
+          "\uFF1A",
+          confirmation.profile.name
+        ] }),
+        confirmation.action === "useProfile" ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pw-browser-environment-diff", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: "\u914D\u7F6E\u9879" }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: "\u5F53\u524D" }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: "\u76EE\u6807" }),
+            environmentFields.map(([label, value]) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pw-browser-diff-row", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: label }),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: value(current) }),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { children: value(confirmation.profile) })
+            ] }, label))
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("p", { children: [
+            "\u786E\u8BA4\u540E\u5173\u95ED\u672C\u4F1A\u8BDD\u5F53\u524D ",
+            state.tabs.length,
+            " \u4E2A\u6807\u7B7E\uFF1B\u672A\u63D0\u4EA4\u8868\u5355\u4E0D\u4FDD\u7559\u3002\u539F\u751F\u5185\u6838\u6307\u7EB9\u5207\u6362\u4F1A\u91CD\u542F\u5185\u6838\uFF1B\u767B\u5F55\u72B6\u6001\u6309\u76EE\u6807\u73AF\u5883\u72EC\u7ACB\u5904\u7406\u3002"
+          ] })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: confirmation.action === "clearStorage" ? "\u6E05\u9664\u6B64\u73AF\u5883\u5DF2\u4FDD\u5B58\u7684 Cookie\u3001localStorage \u7B49\u767B\u5F55\u72B6\u6001\uFF1B\u82E5\u4E3A\u5F53\u524D\u73AF\u5883\uFF0C\u4F1A\u5173\u95ED\u5F53\u524D\u6807\u7B7E\u9875\u3002\u6B64\u64CD\u4F5C\u4E0D\u80FD\u64A4\u9500\u3002" : "\u5220\u9664\u6B64\u73AF\u5883\u53CA\u5176\u4FDD\u5B58\u7684\u767B\u5F55\u72B6\u6001\u3002\u6B64\u64CD\u4F5C\u4E0D\u80FD\u64A4\u9500\uFF0C\u5F53\u524D\u73AF\u5883\u4E0D\u5141\u8BB8\u5220\u9664\u3002" }),
+        (confirmation.revision !== state.revision || confirmation.currentId !== state.profileId) && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { role: "alert", children: "\u73AF\u5883\u5DF2\u53D8\u5316\uFF0C\u8BF7\u53D6\u6D88\u540E\u91CD\u65B0\u9009\u62E9\u3002" }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pw-actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Button, { disabled: busy || confirmation.revision !== state.revision || confirmation.currentId !== state.profileId, onClick: confirm, children: [
+            "\u786E\u8BA4",
+            confirmation.action === "useProfile" ? "\u5207\u6362" : confirmation.action === "clearStorage" ? "\u6E05\u9664\u767B\u5F55" : "\u5220\u9664\u73AF\u5883"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { disabled: busy, onClick: () => setConfirmation(null), children: "\u53D6\u6D88\u64CD\u4F5C" })
+        ] })
+      ] }),
       rotation && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pw-browser-identity-confirm", role: "group", "aria-label": "\u786E\u8BA4\u66F4\u6362\u73AF\u5883", children: [
         /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("strong", { children: [
           rotation.mode === "fingerprint" ? "\u91CD\u65B0\u751F\u6210\u6307\u7EB9" : "\u91CD\u65B0\u751F\u6210\u8BBE\u5907\u53C2\u6570",
@@ -911,23 +1004,26 @@ function BrowserEnvironments({ state, busy, act, Form }) {
         ] })
       ] }),
       editing ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Form, { initial: editing, busy, onCancel: () => setEditing(null), onSave: async (profile) => {
-        const result = await act(editing.id ? "updateProfile" : "createProfile", { profileId: editing.id, profile, revision: state.revision });
+        const result = await act(editing.id ? "updateProfile" : "createProfile", { profileId: editing.id, profile, revision: editing.revision });
         if (result) {
           setEditing(null);
           setNotice("\u73AF\u5883\u5DF2\u4FDD\u5B58\uFF0C\u70B9\u51FB\u201C\u4F7F\u7528\u201D\u540E\u751F\u6548\u3002");
         }
       } }, editing.id ?? editing.mode ?? "new") : /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pw-actions", children: [
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || full, onClick: () => {
-          setEditing({ mode: "device" });
+          setEditing({ mode: "device", revision: state.revision });
           setRotation(null);
+          setConfirmation(null);
         }, children: "\u65B0\u589E\u8BBE\u5907\u73AF\u5883" }),
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || full, onClick: () => {
-          setEditing({ name: "\u539F\u751F\u6307\u7EB9\u73AF\u5883", mode: "fingerprint", backend: "aliasmode" });
+          setEditing({ name: "\u539F\u751F\u6307\u7EB9\u73AF\u5883", mode: "fingerprint", backend: "aliasmode", revision: state.revision });
           setRotation(null);
+          setConfirmation(null);
         }, children: "\u65B0\u589E\u539F\u751F\u6307\u7EB9" }),
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Button, { type: "button", disabled: busy || full, onClick: () => {
-          setEditing({ mode: "fingerprint" });
+          setEditing({ mode: "fingerprint", revision: state.revision });
           setRotation(null);
+          setConfirmation(null);
         }, children: "\u65B0\u589E JS \u6307\u7EB9" })
       ] }),
       full && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: "\u5DF2\u8FBE 8 \u4E2A\u81EA\u5B9A\u4E49\u73AF\u5883\u4E0A\u9650\uFF0C\u5148\u5220\u9664\u4E0D\u518D\u4F7F\u7528\u7684\u73AF\u5883\u3002" }),
@@ -1756,10 +1852,11 @@ var BROWSER_CSS = String.raw`
 .pw-browser-icon { display:block; width:18px; height:18px; flex:none }
 .pw-browser-environment { display:flex; align-items:center; gap:8px; padding:10px; border-bottom:1px solid var(--pw-line); flex-wrap:wrap }
 .pw-browser-profiles { flex:0 1 auto; padding:12px; border-bottom:1px solid var(--pw-line); max-height:50vh; overflow:auto }
-.pw-browser-profiles p,.pw-browser-profile-form p { font-size:11px; color:var(--pw-muted); line-height:1.8; margin:0 0 10px }
+.pw-browser-profiles p,.pw-browser-profile-form p { font-size:12px; color:var(--pw-muted); line-height:1.8; margin:0 0 10px }
+.pw-browser-profiles h3 { margin:0 0 6px }
 .pw-browser-profile-row { display:flex; align-items:center; gap:6px; padding:8px 0; border-bottom:1px solid var(--pw-line); margin-bottom:8px; font-size:12px }
 .pw-browser-profile-row>span { min-width:0; flex:1; overflow-wrap:anywhere }
-.pw-browser-profile-row small { display:block; font-size:10px; color:var(--pw-muted); margin-top:4px }
+.pw-browser-profile-row small { display:block; font-size:11px; color:var(--pw-muted); margin-top:4px }
 .pw-browser-profile-form { display:grid; gap:10px; margin-top:12px }
 .pw-browser-profile-form label { display:grid; gap:5px; color:var(--pw-secondary); font-size:11px }
 .pw-browser-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
@@ -1829,8 +1926,17 @@ var BROWSER_CSS = String.raw`
 .pw-browser-status>span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 .pw-browser .pw-browser-inspect { flex:0 1 auto; min-height:70px; max-height:42vh; overflow:auto; padding:10px 12px; border-bottom:1px solid var(--pw-line); font-size:11px; color:var(--pw-secondary); line-height:1.7 }
 .pw-browser-inspect-actions { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px }
-.pw-browser .pw-browser-resources { flex:0 1 auto; overflow:auto; max-height:44vh; border-bottom:1px solid var(--pw-line); padding:0 12px; font-size:11px; line-height:1.7; color:var(--pw-secondary) }
+.pw-browser .pw-browser-resources { flex:0 1 auto; overflow:auto; max-height:44vh; border-bottom:1px solid var(--pw-line); padding:0 12px; font-size:12px; line-height:1.7; color:var(--pw-secondary) }
 .pw-browser-resources .pw-facts { margin:0 0 10px }
+.pw-browser-resource-summary { display:flex; flex-wrap:wrap; gap:12px 24px; margin:10px 0; padding-bottom:10px; border-bottom:1px solid var(--pw-line) }
+.pw-browser-resource-summary dt { color:var(--pw-muted) }
+.pw-browser-resource-summary dd { margin:0; font-weight:600; color:var(--dsw-alias-label-primary) }
+.pw-browser-management-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:12px 0 4px }
+.pw-browser-management-toolbar > * { flex:1 1 150px; min-width:0 }
+.pw-browser-identity-confirm>.pw-browser-environment-diff { display:grid; grid-template-columns:minmax(52px,.7fr) repeat(2,minmax(0,1fr)); gap:6px; margin:10px 0; overflow-wrap:anywhere }
+.pw-browser-diff-row { display:contents }
+.pw-browser-diff-row > * { padding-block:4px; border-top:1px solid var(--pw-line) }
+.pw-browser-protection { padding:8px; background:var(--pw-soft); border-radius:var(--dsw-radius-md) }
 .pw-browser-resources p { margin:8px 0 10px }
 .pw-browser-health { display:flex; flex-wrap:wrap; gap:4px 12px; margin-block:8px }
 .pw-browser-health p { flex-basis:100%; color:var(--pw-muted) }

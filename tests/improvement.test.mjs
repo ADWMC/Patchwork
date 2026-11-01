@@ -1,41 +1,44 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { join } from 'node:path'
+import { registerSourceReceipt } from '../src/improvement/provenance.mjs'
+import { currentPolicy } from '../src/improvement/policy.mjs'
 import { scopedAgent } from './helpers/agent.mjs'
-import { decideCandidate, improvementSnapshot, proposeCandidate, recordExperiment, recordIncident, rollbackCandidate } from '../src/improvement/store.mjs'
+import { decideCandidate, improvementSnapshot, proposeCandidate, recordExperiment, recordIncident, rollbackCandidate, runCandidateExperiment } from '../src/improvement/store.mjs'
 import { isolatedEnvironment, runIsolatedCommand, validateIsolationSpec } from '../src/improvement/runner.mjs'
 import { IMPROVEMENT_ROUTE_PATH, registerImprovementRoute } from '../src/improvement/route.mjs'
 
 function agent(id = 'improvement-session') {
-  return scopedAgent({ session: { header: { id, cwd: process.cwd() } } })
+  const a = scopedAgent({ session: { header: { id, cwd: process.cwd() } } })
+  for (const id of ['receipt-1', 'receipt-2', 'route-receipt']) registerSourceReceipt(a, { id, outcome: 'failed' })
+  return a
 }
 
-function experiment(agent, candidateId, incidentId) {
-  const run = { mode: 'real-host', model: 'fixed-model', harnessVersion: 'fixed-host', environment: 'isolated-lab', initialRevision: 'same-code', budget: 'same-budget', evidenceRef: 'local:receipts', correctness: 'passed', maintenance: 'passed', passedCases: ['tuning', 'heldout'], cost: 1, latency: 10 }
-  return recordExperiment(agent, { candidateId, sourceFailureIds: [incidentId], sets: { tuning: ['tuning'], heldOut: ['heldout'] }, baseline: { ...run }, candidate: { ...run }, regressions: [], sideEffects: [] })
-}
+async function experiment(agent, candidateId) { return runCandidateExperiment(agent, candidateId, improvementSnapshot(agent).revision) }
 
 test('improvement records are scope-bound, provenance-bound and proposal-first', () => {
   const a = agent('improvement-a')
   const incident = recordIncident(a, { kind: 'failure', sourceReceiptIds: ['receipt-1'], trigger: 'tool failed', action: 'retain evidence' })
   assert.equal(incident.status, 'committed')
-  const candidate = proposeCandidate(a, { incidentIds: [incident.incident.id], object: 'tool-flow', trigger: 'repeat failure', hypothesis: 'change flow', changeScope: 'current project', rollbackTarget: 'baseline' })
+  const candidate = proposeCandidate(a, { incidentIds: [incident.incident.id], object: 'tool-flow', patch: { version: 1, setting: 'requireCrossCheck', value: true }, trigger: 'repeat failure', hypothesis: 'change flow', changeScope: 'current project', rollbackTarget: 'baseline' })
   assert.equal(candidate.candidate.decision, 'proposed')
   assert.equal(improvementSnapshot(a).automaticActivation, 'disabled')
   const standard = agent('improvement-standard'); standard.selectPreset('standard')
   assert.equal(recordIncident(standard, { kind: 'failure', sourceReceiptIds: ['x'], trigger: 'x' }).failureCode, 'IMPROVEMENT_SCOPE_REQUIRED')
 })
 
-test('only an eligible experiment can receive explicit trial and rollback decisions', () => {
+test('only an eligible experiment can receive explicit trial and rollback decisions', async () => {
   const a = agent('improvement-experiment')
   const incident = recordIncident(a, { kind: 'failure', sourceReceiptIds: ['receipt-2'], trigger: 'tool failed', action: 'retain evidence' })
-  const candidate = proposeCandidate(a, { incidentIds: [incident.incident.id], object: 'rule', trigger: 'bounded rule', hypothesis: 'reduce repeats', changeScope: 'project', rollbackTarget: 'baseline' })
+  const candidate = proposeCandidate(a, { incidentIds: [incident.incident.id], object: 'rule', patch: { version: 1, setting: 'verifyBeforeDelivery', value: true }, trigger: 'bounded rule', hypothesis: 'reduce repeats', changeScope: 'project', rollbackTarget: 'baseline' })
   const no = decideCandidate(a, candidate.candidate.id, 1, { mode: 'trial', userConfirmed: false })
   assert.equal(no.failureCode, 'IMPROVEMENT_USER_CONFIRMATION_REQUIRED')
-  const recorded = experiment(a, candidate.candidate.id, incident.incident.id)
+  const recorded = await experiment(a, candidate.candidate.id, incident.incident.id)
   assert.equal(recorded.eligibility.eligibleForReview, true)
   const trial = decideCandidate(a, candidate.candidate.id, recorded.revision, { mode: 'trial', userConfirmed: true })
   assert.equal(trial.candidate.decision, 'trial')
+  assert.equal(trial.candidate.applied, true)
+  assert.equal(currentPolicy(a).verifyBeforeDelivery, true)
   const rollback = rollbackCandidate(a, candidate.candidate.id, trial.revision, { userConfirmed: true })
   assert.equal(rollback.candidate.decision, 'revoked')
   assert.equal(improvementSnapshot(a).candidates[0].applied, false)
@@ -63,8 +66,8 @@ test('isolated runner executes shell-free with bounded output and injected DSH_H
 test('improvement route enforces token, scope and CAS before recording a decision', async () => {
   const a = agent('improvement-route')
   const incident = recordIncident(a, { kind: 'failure', sourceReceiptIds: ['route-receipt'], trigger: 'route failure', action: 'retain evidence' })
-  const candidate = proposeCandidate(a, { incidentIds: [incident.incident.id], object: 'tool-flow', trigger: 'route candidate', hypothesis: 'reduce repeat', changeScope: 'project', rollbackTarget: 'baseline' })
-  const recorded = experiment(a, candidate.candidate.id, incident.incident.id)
+  const candidate = proposeCandidate(a, { incidentIds: [incident.incident.id], object: 'tool-flow', patch: { version: 1, setting: 'requireCrossCheck', value: true }, trigger: 'route candidate', hypothesis: 'reduce repeat', changeScope: 'project', rollbackTarget: 'baseline' })
+  const recorded = await experiment(a, candidate.candidate.id, incident.incident.id)
   let route, dispose
   const server = { register(value) { route = value; return () => {} } }
   const standard = agent('improvement-route-standard'); standard.selectPreset('standard')
@@ -84,3 +87,5 @@ test('improvement route enforces token, scope and CAS before recording a decisio
     assert.equal((await call({ action: 'list' }, { sessionId: 'improvement-route-standard' })).status, 403)
   } finally { dispose?.() }
 })
+
+test('fabricated sources and model supplied experiment metrics are refused', () => { const a = agent('forgery'); assert.equal(recordIncident(a, {sourceReceiptIds:['fake'],trigger:'x'}).failureCode, 'IMPROVEMENT_SOURCE_NOT_FOUND'); const inc=recordIncident(a,{sourceReceiptIds:['receipt-1'],trigger:'failure'}); const candidate=proposeCandidate(a,{incidentIds:[inc.incident.id],object:'rule',trigger:'x',hypothesis:'x',changeScope:'session'}); assert.equal(recordExperiment(a,{candidateId:candidate.candidate.id,baseline:{mode:'real-host'},candidate:{mode:'real-host'}}).failureCode,'IMPROVEMENT_RUNNER_EVIDENCE_REQUIRED') })

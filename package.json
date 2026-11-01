@@ -59,7 +59,13 @@
     "docs/checks/system-prompts-community-2026-11-01.json",
     "docs/checks/superagent-native-2026-11-01.json",
     "docs/checks/superagent-fusion-2026-11-01.json",
-    "docs/checks/browser-chrome-2026-11-01.json"
+    "docs/checks/browser-chrome-2026-11-01.json",
+    "docs/closure-2026-11-01.md",
+    "docs/memory-management-2026-11-01.md",
+    "docs/ui-community-expansion-2026-11-01.md",
+    "docs/checks/ui-community-expansion-2026-11-01.json",
+    "docs/checks/closure-2026-11-01.json",
+    "docs/archive/removed-evidence.md"
   ],
   "scripts": {
     "build:client": "node scripts/build-client.mjs",
@@ -67,7 +73,12 @@
     "pack:local": "node scripts/publish.mjs",
     "verify:improvement-real": "node scripts/verify-improvement-isolation.mjs",
     "test": "node --test \"tests/*.test.mjs\" \"tests/real-composition/*.test.mjs\" \"packages/browser/tests/*.test.mjs\"",
-    "test:benchmark": "node benchmarks/coding/run-isolated.mjs --mode=oracle"
+    "test:benchmark": "node benchmarks/coding/run-isolated.mjs --mode=oracle",
+    "check:docs": "node scripts/check-doc-links.mjs",
+    "test:acceptance:ui": "node tests/ui.acceptance.mjs",
+    "test:acceptance:browser": "node packages/browser/tests/interaction.acceptance.mjs",
+    "test:acceptance:native": "node packages/browser/tests/native-browser.acceptance.mjs",
+    "verify:closure": "node scripts/verify-closure.mjs"
   },
   "dsh": {
     "bundle": {

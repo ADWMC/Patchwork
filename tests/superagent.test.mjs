@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp } from 'node:fs/promises'
+import { mkdtemp, writeFile, stat, realpath } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
@@ -78,6 +78,43 @@ test('completed model output and unknown semantics never unlock a dependency', a
   await f.c.submit([job('a'), job('b', 'write', ['a'])], 0); await until(() => f.children.length === 1)
   const task = ready(); task.requirements.push({ required: true, kind: 'semantic', status: 'unknown' })
   await f.complete(0, { task }); assert.equal(f.c.state.jobs[0].status, 'review'); assert.equal(f.children.length, 1)
+})
+
+test('only user review of the current evidence version unlocks an executor dependency', async t => {
+  const f = await fixture(); t.after(() => f.c.close('test'))
+  await f.c.submit([job('a'), job('b', 'write', ['a'])], 0); await until(() => f.children.length === 1)
+  const task = ready(); task.status = 'partial'; task.requirements.push({ id: 'meaning', required: true, kind: 'semantic', status: 'unknown' })
+  await f.complete(0, { task })
+  const evidenceVersion = f.c.state.jobs[0].evidence.version
+  await assert.rejects(f.c.review('a', f.c.state.revision, { evidenceVersion, accept: true }), /confirmation/)
+  await assert.rejects(f.c.review('a', f.c.state.revision, { userConfirmed: true, evidenceVersion: 'old', accept: true }), /version/)
+  assert.equal(f.children.length, 1)
+  await f.c.review('a', f.c.state.revision, { userConfirmed: true, evidenceVersion, accept: true })
+  await until(() => f.children.length === 2)
+  assert.equal(f.c.state.jobs[0].disposition.source, 'user-confirmed')
+  assert.equal(f.c.state.jobs[0].evidence.verified, false)
+})
+
+test('review refuses changed or out-of-workspace artifacts; rejection and restore never silently release dependencies', async t => {
+  const f = await fixture(); t.after(() => f.c.close('test'))
+  await f.c.submit([job('a'), job('b', 'write', ['a'])], 0); await until(() => f.children.length === 1)
+  const path = join(f.cwd, 'result.txt'); await writeFile(path, 'original')
+  const s = await stat(path), task = ready(); task.status = 'partial'
+  task.artifacts = [{ path: await realpath(path), status: 'current', stamp: `${s.size}:${s.mtimeMs}:${s.ctimeMs}` }]
+  task.requirements.push({ id: 'meaning', required: true, kind: 'semantic', status: 'unknown' })
+  await f.complete(0, { task })
+  const evidenceVersion = f.c.state.jobs[0].evidence.version
+  await writeFile(path, 'changed current bytes')
+  await assert.rejects(f.c.review('a', f.c.state.revision, { userConfirmed: true, accept: true, evidenceVersion }), /changed/)
+  assert.equal(f.children.length, 1)
+  await f.c.review('a', f.c.state.revision, { userConfirmed: true, accept: false, evidenceVersion })
+  assert.equal(f.c.state.jobs[0].status, 'blocked'); assert.equal(f.children.length, 1)
+  const state = structuredClone(f.c.state); state.jobs[0].status = 'done'
+  const restored = restoreSuperagent(state, f.owner.session.header.id)
+  assert.equal(restored.status, 'paused'); assert.equal(restored.jobs[0].status, 'review'); assert.equal(restored.jobs[0].disposition, null)
+  f.c.state.jobs[0].status = 'review'
+  f.c.state.jobs[0].evidence.artifacts[0].path = new URL(import.meta.url).pathname.replace(/^\/(?=[A-Z]:)/, '')
+  await assert.rejects(f.c.review('a', f.c.state.revision, { userConfirmed: true, accept: true, evidenceVersion }), /outside/)
 })
 
 test('waiting and input preserve job identity and allocate a new bounded attempt', async t => {

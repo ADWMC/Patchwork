@@ -4,7 +4,7 @@
 
 ## 使用与维护
 
-- [项目介绍与安装](../README.md)
+- [项目介绍与安装](../README.md) · [English README](../README_EN.md)
 - [更新日志](../CHANGELOG.md)与[写作指南](changelog-guide.md)
 - [贡献流程](../CONTRIBUTING.md)与[安全反馈](../SECURITY.md)
 - [日志系统](logging.md)
@@ -12,8 +12,13 @@
 
 ## 当前功能与验证
 
+- [全功能工作台社区调研、扩充矩阵与实现](ui-community-expansion-2026-11-01.md) · [10 项目固定源码快照](checks/ui-community-expansion-2026-11-01.json)
+
+- [24 项闭环、恢复与验收入口](closure-2026-11-01.md) · [本轮机器证据](checks/closure-2026-11-01.json)
+
 - [DSH 内部 Superagent 主控](superagent-native-2026-11-01.md)、[提示词优化与实跑](superagent-prompt-optimization-2026-11-01.md)
 - [受控改进执行记录](improvement-execution-2026-10-31.md)
+- [记忆详细管理：内容、版本、范围与召回控制](memory-management-2026-11-01.md)
 - [独立浏览器包](../packages/browser/README.md)、[迁移说明](browser-optional-package-2026-11-01.md)、[检索接入](browser-runtime-integration-2026-11-01.md)
 - [编码任务评测](../benchmarks/coding/README.md)与[插件场景](../benchmarks/patchwork/README.md)
 - [SoL 会话分析工具](../benchmark/README.md)与[机制研究门](../research/README.md)：与上述任务题集用途不同，继续保留原 CLI 入口。

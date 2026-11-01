@@ -25,13 +25,13 @@ export async function apply(ctx, config) {
   await initializeDiagnostics(ctx)
   const rowConfig = config ?? {}
   const effective = effectiveConfig(rowConfig, readUserConfig())
-  await loadMemoryState()
+  try { await loadMemoryState() } catch { /* Memory fails closed and exposes recovery; other scoped capabilities remain available. */ }
   registerTaskLifecycle(ctx, effective)
   registerSuperagent(ctx)
   registerRetrievalTools(ctx, effective)
   registerMemoryTool(ctx, effective)
   registerImprovementTool(ctx, effective)
-  await registerPatchworkSkills(ctx, effective)
+  const skillNames = await registerPatchworkSkills(ctx, effective)
   registerUiGuidance(ctx, effective)
   registerReviewCommand(ctx)
   registerStructureHook(ctx, effective)
@@ -39,5 +39,5 @@ export async function apply(ctx, config) {
   // Loading is intentionally read-only: candidates never become runtime rules
   // merely because a session is restored.
   ctx.on?.('agent/created', ({ agent }) => { loadImprovementState(agent) })
-  registerRuntimeCollector(ctx, { rowConfig, loadedConfig: effective })
+  registerRuntimeCollector(ctx, { rowConfig, loadedConfig: effective, skillNames })
 }
