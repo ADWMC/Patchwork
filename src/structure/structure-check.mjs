@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { basename, relative, sep } from 'node:path'
+import { basename, isAbsolute, relative, sep } from 'node:path'
 
 export const SOURCE = /\.(?:c|cc|cpp|cxx|h|hpp|java|js|jsx|mjs|ts|tsx|go|rs|py|kt|swift)$/i
 
@@ -23,7 +23,7 @@ export function isInsideWorkspace(cwd, absolutePath) {
   const rel = relative(cwd, absolutePath)
   if (rel === '') return false
   if (rel.startsWith('..')) return false
-  if (rel.startsWith(`${sep}`) || rel.startsWith('/')) return false
+  if (isAbsolute(rel)) return false
   return true
 }
 

@@ -37,6 +37,11 @@ test('files outside the workspace are not this project structure contract', asyn
   assert.deepEqual(result.warnings, [])
 })
 
+test('Windows files on another drive are outside the workspace', { skip: process.platform !== 'win32' }, () => {
+  assert.equal(isInsideWorkspace('D:\\work\\patchwork', 'C:\\dependencies\\index.d.ts'), false)
+  assert.equal(isInsideWorkspace('D:\\work\\patchwork', 'D:\\work\\patchwork\\src\\index.mjs'), true)
+})
+
 test('reading a large third-party file produces no warning (regression)', async () => {
   const outside = await mkdtemp(join(tmpdir(), 'patchwork-read-'))
   const dependency = join(outside, 'debug_final.d.ts')
