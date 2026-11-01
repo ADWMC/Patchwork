@@ -1,0 +1,80 @@
+{
+  "project": "xicons",
+  "site": "https://www.xicons.org/",
+  "package": "@ricons/ionicons5",
+  "version": "0.13.0",
+  "integrity": "sha512-A8kPRJ2Y3mgaUz2v7Tmemi6WotcZvscqqtTsLvzQ18oDBvTyo8G4RDwjF81m26lgyRgM+kB0oAq5HtZc2GmWxA==",
+  "archive": "https://registry.npmjs.org/@ricons/ionicons5/-/ionicons5-0.13.0.tgz",
+  "license": "MIT",
+  "licenseSource": "https://github.com/ionic-team/ionicons/blob/main/LICENSE",
+  "licenseBlob": "6be4c3e10d8acc5e5268d72c381cdd5685805312",
+  "integration": "Selected static SVG geometry only; rendered with the host React instance. No CDN or runtime icon dependency.",
+  "icons": [
+    {
+      "id": "search",
+      "component": "SearchOutline",
+      "path": "package/es/SearchOutline.js",
+      "sha256": "0eb7013390ed4cf4be1316dad29d906eaa937ba637fd45a06267b31e1ebaff31"
+    },
+    {
+      "id": "chevron",
+      "component": "ChevronForwardOutline",
+      "path": "package/es/ChevronForwardOutline.js",
+      "sha256": "df311a4b9ec86edc7c4c469c81fe404e27fc0ed05669921949c397635f63bc8c"
+    },
+    {
+      "id": "check",
+      "component": "CheckmarkOutline",
+      "path": "package/es/CheckmarkOutline.js",
+      "sha256": "ae41a772428341d51bee873981bf3b0a8ef7e187373dc774aa7a4e3f325b322f"
+    },
+    {
+      "id": "circle",
+      "component": "EllipseOutline",
+      "path": "package/es/EllipseOutline.js",
+      "sha256": "21db89c8a2ced7ab12aa65d769c5cb60fd2a7abc88864c4de0671b6a2a770773"
+    },
+    {
+      "id": "refresh",
+      "component": "RefreshOutline",
+      "path": "package/es/RefreshOutline.js",
+      "sha256": "622809638813c64009a725588f63baf967396f46177871a778325d76e42e5273"
+    },
+    {
+      "id": "file",
+      "component": "DocumentTextOutline",
+      "path": "package/es/DocumentTextOutline.js",
+      "sha256": "b0fe03b3b7ba06a73945459ff3606d53463f2715ccb6849743f278a5558f4f3e"
+    },
+    {
+      "id": "external",
+      "component": "OpenOutline",
+      "path": "package/es/OpenOutline.js",
+      "sha256": "f2d9da816d8000557b1aef35fab73c3914e237e2fedfdc0a01cd93d04f86a316"
+    },
+    {
+      "id": "lock",
+      "component": "LockClosedOutline",
+      "path": "package/es/LockClosedOutline.js",
+      "sha256": "fc4011968de88e69738f9a8287a0f073eb0a0949b32eb5dba2187ac36b87e604"
+    },
+    {
+      "id": "download",
+      "component": "DownloadOutline",
+      "path": "package/es/DownloadOutline.js",
+      "sha256": "19611d7e440f8a4b40cf6bf9288d845d4f3710497da4f22bb8453c1bff241ba0"
+    },
+    {
+      "id": "activity",
+      "component": "PulseOutline",
+      "path": "package/es/PulseOutline.js",
+      "sha256": "1749ae529ffce321cb2af172fc6139ce7e0211faa92737fcb6386ea2f18365a1"
+    },
+    {
+      "id": "shield",
+      "component": "ShieldCheckmarkOutline",
+      "path": "package/es/ShieldCheckmarkOutline.js",
+      "sha256": "71fab499ac119c820b5f7a9c757ce63655ea3d4a5497899ac56da363baa93ff1"
+    }
+  ]
+}

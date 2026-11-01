@@ -12,6 +12,7 @@ node_modules/
 .dsh-web.*.log
 .dsh-web.token.txt
 .dsh-web-verify.png
+.dsh-save-*.png
 .tmp-*.ps1
 .tmp-*.mjs
 
@@ -20,7 +21,15 @@ dsh-test-*.yml
 .dsh-source-test/
 
 # Local tool state
+.idea/
 .playwright-cli/
 .workbuddy/
-\
-.dsh-save-*.png
+
+# Browser verification output
+/output/playwright/
+
+# Local research checkouts, generated evaluations and private session audits
+/artifacts/
+/docs/dsh-session-audit-*/
+*.private.json
+*.private.jsonl
