@@ -1,0 +1,72 @@
+{
+  "name": "@patchwork/browser",
+  "version": "0.2.0",
+  "description": "Optional session-isolated browser workspace for DeepSeek Harness.",
+  "type": "module",
+  "main": "src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "patchwork-browser-components": "scripts/browser-components.mjs"
+  },
+  "files": [
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "README.md",
+    "CHANGELOG.md",
+    "src",
+    "lib",
+    "scripts",
+    "assets",
+    "docs",
+    "cordis.patch.yml"
+  ],
+  "scripts": {
+    "build:client": "node scripts/build-client.mjs",
+    "test": "node --test \"tests/*.test.mjs\"",
+    "components": "node scripts/browser-components.mjs",
+    "setup:browser-recorder": "node scripts/setup-browser-recorder.mjs",
+    "setup:browser-backend": "node scripts/setup-browser-backend.mjs",
+    "check:release": "node scripts/check-release.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": [
+        "./cordis.patch.yml"
+      ]
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-ui-primitives",
+        "@deepseek-ai/dsh-client-ui-theme"
+      ],
+      "platform": "web"
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "@deepseek-ai/dsh-home-paths": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "3.18.4",
+    "fingerprint-generator": "2.1.89",
+    "fingerprint-injector": "2.1.89",
+    "playwright-core": "1.64.1",
+    "ws": "8.22.0",
+    "yauzl": "3.2.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": ">=0.2.0-rc.2 <0.3.0"
+  },
+  "devDependencies": {
+    "clsx": "2.1.1",
+    "esbuild": "^0.28.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "date": "2026-11-01",
+  "package": "@patchwork/browser",
+  "release": "unpublished",
+  "tests": {
+    "tests": 311,
+    "pass": 311,
+    "fail": 0,
+    "skipped": 0
+  },
+  "qa": {
+    "feature": "fingerprint replacement and browser annotation regression",
+    "reference": "browser tab and navigation chrome from the user screenshot",
+    "date": "2026-11-01",
+    "browserPlugin": "absent",
+    "fallback": "Browser plugin not available; use a private Playwright instance",
+    "fullDshApp": false,
+    "nativeDshRegistries": true,
+    "patchworkRuntimeLoaded": false,
+    "modelRequests": 0,
+    "hostBrowserUsed": false,
+    "checks": [
+      "optional package mounts without Patchwork runtime; native tool schemas appear only in the explicitly authorized standard session",
+      "real native tool calls fill and click an observed appliance control; stale observations, ambiguous targets and user takeover reject writes",
+      "two real private browsers keep DOM/input state independent",
+      "browser chrome real interactions: create, select and close tab; back, forward and reload; menu Escape/focus; environment panel opens and closes",
+      "real annotation clicks do not hit the webpage; user notes reach only the bound session callback; drafts are hidden; Space passes input through; drag regions and Escape work; semantic checkbox/select and exact-URL reuse succeed",
+      "native attachment store decodes and hash-verifies real PNG crop; failed conversation send can retry without duplicate submission; new draft clears old success; 380/320px annotation editor stays within viewport; navigation rejects stale marks; Agent schema excludes user-only mark mutations; outside-panel Ctrl+L is untouched",
+      "visible fingerprint entry; real UI creates and uses a device profile; generation retains active pages; explicit use changes actual screen/DPR and isolates cookies/localStorage; full fingerprint replacement yields a different hardware identity; mismatched engine is visibly blocked and leaves old page intact; no Agent mutation tool; 900/380/320px environment panel stays within viewport",
+      "preset switch closes only its owner; a fresh grant cannot revive old clients; stale access revocation is rejected"
+    ],
+    "screenshots": [
+      "browser-fingerprint-dark.png",
+      "browser-fingerprint-1264-dark.png",
+      "browser-fingerprint-900-light.png",
+      "browser-fingerprint-380-light.png",
+      "browser-fingerprint-320-dark.png",
+      "browser-fingerprint-feedback-380-light.png",
+      "browser-fingerprint-feedback-320-dark.png",
+      "fingerprint-controls-900-dark.png",
+      "fingerprint-controls-380-light.png",
+      "fingerprint-controls-320-dark.png"
+    ],
+    "url": "http://127.0.0.1:50906",
+    "expectedAccessDenials": [
+      "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "httpErrors": [],
+    "crop": {
+      "attachmentId": "sha256:0ab0c12ec3f2f88518e3571c5544f8e1876f0dbf6c11231d3192d2e85b82de55",
+      "mediaType": "image/png",
+      "width": 164,
+      "height": 94,
+      "bytes": 3036,
+      "name": "browser-annotation.png",
+      "nativeAttachmentStore": true
+    },
+    "fingerprint": {
+      "engineMajor": 156,
+      "sampleMajor": 147,
+      "fullInjectionVerified": false,
+      "deviceSettingsBefore": {
+        "screen": 1920,
+        "dpr": 1
+      },
+      "deviceSettingsAfter": {
+        "screen": 2195,
+        "dpr": 2.625
+      },
+      "sourceRetained": true,
+      "freshLoginNamespace": true,
+      "otherSessionUnaffected": true
+    },
+    "consoleErrors": [],
+    "nativeToolCalls": 18,
+    "status": "passed",
+    "cleanedUp": true
+  },
+  "sourceHashes": [
+    {
+      "path": "src/browser/profiles.mjs",
+      "sha256": "339f141c750fcf959c6360df97f68cd736e11ee9471d4b86c7498c13fe0c034a"
+    },
+    {
+      "path": "src/browser/session.mjs",
+      "sha256": "116090ace5dd8315260f204f001502248eb2d89f705e800720c90b9110926918"
+    },
+    {
+      "path": "src/client/BrowserChrome.jsx",
+      "sha256": "2cec2184c70f7c0dd60868ff4a31383b47dddd92d8ac91148f5524b6799bf07f"
+    },
+    {
+      "path": "src/client/BrowserPanel.jsx",
+      "sha256": "f1b7ba90c256793323d41fe3e5164d0ae9dbbaa90136de8730be785ae8a37443"
+    },
+    {
+      "path": "src/client/BrowserEnvironments.jsx",
+      "sha256": "49ee511810681d9c745b86388177283f78203ce21e83b9df4fdccbbdab17a909"
+    },
+    {
+      "path": "src/client/styles.mjs",
+      "sha256": "11c9888c154cba81344c0a3f9aa740ff9881c92e065456d6f47b33669a7ef29a"
+    },
+    {
+      "path": "lib/client.js",
+      "sha256": "d57125217e3f91eb76bfe53875a0ec217bbf0aafd5317f06197eb1c6ae236098"
+    }
+  ],
+  "scripts": [
+    {
+      "path": "prepare-fingerprint-qa.mjs",
+      "sha256": "1466286fdb8825130bf6922729901e752fbe11fb9546b603578ccbb7ab07689e"
+    },
+    {
+      "path": "browser-fingerprint-qa.mjs",
+      "sha256": "7424bde6af5e7c0931b1c5b416bfe437568fa1689742529ce27adceaf98a33b0"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "browser-fingerprint-dark.png",
+      "sha256": "3a20d1138d7010281b55a35a2952530edc65ab141c683ca6d9652a0f03a6fd6d"
+    },
+    {
+      "path": "browser-fingerprint-1264-dark.png",
+      "sha256": "522a21cc92ad13e31b22920c09059fb3ef18a322b1a4afbace0100de060eec60"
+    },
+    {
+      "path": "browser-fingerprint-900-light.png",
+      "sha256": "55e5a9a6c1541b2593e38ddb36c019e5ebe9cad5c697a7be40e4d8b798725ac2"
+    },
+    {
+      "path": "browser-fingerprint-380-light.png",
+      "sha256": "98e4f855adbd21228a624436d02977c685251229c81dfdc2d95acb4912d6729d"
+    },
+    {
+      "path": "browser-fingerprint-320-dark.png",
+      "sha256": "b731fcec934c42598cf60fed8daf7104e087786c5efc0836c8e60b618a672d29"
+    },
+    {
+      "path": "browser-fingerprint-feedback-380-light.png",
+      "sha256": "8f5fa28adc5b0a04033660bd3e8c2b21feb25fd685a1d54718ccdb8eeafb2ea4"
+    },
+    {
+      "path": "browser-fingerprint-feedback-320-dark.png",
+      "sha256": "3ee4b2a16abb625019529f4b155f55ce2bd8770128caf097be06370e6db50a1a"
+    },
+    {
+      "path": "fingerprint-controls-900-dark.png",
+      "sha256": "d9999851a40e74d9ab0eb8b9eb4a8daee955120cc7162c5e055ed50c8881e7b6"
+    },
+    {
+      "path": "fingerprint-controls-380-light.png",
+      "sha256": "882fc3a83b0e6b8dd6605b811dd9750511e7fe797f5994e377da4cbc835eb9ad"
+    },
+    {
+      "path": "fingerprint-controls-320-dark.png",
+      "sha256": "bedb77fdbf54ab079bd2cdde5fd6c5b38fb6769a0c82e6b3aeda9be5f83658ef"
+    }
+  ],
+  "limitations": [
+    "Full fingerprint injection not verified: sampled Chromium 147 incompatible with live Chromium 156",
+    "Device templates do not claim CPU/GPU/Canvas/IP rotation",
+    "Explicit viewport resizing can change reported screen size",
+    "Full DSH client/model path not exercised"
+  ],
+  "mainDshModified": false,
+  "hostBrowserUsed": false,
+  "modelRequests": 0
+}

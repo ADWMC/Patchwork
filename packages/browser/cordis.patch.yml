@@ -1,0 +1,4 @@
+# Optional browser package. Install this bundle separately from Patchwork.
+- insert:
+    - id: patchwork-browser
+      name: '@patchwork/browser'

@@ -1,0 +1,102 @@
+{
+  "date": "2026-11-01T08:07:45.286Z",
+  "method": "GitHub CLI through process-local HTTP proxy; targeted primary-source reads",
+  "files": [
+    {
+      "repo": "zai-org/ZCode",
+      "commit": "a60ba6a7e5a06742270ca605f5d2cc2766afa7e1",
+      "path": "packages/ui/src/browser-use/BrowserViewportSurface.tsx",
+      "sha256": "1d2a539c93fdc276994a33dc184ddaa85f903e9dbbb8a90abec3efec1e4cb667",
+      "bytes": 8890,
+      "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/packages/ui/src/browser-use/BrowserViewportSurface.tsx"
+    },
+    {
+      "repo": "zai-org/ZCode",
+      "commit": "a60ba6a7e5a06742270ca605f5d2cc2766afa7e1",
+      "path": "docs/browser-use/2026-07-31-browser-toolbar-more-menu-spec.md",
+      "sha256": "40e6661901f501157b1730e7c1f52aa5e0f176576bbc5dd27e305d0b3927d204",
+      "bytes": 3963,
+      "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/docs/browser-use/2026-07-31-browser-toolbar-more-menu-spec.md"
+    },
+    {
+      "repo": "zai-org/ZCode",
+      "commit": "a60ba6a7e5a06742270ca605f5d2cc2766afa7e1",
+      "path": "apps/zcode-cli/packages/browser-use-plugin/skills/control-browser/SKILL.md",
+      "sha256": "e726fbf72a2bbece6e024d8d7e2d71b54fddf0dda613dfcc91dffd849b7db4a8",
+      "bytes": 18514,
+      "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/apps/zcode-cli/packages/browser-use-plugin/skills/control-browser/SKILL.md"
+    },
+    {
+      "repo": "zai-org/ZCode",
+      "commit": "a60ba6a7e5a06742270ca605f5d2cc2766afa7e1",
+      "path": "apps/zcode-cli/packages/browser-use-plugin/skills/web-gui-tester/SKILL.md",
+      "sha256": "176eab41111d939d0668aa14623a5482496417e63e2fe452fd52da8de45a6307",
+      "bytes": 16423,
+      "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/apps/zcode-cli/packages/browser-use-plugin/skills/web-gui-tester/SKILL.md"
+    },
+    {
+      "repo": "zai-org/ZCode",
+      "commit": "a60ba6a7e5a06742270ca605f5d2cc2766afa7e1",
+      "path": "apps/zcode-cli/packages/browser-use-plugin/docs/tab-claiming-iab.md",
+      "sha256": "d71b9370227c9cbcd8e0aa14f783d79d72c3ed7d876ad58c374f5e3e412ef7ce",
+      "bytes": 1152,
+      "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/apps/zcode-cli/packages/browser-use-plugin/docs/tab-claiming-iab.md"
+    },
+    {
+      "repo": "vercel-labs/agent-browser",
+      "commit": "5868f7c05020e047c00e68e4abf9253cce864f41",
+      "path": "skill-data/core/SKILL.md",
+      "sha256": "ea36484efceb1fcb004a8eb1c5c09fa8dd85a88fd0193c566080d777f23e4970",
+      "bytes": 42553,
+      "url": "https://github.com/vercel-labs/agent-browser/blob/5868f7c05020e047c00e68e4abf9253cce864f41/skill-data/core/SKILL.md"
+    },
+    {
+      "repo": "vercel-labs/agent-browser",
+      "commit": "5868f7c05020e047c00e68e4abf9253cce864f41",
+      "path": "skill-data/core/references/snapshot-refs.md",
+      "sha256": "643b7c3fe7fecbe2f66d299d22c46dbeab3f7c7d03ae4ad0c8db003b73e729ec",
+      "bytes": 6382,
+      "url": "https://github.com/vercel-labs/agent-browser/blob/5868f7c05020e047c00e68e4abf9253cce864f41/skill-data/core/references/snapshot-refs.md"
+    },
+    {
+      "repo": "vercel-labs/agent-browser",
+      "commit": "5868f7c05020e047c00e68e4abf9253cce864f41",
+      "path": "cli/src/native/stream/websocket.rs",
+      "sha256": "e064f2c826be4298544b588f08d1ab29b528549ce00b818a821769fa3581294d",
+      "bytes": 35296,
+      "url": "https://github.com/vercel-labs/agent-browser/blob/5868f7c05020e047c00e68e4abf9253cce864f41/cli/src/native/stream/websocket.rs"
+    },
+    {
+      "repo": "browser-use/browser-use",
+      "commit": "b49a68e4060acb226da8f784194fef301c53a6d7",
+      "path": "browser_use/skills/browser-use/SKILL.md",
+      "sha256": "5651d390c3acfe518960a8b506a7c0d0b40d6b9e79911001ff479c501d877a10",
+      "bytes": 14721,
+      "url": "https://github.com/browser-use/browser-use/blob/b49a68e4060acb226da8f784194fef301c53a6d7/browser_use/skills/browser-use/SKILL.md"
+    },
+    {
+      "repo": "microsoft/playwright-mcp",
+      "commit": "be26c080edfae7c761db1e757c4aff9f6453b4d7",
+      "path": "README.md",
+      "sha256": "b3a0d1f804f4db560344ae3ef98e8e8497d9c41d2fc433a95d4060c40a401d4b",
+      "bytes": 69048,
+      "url": "https://github.com/microsoft/playwright-mcp/blob/be26c080edfae7c761db1e757c4aff9f6453b4d7/README.md"
+    },
+    {
+      "bytes": 13373,
+      "sha256": "a7646aedbe91c12dadbe3d4911cc3eaf001abffca65d7004b90397915b637e11",
+      "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/packages/ui/src/browser-use/ResponsiveBrowserViewport.tsx",
+      "commit": "a60ba6a7e5a06742270ca605f5d2cc2766afa7e1",
+      "path": "packages/ui/src/browser-use/ResponsiveBrowserViewport.tsx",
+      "repo": "zai-org/ZCode"
+    },
+    {
+      "bytes": 2668,
+      "sha256": "0e586cbd2fba8db3ba4bde9c0b7447590bdb32fa1367ed1e5a7df0cda87c980b",
+      "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/packages/ui/src/browser-use/browserViewportZoom.ts",
+      "commit": "a60ba6a7e5a06742270ca605f5d2cc2766afa7e1",
+      "path": "packages/ui/src/browser-use/browserViewportZoom.ts",
+      "repo": "zai-org/ZCode"
+    }
+  ]
+}

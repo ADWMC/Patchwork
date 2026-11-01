@@ -1,0 +1,575 @@
+{
+  "schema": 1,
+  "date": "2026-11-01T07:41:29.219Z",
+  "feature": "Optional native AliasMode fingerprint environments",
+  "package": "@patchwork/browser",
+  "version": "0.2.0",
+  "published": false,
+  "sourceReleaseCommit": "3900a207abab317348c5c5c43adbaf0c2d47c725",
+  "asset": {
+    "name": "aliasmode-chromium-155.0.8059.85-windows-x64.zip",
+    "bytes": 203519527,
+    "sha256": "cfea275e4b7f3274b701e64c0483b46cbf6cd12ead9a6cfda6ff77b2680e7a23"
+  },
+  "regression": {
+    "pass": 329,
+    "fail": 0,
+    "skipped": 0,
+    "command": "node --test \"tests/*.test.mjs\" \"tests/real-composition/*.test.mjs\" \"packages/browser/tests/*.test.mjs\""
+  },
+  "acceptance": {
+    "schema": 1,
+    "date": "2026-11-01T07:40:10.235Z",
+    "realDshRegistries": true,
+    "fullDshClient": false,
+    "modelRequests": 0,
+    "hostBrowserUsed": false,
+    "platform": "win32",
+    "checks": [
+      "real DSH tool registry requires explicit per-session authorization; two private native engines coexist",
+      "real DSH fill/check, session DOM and cookie/localStorage/IndexedDB isolation, health, screenshot and CDP stream",
+      "regeneration leaves source live; use restarts its process, changes actual Canvas output and starts with empty login; second session remains unchanged",
+      "same seed survives process restart with identical measured identity/Canvas and restores opted-in encrypted cookies/localStorage/IndexedDB",
+      "injected target startup failure restores old URL, identity and login; no third process; seed absent from user and model outputs",
+      "revoking one session removes its tool and process; the other session remains usable"
+    ],
+    "unmeasured": [
+      "exit-IP",
+      "TLS",
+      "WebRTC",
+      "cross-origin iframe",
+      "service worker",
+      "external anti-bot acceptance"
+    ],
+    "engine": "155.0.8059.85",
+    "health": {
+      "checkedAt": "2026-11-01T07:40:17.351Z",
+      "source": "session-private-loopback-probe",
+      "configuration": {
+        "status": "match",
+        "compared": 5,
+        "counts": {
+          "match": 5,
+          "mismatch": 0,
+          "unknown": 0,
+          "unsupported": 0
+        },
+        "items": [
+          {
+            "field": "language",
+            "status": "match"
+          },
+          {
+            "field": "width",
+            "status": "match"
+          },
+          {
+            "field": "height",
+            "status": "match"
+          },
+          {
+            "field": "dpr",
+            "status": "match"
+          },
+          {
+            "field": "timezone",
+            "status": "match"
+          }
+        ]
+      },
+      "iframe": {
+        "status": "match",
+        "compared": 8,
+        "counts": {
+          "match": 8,
+          "mismatch": 0,
+          "unknown": 0,
+          "unsupported": 0
+        },
+        "items": [
+          {
+            "field": "ua",
+            "status": "match"
+          },
+          {
+            "field": "language",
+            "status": "match"
+          },
+          {
+            "field": "platform",
+            "status": "match"
+          },
+          {
+            "field": "cores",
+            "status": "match"
+          },
+          {
+            "field": "width",
+            "status": "match"
+          },
+          {
+            "field": "height",
+            "status": "match"
+          },
+          {
+            "field": "dpr",
+            "status": "match"
+          },
+          {
+            "field": "timezone",
+            "status": "match"
+          }
+        ]
+      },
+      "worker": {
+        "status": "match",
+        "compared": 4,
+        "counts": {
+          "match": 4,
+          "mismatch": 0,
+          "unknown": 0,
+          "unsupported": 0
+        },
+        "items": [
+          {
+            "field": "ua",
+            "status": "match"
+          },
+          {
+            "field": "language",
+            "status": "match"
+          },
+          {
+            "field": "platform",
+            "status": "match"
+          },
+          {
+            "field": "cores",
+            "status": "match"
+          }
+        ]
+      },
+      "network": {
+        "status": "match",
+        "compared": 2,
+        "counts": {
+          "match": 2,
+          "mismatch": 0,
+          "unknown": 0,
+          "unsupported": 0
+        },
+        "items": [
+          {
+            "field": "ua",
+            "status": "match"
+          },
+          {
+            "field": "language",
+            "status": "match"
+          }
+        ]
+      },
+      "rendering": {
+        "status": "match",
+        "compared": 3,
+        "counts": {
+          "match": 3,
+          "mismatch": 0,
+          "unknown": 0,
+          "unsupported": 0
+        },
+        "items": [
+          {
+            "field": "canvasStable",
+            "status": "match"
+          },
+          {
+            "field": "blobConsistent",
+            "status": "match"
+          },
+          {
+            "field": "offscreen",
+            "status": "match"
+          }
+        ]
+      },
+      "clientHints": {
+        "status": "match",
+        "compared": 8,
+        "counts": {
+          "match": 8,
+          "mismatch": 0,
+          "unknown": 0,
+          "unsupported": 0
+        },
+        "items": [
+          {
+            "field": "brands",
+            "status": "match"
+          },
+          {
+            "field": "mobile",
+            "status": "match"
+          },
+          {
+            "field": "platform",
+            "status": "match"
+          },
+          {
+            "field": "fullVersionList",
+            "status": "match"
+          },
+          {
+            "field": "platformVersion",
+            "status": "match"
+          },
+          {
+            "field": "uaMajor",
+            "status": "match"
+          },
+          {
+            "field": "jsMajor",
+            "status": "match"
+          },
+          {
+            "field": "fullEngineVersion",
+            "status": "match"
+          }
+        ]
+      },
+      "coverage": {
+        "headers": "received by loopback HTTP server",
+        "clientHints": "JS and loopback low/high entropy headers compared against each other and actual Chromium version; unavailable fields remain unknown",
+        "exitIP": "unsupported",
+        "tls": "unsupported",
+        "webrtc": "unmeasured",
+        "crossOriginIframe": "unmeasured",
+        "workerOffscreenCanvas": "unmeasured"
+      }
+    },
+    "measurements": {
+      "original": {
+        "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+        "uaData": {
+          "architecture": "x86",
+          "bitness": "64",
+          "brands": [
+            {
+              "brand": "Google Chrome",
+              "version": "155"
+            },
+            {
+              "brand": "Chromium",
+              "version": "155"
+            },
+            {
+              "brand": "Not(A:Brand",
+              "version": "24"
+            }
+          ],
+          "fullVersionList": [
+            {
+              "brand": "Google Chrome",
+              "version": "155.0.8059.85"
+            },
+            {
+              "brand": "Chromium",
+              "version": "155.0.8059.85"
+            },
+            {
+              "brand": "Not(A:Brand",
+              "version": "24.0.0.0"
+            }
+          ],
+          "mobile": false,
+          "platform": "Windows",
+          "platformVersion": "19.0.0"
+        },
+        "platform": "Win32",
+        "cores": 8,
+        "memory": 8,
+        "language": "zh-CN",
+        "timezone": "Asia/Shanghai",
+        "screen": [
+          1920,
+          1080,
+          1
+        ],
+        "gpu": [
+          "Google Inc. (Intel)",
+          "ANGLE (Intel, Intel(R) UHD Graphics 620 (0x00003EA0) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        ],
+        "canvas": "86e2f47449a05315abadb1a90acb5db9f4c1b3cdf4367ef9abfcb84ee9c73823"
+      },
+      "replacement": {
+        "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+        "uaData": {
+          "architecture": "x86",
+          "bitness": "64",
+          "brands": [
+            {
+              "brand": "Google Chrome",
+              "version": "155"
+            },
+            {
+              "brand": "Chromium",
+              "version": "155"
+            },
+            {
+              "brand": "Not(A:Brand",
+              "version": "24"
+            }
+          ],
+          "fullVersionList": [
+            {
+              "brand": "Google Chrome",
+              "version": "155.0.8059.85"
+            },
+            {
+              "brand": "Chromium",
+              "version": "155.0.8059.85"
+            },
+            {
+              "brand": "Not(A:Brand",
+              "version": "24.0.0.0"
+            }
+          ],
+          "mobile": false,
+          "platform": "Windows",
+          "platformVersion": "19.0.0"
+        },
+        "platform": "Win32",
+        "cores": 24,
+        "memory": 16,
+        "language": "zh-CN",
+        "timezone": "Asia/Shanghai",
+        "screen": [
+          1920,
+          1080,
+          1
+        ],
+        "gpu": [
+          "Google Inc. (NVIDIA)",
+          "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Ti (0x00002782) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        ],
+        "canvas": "c8a9e661c47e70255d38ab59e7aa6b4261089f7433b1791c2e23c8718bad1774"
+      },
+      "secondSession": {
+        "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+        "uaData": {
+          "architecture": "x86",
+          "bitness": "64",
+          "brands": [
+            {
+              "brand": "Google Chrome",
+              "version": "155"
+            },
+            {
+              "brand": "Chromium",
+              "version": "155"
+            },
+            {
+              "brand": "Not(A:Brand",
+              "version": "24"
+            }
+          ],
+          "fullVersionList": [
+            {
+              "brand": "Google Chrome",
+              "version": "155.0.8059.85"
+            },
+            {
+              "brand": "Chromium",
+              "version": "155.0.8059.85"
+            },
+            {
+              "brand": "Not(A:Brand",
+              "version": "24.0.0.0"
+            }
+          ],
+          "mobile": false,
+          "platform": "Windows",
+          "platformVersion": "10.0.0"
+        },
+        "platform": "Win32",
+        "cores": 16,
+        "memory": 16,
+        "language": "zh-CN",
+        "timezone": "Asia/Shanghai",
+        "screen": [
+          1920,
+          1080,
+          1
+        ],
+        "gpu": [
+          "Google Inc. (NVIDIA)",
+          "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 (0x00002503) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        ],
+        "canvas": "782fa4c6064cc36e187b881faf39ede76b280a65b7db92a12adc5836211f4148"
+      }
+    },
+    "nativeToolCalls": 7,
+    "peakEngines": 2,
+    "status": "passed",
+    "remainingEngines": 0
+  },
+  "ui": {
+    "date": "2026-11-01T07:36:27.656Z",
+    "browserPlugin": "absent",
+    "fallback": "Private Playwright Edge for UI verification",
+    "actualHostControls": true,
+    "fullDshClient": false,
+    "realDshRegistries": true,
+    "hostBrowserUsed": false,
+    "checks": [
+      "Actual DSH controls create native environment, lock identity mode, select appearance, use it, confirm replacement and activate the separate identity",
+      "Desktop and 380/320px sidebar, light/dark host tokens: no horizontal overflow or native select popovers"
+    ],
+    "screenshots": [
+      "browser-native-1100-light.png",
+      "browser-native-900-dark.png",
+      "browser-native-380-light.png",
+      "browser-native-320-dark.png"
+    ],
+    "errors": [],
+    "status": "passed"
+  },
+  "healthUi": {
+    "date": "2026-11-01T07:41:06.926Z",
+    "hostBrowserUsed": false,
+    "actualHostControls": true,
+    "screenshots": [
+      "browser-native-health-1100-light.png",
+      "browser-native-health-320-dark.png"
+    ],
+    "errors": [],
+    "status": "passed",
+    "check": "Clicking actual host controls runs native self-check and visibly reports Client Hints consistency; desktop/narrow layout holds"
+  },
+  "screenshots": [
+    {
+      "name": "browser-native-1100-light.png",
+      "sha256": "09f80f138814df3cc565587479b4454cd8cbe93c8e50adebd35dc81a1a8a948b",
+      "bytes": 59673
+    },
+    {
+      "name": "browser-native-900-dark.png",
+      "sha256": "c4a199970e19166743ac80893cfbc17556b9739013622e967fb6b73dcbd0a166",
+      "bytes": 58196
+    },
+    {
+      "name": "browser-native-380-light.png",
+      "sha256": "98614e6da221d9b76c6fc7faa2ddef7e351e00692aeed225043b85bc422fa70b",
+      "bytes": 41629
+    },
+    {
+      "name": "browser-native-320-dark.png",
+      "sha256": "75007ee7c63225bf782ea85f18744e8acd339715bc40ba2bc4bececd4eded18b",
+      "bytes": 40968
+    },
+    {
+      "name": "browser-native-health-1100-light.png",
+      "sha256": "bac2cb332c41df63f113fe22bfd7482ff3d779fb32a0d6373faf92322d0f3a03",
+      "bytes": 67144
+    },
+    {
+      "name": "browser-native-health-320-dark.png",
+      "sha256": "098041196b1914980f7dcce06928a269115ea19b46858883b529b47275e6b70d",
+      "bytes": 35397
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "packages/browser/src/browser/native-identity.mjs",
+      "sha256": "d5ffc79ebacc308bf9174481f6bc0c5c805423a2dffbdbad571292070df590b8",
+      "bytes": 2348
+    },
+    {
+      "path": "packages/browser/src/browser/client-hints.mjs",
+      "sha256": "dcebe6f716801a1c83a9921eec2639ae4887c4d3b2ab9a7dde29357267c51732",
+      "bytes": 1775
+    },
+    {
+      "path": "packages/browser/src/browser/session.mjs",
+      "sha256": "84a73a57756de12dcb19ef62d519decef0b4983d8b2d79417150e9c600752ff5",
+      "bytes": 43820
+    },
+    {
+      "path": "packages/browser/src/browser/profiles.mjs",
+      "sha256": "0ff37825e83340e09cacf4fae5cd989167c777b688213dd9d64f664eea441192",
+      "bytes": 18232
+    },
+    {
+      "path": "packages/browser/src/browser/backends.mjs",
+      "sha256": "fcf80cafe881f9d7034f7a488fb673bd2befd71d627f1895590074e567aef8cf",
+      "bytes": 10108
+    },
+    {
+      "path": "packages/browser/src/browser/health.mjs",
+      "sha256": "27828eab8be94d38db1638655e9f61007adfd04060da368caca6143d155299b9",
+      "bytes": 5721
+    },
+    {
+      "path": "packages/browser/src/browser/policy.mjs",
+      "sha256": "1420aca3d37bbdb32ab69c6781c65773e989a6e09d40b7435da12103e0751a4b",
+      "bytes": 2670
+    },
+    {
+      "path": "packages/browser/src/browser/identity.mjs",
+      "sha256": "bb3983cd1ab7aac4eeaa479b3e0395d89613d705cc8ca91d951c49a51f5d135c",
+      "bytes": 2414
+    },
+    {
+      "path": "packages/browser/src/browser/components/catalog.mjs",
+      "sha256": "929a813425442cea2960345f6713b88716e8d0948890bbdbbf2f74ef7ebdbc76",
+      "bytes": 3240
+    },
+    {
+      "path": "packages/browser/src/browser/components/provision.mjs",
+      "sha256": "cc5e84e0354f9b47ec91b5e63c033d50b83b1034355d294ef7a1ca8b13eb22df",
+      "bytes": 7767
+    },
+    {
+      "path": "packages/browser/src/client/BrowserEnvironments.jsx",
+      "sha256": "a113c66a93cbad33ee1c238626dab1a003411f8591aa6b0bb4979f2f7a27e974",
+      "bytes": 6713
+    },
+    {
+      "path": "packages/browser/src/client/BrowserPanel.jsx",
+      "sha256": "e6ed3c4b624175044e17434608808495691eac9b7dbb8e075d86a53919a81fcd",
+      "bytes": 26514
+    },
+    {
+      "path": "packages/browser/lib/client.js",
+      "sha256": "8fc6e2c3d1e7616d581f4428c5051469a13459945a83a862967ed93a93a72fef",
+      "bytes": 109849
+    },
+    {
+      "path": "packages/browser/tests/native-fingerprint.test.mjs",
+      "sha256": "b36b9a4152370efe038624cd538e1fd6049f66a35554bca7bedd891ac20fa813",
+      "bytes": 13681
+    },
+    {
+      "path": "packages/browser/tests/native-browser.acceptance.mjs",
+      "sha256": "7016c5a488303af78fe263434b21927c92cd582e93ace0ab162099f211756884",
+      "bytes": 12238
+    },
+    {
+      "path": "packages/browser/tests/helpers/native-probe-plugin.mjs",
+      "sha256": "913dc469584d2de802916fd402174b07ae343fb028e89013d0fe84532d8056fa",
+      "bytes": 1124
+    }
+  ],
+  "verificationScripts": [
+    {
+      "name": "browser-native-ui-qa.mjs",
+      "sha256": "3ddb88664ad3670ee17d1673a35371cf13d228026a6f0a955d7e514c1d4a99b5",
+      "bytes": 5712
+    },
+    {
+      "name": "browser-native-health-ui-qa.mjs",
+      "sha256": "fdb8f27de4110851d894709e7e84d71f457317c1c895f36e40923f35266fa670",
+      "bytes": 2480
+    }
+  ]
+}

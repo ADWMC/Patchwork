@@ -1,0 +1,151 @@
+{
+  "date": "2026-11-01",
+  "package": "@patchwork/browser",
+  "version": "0.2.0",
+  "release": "local-unpublished",
+  "upstream": {
+    "repository": "zai-org/ZCode",
+    "commit": "a60ba6a7e5a06742270ca605f5d2cc2766afa7e1",
+    "headVerifiedWith": "gh api through process-local proxy",
+    "sourceTreeClean": true,
+    "productExecuted": false,
+    "files": [
+      {
+        "path": "apps/zcode-cli/packages/browser-use-plugin/skills/control-browser/SKILL.md",
+        "sha256": "e726fbf72a2bbece6e024d8d7e2d71b54fddf0dda613dfcc91dffd849b7db4a8",
+        "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/apps/zcode-cli/packages/browser-use-plugin/skills/control-browser/SKILL.md"
+      },
+      {
+        "path": "apps/zcode-cli/packages/browser-use-plugin/skills/web-gui-tester/SKILL.md",
+        "sha256": "176eab41111d939d0668aa14623a5482496417e63e2fe452fd52da8de45a6307",
+        "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/apps/zcode-cli/packages/browser-use-plugin/skills/web-gui-tester/SKILL.md"
+      },
+      {
+        "path": "apps/zcode-cli/packages/core/src/browser-client/manifest.ts",
+        "sha256": "3dd4daa520291c92020152b78669dbd40c198320af39fba36d8235c607168551",
+        "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/apps/zcode-cli/packages/core/src/browser-client/manifest.ts"
+      },
+      {
+        "path": "apps/zcode-cli/packages/core/src/browser-client/selection.ts",
+        "sha256": "965446e1887883d0cf8197d01be99006d54033f0546130eb4fbe4ae898ad921a",
+        "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/apps/zcode-cli/packages/core/src/browser-client/selection.ts"
+      },
+      {
+        "path": "apps/zcode-cli/packages/browser-use-plugin/src/browser-client.ts",
+        "sha256": "b07d42a9dff615c8f5d60fe615cee2a97053d9bc9283ca78679101f55cdbf517",
+        "url": "https://github.com/zai-org/ZCode/blob/a60ba6a7e5a06742270ca605f5d2cc2766afa7e1/apps/zcode-cli/packages/browser-use-plugin/src/browser-client.ts"
+      }
+    ]
+  },
+  "verification": {
+    "tests": {
+      "tests": 308,
+      "pass": 308,
+      "fail": 0,
+      "skipped": 0
+    },
+    "buildClientCheck": "passed",
+    "skillQuickValidation": "passed",
+    "realBrowser": {
+      "feature": "annotations and optional browser skill",
+      "reference": "browser tab and navigation chrome from the user screenshot",
+      "date": "2026-11-01",
+      "browserPlugin": "absent",
+      "fallback": "Browser plugin not available; use a private Playwright instance",
+      "fullDshApp": false,
+      "nativeDshRegistries": true,
+      "patchworkRuntimeLoaded": false,
+      "modelRequests": 0,
+      "hostBrowserUsed": false,
+      "checks": [
+        "optional package mounts without Patchwork runtime; native tool schemas appear only in the explicitly authorized standard session",
+        "real native tool calls fill and click an observed appliance control; stale observations, ambiguous targets and user takeover reject writes",
+        "two real private browsers keep DOM/input state independent",
+        "browser chrome real interactions: create, select and close tab; back, forward and reload; menu Escape/focus; environment panel opens and closes",
+        "real annotation clicks do not hit the webpage; user notes reach only the bound session callback; drafts are hidden; Space passes input through; drag regions and Escape work; semantic checkbox/select and exact-URL reuse succeed",
+        "native attachment store decodes and hash-verifies real PNG crop; failed conversation send can retry without duplicate submission; new draft clears old success; 380/320px annotation editor stays within viewport; navigation rejects stale marks; Agent schema excludes user-only mark mutations; outside-panel Ctrl+L is untouched",
+        "preset switch closes only its owner; a fresh grant cannot revive old clients; stale access revocation is rejected"
+      ],
+      "screenshots": [
+        "browser-annotation-dark.png",
+        "browser-annotation-1264-dark.png",
+        "browser-annotation-900-light.png",
+        "browser-annotation-380-light.png",
+        "browser-annotation-320-dark.png",
+        "browser-annotation-feedback-380-light.png",
+        "browser-annotation-feedback-320-dark.png"
+      ],
+      "url": "http://127.0.0.1:49912",
+      "expectedAccessDenials": [
+        "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+      ],
+      "httpErrors": [],
+      "crop": {
+        "attachmentId": "sha256:0ab0c12ec3f2f88518e3571c5544f8e1876f0dbf6c11231d3192d2e85b82de55",
+        "mediaType": "image/png",
+        "width": 164,
+        "height": 94,
+        "bytes": 3036,
+        "name": "browser-annotation.png",
+        "nativeAttachmentStore": true
+      },
+      "consoleErrors": [],
+      "nativeToolCalls": 17,
+      "status": "passed",
+      "cleanedUp": true
+    },
+    "urlLifetime": "QA server stopped and isolated profiles removed after run",
+    "qaScripts": [
+      {
+        "path": "prepare-annotation-qa.mjs",
+        "sha256": "bbffa67103327c9cb2411301a832a588976d1e6e51dfd573bf79a6eab9642218"
+      },
+      {
+        "path": "browser-annotation-qa.mjs",
+        "sha256": "e9d3da9f28babaa8357b8f7a9dc7d76836f9cbb52e95eb63a82b4a730657bc00"
+      }
+    ],
+    "screenshots": [
+      {
+        "path": "browser-annotation-dark.png",
+        "sha256": "54b6dd907ee44aab1dc2e55c337fef245f869a63876bfe91cf4d5a669a18196c"
+      },
+      {
+        "path": "browser-annotation-1264-dark.png",
+        "sha256": "8151cbc2794cdad464af46dff06d9362081a5c320c17639c4eb568a90f1360f8"
+      },
+      {
+        "path": "browser-annotation-900-light.png",
+        "sha256": "a92620901aebfb02aeedaba3b6d9154875d2e14add3fc9b7da1a258f58927eb2"
+      },
+      {
+        "path": "browser-annotation-380-light.png",
+        "sha256": "7278b2b00014fd20a3ce9fd8e797622d55b54678f9f572e34b1d4504628f0469"
+      },
+      {
+        "path": "browser-annotation-320-dark.png",
+        "sha256": "fbd016bf14504e6acd15e170e07880c9c850774cff84867bb5af2addb0b307e4"
+      },
+      {
+        "path": "browser-annotation-feedback-380-light.png",
+        "sha256": "e28a93c164b5a6b26887a2f14a241a36ca0d52b1cbb4befd2cbf22225cdfee74"
+      },
+      {
+        "path": "browser-annotation-feedback-320-dark.png",
+        "sha256": "89dfb73e20040d2be8ea15a0c4544ac63650d542ab43d7831e8fb43e0d2cd136"
+      }
+    ],
+    "nativeConversationSend": "session-bound capture callback and scoped binding unit tests; full DSH client/model path not exercised",
+    "mainDshModified": false,
+    "hostBrowserUsed": false,
+    "modelRequests": 0
+  },
+  "limitations": [
+    "Top document and open Shadow DOM only for semantic element picking",
+    "Visual layout can change without ARIA fingerprint changes",
+    "Submitted crop attachments follow host attachment retention after delivery",
+    "No exactly-once host message acknowledgment",
+    "No ZCode product runtime comparison",
+    "No complete DSH client/model annotation round-trip"
+  ]
+}
