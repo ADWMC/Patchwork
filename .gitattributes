@@ -1,0 +1,3 @@
+# Keep committed browser bundles byte-identical to the LF build output on Windows.
+/lib/client.js text eol=lf
+/packages/browser/lib/client.js text eol=lf
