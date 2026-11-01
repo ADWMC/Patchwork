@@ -10,7 +10,7 @@ Apache-2.0. License texts and dependency notices are distributed with their
 installed packages. Full injection is gated by engine compatibility; the
 default native/device environment does not apply an old browser UA sample.
 
-The optional component installer uses `yauzl@3.2.0` by Josh Wolfe, licensed
+The optional component installer uses `yauzl@3.2.1` by Josh Wolfe, licensed
 under MIT. Its license is distributed with the installed dependency. Browser
 and FFmpeg components retain the notices in their official runtime archives;
 their licenses are independent of Patchwork's AGPL-3.0-only license. Camoufox
