@@ -1,4 +1,6 @@
 import { withFileQueue } from './file-queue.mjs'
+import { requirePatchworkAgent } from '../../scope.mjs'
+import { assertTaskRevision, taskRevision } from '../../task/action-check.mjs'
 
 export const THEN_RUN_PARAMETER = 'then_run'
 
@@ -14,6 +16,7 @@ const THEN_RUN_RESULT_SCHEMA = {
     command: { type: 'string' },
     output: { type: 'string' },
     reason: { type: 'string' },
+    exitCode: { oneOf: [{ type: 'integer' }, { type: 'null' }] },
   },
   required: ['status', 'command'],
   additionalProperties: false,
@@ -42,6 +45,7 @@ export function thenRunBlocks(thenRun) {
   if (!thenRun || typeof thenRun !== 'object') return []
   const lines = [`[then_run:${thenRun.status}]`]
   if (thenRun.reason) lines.push(`reason: ${thenRun.reason}`)
+  if (Number.isInteger(thenRun.exitCode)) lines.push(`exitCode: ${thenRun.exitCode}`)
   if (thenRun.output) lines.push(thenRun.output)
   return [{ type: 'text', text: lines.join('\n') }]
 }
@@ -76,14 +80,20 @@ export function createFusedDefinition({ original, runThenRun }) {
         : {}),
     },
     async execute(args, exec) {
+      requirePatchworkAgent(exec?.agent)
       const { [THEN_RUN_PARAMETER]: thenRun, ...mutationArgs } = args ?? {}
       const command = typeof thenRun?.command === 'string' ? thenRun.command.trim() : ''
 
       // 没有 then_run 时完全不改变原生路径：不进队列，也不额外读文件。
       if (command === '') return { mutation: await original.execute(mutationArgs, exec) }
 
+      const revision = taskRevision(exec.agent)
       return withFileQueue(mutationArgs.file_path, async () => {
+        requirePatchworkAgent(exec?.agent)
+        assertTaskRevision(exec.agent, revision)
         const mutation = await original.execute(mutationArgs, exec)
+        try { assertTaskRevision(exec.agent, revision) }
+        catch { return { mutation, thenRun: { status: 'skipped', command, reason: 'mutation completed; task changed before follow-up' } } }
         const thenRunResult = await runThenRun({ command, filePath: mutationArgs.file_path, exec })
         return { mutation, thenRun: thenRunResult }
       })

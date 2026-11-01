@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "correction-ledger",
+  "title": "纠正、审查和证据闸门形成可追溯链",
+  "suite": "hidden-regression",
+  "capability": "evidence-gate",
+  "userPrompt": "模拟失败后纠正、代码审查和 shell 证据缺失，确认系统宁可 unknown/blocked，也不会把模型声明当成宿主事实。",
+  "allowedTools": ["task lifecycle", "review", "evidence gate"],
+  "oracle": { "commands": [{ "id": "ledger", "program": "node", "args": ["--test", "tests/evidence-gate.test.mjs", "tests/review-command.test.mjs", "tests/task-state.test.mjs"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["状态页显示 unknown/blocked 的具体原因"],
+  "marketing": { "claim": "不完整证据会阻止错误的 ready 结论。", "evidence": "hidden-regression" }
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "improvement-loop",
+  "title": "改进候选必须经过实验和用户确认",
+  "suite": "public-marketing",
+  "capability": "controlled-improvement",
+  "userPrompt": "从真实失败生成 incident 和 candidate，要求 baseline/candidate/held-out 证据，试用、批准后可回滚；任何一步都不能自动改 prompt 或权限。",
+  "allowedTools": ["patchwork_improvement", "isolated runner"],
+  "oracle": { "commands": [{ "id": "improvement", "program": "node", "args": ["--test", "tests/improvement.test.mjs", "tests/evolution.test.mjs"], "timeoutMs": 180000, "expect": { "exitCode": 0 } }, { "id": "real-improvement", "program": "node", "args": ["benchmarks/patchwork/checks/improvement-real.mjs"], "timeoutMs": 180000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["改进页显示来源、实验门槛、审批和回滚", "批准前运行规则、提示词和权限没有变化"],
+  "marketing": { "claim": "Patchwork 根据失败提出候选，但只有隔离验证和用户确认后才可启用，并支持回滚。", "evidence": "deterministic improvement-contract" }
+}

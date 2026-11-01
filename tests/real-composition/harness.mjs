@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const patchworkEntry = pathToFileURL(join(here, '..', '..', 'src', 'index.mjs')).href
+const patchworkEntry = pathToFileURL(join(here, '..', '..', 'src', 'runtime.mjs')).href
 
 /** 组合里必须挂载的宿主包。缺失时调用方应跳过测试而不是失败。 */
 const REQUIRED_HOST_PACKAGES = [
@@ -57,17 +57,17 @@ export async function bootPatchwork(
     ['shell', import.meta.resolve('@deepseek-ai/dsh-pwsh-local')],
     ['tool-pwsh', import.meta.resolve('@deepseek-ai/dsh-tool-pwsh')],
     ...extraRows,
-    ['patchwork', pluginEntry],
     ['driver', pathToFileURL(join(here, driverFile)).href],
   ]
 
   const yml = rows
     .flatMap(([id, name]) => {
       const head = [`- id: ${id}`, `  name: '${name}'`]
-      if (id !== 'patchwork') return head
+      if (id !== 'driver') return head
+      head.push('  config:', `    pluginEntry: '${pluginEntry}'`)
       const entries = Object.entries(pluginConfig)
       if (!entries.length) return head
-      return [...head, '  config:', ...entries.map(([key, value]) => `    ${key}: ${JSON.stringify(value)}`)]
+      return [...head, ...entries.map(([key, value]) => `    ${key}: ${JSON.stringify(value)}`)]
     })
     .join('\n')
 

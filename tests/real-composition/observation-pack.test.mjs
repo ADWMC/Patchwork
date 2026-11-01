@@ -64,7 +64,8 @@ test('a large tool result becomes a handle and its original is archived byte for
     assert.ok(handle, `the projection must carry a handle, got: ${projected.slice(0, 120)}`)
     assert.match(projected, /bytes, \d+ lines/)
     assert.match(projected, /obs_recall/)
-    assert.ok(!projected.includes('diagnostic-line-2000'), 'the full body must not be replayed')
+    assert.ok(!projected.includes('diagnostic-line-1000'), 'the middle of the full body must not be replayed')
+    assert.match(projected, /diagnostic-line-2000/, 'the bounded tail exposes the final lines')
     assert.ok(projected.length < 2048, 'the projection must be small')
 
     // 外部世界核对：磁盘上的归档对象就是原始输出本身。

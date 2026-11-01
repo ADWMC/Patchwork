@@ -1,0 +1,200 @@
+import { nativeFetch } from './http-client.mjs'
+import { parseBingResults, parseBraveResults, parseDuckDuckGoResults, providerParsers } from './provider-parsers.mjs'
+import { createHash } from 'node:crypto'
+
+const MAX_RESPONSE_BYTES = 2_000_000
+const MAX_QUERY_LENGTH = 512
+const USER_AGENT = 'Patchwork-native-search/0.3'
+
+const PROVIDERS = Object.freeze({
+  'bing-html': { endpoint: 'https://www.bing.com/search', queryKey: 'q', family: 'bing' },
+  'brave-html': { endpoint: 'https://search.brave.com/search', queryKey: 'q', family: 'brave' },
+  'duckduckgo-html': { endpoint: 'https://html.duckduckgo.com/html/', queryKey: 'q', params: { kp: '1' }, family: 'duckduckgo' },
+})
+
+export class NativeSearchError extends Error {
+  constructor(message, code = 'SEARCH_PROVIDER_ERROR', details = {}) {
+    super(message)
+    this.name = 'NativeSearchError'
+    this.code = code
+    Object.assign(this, details)
+  }
+}
+
+export function validateQuery(query) {
+  const normalized = String(query ?? '').replace(/\s+/g, ' ').trim()
+  if (!normalized) throw new NativeSearchError('query is required', 'SEARCH_INVALID_QUERY')
+  if (normalized.length > MAX_QUERY_LENGTH) throw new NativeSearchError(`query exceeds ${MAX_QUERY_LENGTH} characters`, 'SEARCH_INVALID_QUERY')
+  return normalized
+}
+
+function boundedLimit(maxResults) {
+  return Math.max(1, Math.min(12, Math.trunc(Number(maxResults) || 8)))
+}
+
+function combinedSignal(signal, timeoutMs) {
+  const timeout = AbortSignal.timeout(Math.max(1000, Math.min(30000, Math.trunc(Number(timeoutMs) || 15000))))
+  return signal ? AbortSignal.any([signal, timeout]) : timeout
+}
+
+async function responseText(response) {
+  if (!response?.ok) throw new NativeSearchError(`search provider returned HTTP ${response?.status ?? 'unknown'}`, 'SEARCH_PROVIDER_HTTP', { status: response?.status })
+  const text = await response.text()
+  if (Buffer.byteLength(text, 'utf8') > MAX_RESPONSE_BYTES) throw new NativeSearchError('search provider response exceeded the bounded response size', 'SEARCH_RESPONSE_TOO_LARGE')
+  return text
+}
+
+function providerUrl(provider, query, endpoint) {
+  const definition = PROVIDERS[provider]
+  if (!definition) throw new NativeSearchError(`unknown native search provider: ${provider}`, 'SEARCH_UNKNOWN_PROVIDER')
+  const url = new URL(endpoint ?? definition.endpoint)
+  url.searchParams.set(definition.queryKey, query)
+  for (const [key, value] of Object.entries(definition.params ?? {})) url.searchParams.set(key, value)
+  if (provider === 'bing-html') url.searchParams.set('count', '12')
+  if (provider === 'brave-html') url.searchParams.set('source', 'web')
+  return url
+}
+
+function normalizeProviderList(providers) {
+  const values = Array.isArray(providers) && providers.length ? providers : ['bing-html', 'brave-html', 'duckduckgo-html']
+  return [...new Set(values.map(value => String(value).trim()).filter(value => value && providerParsers[value]))]
+}
+
+async function searchHtmlProvider({ provider, query, maxResults, timeoutMs, signal, fetchImpl, endpoint }) {
+  const started = Date.now()
+  const response = await fetchImpl(providerUrl(provider, query, endpoint), {
+    method: 'GET',
+    headers: { accept: 'text/html,application/xhtml+xml', 'user-agent': USER_AGENT },
+    timeoutMs,
+    signal: combinedSignal(signal, timeoutMs),
+  })
+  const parser = providerParsers[provider]
+  const html = await responseText(response)
+  const parsed = parser(html, maxResults)
+  const elapsedMs = Date.now() - started
+  const parserSignal = provider === 'bing-html' ? /\bb_algo\b/i : provider === 'brave-html' ? /data-type\s*=\s*["']web["']/i : /\bresult__a\b/i
+  const status = parsed.results.length ? 'healthy' : parserSignal.test(html) ? 'parser_drift' : 'zero_result'
+  return { provider, family: PROVIDERS[provider].family, sources: parsed.results, truncated: parsed.truncated, elapsedMs,
+    health: { provider, family: PROVIDERS[provider].family, status, resultCount: parsed.results.length, elapsedMs } }
+}
+
+async function searchSingleProvider({ provider, query, maxResults = 8, timeoutMs = 15000, signal, fetchImpl = nativeFetch, endpoint } = {}) {
+  const normalized = validateQuery(query)
+  if (typeof fetchImpl !== 'function') throw new NativeSearchError('native search has no HTTP client', 'SEARCH_CLIENT_UNAVAILABLE')
+  try {
+    return await searchHtmlProvider({ provider, query: normalized, maxResults: boundedLimit(maxResults), timeoutMs, signal, fetchImpl, endpoint })
+  } catch (error) {
+    if (error instanceof NativeSearchError) {
+      if (!error.provider) error.provider = provider
+      if (!error.family) error.family = PROVIDERS[provider].family
+      throw error
+    }
+    if (error?.name === 'AbortError' || error?.name === 'TimeoutError') throw new NativeSearchError('native search was cancelled or timed out', error.name === 'AbortError' ? 'SEARCH_ABORTED' : 'SEARCH_TIMEOUT', { provider, family: PROVIDERS[provider].family })
+    throw new NativeSearchError('native search provider request failed', 'SEARCH_PROVIDER_ERROR', { provider, family: PROVIDERS[provider].family })
+  }
+}
+
+/** Search DuckDuckGo directly for callers that need a stable single-provider result. */
+export async function searchDuckDuckGo({ query, maxResults = 8, timeoutMs = 15000, signal, fetchImpl = nativeFetch, endpoint } = {}) {
+  const result = await searchSingleProvider({ provider: 'duckduckgo-html', query, maxResults, timeoutMs, signal, fetchImpl, endpoint })
+  return { provider: result.provider, query: validateQuery(query), sources: result.sources, truncated: result.truncated, elapsedMs: result.elapsedMs, health: result.health }
+}
+
+export async function searchBing({ query, maxResults = 8, timeoutMs = 15000, signal, fetchImpl = nativeFetch, endpoint } = {}) {
+  const result = await searchSingleProvider({ provider: 'bing-html', query, maxResults, timeoutMs, signal, fetchImpl, endpoint })
+  return { provider: result.provider, query: validateQuery(query), sources: result.sources, truncated: result.truncated, elapsedMs: result.elapsedMs, health: result.health }
+}
+
+export async function searchBrave({ query, maxResults = 8, timeoutMs = 15000, signal, fetchImpl = nativeFetch, endpoint } = {}) {
+  const result = await searchSingleProvider({ provider: 'brave-html', query, maxResults, timeoutMs, signal, fetchImpl, endpoint })
+  return { provider: result.provider, query: validateQuery(query), sources: result.sources, truncated: result.truncated, elapsedMs: result.elapsedMs, health: result.health }
+}
+
+function queryTerms(query) {
+  return [...new Set(String(query).toLowerCase().match(/[a-z0-9][a-z0-9_-]*/g) ?? [])]
+}
+
+function relevanceScore(source, terms) {
+  if (!terms.length) return 0
+  const haystack = `${source.title} ${source.snippet ?? ''}`.toLowerCase()
+  return terms.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0) / terms.length
+}
+
+function mergeProviderResults(providerResults, maxResults, query) {
+  const limit = boundedLimit(maxResults)
+  const terms = queryTerms(query)
+  const candidates = new Map()
+  const weights = { 'brave-html': 1.1, 'bing-html': 0.9, 'duckduckgo-html': 0.85 }
+  for (const [providerIndex, provider] of providerResults.entries()) {
+    for (const [rank, source] of provider.sources.entries()) {
+      const existing = candidates.get(source.url)
+      const rankScore = (weights[provider.provider] ?? 0.8) / (rank + 1)
+      const relevance = relevanceScore(source, terms)
+      const score = rankScore + relevance * 2
+      if (existing) {
+        existing.score += score + 0.75
+        existing.providers += 1
+        existing.relevance = Math.max(existing.relevance, relevance)
+        if (!existing.source.snippet && source.snippet) existing.source = { ...existing.source, snippet: source.snippet }
+      } else {
+        candidates.set(source.url, { source, score, providers: 1, relevance, providerIndex, rank })
+      }
+    }
+  }
+  const all = [...candidates.values()]
+  const relevant = all.filter(item => item.relevance > 0)
+  return (relevant.length ? relevant : all)
+    .sort((a, b) => b.score - a.score || b.providers - a.providers || a.providerIndex - b.providerIndex || a.rank - b.rank)
+    .slice(0, limit)
+    .map(item => item.source)
+}
+
+/** Query independent public HTML providers in parallel and merge unique results by rank. */
+export async function searchNativeWeb({ query, maxResults = 8, timeoutMs = 15000, signal, fetchImpl = nativeFetch, providers, endpoints = {} } = {}) {
+  const normalized = validateQuery(query)
+  if (typeof fetchImpl !== 'function') throw new NativeSearchError('native search has no HTTP client', 'SEARCH_CLIENT_UNAVAILABLE')
+  const selected = normalizeProviderList(providers)
+  if (!selected.length) throw new NativeSearchError('native search has no enabled providers', 'SEARCH_NO_PROVIDERS')
+  const started = Date.now()
+  const settled = await Promise.allSettled(selected.map(provider => searchSingleProvider({
+    provider,
+    query: normalized,
+    maxResults: boundedLimit(maxResults),
+    timeoutMs,
+    signal,
+    fetchImpl,
+    endpoint: endpoints[provider],
+  })))
+  const successful = settled.flatMap(item => item.status === 'fulfilled' ? [item.value] : [])
+  const failedProviders = settled.flatMap((item, index) => item.status === 'rejected' ? [{ provider: selected[index], code: item.reason?.code ?? 'SEARCH_PROVIDER_ERROR' }] : [])
+  const providerHealth = settled.map((item, index) => {
+    if (item.status === 'fulfilled') return item.value.health
+    const error = item.reason
+    const status = error?.code === 'SEARCH_PROVIDER_HTTP' && [401, 403, 429, 503].includes(error?.status) ? 'blocked' : 'transport_error'
+    return { provider: selected[index], family: PROVIDERS[selected[index]].family, status, resultCount: 0, code: error?.code ?? 'SEARCH_PROVIDER_ERROR' }
+  })
+  if (signal?.aborted || failedProviders.some(item => item.code === 'SEARCH_ABORTED')) {
+    throw new NativeSearchError('native search was cancelled or timed out', 'SEARCH_ABORTED', { failedProviders, providerHealth })
+  }
+  if (!successful.length) throw new NativeSearchError('all native search providers failed', 'SEARCH_ALL_PROVIDERS_FAILED', { failedProviders, providerHealth })
+  const sources = mergeProviderResults(successful, maxResults, normalized)
+  return {
+    provider: 'patchwork-native-multi',
+    providers: successful.map(item => item.provider),
+    failedProviders,
+    providerHealth,
+    query: normalized,
+    queryFingerprint: createHash('sha256').update(normalized).digest('hex'),
+    sources,
+    truncated: successful.some(item => item.truncated) || successful.some(item => item.sources.length > sources.length),
+    elapsedMs: Date.now() - started,
+  }
+}
+
+export const NATIVE_SEARCH_DEFAULTS = Object.freeze({
+  providers: ['bing-html', 'brave-html', 'duckduckgo-html'],
+  maxResults: 8,
+  timeoutMs: 15000,
+})
+
+export { parseBingResults, parseBraveResults, parseDuckDuckGoResults }

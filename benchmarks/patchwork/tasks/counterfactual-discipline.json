@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "counterfactual-discipline",
+  "title": "优化收益不把反事实估算冒充实测",
+  "suite": "hidden-regression",
+  "capability": "evaluation-discipline",
+  "userPrompt": "对同一条轨迹计算机制反事实节省，确认原始事实、估算假设和未测量字段分开，token 不可用时不能写成零。",
+  "allowedTools": ["counterfactual analyzer", "evolution ledger"],
+  "oracle": { "commands": [{ "id": "counterfactual", "program": "node", "args": ["--test", "tests/benchmark-counterfactual.test.mjs", "tests/auto-research.test.mjs"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["公开报告明确标注反事实和真实运行的区别"],
+  "marketing": { "claim": "优化数据能追溯到事实和假设，报告不会用反事实数字冒充实测收益。", "evidence": "hidden-regression" }
+}

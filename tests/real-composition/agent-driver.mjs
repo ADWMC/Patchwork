@@ -1,4 +1,4 @@
-import { createScope } from '@deepseek-ai/dsh-scope'
+import { createScope, scopeOf, scopeTarget, bindScopeParent, scopeParentOf } from '@deepseek-ai/dsh-scope'
 
 /**
  * Test-only 驱动插件。它只做一件事：在被测插件挂载完成后，按真实形状造出
@@ -13,13 +13,26 @@ import { createScope } from '@deepseek-ai/dsh-scope'
  * 本例的父就是根，等价于「继承根层注册的工具」这一关系。
  */
 export const name = 'patchwork-agent-driver'
-export const inject = ['tools']
+export const inject = ['tools', 'commands', 'skills', 'systemPrompt']
 
 let rootCtx
+let presetKey
+const liveAgents = new Map()
+const agentBindings = new WeakMap()
 export const observed = {}
 
-export function apply(ctx) {
+export async function apply(ctx, config) {
   rootCtx = ctx
+  liveAgents.clear()
+  presetKey = {}
+  // Use native scope ancestry and native registries. Only the composition-id
+  // lookup is a fixture; browser acceptance also uses DSH's actual registry.
+  ctx.provide('agentPresets', { composedPreset: context => scopeParentOf(scopeOf(context)) === presetKey ? 'patchwork' : 'standard' })
+  ctx.provide('agents', { get: id => liveAgents.get(id) })
+  const scoped = createScope(ctx, presetKey)
+  const { pluginEntry, ...pluginConfig } = config
+  const plugin = await import(pluginEntry)
+  await plugin.apply(scoped.ctx, pluginConfig)
   observed.applied = true
 }
 
@@ -30,7 +43,7 @@ function dispatch(payload) {
   let emitError
   console.warn = (...args) => warnings.push(args.map(String).join(' '))
   try {
-    rootCtx.emit('agent/created', payload)
+    rootCtx.emit(scopeTarget(payload.agent, scopeOf(payload.agent.ctx)), 'agent/created', payload)
   } catch (error) {
     emitError = error instanceof Error ? error.message : String(error)
   } finally {
@@ -47,18 +60,20 @@ function probeAccess(agent) {
   }
 }
 
-export function createAgent({ id = 'test-agent', cwd = process.cwd(), sessionId = 'test-session' } = {}) {
+export function createAgent({ id = 'test-agent', cwd = process.cwd(), sessionId = 'test-session', preset = 'patchwork' } = {}) {
   const agentKey = {}
   const agentScope = createScope(rootCtx, agentKey)
+  agentBindings.set(agentKey, bindScopeParent(agentKey, preset === 'patchwork' ? presetKey : {}))
   const followups = []
-  const agent = {
+  const agent = Object.assign(agentKey, {
     id,
     ctx: agentScope.ctx,
     session: { header: { id: sessionId, cwd }, requestContext: () => ({ contextWindow: 200_000 }) },
     whenIdle: async () => {},
     runMaintenance: task => task(new AbortController().signal),
     followup: message => followups.push(message),
-  }
+  })
+  liveAgents.set(sessionId, agent)
 
   const { warnings, emitError } = dispatch({ agent })
 
@@ -73,4 +88,9 @@ export function createAgent({ id = 'test-agent', cwd = process.cwd(), sessionId 
   observed.agentToolNames = rootCtx.tools.schemas(agentKey).map(schema => schema.name)
 
   return { agent, agentKey, tools: rootCtx.tools, followups }
+}
+
+export function selectPreset(agent, preset) {
+  agentBindings.get(scopeOf(agent.ctx)).rebind(preset === 'patchwork' ? presetKey : {})
+  rootCtx.emit('agent-preset/selected', agent.session.header.id, preset)
 }

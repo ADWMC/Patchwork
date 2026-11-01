@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "web-boundary-negative",
+  "title": "网页抓取拒绝 SSRF、越界重定向和恶意输入边界",
+  "suite": "security-negative",
+  "capability": "retrieval-security",
+  "userPrompt": "请求 localhost、私有地址、未允许 host、越界重定向和 robots 拒绝页面，确认请求不会越过 Patchwork 的网络边界。",
+  "allowedTools": ["patchwork_fetch", "patchwork_search"],
+  "oracle": { "commands": [{ "id": "web-negative", "program": "node", "args": ["--test", "tests/public-fetch.test.mjs", "tests/retrieval-tool.test.mjs"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["失败页不会被渲染成可点击执行按钮"],
+  "marketing": { "claim": "外部网页按不可信数据处理，并有 SSRF、robots、host 和大小边界。", "evidence": "security-negative" }
+}

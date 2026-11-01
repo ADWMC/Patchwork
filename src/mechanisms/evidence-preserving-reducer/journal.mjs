@@ -1,25 +1,22 @@
-import { appendFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { MECHANISM_DIR } from './config.mjs'
+import { appendBoundedJsonl } from '../../logging/jsonl.mjs'
+import { diagnosticData } from '../../logging/schema.mjs'
 
 export function journalRoot(sessionId) {
   return dshHomePath('patchwork', MECHANISM_DIR, sessionId)
 }
 
 /**
- * 决策日志：每次是否压缩、以什么原因放弃，都留一条事实。
- *
- * 与 SoL-Pi 的差异：它写进 session log 的非上下文条目；这里写会话级 JSONL。
- * 两者都不进模型上下文，区别只在于是否随会话日志一起迁移。本机制改用旁挂
- * 文件，是因为 DSH 的自定义 session 事件需要先合并进 `SessionEventMap` 才
- * 有稳定契约，而这里只做诊断。
+ * 兼容决策账本：只追加白名单元数据，并按文件大小轮转。
+ * 主诊断流由 index.mjs 写入宿主非上下文插件记录；这里保留历史文件入口，
+ * 不保存完整命令或动态错误文本，也不参与压缩决策。原文 objects 单独保留。
  */
-export async function appendJournal(sessionId, entry) {
+export async function appendJournal(sessionId, entry, options) {
   const root = journalRoot(sessionId)
-  await mkdir(root, { recursive: true, mode: 0o700 })
-  await appendFile(join(root, 'journal.jsonl'), `${JSON.stringify({ timestamp: new Date().toISOString(), ...entry })}\n`, {
-    encoding: 'utf8',
-    mode: 0o600,
-  })
+  const clean = diagnosticData({ ...entry, mechanism: 'epr', event: 'decision', routeKind: entry.reducer?.kind,
+    model: entry.reducer?.model, provider: entry.reducer?.provider, elapsedMs: entry.reducer?.elapsedMs,
+    usage: entry.reducer?.usage, sourceBytes: entry.reducer?.sourceBytes, resultBytes: entry.reducer?.receiptBytes })
+  await appendBoundedJsonl(join(root, 'journal.jsonl'), { ...clean, kind: entry.kind === 'applied' ? 'applied' : 'fallback' }, options)
 }

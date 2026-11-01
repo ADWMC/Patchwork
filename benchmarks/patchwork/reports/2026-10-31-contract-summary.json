@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "patchwork-contract-benchmark",
+  "benchmarkVersion": "0.1.0",
+  "executedAt": "2026-10-31",
+  "environment": {
+    "node": ">=22",
+    "host": "official DSH composition available",
+    "isolation": "per-task temporary DSH_HOME; main DSH untouched",
+    "network": "not required by deterministic contract tasks"
+  },
+  "commands": [
+    { "command": "npm test", "tests": 223, "passed": 223, "failed": 0 },
+    { "command": "node scripts/build-client.mjs --check", "status": "passed" },
+    { "command": "node benchmarks/patchwork/run-isolated.mjs", "tasks": 16, "passed": 16, "failed": 0 }
+  ],
+  "suites": {
+    "public-marketing": { "tasks": 8, "passed": 8, "passRate": 1 },
+    "hidden-regression": { "tasks": 4, "passed": 4, "passRate": 1 },
+    "security-negative": { "tasks": 4, "passed": 4, "passRate": 1 }
+  },
+  "metrics": {
+    "contractPassRate": 1,
+    "securityRefusalRate": 1,
+    "scopeLeakageRate": 0,
+    "staleReferenceMisuseRate": 0,
+    "mainDshTouched": false
+  },
+  "interpretation": "This is a deterministic Patchwork host-contract result. It does not claim model capability improvement or an official Terminal-Bench/SWE-bench leaderboard score."
+}

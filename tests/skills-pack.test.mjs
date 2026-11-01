@@ -5,9 +5,9 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../assets/skills', import.meta.url))
-const EXPECTED = ['anti-slop', 'architecture', 'collaborator', 'evidence', 'patchwork', 'standards', 'web-ui']
+const EXPECTED = ['anti-slop', 'architecture', 'code-review', 'collaborator', 'debugging', 'documentation', 'evidence', 'improvement', 'memory', 'patchwork', 'retrieval', 'standards', 'web-ui']
 
-test('seven skill packs exist with frontmatter name+description', async () => {
+test('skill packs exist with frontmatter name+description and valid references', async () => {
   const dirs = (await readdir(root, { withFileTypes: true }))
     .filter(e => e.isDirectory())
     .map(e => e.name)
@@ -25,5 +25,9 @@ test('seven skill packs exist with frontmatter name+description', async () => {
     assert.ok(desc[1].trim().length <= 500, `${name} description too long`)
     const { size } = await stat(path)
     assert.ok(size < 4000, `${name} SKILL.md too large: ${size}`)
+    for (const [, reference] of raw.matchAll(/\]\((references\/[\w./-]+)\)/g)) {
+      assert.ok(!reference.includes('..'), `${name} reference escapes skill directory: ${reference}`)
+      await stat(join(root, name, reference))
+    }
   }
 })

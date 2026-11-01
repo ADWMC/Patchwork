@@ -40,7 +40,7 @@ test('counters accumulate per mechanism and per field', () => {
   reset()
 })
 
-test('the host injects config and counters into the page instead of opening a route', () => {
+test('the global page contains only bridge metadata, never config or counters', () => {
   reset()
   record('observationPack', 'packedResults')
   const { ctx, taps } = fakeCtx()
@@ -53,38 +53,35 @@ test('the host injects config and counters into the page instead of opening a ro
   // 注入的是 data 元素而不是可执行脚本：多个实例自然累积，也没有覆盖竞态。
   assert.match(html, new RegExp(`<script type="application/json" ${STATS_ELEMENT_ATTRIBUTE}>`))
   assert.ok(html.indexOf('</head>') > html.indexOf(STATS_ELEMENT_ATTRIBUTE), 'the data element must land inside head')
-  assert.match(html, /"actionFusion":true/)
-  assert.match(html, /"evidencePreservingReducer":false/, 'a mechanism that is off must read as off')
-  assert.match(html, /"cacheWriteReadRatio":12\.5/)
-  assert.match(html, /"observationPack":\{"packedResults":1\}/)
+  assert.doesNotMatch(html, /actionFusion|evidencePreservingReducer|cacheWriteReadRatio|packedResults/)
   // 维护提醒计数与机制计数器同源注入，供面板第三屏展示。
-  assert.match(html, /"maintenance":\{\}/)
+  assert.doesNotMatch(html, /"maintenance"|"counters"|"config"/)
   // 写入口与密钥随页面一起下发，面板保存时要用。
   assert.match(html, /"writePath":"\/api\/plugins\/patchwork-coding-agent\/config"/)
   assert.match(html, /"token":"write-token"/)
   reset()
 })
 
-test('the injected config is read fresh on every render, so a save shows without a restart', () => {
+test('global metadata never reads session configuration', () => {
   reset()
   const { ctx, taps } = fakeCtx()
   let current = { actionFusion: false }
   registerStatsInjection(ctx, { readConfig: () => current })
   const html = () => taps[0]('<head></head>')
 
-  assert.match(html(), /"actionFusion":false/)
+  assert.doesNotMatch(html(), /actionFusion/)
   current = { actionFusion: true }
-  assert.match(html(), /"actionFusion":true/)
+  assert.doesNotMatch(html(), /actionFusion/)
   reset()
 })
 
-test('a missing cacheWriteReadRatio injects the schema default instead of null', () => {
+test('defaults are not leaked into global HTML', () => {
   // 回归：注入 null 会让面板把输入框标红并禁用保存按钮。
   reset()
   const { ctx, taps } = fakeCtx()
   registerStatsInjection(ctx, { readConfig: () => ({ actionFusion: true }) })
   const html = taps[0]('<head></head>')
-  assert.match(html, /"cacheWriteReadRatio":12\.5/)
+  assert.doesNotMatch(html, /cacheWriteReadRatio/)
   assert.doesNotMatch(html, /"cacheWriteReadRatio":null/)
   reset()
 })
@@ -92,7 +89,7 @@ test('a missing cacheWriteReadRatio injects the schema default instead of null',
 test('injected JSON cannot close the script tag early', () => {
   reset()
   const { ctx, taps } = fakeCtx()
-  registerStatsInjection(ctx, { readConfig: () => ({}) })
+  registerStatsInjection(ctx, { token: '</script><script>alert(1)</script>' })
   // 计数器字段来自机制内部，仍按「不可信」处理：`<` 必须被转义。
   record('weird', '</script><script>alert(1)</script>', 1)
   const html = taps[0]('<head></head>')
@@ -106,4 +103,16 @@ test('without a webserver the injection is a silent no-op', () => {
   assert.doesNotThrow(() => registerStatsInjection({ get: () => undefined }, {}))
   assert.doesNotThrow(() => registerStatsInjection({}, {}))
   assert.doesNotThrow(() => registerStatsInjection(undefined, {}))
+})
+
+test('index injection is removed with the owning plugin effect', () => {
+  let dispose, removed = false
+  const ctx = {
+    get: () => ({ tapIndex: () => () => { removed = true } }),
+    effect: register => { dispose = register() },
+  }
+  registerStatsInjection(ctx, { readConfig: () => ({}) })
+  assert.equal(removed, false)
+  dispose()
+  assert.equal(removed, true)
 })

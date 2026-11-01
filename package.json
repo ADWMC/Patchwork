@@ -6,22 +6,59 @@
   "main": "src/index.mjs",
   "exports": {
     ".": "./src/index.mjs",
+    "./runtime": "./src/runtime.mjs",
     "./client": "./lib/client.js",
     "./package.json": "./package.json"
   },
   "files": [
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "CHANGELOG.md",
+    "docs/changelog-guide.md",
+    "docs/changelog-research-2026-10-30.md",
+    "docs/information-retrieval-research-2026-10-31.md",
+    "docs/information-retrieval-execution-plan-2026-10-31.md",
+    "docs/remaining-plans-execution-roadmap-2026-10-31.md",
+    "docs/improvement-execution-2026-10-31.md",
+    "docs/benchmark-research-2026-10-31.md",
+    "docs/web-ui-skill-community-review-2026-10-31.md",
+    "docs/human-centered-ai-ui-research-2026-10-31.md",
+    "docs/skill-reliability-audit-2026-10-31.md",
+    "docs/skills-fusion-plan-2026-10-31.md",
+    "docs/skills-fusion-execution-2026-10-31.md",
+    "benchmarks/coding",
+    "benchmarks/patchwork",
+    "assets/prompts/retrieval-research-prompt.md",
     "src",
     "lib",
     "hooks",
     "presets",
     "profiles",
     "scripts",
+    "tests/fixtures/dsh-v0.2.1-rc.2.standard.patch.yml",
     "assets",
-    "cordis.patch.yml"
+    "cordis.patch.yml",
+    "docs/browser-optional-package-2026-11-01.md",
+    "docs/browser-runtime-integration-2026-11-01.md",
+    "docs/checks/browser-optional-package-2026-11-01.json",
+    "docs/browser-chrome-2026-11-01.md",
+    "docs/superagent-fusion-2026-11-01.md",
+    "docs/superagent-native-2026-11-01.md",
+    "docs/superagent-prompt-optimization-2026-11-01.md",
+    "docs/checks/superagent-prompt-optimization-2026-11-01.json",
+    "docs/system-prompts-community-research-2026-11-01.md",
+    "docs/checks/system-prompts-community-2026-11-01.json",
+    "docs/checks/superagent-native-2026-11-01.json",
+    "docs/checks/superagent-fusion-2026-11-01.json",
+    "docs/checks/browser-chrome-2026-11-01.json"
   ],
   "scripts": {
     "build:client": "node scripts/build-client.mjs",
-    "test": "node --test"
+    "check:release": "node scripts/check-browser-release.mjs",
+    "pack:local": "node scripts/publish.mjs",
+    "verify:improvement-real": "node scripts/verify-improvement-isolation.mjs",
+    "test": "node --test \"tests/*.test.mjs\" \"tests/real-composition/*.test.mjs\" \"packages/browser/tests/*.test.mjs\"",
+    "test:benchmark": "node benchmarks/coding/run-isolated.mjs --mode=oracle"
   },
   "dsh": {
     "bundle": {
@@ -32,7 +69,9 @@
     },
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-ui-sidebar-right"
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-ui-primitives",
+        "@deepseek-ai/dsh-client-ui-theme"
       ],
       "platform": "web"
     }

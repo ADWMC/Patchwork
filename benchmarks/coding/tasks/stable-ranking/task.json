@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "stable-ranking",
+  "title": "保持排序稳定并避免修改输入",
+  "issue": "rankItems 按 score 降序排列，但相同分数必须保持输入顺序，且不能原地修改调用方数组。",
+  "workspace": "workspace",
+  "acceptance": { "public": "node --test test/public.test.mjs", "hidden": "node --test test/public.test.mjs oracle/hidden.test.mjs" },
+  "allowedPaths": ["src/rank.mjs"],
+  "marketing": "排序修复同时覆盖行为正确性和副作用回归。"
+}

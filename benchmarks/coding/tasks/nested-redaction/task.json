@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "nested-redaction",
+  "title": "递归脱敏嵌套凭据",
+  "issue": "redactRecord 只处理顶层字段，导致 headers、数组和嵌套对象中的 token 泄露。递归处理 password/token/apiKey/authorization/secret 字段，保留其他值。",
+  "workspace": "workspace",
+  "acceptance": { "public": "node --test test/public.test.mjs", "hidden": "node --test test/public.test.mjs oracle/hidden.test.mjs" },
+  "allowedPaths": ["src/redact.mjs"],
+  "marketing": "诊断日志可保留结构，但嵌套 token 和 authorization 不会原样输出。"
+}

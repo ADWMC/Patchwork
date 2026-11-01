@@ -1,4 +1,6 @@
-import { effectiveConfig, mergeUserConfig, validatePatch } from '../config/user-config.mjs'
+import { configRevision, effectiveConfig, mergeUserConfigState, readUserConfig, validatePatch } from '../config/user-config.mjs'
+import { webRuntime } from './web-runtime.mjs'
+import { resolvePatchworkAgent } from '../scope.mjs'
 
 export const CONFIG_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/config'
 export const CONFIG_TOKEN_HEADER = 'x-patchwork-token'
@@ -17,11 +19,11 @@ const MAX_BODY_BYTES = 64 * 1024
  * 会直接失败（duplicate exact route）。所以用进程级注册表：`exact /api/plugins/patchwork-coding-agent/config`
  * 全局只注册一次，后到的实例直接跳过。
  */
-const registeredRouteKeys = new Set()
+const registeredRouteKeys = webRuntime.routes
 
 /** 测试用：清空进程级注册表，让每个测试从干净状态开始。 */
 export function resetRouteRegistry() {
-  registeredRouteKeys.clear()
+  registeredRouteKeys.delete(`exact\u0000${CONFIG_ROUTE_PATH}`)
 }
 
 export function registerConfigRoute(ctx, { token, rowConfig = {}, onSaved } = {}) {
@@ -31,39 +33,50 @@ export function registerConfigRoute(ctx, { token, rowConfig = {}, onSaved } = {}
   if (registeredRouteKeys.has(routeKey)) return
   registeredRouteKeys.add(routeKey)
 
-  server.register({
-    kind: 'exact',
-    path: CONFIG_ROUTE_PATH,
-    handler: async (req, res) => {
-      const reply = (status, payload) => {
-        res.statusCode = status
-        res.setHeader('content-type', 'application/json')
-        res.end(JSON.stringify(payload))
-      }
+  const register = () => {
+    const dispose = server.register({
+      kind: 'exact',
+      path: CONFIG_ROUTE_PATH,
+      handler: async (req, res) => {
+        const reply = (status, payload) => {
+          res.statusCode = status
+          res.setHeader('content-type', 'application/json')
+          res.setHeader('cache-control', 'no-store')
+          res.end(JSON.stringify(payload))
+        }
 
-      if (req.method !== 'POST') return reply(405, { ok: false, reason: 'method-not-allowed' })
-      if (req.headers[CONFIG_TOKEN_HEADER] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+        if (req.method !== 'POST') return reply(405, { ok: false, reason: 'method-not-allowed' })
+        if (req.headers[CONFIG_TOKEN_HEADER] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+        const sessionId = new URL(req.url ?? CONFIG_ROUTE_PATH, 'http://localhost').searchParams.get('sessionId')
+        if (!resolvePatchworkAgent(ctx, sessionId)) return reply(403, { ok: false, reason: 'patchwork-agent-required' })
 
-      let raw
-      try {
-        raw = JSON.parse(await readBody(req))
-      } catch {
-        return reply(400, { ok: false, reason: 'body-not-json' })
-      }
+        let raw
+        try {
+          raw = JSON.parse(await readBody(req))
+        } catch {
+          return reply(400, { ok: false, reason: 'body-not-json' })
+        }
 
-      const validated = validatePatch(raw)
-      if (!validated.ok) return reply(400, { ok: false, reason: validated.reason })
+        const validated = validatePatch(raw)
+        if (!validated.ok) return reply(400, { ok: false, reason: validated.reason })
+        if (!resolvePatchworkAgent(ctx, sessionId)) return reply(403, { ok: false, reason: 'patchwork-agent-required' })
 
-      try {
-        const stored = await mergeUserConfig(validated.value)
-        const config = effectiveConfig(rowConfig, stored)
-        await onSaved?.(config)
-        return reply(200, { ok: true, config })
-      } catch (error) {
-        return reply(500, { ok: false, reason: error instanceof Error ? error.message : String(error) })
-      }
-    },
-  })
+        try {
+          const { config: stored, revision } = await mergeUserConfigState(validated.value, req.headers['x-patchwork-revision'], () => Boolean(resolvePatchworkAgent(ctx, sessionId)))
+          const config = effectiveConfig(rowConfig, stored)
+          await onSaved?.(config)
+          return reply(200, { ok: true, config, revision })
+        } catch (error) {
+          if (error?.code === 'patchwork-agent-required') return reply(403, { ok: false, reason: error.code })
+          if (error?.code === 'revision-conflict') return reply(409, { ok: false, reason: 'revision-conflict', config: effectiveConfig(rowConfig, readUserConfig()), revision: configRevision() })
+          return reply(500, { ok: false, reason: error instanceof Error ? error.message : String(error) })
+        }
+      },
+    })
+    return () => { dispose?.(); registeredRouteKeys.delete(routeKey) }
+  }
+  if (ctx.effect) ctx.effect(register, 'patchwork: configuration endpoint')
+  else return register()
 }
 
 function readBody(req) {

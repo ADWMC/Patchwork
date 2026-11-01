@@ -1,12 +1,13 @@
 import { PLAN_TOOL_NAME } from './config.mjs'
 import { formatPlanSnapshot, validatePlan } from './plan.mjs'
+import { requirePatchworkAgent } from '../../scope.mjs'
 
 const STEP_SCHEMA = {
   type: 'object',
   properties: {
     id: { type: 'string', description: 'Stable id for this step; reuse it when you update the step.' },
     text: { type: 'string', description: 'What this step does, in one short line.' },
-    status: { type: 'string', description: 'One of pending, in_progress, completed.' },
+    status: { type: 'string', enum: ['pending', 'in_progress', 'completed'], description: 'One of pending, in_progress, completed.' },
   },
   required: ['id', 'text', 'status'],
   additionalProperties: false,
@@ -25,7 +26,7 @@ export function registerPlanTool(ctx, onPlan) {
   ctx.tools.register({
     name: PLAN_TOOL_NAME,
     description:
-      'Record or update your working plan for the current task. Submit the complete list every time; mark a step completed only when it is actually finished, because a completed step is the point where the session may compact its context and continue.',
+      'Record or update your working plan for the current task. Example: {"steps":[{"id":"inspect","text":"Inspect relevant source","status":"in_progress"}]}. Each item requires id, text (not content) and status. Submit the complete list every time; mark a step completed only when actually finished, because completion may compact context. Small tasks need no plan.',
     parameters: {
       type: 'object',
       properties: { steps: { type: 'array', items: STEP_SCHEMA } },
@@ -51,8 +52,9 @@ export function registerPlanTool(ctx, onPlan) {
       ],
     },
     async execute(args, exec) {
+      requirePatchworkAgent(exec?.agent)
       const validated = validatePlan(args)
-      if (!validated.ok) throw new Error(`invalid plan: ${validated.reason}`)
+      if (!validated.ok) throw new Error(`invalid plan: ${validated.reason}; steps items require id, text (not content), status=pending|in_progress|completed`)
 
       const outcome = await onPlan({ steps: validated.steps, exec })
       return {

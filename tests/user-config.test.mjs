@@ -1,3 +1,4 @@
+import { scopedAgent } from './helpers/agent.mjs'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { mkdtemp, readFile } from 'node:fs/promises'
@@ -7,7 +8,7 @@ import { join } from 'node:path'
 // 用户配置落在宿主用户数据根下；指到临时目录，测试不污染真实 ~/.dsh。
 process.env.DSH_HOME = await mkdtemp(join(tmpdir(), 'patchwork-user-config-'))
 
-const { effectiveConfig, mergeUserConfig, readUserConfig, userConfigPath, validatePatch } = await import(
+const { effectiveConfig, mergeUserConfig, mergeUserConfigState, configRevision, readUserConfig, userConfigPath, validatePatch } = await import(
   '../src/config/user-config.mjs'
 )
 const { CONFIG_ROUTE_PATH, CONFIG_TOKEN_HEADER, registerConfigRoute, resetRouteRegistry } = await import(
@@ -18,6 +19,7 @@ const { CONFIG_ROUTE_PATH, CONFIG_TOKEN_HEADER, registerConfigRoute, resetRouteR
 test.beforeEach(() => resetRouteRegistry())
 
 test('only known writable keys with the right types are accepted', () => {
+  assert.equal(validatePatch({ browserEnabled: true }).reason, 'unknown-key:browserEnabled')
   assert.equal(validatePatch({ actionFusion: true }).ok, true)
   assert.equal(validatePatch({ cacheWriteReadRatio: 0 }).ok, true)
   assert.equal(validatePatch({ actionFussion: true }).reason, 'unknown-key:actionFussion')
@@ -50,10 +52,27 @@ test('the user layer wins over the deployment row config', () => {
   assert.deepEqual(effectiveConfig(row, {}), row, 'without user overrides the row config stands')
 })
 
+test('concurrent patches preserve fields and stale revisions conflict explicitly', async () => {
+  await Promise.all([mergeUserConfig({ actionFusion: false }), mergeUserConfig({ observationPack: true })])
+  assert.equal(readUserConfig().actionFusion, false)
+  assert.equal(readUserConfig().observationPack, true)
+  const revision = configRevision()
+  const results = await Promise.allSettled([
+    mergeUserConfigState({ actionFusion: true }, revision),
+    mergeUserConfigState({ observationPack: false }, revision),
+  ])
+  assert.equal(results.filter(r => r.status === 'fulfilled').length, 1)
+  assert.equal(results.find(r => r.status === 'rejected').reason.code, 'revision-conflict')
+  assert.equal(readUserConfig().actionFusion, true)
+  assert.equal(readUserConfig().observationPack, true)
+})
+
 function fakeServer() {
+  const agent = scopedAgent({ session: { header: { id: 'config-session' } } })
   const routes = []
   return {
     routes,
+    agent,
     server: {
       register(route) {
         routes.push(route)
@@ -68,6 +87,7 @@ function fakeRequest({ method = 'POST', token, body } = {}) {
   return {
     __body: body,
     method,
+    url: CONFIG_ROUTE_PATH + '?sessionId=config-session',
     headers: token === undefined ? {} : { [CONFIG_TOKEN_HEADER]: token },
     on(event, listener) {
       listeners.set(event, listener)
@@ -107,7 +127,7 @@ async function callRoute(route, request) {
 
 test('the write route refuses anything that is not an authorised POST', async () => {
   const { routes, server } = fakeServer()
-  const ctx = { get: name => (name === 'webServer' ? server : undefined) }
+  const ctx = { get: name => name === 'webServer' ? server : name === 'agents' ? { get: () => scopedAgent({ session: { header: { id: 'config-session' } } }) } : undefined }
   registerConfigRoute(ctx, { token: 'secret', rowConfig: { observationPack: true } })
   assert.equal(routes.length, 1)
   assert.equal(routes[0].path, CONFIG_ROUTE_PATH)
@@ -131,7 +151,7 @@ test('an authorised save persists and answers with the effective config', async 
   const { routes, server } = fakeServer()
   let saved
   registerConfigRoute(
-    { get: name => (name === 'webServer' ? server : undefined) },
+    { get: name => name === 'webServer' ? server : name === 'agents' ? { get: () => scopedAgent({ session: { header: { id: 'config-session' } } }) } : undefined },
     { token: 'secret', rowConfig: { observationPack: true }, onSaved: config => { saved = config } },
   )
 
@@ -151,7 +171,7 @@ test('without a webserver or a token the route is a silent no-op', () => {
 
 test('registering twice on the same web server is idempotent', () => {
   const { routes, server } = fakeServer()
-  const ctx = { get: name => (name === 'webServer' ? server : undefined) }
+  const ctx = { get: name => name === 'webServer' ? server : name === 'agents' ? { get: () => scopedAgent({ session: { header: { id: 'config-session' } } }) } : undefined }
   registerConfigRoute(ctx, { token: 'first' })
   registerConfigRoute(ctx, { token: 'second' })
   assert.equal(routes.length, 1, 'a second registration must not duplicate the exact route')
@@ -168,4 +188,42 @@ test('a different web-server instance still cannot register the route again', ()
   const second = fakeServer()
   registerConfigRoute({ get: name => (name === 'webServer' ? second.server : undefined) }, { token: 'two' })
   assert.equal(second.routes.length, 0, 'a second server instance must not register the shared exact route')
+})
+
+test('config route ownership releases on plugin disposal so hot reload can register', () => {
+  const first = fakeServer()
+  let dispose
+  registerConfigRoute({ get: () => first.server, effect: fn => { dispose = fn() } }, { token: 'stable' })
+  assert.equal(first.routes.length, 1)
+  dispose()
+  const second = fakeServer()
+  registerConfigRoute({ get: () => second.server }, { token: 'stable' })
+  assert.equal(second.routes.length, 1)
+})
+
+test('even a valid page token cannot configure a standard or switched-away session', async () => {
+  const { routes, server, agent } = fakeServer()
+  const ctx = { get: name => name === 'webServer' ? server : name === 'agents' ? { get: id => id === 'config-session' ? agent : undefined } : undefined }
+  registerConfigRoute(ctx, { token: 'secret' })
+  const before = readUserConfig()
+  agent.selectPreset('standard')
+  const denied = await callRoute(routes[0], fakeRequest({ token: 'secret', body: '{"actionFusion":false}' }))
+  assert.equal(denied.status, 403)
+  assert.deepEqual(denied.json, { ok: false, reason: 'patchwork-agent-required' })
+  agent.selectPreset('patchwork')
+  const request = fakeRequest({ token: 'secret', body: '{"actionFusion":false}' })
+  const response = fakeResponse()
+  const pending = routes[0].handler(request, response)
+  agent.selectPreset('standard')
+  await request.emitBody(request.__body)
+  await pending
+  assert.equal(response.statusCode, 403)
+  assert.deepEqual(readUserConfig(), before)
+})
+
+test('queued writes recheck authorization immediately before replacing the file', async () => {
+  const before = readUserConfig()
+  let checks = 0
+  await assert.rejects(mergeUserConfigState({ actionFusion: !before.actionFusion }, undefined, () => ++checks < 2), error => error.code === 'patchwork-agent-required')
+  assert.deepEqual(readUserConfig(), before)
 })

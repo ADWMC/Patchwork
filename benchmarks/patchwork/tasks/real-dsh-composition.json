@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "real-dsh-composition",
+  "title": "官方 DSH 组合中的全插件冒烟",
+  "suite": "hidden-regression",
+  "capability": "official-host-integration",
+  "userPrompt": "在临时 DSH_HOME 中启动官方 DSH 组合，创建 Patchwork 和 standard Agent，跑通主要工具注册、真实宿主 acceptance 和 scope 切换。",
+  "allowedTools": ["official DSH composition", "real-composition tests"],
+  "oracle": { "commands": [{ "id": "host", "program": "node", "args": ["--test", "tests/real-composition/action-fusion.test.mjs", "tests/real-composition/evidence-preserving-reducer.test.mjs", "tests/real-composition/observation-pack.test.mjs", "tests/real-composition/online-context-compact.test.mjs", "tests/real-composition/scope-isolation.test.mjs", "tests/real-composition/task-lifecycle.test.mjs"], "timeoutMs": 300000, "requireNoSkips": true, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["主 DSH_HOME、主进程和主会话没有新增写入"],
+  "marketing": { "claim": "插件在官方 DSH 组合中完成真实宿主级隔离冒烟。", "evidence": "isolated official-host run" }
+}

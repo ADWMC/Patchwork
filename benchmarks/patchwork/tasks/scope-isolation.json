@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "scope-isolation",
+  "title": "切换 Agent 后能力目录立即隔离",
+  "suite": "public-marketing",
+  "capability": "agent-scope",
+  "userPrompt": "在同一个 DSH 中创建 Patchwork Agent 和 standard Agent，验证 Patchwork 工具只在前者出现；切换 preset 后旧工具引用也必须失效。",
+  "allowedTools": ["official DSH composition", "node test runner"],
+  "oracle": { "commands": [{ "id": "scope", "program": "node", "args": ["--test", "tests/scope-isolation.test.mjs", "tests/real-composition/scope-isolation.test.mjs"], "timeoutMs": 120000, "requireNoSkips": true, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["UI 当前 session 显示 Patchwork scope", "standard Agent 看不到 Patchwork 工具或提示词"],
+  "marketing": { "claim": "Patchwork 能力只在选中的 Patchwork Agent 中出现，切换后旧引用立即失效。", "evidence": "deterministic host-contract" }
+}

@@ -18,7 +18,7 @@ class ScriptedTokenMeter extends Service {
   }
 
   measure() {
-    return { totalTokens: this.totalTokens }
+    return { totalTokens: this.totalTokens, nodes: [] }
   }
 }
 

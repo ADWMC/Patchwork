@@ -1,4 +1,6 @@
+import { scopedAgent } from './helpers/agent.mjs'
 import assert from 'node:assert/strict'
+import { diagnosticSnapshot, flushDiagnostics } from '../src/logging/session-log.mjs'
 import test from 'node:test'
 import { mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -7,6 +9,8 @@ import { createFusedDefinition, extendParameters, thenRunBlocks } from '../src/m
 import { hashFile, targetUnchanged } from '../src/mechanisms/action-fusion/mutation-guard.mjs'
 import { withFileQueue } from '../src/mechanisms/action-fusion/file-queue.mjs'
 import { registerActionFusion } from '../src/mechanisms/action-fusion/index.mjs'
+import { reset, snapshot } from '../src/ui/mechanism-stats.mjs'
+import { taskState, transitionTask } from '../src/task/store.mjs'
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -31,7 +35,64 @@ function nativeWriteTool({ onExecute } = {}) {
   }
 }
 
-const EXEC = { callId: 'call-1', rootCallId: 'call-1', token: Symbol('token'), name: 'write', arguments: {} }
+const EXEC = { agent: scopedAgent(), callId: 'call-1', rootCallId: 'call-1', token: Symbol('token'), name: 'write', arguments: {} }
+
+test('correction during follow-up hashing preserves mutation and skips shell dispatch', async () => {
+  const listeners = new Map()
+  registerActionFusion({ on: (event, listener) => listeners.set(event, listener) })
+  let fused, calls = 0
+  const tools = {
+    get: name => name === 'write' ? nativeWriteTool({ onExecute: () => {
+      setImmediate(() => transitionTask(agent, { kind: 'incoming', eventId: 'correction', sourceKind: 'user' }))
+    } }) : name === 'pwsh' ? {} : undefined,
+    register: definition => { fused = definition },
+    execute: async () => { calls++; return { value: { exitCode: 0 }, content: [] } },
+  }
+  const agent = scopedAgent({ ctx: { tools } })
+  transitionTask(agent, { kind: 'define', baseRevision: taskState(agent).revision, data: { title: 'Original task', phase: 'implement', requirements: [] } })
+  listeners.get('agent/created')({ agent })
+  const value = await fused.execute({ file_path: 'correction-test-missing.txt', content: 'x', then_run: { command: 'must not run' } }, { ...EXEC, agent })
+  assert.equal(value.mutation, 'ok:correction-test-missing.txt')
+  assert.equal(value.thenRun.status, 'skipped')
+  assert.match(value.thenRun.reason, /mutation completed/)
+  assert.equal(calls, 0)
+})
+
+test('real shell canonical outcomes retain exit codes and only successful root fusion counts', async () => {
+  reset()
+  const listeners = new Map()
+  registerActionFusion({ on: (event, listener) => listeners.set(event, listener) })
+  let fused
+  let shellValue = { kind: 'foreground', exitCode: 0, timedOut: false, aborted: false }
+  const tools = {
+    get: name => name === 'write' ? nativeWriteTool() : name === 'pwsh' ? {} : undefined,
+    register: definition => { fused = definition },
+    execute: async input => {
+      assert.equal(typeof input.arguments.description, 'string')
+      assert.equal(input.rootCallId, EXEC.rootCallId)
+      assert.equal(input.parent, EXEC.token)
+      return { isError: false, value: shellValue, content: [{ type: 'text', text: 'shell result' }] }
+    },
+  }
+  const agent = scopedAgent({ ctx: { tools } })
+  listeners.get('agent/created')({ agent: scopedAgent(agent) })
+  EXEC.agent = agent
+  const invoke = () => fused.execute({ file_path: 'canonical-test-missing.txt', content: 'x', then_run: { command: 'exit' } }, EXEC)
+  assert.equal((await invoke()).thenRun.exitCode, 0)
+  assert.equal(snapshot().actionFusion.successfulRootFusions, 1)
+  shellValue = { ...shellValue, exitCode: 7 }
+  const failed = (await invoke()).thenRun
+  assert.equal(failed.status, 'failed')
+  assert.equal(failed.exitCode, 7)
+  assert.match(thenRunBlocks(failed)[0].text, /exitCode: 7/)
+  assert.equal(snapshot().actionFusion.successfulRootFusions, 1)
+  shellValue = { ...shellValue, exitCode: null, timedOut: true }
+  assert.equal((await invoke()).thenRun.status, 'failed')
+  shellValue = { kind: 'background' }
+  assert.equal((await invoke()).thenRun.status, 'unverified')
+  assert.equal(snapshot().actionFusion.successfulRootFusions, 1)
+  assert.equal(snapshot().actionFusion.failedCalls, 2)
+})
 
 test('then_run is added without becoming required', () => {
   const original = nativeWriteTool()
@@ -170,15 +231,15 @@ test('registration shadows write/edit in the agent scope only', () => {
       return { isError: false, content: [{ type: 'text', text: `ran ${input.arguments.command}` }] }
     },
   }
-  const agent = { ctx: { tools } }
-  listeners.get('agent/created')({ agent })
+  const agent = scopedAgent({ ctx: { tools } })
+  listeners.get('agent/created')({ agent: scopedAgent(agent) })
 
   assert.equal(registered.length, 1)
   assert.equal(registered[0].name, 'write')
   assert.equal(registered[0].parameters.properties.then_run.required[0], 'command')
 })
 
-test('a missing shell tool leaves the native tools untouched', () => {
+test('a missing shell tool leaves the native tools untouched', async () => {
   const warnings = []
   const original = console.warn
   console.warn = message => warnings.push(message)
@@ -194,9 +255,11 @@ test('a missing shell tool leaves the native tools untouched', () => {
         },
       },
     }
-    listeners.get('agent/created')({ agent })
+    listeners.get('agent/created')({ agent: scopedAgent(agent) })
     assert.deepEqual(registered, [])
-    assert.match(warnings[0], /no shell tool/)
+    await flushDiagnostics(agent)
+    assert.equal(diagnosticSnapshot(agent).entries[0].reason, 'no-shell')
+    assert.equal(warnings.length, 0)
   } finally {
     console.warn = original
   }
@@ -223,7 +286,7 @@ test('a second plugin instance skips an already shadowed agent', () => {
       },
     },
   }
-  firstListeners.get('agent/created')({ agent })
+  firstListeners.get('agent/created')({ agent: scopedAgent(agent) })
   secondListeners.get('agent/created')({ agent })
 
   assert.equal(registered.length, 1, 'the second instance must not shadow the same scope again')

@@ -14,6 +14,13 @@ export const RECALL_MAX_LINES = 400
 
 /** 占位符里保留的开头字节数，让模型不必为「刚看过的东西」多跑一次召回。 */
 export const EXCERPT_BYTES = 512
+export const TAIL_EXCERPT_BYTES = 512
+
+export function tailText(buffer, maxBytes = TAIL_EXCERPT_BYTES) {
+  let start = Math.max(0, buffer.length - maxBytes)
+  while (start < buffer.length && (buffer[start] & 0xc0) === 0x80) start += 1
+  return buffer.subarray(start).toString('utf8')
+}
 
 export function isTextOnly(content) {
   if (!Array.isArray(content) || content.length === 0) return false
@@ -46,7 +53,7 @@ export function countLines(buffer) {
   return lines
 }
 
-export function placeholderText({ handle, byteLength, lineCount, excerpt }) {
+export function placeholderText({ handle, byteLength, lineCount, excerpt, tailExcerpt }) {
   return [
     `[observation-pack] ${handle}`,
     `${byteLength} bytes, ${lineCount} lines. The full content is archived and is not replayed; recall it exactly with obs_recall.`,
@@ -55,6 +62,7 @@ export function placeholderText({ handle, byteLength, lineCount, excerpt }) {
     '--- head excerpt ---',
     excerpt,
     '--- end excerpt ---',
+    ...(tailExcerpt ? ['', '--- tail excerpt ---', tailExcerpt, '--- end tail excerpt ---'] : []),
   ].join('\n')
 }
 

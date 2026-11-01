@@ -1,3 +1,4 @@
+import { scopedAgent } from './helpers/agent.mjs'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { registerReviewCommand, reviewInstruction, submitReview } from '../src/review/review-command.mjs'
@@ -23,7 +24,7 @@ test('submitReview sends one user message via agent followup', async () => {
   const messages = []
   const result = await submitReview({
     rawInput: '结账流程',
-    agent: { followup: message => messages.push(message) },
+    agent: scopedAgent({ followup: message => messages.push(message) }),
   })
   assert.equal(result.kind, 'success')
   assert.equal(messages.length, 1)

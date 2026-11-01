@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "task-correction",
+  "title": "任务纠正后旧验收不会继续算通过",
+  "suite": "public-marketing",
+  "capability": "task-lifecycle",
+  "userPrompt": "定义一个带命令和 artifact 验收的任务，登记成功证据，再发出纠正并检查 revision、旧回执和状态。",
+  "allowedTools": ["patchwork_task", "official DSH composition"],
+  "oracle": { "commands": [{ "id": "task", "program": "node", "args": ["--test", "tests/task-state.test.mjs", "tests/real-composition/task-lifecycle.test.mjs"], "timeoutMs": 180000, "requireNoSkips": true, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["任务面板显示当前 revision 和失败原因", "纠正后旧 evidence 标为 stale 或被清除"],
+  "marketing": { "claim": "用户纠正会让旧验收失效，任务状态不会被过期成功结果污染。", "evidence": "deterministic host-contract" }
+}

@@ -1,3 +1,4 @@
+import { scopedAgent } from './helpers/agent.mjs'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { mkdtempSync, writeFileSync } from 'node:fs'
@@ -26,6 +27,7 @@ test('a structure warning is counted for the panel maintenance view', async () =
   }
   const next = async () => decision
 
+  scopedAgent(exec.agent)
   const out = await listeners.get('tools/post-execute')(exec, null, next)
   assert.notEqual(out, decision, 'the hook must return a new decision')
   assert.equal(out.additionalContexts.length, 1, 'the warning context must be appended')

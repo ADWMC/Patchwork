@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "cancel-and-timeout",
+  "title": "取消和超时会停止迟到回调",
+  "suite": "hidden-regression",
+  "capability": "cancellation",
+  "userPrompt": "开始一次搜索、抓取或后台维护后立即取消；检查不会在取消后写入成功证据、记忆或改进状态。",
+  "allowedTools": ["patchwork_search", "patchwork_fetch", "task cancellation"],
+  "oracle": { "commands": [{ "id": "cancel", "program": "node", "args": ["--test", "tests/public-fetch.test.mjs", "tests/retrieval-tool.test.mjs", "tests/online-context-compact.test.mjs"], "timeoutMs": 180000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["UI 显示 cancelled/timeout，而不是假成功"],
+  "marketing": { "claim": "取消和超时有明确终态，迟到结果不能悄悄污染任务证据。", "evidence": "hidden-regression" }
+}

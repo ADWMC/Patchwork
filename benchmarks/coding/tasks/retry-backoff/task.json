@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "retry-backoff",
+  "title": "修复重试次数和退避顺序",
+  "issue": "src/retry.mjs 中 retries 表示额外重试次数。当前 retries=0 时不会执行一次，retries=2 时最多只执行两次。修复实现并保持每次失败后的 wait(attempt) 顺序。",
+  "workspace": "workspace",
+  "acceptance": { "public": "node --test test/public.test.mjs", "hidden": "node --test test/public.test.mjs oracle/hidden.test.mjs" },
+  "allowedPaths": ["src/retry.mjs"],
+  "marketing": "真实失败后按约定次数重试，第一次调用和退避顺序都可验证。"
+}

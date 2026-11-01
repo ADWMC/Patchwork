@@ -11,6 +11,8 @@ export const WINDOW_RESERVE_TOKENS = 16_384
 
 /** 压缩后必须留在上下文里的近期 token 量：压缩不该把刚做过的事也抹掉。 */
 export const KEEP_RECENT_TOKENS = 20_000
+/** Planning estimate only; actual native summary size is measured after commit. */
+export const SUMMARY_TOKEN_ESTIMATE = 1_000
 
 /** 首次压缩视界放宽的倍数：还没有边界间隔样本时只能保守外推。 */
 export const FIRST_COMPACTION_HORIZON_FACTOR = 2

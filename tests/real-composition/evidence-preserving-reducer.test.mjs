@@ -70,7 +70,8 @@ test('a long diagnostic log becomes a receipt whose quotes came from the log', {
   const journal = await readFile(join(root, 'journal.jsonl'), 'utf8')
   const entries = journal.trim().split('\n').map(line => JSON.parse(line))
   assert.equal(entries.at(-1).kind, 'applied')
-  assert.match(entries.at(-1).reason, /retained-1-quotes/)
+  assert.equal(entries.at(-1).reason, 'retained')
+  assert.equal(entries.at(-1).evidenceItems, 1)
 })
 
 test('with the reducer disabled the diagnostic log stays inline', { skip }, async () => {

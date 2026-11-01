@@ -11,7 +11,7 @@ test('Action Fusion shadows the native write tool inside the agent scope only', 
   const { dispose } = await bootPatchwork({ actionFusion: true })
   try {
     const { createAgent } = await loadDriver()
-    const { agentKey, tools } = createAgent()
+    const { agent, agentKey, tools } = createAgent()
 
     const native = tools.get('write')
     assert.ok(native, 'dsh-tool-fs must register write on the root scope')
@@ -36,13 +36,13 @@ test('the fused definition still writes through the real filesystem service', { 
   const work = await mkdtemp(join(tmpdir(), 'patchwork-fused-'))
   try {
     const { createAgent } = await loadDriver()
-    const { agentKey, tools } = createAgent()
+    const { agent, agentKey, tools } = createAgent()
     const fused = tools.get('write', agentKey)
 
     const target = join(work, 'out.txt')
     const value = await fused.execute(
       { file_path: target, content: 'written by the fused tool\n' },
-      { signal: new AbortController().signal, callId: 'call-fused-1' },
+      { agent, signal: new AbortController().signal, callId: 'call-fused-1' },
     )
 
     assert.equal(await readFile(target, 'utf8'), 'written by the fused tool\n')
@@ -60,7 +60,7 @@ test('with Action Fusion explicitly disabled the agent scope keeps the native wr
   const { dispose } = await bootPatchwork({ actionFusion: false })
   try {
     const { createAgent } = await loadDriver()
-    const { agentKey, tools } = createAgent()
+    const { agent, agentKey, tools } = createAgent()
     assert.equal(tools.get('write', agentKey).parameters.properties.then_run, undefined)
   } finally {
     await dispose()

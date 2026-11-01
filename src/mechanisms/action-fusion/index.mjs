@@ -1,15 +1,16 @@
 import { createFusedDefinition } from './fused-tool.mjs'
 import { hashFile, targetUnchanged, yieldToHost } from './mutation-guard.mjs'
 import { record } from '../../ui/mechanism-stats.mjs'
+import { isPatchworkAgent, requirePatchworkAgent } from '../../scope.mjs'
+import { logDiagnostic } from '../../logging/session-log.mjs'
+import { assertTaskRevision, taskRevision } from '../../task/action-check.mjs'
 
 const FUSABLE_TOOLS = ['write', 'edit']
 const SHELL_TOOLS = ['pwsh', 'bash']
 
-// 进程级遮蔽记录：插件会在 profile 补丁与 agent preset 隔离 realm 各加载一份，
-// 每个实例各监听一次 agent/created。若按实例各自记录，同一 agent 会被两份实例
-// 各处理一次，后到的遮蔽同 scope 已注册的工具而失败（fail-open 保住了功能，但
-// 产生噪音且行为依赖实例到达顺序）。共享记录让「每个 agent 只被第一个实例处理」。
-const registeredAgents = new WeakSet()
+// Agent-local shadows outlive a standing-composition context unless explicitly
+// disposed. Track their owners so preset switches revoke the exact registrations.
+const registeredAgents = new WeakMap()
 
 function textOf(content) {
   return (content ?? [])
@@ -30,72 +31,107 @@ function messageOf(error) {
  * agent preset 注册在更近的作用域，DSH 里近者胜，注册在根会被反过来遮蔽。
  */
 export function registerActionFusion(ctx) {
-  ctx.on('agent/created', ({ agent }) => {
-    if (!agent || registeredAgents.has(agent)) return
-    registeredAgents.add(agent)
+  const owned = new Set()
+  function release(agent) {
+    const registration = registeredAgents.get(agent)
+    if (!registration) return
+    for (const dispose of registration.disposers) dispose?.()
+    registration.owned.delete(agent)
+    registeredAgents.delete(agent)
+  }
+  function activate(agent) {
+    if (!isPatchworkAgent(agent)) { if (agent) release(agent); return }
+    if (registeredAgents.has(agent)) return
 
     const tools = agent.ctx?.tools
     if (!tools) {
-      warn('the agent context exposes no tools service; leaving write/edit untouched')
+      logDiagnostic(ctx, agent, { mechanism: 'af', event: 'inactive', level: 'warn', reason: 'no-tools' })
       return
     }
     const shellName = SHELL_TOOLS.find(name => tools.get(name, agent))
     if (!shellName) {
-      warn('no shell tool (pwsh or bash) is visible; leaving write/edit untouched')
+      logDiagnostic(ctx, agent, { mechanism: 'af', event: 'inactive', level: 'warn', reason: 'no-shell' })
       return
     }
 
+    const disposers = []
     for (const name of FUSABLE_TOOLS) {
       const original = tools.get(name, agent)
       if (!original) continue
       try {
-        tools.register(
+        disposers.push(tools.register(
           createFusedDefinition({
             original,
             runThenRun: request =>
-              runThenRun({ tools, shellName, agent, ...request }),
+              runThenRun({ ctx, tools: request.exec.agent.ctx.tools, shellName, agent: request.exec.agent, ...request }),
           }),
-        )
+        ))
       } catch (error) {
         // 注册失败只让这个机制失效，不能让 agent 发布失败。
-        warn(`could not shadow ${name}: ${messageOf(error)}`)
+        logDiagnostic(ctx, agent, { mechanism: 'af', event: 'inactive', level: 'warn', reason: 'shadow-failed', error })
       }
     }
+    registeredAgents.set(agent, { disposers, owned })
+    owned.add(agent)
+  }
+  ctx.on('agent/created', ({ agent }) => activate(agent))
+  ctx.on('agent/disposed', ({ agent }) => release(agent))
+  // Native blank-session recompose changes scope ancestry, but registrations
+  // on agent.ctx would otherwise outlive the old preset. Revoke them at once.
+  ctx.on('agent-preset/selected', sessionId => {
+    const agent = ctx.get?.('agents')?.get?.(sessionId)
+    if (agent) activate(agent)
   })
+  ctx.effect?.(() => () => { for (const agent of [...owned]) release(agent) }, 'patchwork: fused tools lifetime')
 }
 
-function warn(reason) {
-  // 不在 agent/created 里抛错：同步监听器失败会否决 agent 发布，
-  // 对一个非关键机制来说爆炸半径过大。改为记录并保持原生行为。
-  console.warn(`[patchwork] Action Fusion is enabled but inactive: ${reason}`)
-}
-
-async function runThenRun({ tools, shellName, agent, command, filePath, exec }) {
+async function runThenRun({ ctx, tools, shellName, agent, command, filePath, exec }) {
+  requirePatchworkAgent(agent)
+  const revision = taskRevision(agent)
   const before = await hashFile(filePath)
   await yieldToHost()
   if (!(await targetUnchanged(filePath, before))) {
+    logDiagnostic(ctx, exec, { mechanism: 'af', event: 'skipped', reason: 'target-changed', command })
     return { status: 'skipped', reason: 'target-changed', command }
+  }
+  // The mutation has already completed. Recheck after every async file read,
+  // and preserve its receipt if a correction or preset switch revokes follow-up.
+  try { requirePatchworkAgent(agent); assertTaskRevision(agent, revision) }
+  catch {
+    logDiagnostic(ctx, exec, { mechanism: 'af', event: 'skipped', reason: 'task-changed', command })
+    return { status: 'skipped', reason: 'mutation completed; task or Patchwork scope changed before follow-up', command }
   }
 
   try {
+    const started = Date.now()
+    logDiagnostic(ctx, exec, { mechanism: 'af', event: 'start', reason: 'enabled', command })
     const result = await tools.execute({
       callId: `${exec.callId}:then_run`,
       rootCallId: exec.rootCallId,
       name: shellName,
-      arguments: { command },
+      arguments: { description: 'Run follow-up verification after the file change', command },
       agent,
       signal: exec.signal,
       parent: exec.token,
     })
     const output = textOf(result.content)
-    // 一次真正被合并执行的调用：这就是本机制省下的那一次模型往返。
+    const value = result.value
+    const exitCode = Number.isInteger(value?.exitCode) ? value.exitCode : null
+    const failed = Boolean(result.isError || value?.timedOut || value?.aborted || (exitCode !== null && exitCode !== 0))
+    const succeeded = !failed && exitCode === 0
+    logDiagnostic(ctx, exec, { mechanism: 'af', event: failed ? 'failure' : 'success', level: failed ? 'warn' : 'info',
+      reason: failed ? 'command-failed' : succeeded ? 'command-succeeded' : 'command-unverified', command, exitCode,
+      resultBytes: Buffer.byteLength(output, 'utf8'), elapsedMs: Date.now() - started })
+    // This is an observed fused execution, not a measured counterfactual saving.
     record('actionFusion', 'fusedCalls')
-    record('actionFusion', 'savedRequests')
+    record('actionFusion', failed ? 'failedCalls' : succeeded ? 'succeededCalls' : 'unverifiedCalls')
+    if (succeeded && (!exec.rootCallId || exec.rootCallId === exec.callId)) record('actionFusion', 'successfulRootFusions')
     record('actionFusion', 'fusedCommandBytes', Buffer.byteLength(output, 'utf8'))
-    return result.isError
-      ? { status: 'failed', command, output, reason: result.error?.message ?? 'command failed' }
-      : { status: 'succeeded', command, output }
+    return failed
+      ? { status: 'failed', command, output, exitCode, reason: result.error?.message ?? (value?.timedOut ? 'command timed out' : value?.aborted ? 'command aborted' : `command exited ${exitCode}`) }
+      : { status: succeeded ? 'succeeded' : 'unverified', command, output, exitCode }
   } catch (error) {
+    logDiagnostic(ctx, exec, { mechanism: 'af', event: 'failure', level: 'warn', reason: 'command-failed', command, error })
     return { status: 'failed', command, output: '', reason: messageOf(error) }
   }
 }

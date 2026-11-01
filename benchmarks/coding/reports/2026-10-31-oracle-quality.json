@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "patchwork-coding-tasks",
+  "benchmarkVersion": "0.1.0",
+  "mode": "oracle",
+  "runId": "coding-oracle-2026-10-31",
+  "finishedAt": "2026-10-31T05:29:57.450Z",
+  "aggregate": {
+    "tasks": 8,
+    "passed": 8,
+    "failed": 0,
+    "oracleTaskQualityRate": 1
+  },
+  "scores": [
+    {
+      "id": "retry-backoff",
+      "title": "修复重试次数和退避顺序",
+      "baselineExpectedFail": true,
+      "referenceSolutionPass": true,
+      "passed": true,
+      "baseline": {
+        "exitCode": 1,
+        "durationMs": 204,
+        "stdout": "e/hidden.test.mjs:7:24)\n        at Test.runInAsyncScope (node:async_hooks:227:14)\n        at Test.run (node:internal/test_runner/test:1402:25)\n        at Test.start (node:internal/test_runner/test:1262:17)\n        at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17),\n    expected: /fail/,\n    operator: 'rejects',\n    diff: 'simple'\n  }\n\ntest at oracle\\hidden.test.mjs:11:1\n✖ retries are additional attempts and waits use one-based failure count (0.1791ms)\n  Error: temporary\n      at retry.retries (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:13:76)\n      at retry (file:///<isolated-benchmark>/<task>/workspace/src/retry.mjs:4:24)\n      at async TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:13:17)\n      at async Test.run (node:internal/test_runner/test:1409:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)\n\ntest at test\\public.test.mjs:5:1\n✖ a retry can recover after one failure (0.6083ms)\n  Error: temporary\n      at retry.retries (file:///<isolated-benchmark>/<task>/workspace/test/public.test.mjs:7:78)\n      at retry (file:///<isolated-benchmark>/<task>/workspace/src/retry.mjs:4:24)\n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/test/public.test.mjs:7:23)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.start (node:internal/test_runner/test:1262:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)\n",
+        "stderr": ""
+      },
+      "reference": {
+        "exitCode": 0,
+        "durationMs": 207,
+        "stdout": "✔ zero retries still performs the initial attempt (0.8186ms)\n✔ retries are additional attempts and waits use one-based failure count (0.5733ms)\n✔ a retry can recover after one failure (0.6577ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 121.2323\n",
+        "stderr": ""
+      },
+      "changedFiles": [
+        "src/retry.mjs"
+      ],
+      "changedLines": 1
+    },
+    {
+      "id": "path-boundary",
+      "title": "修复工作区路径越界",
+      "baselineExpectedFail": true,
+      "referenceSolutionPass": true,
+      "passed": true,
+      "baseline": {
+        "exitCode": 1,
+        "durationMs": 202,
+        "stdout": "✖ rejects traversal and absolute escapes (0.8449ms)\n✔ allows root itself (0.1533ms)\n✔ resolves a normal child path (0.5123ms)\nℹ tests 3\nℹ suites 0\nℹ pass 2\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 116.8637\n\n✖ failing tests:\n\ntest at oracle\\hidden.test.mjs:5:1\n✖ rejects traversal and absolute escapes (0.8449ms)\n  AssertionError [ERR_ASSERTION]: Missing expected exception.\n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:6:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.start (node:internal/test_runner/test:1262:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: undefined,\n    expected: /PATH_OUTSIDE_ROOT/,\n    operator: 'throws',\n    diff: 'simple'\n  }\n",
+        "stderr": ""
+      },
+      "reference": {
+        "exitCode": 0,
+        "durationMs": 197,
+        "stdout": "✔ rejects traversal and absolute escapes (0.7327ms)\n✔ allows root itself (0.1228ms)\n✔ resolves a normal child path (0.5725ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 116.6289\n",
+        "stderr": ""
+      },
+      "changedFiles": [
+        "src/safe-path.mjs"
+      ],
+      "changedLines": 5
+    },
+    {
+      "id": "nested-redaction",
+      "title": "递归脱敏嵌套凭据",
+      "baselineExpectedFail": true,
+      "referenceSolutionPass": true,
+      "passed": true,
+      "baseline": {
+        "exitCode": 1,
+        "durationMs": 213,
+        "stdout": "✖ redacts nested objects and arrays case-insensitively (1.6978ms)\n✔ redacts a top-level token and keeps ordinary fields (0.9796ms)\nℹ tests 2\nℹ suites 0\nℹ pass 1\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 130.4962\n\n✖ failing tests:\n\ntest at oracle\\hidden.test.mjs:5:1\n✖ redacts nested objects and arrays case-insensitively (1.6978ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n  + actual - expected\n  \n    {\n      headers: {\n  +     Authorization: 'Bearer x'\n  -     Authorization: '[REDACTED]'\n      },\n      nested: {\n  +     Secret: 's'\n  -     Secret: '[REDACTED]'\n      },\n      values: [\n        {\n  +       apiKey: 'k',\n  -       apiKey: '[REDACTED]',\n          ok: 1\n        }\n      ]\n    }\n  \n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:6:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.start (node:internal/test_runner/test:1262:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: { headers: { Authorization: 'Bearer x' }, values: [ [Object] ], nested: { Secret: 's' } },\n    expected: { headers: { Authorization: '[REDACTED]' }, values: [ [Object] ], nested: { Secret: '[REDACTED]' } },\n    operator: 'deepStrictEqual',\n    diff: 'simple'\n  }\n",
+        "stderr": ""
+      },
+      "reference": {
+        "exitCode": 0,
+        "durationMs": 202,
+        "stdout": "✔ redacts nested objects and arrays case-insensitively (0.939ms)\n✔ redacts a top-level token and keeps ordinary fields (0.9407ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 119.4946\n",
+        "stderr": ""
+      },
+      "changedFiles": [
+        "src/redact.mjs"
+      ],
+      "changedLines": 1
+    },
+    {
+      "id": "stable-ranking",
+      "title": "保持排序稳定并避免修改输入",
+      "baselineExpectedFail": true,
+      "referenceSolutionPass": true,
+      "passed": true,
+      "baseline": {
+        "exitCode": 1,
+        "durationMs": 198,
+        "stdout": "✖ preserves ties and input array (1.7594ms)\n✔ sorts by score descending (0.9234ms)\nℹ tests 2\nℹ suites 0\nℹ pass 1\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 115.0324\n\n✖ failing tests:\n\ntest at oracle\\hidden.test.mjs:5:1\n✖ preserves ties and input array (1.7594ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n  + actual - expected\n  \n    [\n      {\n        id: 'first',\n        score: 2\n      },\n      {\n  +     id: 'second',\n  +     score: 2\n  +   },\n  +   {\n        id: 'low',\n        score: 1\n      },\n  -   {\n  -     id: 'second',\n  -     score: 2\n  -   }\n    ]\n  \n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:9:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.start (node:internal/test_runner/test:1262:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: [ { id: 'first', score: 2 }, { id: 'second', score: 2 }, { id: 'low', score: 1 } ],\n    expected: [ { id: 'first', score: 2 }, { id: 'low', score: 1 }, { id: 'second', score: 2 } ],\n    operator: 'deepStrictEqual',\n    diff: 'simple'\n  }\n",
+        "stderr": ""
+      },
+      "reference": {
+        "exitCode": 0,
+        "durationMs": 198,
+        "stdout": "✔ preserves ties and input array (0.9328ms)\n✔ sorts by score descending (0.9558ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 116.189\n",
+        "stderr": ""
+      },
+      "changedFiles": [
+        "src/rank.mjs"
+      ],
+      "changedLines": 0
+    },
+    {
+      "id": "jsonl-recovery",
+      "title": "恢复 JSONL 尾部半行",
+      "baselineExpectedFail": true,
+      "referenceSolutionPass": true,
+      "passed": true,
+      "baseline": {
+        "exitCode": 1,
+        "durationMs": 195,
+        "stdout": "ode:internal/test_runner/harness:387:17)\n\ntest at oracle\\hidden.test.mjs:6:1\n✖ rejects a malformed middle line (0.5738ms)\n  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /INVALID_JSONL/. Input:\n  \n  `SyntaxError: Unexpected token 'o', \"nope\" is not valid JSON`\n  \n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:6:54)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)\n      at Test.postRun (node:internal/test_runner/test:1542:19)\n      at Test.run (node:internal/test_runner/test:1467:12)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: SyntaxError: Unexpected token 'o', \"nope\" is not valid JSON\n        at JSON.parse (<anonymous>)\n        at file:///<isolated-benchmark>/<task>/workspace/src/jsonl.mjs:2:63\n        at Array.map (<anonymous>)\n        at parseJsonl (file:///<isolated-benchmark>/<task>/workspace/src/jsonl.mjs:2:46)\n        at file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:6:67\n        at getActual (node:assert:611:5)\n        at strict.throws (node:assert:759:24)\n        at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:6:54)\n        at Test.runInAsyncScope (node:async_hooks:227:14)\n        at Test.run (node:internal/test_runner/test:1402:25),\n    expected: /INVALID_JSONL/,\n    operator: 'throws',\n    diff: 'simple'\n  }\n",
+        "stderr": ""
+      },
+      "reference": {
+        "exitCode": 0,
+        "durationMs": 200,
+        "stdout": "✔ keeps complete records before a truncated final line (1.1144ms)\n✔ rejects a malformed middle line (0.3205ms)\n✔ parses complete records (1.009ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 116.0154\n",
+        "stderr": ""
+      },
+      "changedFiles": [
+        "src/jsonl.mjs"
+      ],
+      "changedLines": 10
+    },
+    {
+      "id": "memory-cas",
+      "title": "拒绝过期和未来 revision 写入",
+      "baselineExpectedFail": true,
+      "referenceSolutionPass": true,
+      "passed": true,
+      "baseline": {
+        "exitCode": 1,
+        "durationMs": 201,
+        "stdout": "✖ rejects stale and future revisions without changing state (0.9866ms)\n✔ accepts the current revision (0.5451ms)\nℹ tests 2\nℹ suites 0\nℹ pass 1\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 119.5238\n\n✖ failing tests:\n\ntest at oracle\\hidden.test.mjs:5:1\n✖ rejects stale and future revisions without changing state (0.9866ms)\n  AssertionError [ERR_ASSERTION]: Missing expected exception.\n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:8:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.start (node:internal/test_runner/test:1262:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: undefined,\n    expected: /REVISION_CONFLICT/,\n    operator: 'throws',\n    diff: 'simple'\n  }\n",
+        "stderr": ""
+      },
+      "reference": {
+        "exitCode": 0,
+        "durationMs": 196,
+        "stdout": "✔ rejects stale and future revisions without changing state (0.7379ms)\n✔ accepts the current revision (0.5301ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 114.5045\n",
+        "stderr": ""
+      },
+      "changedFiles": [
+        "src/store.mjs"
+      ],
+      "changedLines": 0
+    },
+    {
+      "id": "task-status",
+      "title": "区分工具派发成功和进程验收成功",
+      "baselineExpectedFail": true,
+      "referenceSolutionPass": true,
+      "passed": true,
+      "baseline": {
+        "exitCode": 1,
+        "durationMs": 198,
+        "stdout": "✖ dispatch success with failed process does not pass (0.9452ms)\n✖ unknown and cancelled outcomes do not pass even with exit zero (0.1567ms)\n✔ a successful command passes (0.5311ms)\nℹ tests 3\nℹ suites 0\nℹ pass 1\nℹ fail 2\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 115.7021\n\n✖ failing tests:\n\ntest at oracle\\hidden.test.mjs:5:1\n✖ dispatch success with failed process does not pass (0.9452ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  true !== false\n  \n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:5:73)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.start (node:internal/test_runner/test:1262:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: true,\n    expected: false,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n\ntest at oracle\\hidden.test.mjs:6:1\n✖ unknown and cancelled outcomes do not pass even with exit zero (0.1567ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  true !== false\n  \n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:7:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)\n      at Test.postRun (node:internal/test_runner/test:1542:19)\n      at Test.run (node:internal/test_runner/test:1467:12)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: true,\n    expected: false,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n",
+        "stderr": ""
+      },
+      "reference": {
+        "exitCode": 0,
+        "durationMs": 196,
+        "stdout": "✔ dispatch success with failed process does not pass (0.5196ms)\n✔ unknown and cancelled outcomes do not pass even with exit zero (0.1101ms)\n✔ a successful command passes (0.5327ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 115.1793\n",
+        "stderr": ""
+      },
+      "changedFiles": [
+        "src/status.mjs"
+      ],
+      "changedLines": 0
+    },
+    {
+      "id": "search-dedup",
+      "title": "规范化搜索结果去重",
+      "baselineExpectedFail": true,
+      "referenceSolutionPass": true,
+      "passed": true,
+      "baseline": {
+        "exitCode": 1,
+        "durationMs": 201,
+        "stdout": "✖ normalizes equivalent URLs without changing first-seen order (1.6414ms)\n✔ removes exact duplicate URLs and keeps first source (0.9992ms)\nℹ tests 2\nℹ suites 0\nℹ pass 1\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 117.525\n\n✖ failing tests:\n\ntest at oracle\\hidden.test.mjs:5:1\n✖ normalizes equivalent URLs without changing first-seen order (1.6414ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n  + actual - expected\n  \n    [\n      {\n        title: 'first',\n        url: 'HTTPS://Example.TEST/docs/#intro'\n      },\n      {\n  +     title: 'duplicate',\n  +     url: 'https://example.test/docs'\n  +   },\n  +   {\n        title: 'other',\n        url: 'https://other.test/'\n      },\n  +   {\n  +     title: 'other duplicate',\n  +     url: 'https://other.test/#x'\n  +   }\n    ]\n  \n      at TestContext.<anonymous> (file:///<isolated-benchmark>/<task>/workspace/oracle/hidden.test.mjs:7:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.start (node:internal/test_runner/test:1262:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: [ { url: 'HTTPS://Example.TEST/docs/#intro', title: 'first' }, { url: 'https://example.test/docs', title: 'duplicate' }, { url: 'https://other.test/', title: 'other' }, { url: 'https://other.test/#x', title: 'other duplicate' } ],\n    expected: [ { url: 'HTTPS://Example.TEST/docs/#intro', title: 'first' }, { url: 'https://other.test/', title: 'other' } ],\n    operator: 'deepStrictEqual',\n    diff: 'simple'\n  }\n",
+        "stderr": ""
+      },
+      "reference": {
+        "exitCode": 0,
+        "durationMs": 200,
+        "stdout": "✔ normalizes equivalent URLs without changing first-seen order (1.0707ms)\n✔ removes exact duplicate URLs and keeps first source (1.1048ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 120.7667\n",
+        "stderr": ""
+      },
+      "changedFiles": [
+        "src/dedupe.mjs"
+      ],
+      "changedLines": 12
+    }
+  ],
+  "marketing": {
+    "oracleTaskQualityRate": 1,
+    "agentTaskPassRate": null,
+    "claim": "题集质量验证；不代表模型完成率。"
+  },
+  "evidence": {
+    "retained": false,
+    "root": null
+  }
+}

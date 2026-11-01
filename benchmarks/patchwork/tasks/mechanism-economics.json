@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanism-economics",
+  "title": "上下文与工具机制保留失败证据",
+  "suite": "public-marketing",
+  "capability": "runtime-mechanisms",
+  "userPrompt": "用大输出、诊断日志、编辑后命令和上下文增长触发 Patchwork 机制；检查节省估算不把未知 token 当作零，也不丢掉原始失败证据。",
+  "allowedTools": ["action fusion", "observation pack", "evidence reducer", "online context compact"],
+  "oracle": { "commands": [{ "id": "mechanisms", "program": "node", "args": ["--test", "tests/action-fusion.test.mjs", "tests/observation-pack.test.mjs", "tests/evidence-preserving-reducer.test.mjs", "tests/online-context-compact.test.mjs", "tests/benchmark-counterfactual.test.mjs"], "timeoutMs": 180000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["节省统计区分事实和假设", "失败日志仍可定位原命令和来源"],
+  "marketing": { "claim": "Patchwork 优化上下文时保留可回查证据，并把估算和事实分开。", "evidence": "deterministic mechanism-contract" }
+}

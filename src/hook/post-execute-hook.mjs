@@ -2,6 +2,7 @@ import { buildStructureWarning, isMutationTool } from '../structure/structure-wa
 import { isSourcePath } from '../structure/structure-check.mjs'
 import { record } from '../ui/mechanism-stats.mjs'
 import { EVIDENCE_HINT, noteShellEvidence, sessionKey, shouldHintEvidence } from '../quality/evidence-gate.mjs'
+import { isPatchworkAgent } from '../scope.mjs'
 
 /**
  * 只从「会改动文件」的工具参数里取路径。读取不属于结构检查的范围：
@@ -35,6 +36,7 @@ async function noticeContext(text) {
 export function registerStructureHook(ctx, config = {}) {
   ctx.on('tools/post-execute', async (exec, result, next) => {
     const decision = await next()
+    if (!isPatchworkAgent(exec?.agent)) return decision
     try {
       const additional = []
       noteShellEvidence(exec, result)
@@ -43,7 +45,7 @@ export function registerStructureHook(ctx, config = {}) {
         const cwd = exec.agent?.session?.header?.cwd
         const files = pathsIn(exec.arguments)
         if (cwd && files.length) {
-          const check = await buildStructureWarning({ cwd, sessionId: exec.agent?.id, files })
+          const check = await buildStructureWarning({ cwd, sessionId: sessionKey(exec.agent), files })
           if (check.prompt) {
             record('maintenance', 'structureWarnings')
             additional.push(await noticeContext(check.prompt))

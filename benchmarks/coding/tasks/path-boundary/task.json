@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "path-boundary",
+  "title": "修复工作区路径越界",
+  "issue": "resolveInside 必须只返回 root 内部路径。当前实现对 ../ 和绝对路径没有边界检查。拒绝越界请求，并保留正常子路径和 root 本身。",
+  "workspace": "workspace",
+  "acceptance": { "public": "node --test test/public.test.mjs", "hidden": "node --test test/public.test.mjs oracle/hidden.test.mjs" },
+  "allowedPaths": ["src/safe-path.mjs"],
+  "marketing": "写入前拒绝路径穿越，代码任务可用隐藏负测验证。"
+}

@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+import { requirePatchworkAgent } from '../scope.mjs'
 
 const promptPath = fileURLToPath(new URL('../../assets/prompts/user-review-prompt.md', import.meta.url))
 const prompt = (await readFile(promptPath, 'utf8')).trim()
@@ -12,11 +13,13 @@ export function reviewInstruction(scope) {
 }
 
 export async function submitReview(invocation) {
+  requirePatchworkAgent(invocation?.agent)
   const instruction = reviewInstruction(invocation?.rawInput)
   const { createUserMessage } = await import('@deepseek-ai/dsh-llm')
+  requirePatchworkAgent(invocation?.agent)
   invocation.agent.followup(createUserMessage({
     content: [{ type: 'text', text: instruction }],
-    source: { kind: 'user' },
+    source: { kind: 'patchwork-command', command: 'patchwork-review' },
   }))
   return { kind: 'success', text: '已提交用户视角评审任务。' }
 }

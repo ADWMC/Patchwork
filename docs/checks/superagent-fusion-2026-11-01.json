@@ -1,0 +1,283 @@
+{
+  "schema": 1,
+  "date": "2026-11-01",
+  "status": "implemented-with-open-usability-gates",
+  "upstream": {
+    "repository": "https://github.com/deepseek-ai/dsh-superagent-prototype",
+    "commit": "6337fc823ce20251c8de8085948165c81aaa701e",
+    "license": "MIT",
+    "researchPrototype": true,
+    "scope": "Selected architecture, admission, delivery, executor, memory and work-prompt sources; not an exhaustive audit",
+    "environment": {
+      "platform": "win32",
+      "node": "24.21.0",
+      "pnpm": "11.7.0"
+    },
+    "installScriptsEnabled": false,
+    "servicesStarted": false,
+    "tests": {
+      "total": 1197,
+      "passed": 1156,
+      "failed": 41,
+      "uncaughtErrors": 17,
+      "files": 59,
+      "filesPassed": 51,
+      "filesFailed": 8
+    },
+    "testLog": "artifacts/research/superagent-upstream-tests.log",
+    "testLogSha256": "167aa6d53c08910fd0927336448f1cd01e59a131725aff3fe116d1562e907775"
+  },
+  "implementation": {
+    "phase": "A-native-task-handoff",
+    "taskTool": "patchwork_task",
+    "handoffMaxUtf16Units": 8000,
+    "deliveryFingerprintWindow": 128,
+    "mainDshChanged": false,
+    "mechanismDefaultsChanged": false,
+    "modelRoutesChanged": false,
+    "taskProjectionChanged": true,
+    "taskCorrectionOmissionBehaviorChanged": true,
+    "browserBundled": false,
+    "autonomousModeImplemented": false,
+    "sourceWatchersEnabled": false,
+    "externalDeliveryEnabled": false,
+    "upstreamImplementationVendored": false,
+    "scope": "Patchwork preset only; current Session/task/revision; context does not grant permissions",
+    "patchworkBaseCommit": "ef19dc7b1ad190b0281bdaa5f9a03fcf302cbac1",
+    "worktreeAlreadyDirty": true,
+    "testedRuntimeResolvedTo": "src/runtime.mjs in this working tree"
+  },
+  "regression": {
+    "command": "node --test \"tests/*.test.mjs\" \"tests/real-composition/*.test.mjs\" \"packages/browser/tests/*.test.mjs\"",
+    "total": 357,
+    "passed": 357,
+    "failed": 0,
+    "skipped": 0,
+    "log": "artifacts/superagent-fusion-tests.log",
+    "logSha256": "72b765faea3d1ee552abb767de9049a8b401b5d7a87afb8fd00e2d39b3130e9e"
+  },
+  "realModel": {
+    "kind": "real-model-smoke-not-ab",
+    "host": "0.2.1-rc.2",
+    "model": "step-5-preview",
+    "configuredContextWindow": 1000000,
+    "attempts": [
+      {
+        "rootName": "patchwork-superagent-real-ITcfK0",
+        "sessionId": "session-d73582a4-81dd-43f6-a8c8-9164cded2f61",
+        "maxOutputTokens": 8192,
+        "requestMetric": "agent/request events; not total provider API calls",
+        "requests": 20,
+        "elapsedMs": 247545,
+        "turns": [
+          "completed",
+          "max-tokens"
+        ],
+        "checks": {
+          "addition": true,
+          "preservedExport": true,
+          "invalidArguments": false,
+          "taskReady": false
+        },
+        "taskIdentityPreserved": true,
+        "handoffToolCalls": 0,
+        "correctionToolCalls": 0,
+        "successfulCorrections": 0,
+        "toolErrors": 4,
+        "handoffNotices": 11,
+        "handoffNoticesAfterCompaction": 1,
+        "compactionProbes": [
+          {
+            "action": "cancelled",
+            "outcome": "error",
+            "code": 20,
+            "name": "AbortError"
+          },
+          {
+            "action": "compact",
+            "outcome": "compacted",
+            "before": 29849,
+            "after": 14929
+          },
+          {
+            "action": "repeat",
+            "outcome": "error",
+            "code": "summary",
+            "name": "ManualCompactionError"
+          }
+        ],
+        "finalTaskStatus": "in-progress",
+        "unknownRequirements": [],
+        "modelClaimedNoUnknownWhileUnknownRemaining": false,
+        "result": "failed-output-budget",
+        "fullWorkflowPassed": false,
+        "privateEvidenceHashes": {
+          "summary": "960ffd606673726b126edd26a88ef68b32c38ef2ccf9acbb489f3d318bcd7d57",
+          "nativeEventExport": "eefff0683548ccbf5b087d1bd4f612e1a90293eb20c7ff813f98911bf4f3c75c",
+          "artifact": "f4e5f42406da134876fd4fab7a249b7a9a6650e74e31d9f1c455c11802f1505e"
+        },
+        "dshExitCode": 1,
+        "runnerExitCode": 1
+      },
+      {
+        "rootName": "patchwork-superagent-real-ZGI6uw",
+        "sessionId": "session-c9b6533c-7f41-4f44-991c-ab1c075022d5",
+        "maxOutputTokens": 16384,
+        "requestMetric": "agent/request events; not total provider API calls",
+        "requests": 49,
+        "elapsedMs": 540514,
+        "turns": [
+          "completed",
+          "completed"
+        ],
+        "checks": {
+          "addition": true,
+          "preservedExport": true,
+          "invalidArguments": true,
+          "taskReady": true
+        },
+        "taskIdentityPreserved": false,
+        "handoffToolCalls": 0,
+        "correctionToolCalls": 17,
+        "successfulCorrections": 0,
+        "toolErrors": 20,
+        "handoffNotices": 22,
+        "handoffNoticesAfterCompaction": 10,
+        "compactionProbes": [
+          {
+            "action": "cancelled",
+            "outcome": "error",
+            "code": 20,
+            "name": "AbortError"
+          },
+          {
+            "action": "compact",
+            "outcome": "compacted",
+            "before": 33185,
+            "after": 15622
+          },
+          {
+            "action": "repeat",
+            "outcome": "compacted",
+            "before": 15622,
+            "after": 15606
+          }
+        ],
+        "finalTaskStatus": "ready",
+        "unknownRequirements": [],
+        "modelClaimedNoUnknownWhileUnknownRemaining": false,
+        "result": "file-checks-pass-task-redefined-after-correction-failures",
+        "fullWorkflowPassed": false,
+        "privateEvidenceHashes": {
+          "summary": "77481ffa57198da48bda8deb4c1ff2f5abbb5f6c70586273bd0caa7f623b708c",
+          "nativeEventExport": "1a922e2e3cfeb1fdc2d0289641934a08e5ae8dec9fb66f315c924a400fec442b",
+          "artifact": "4a546af8094c57c4f4280d3fcecbfdf65d41f7ac969c9ab533ec07fb40dee752"
+        },
+        "dshExitCode": 0,
+        "runnerExitCode": 0
+      },
+      {
+        "rootName": "patchwork-superagent-real-9PaNOB",
+        "sessionId": "session-41aff512-ba8b-45d3-bb72-27ceae22f76b",
+        "maxOutputTokens": 16384,
+        "requestMetric": "agent/request events; not total provider API calls",
+        "requests": 22,
+        "elapsedMs": 179200,
+        "turns": [
+          "completed",
+          "completed"
+        ],
+        "checks": {
+          "addition": true,
+          "preservedExport": true,
+          "invalidArguments": true,
+          "taskReady": false
+        },
+        "taskIdentityPreserved": true,
+        "handoffToolCalls": 0,
+        "correctionToolCalls": 1,
+        "successfulCorrections": 1,
+        "toolErrors": 0,
+        "handoffNotices": 14,
+        "handoffNoticesAfterCompaction": 7,
+        "compactionProbes": [
+          {
+            "action": "cancelled",
+            "outcome": "error",
+            "code": 20,
+            "name": "AbortError"
+          },
+          {
+            "action": "compact",
+            "outcome": "compacted",
+            "before": 20297,
+            "after": 13228
+          },
+          {
+            "action": "repeat",
+            "outcome": "compacted",
+            "before": 13228,
+            "after": 13205
+          }
+        ],
+        "finalTaskStatus": "partial",
+        "unknownRequirements": [
+          "fix-add",
+          "preserve-mul"
+        ],
+        "modelClaimedNoUnknownWhileUnknownRemaining": true,
+        "result": "file-and-correction-pass-semantic-review-remains-open",
+        "fullWorkflowPassed": false,
+        "privateEvidenceHashes": {
+          "summary": "c2714ba3c1e42dadfdb2af05e1c99a6c290d5da94e5af176a41ea98b6be16519",
+          "nativeEventExport": "c0e79181235a2f13cdc0efeee4278be7413a8ed6e6a9ba2969514aab7830dfd7",
+          "artifact": "7c2000930436e2d38fcee3f62aa721f33444857e34b5a099021f3e80ef20f833"
+        },
+        "sourceHashes": {
+          "src/task/handoff.mjs": "5a315cc344d7e0768fab598092911b5fac97b6a47fd32e4d184771e6fe9c4e8e",
+          "src/task/lifecycle.mjs": "ef0be955f1ebca4bab5e5d51e3de8ec03527ae0c3c8ed0ca0a76bd25c6c2b7b5",
+          "src/task/state.mjs": "312cc187fd55ee7bac09e2cbca7c5c94eb164cfd87b1357c42e0389e2d0a8548",
+          "src/task/store.mjs": "514b127b8064f9b218cbaa4825fca398fbef6be500c0eb76982261774d3f11b2",
+          "src/mechanisms/online-context-compact/lifecycle.mjs": "1eb53e4ccf24ebe6140ebf2f298bfbcf184f6ef1e35d5e54662d7641774c0be5",
+          "src/mechanisms/observation-pack/index.mjs": "54e67d3f2097b7fb73f948b8fc74a1bb4caa0aab36d9f0f5645f7773024bcdba",
+          "docs/experiments/2026-11-01-superagent/run-isolated.mjs": "ce43fb33858fb320b1a6f4480462f76a420a3be31e00ae7295266b9a530057d2",
+          "docs/experiments/2026-11-01-superagent/step5.overlay.yml": "2049bcf0a9b93e4f214209b662a41b451a072b2d57f771596cbe590b00566094"
+        },
+        "dshExitCode": 0,
+        "runnerExitCode": 1
+      }
+    ],
+    "latestFileChecksPassed": true,
+    "latestCorrectionAndIdentityPassed": true,
+    "latestSemanticSafetyBoundaryHeld": true,
+    "latestFullWorkflowPassed": false,
+    "explicitHandoffModelInvocationVerified": false,
+    "explicitHandoffNativeDispatcherVerified": true,
+    "compactionInvokedByExperimentDriver": true,
+    "automaticOccBenefitProven": false,
+    "benchmarkImprovementClaimed": false,
+    "conclusion": "The current native integration works in the isolated host. Two semantic requirements remain unknown despite the model claiming no unknowns; no complete-workflow or quality-improvement claim."
+  },
+  "releasePreflight": {
+    "command": "node scripts/check-browser-release.mjs",
+    "ok": true,
+    "files": 231,
+    "missing": [],
+    "forbidden": [],
+    "browserBundled": false,
+    "installHooks": false,
+    "packageCreatedOrInstalled": false
+  },
+  "credentialScan": {
+    "scope": "npm dry-run file manifest",
+    "filesScanned": 231,
+    "exactCredentialMatches": 0,
+    "rawModelLogsPackaged": false
+  },
+  "gatesBeforeBackgroundMode": [
+    "Resolve model reporting of unknown semantic assessments as completed",
+    "Controlled fixed-budget task and context-cost evaluation",
+    "Per-job workspace, durable effect queue, cancellation and restart tests",
+    "Explicit trusted source and delivery authorization"
+  ]
+}

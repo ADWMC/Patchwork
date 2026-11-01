@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "memory-cas",
+  "title": "拒绝过期和未来 revision 写入",
+  "issue": "MemoryStore.put 必须要求 expectedRevision 与当前 revision 精确相等。当前实现把大于当前 revision 也当成可写，可能跳过并发更新。",
+  "workspace": "workspace",
+  "acceptance": { "public": "node --test test/public.test.mjs", "hidden": "node --test test/public.test.mjs oracle/hidden.test.mjs" },
+  "allowedPaths": ["src/store.mjs"],
+  "marketing": "并发记忆更新不会被旧请求或未来 revision 静默覆盖。"
+}

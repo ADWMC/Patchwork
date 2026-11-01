@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "logging-evidence",
+  "title": "日志保留证据但不泄露正文",
+  "suite": "public-marketing",
+  "capability": "logging",
+  "userPrompt": "执行一次工具事件和一次失败事件，查看日志投影；确认可重建、可导出、可审查，但提示词、命令正文和密钥不会进入诊断日志。",
+  "allowedTools": ["Patchwork diagnostics", "native Session records"],
+  "oracle": { "commands": [{ "id": "logging", "program": "node", "args": ["--test", "tests/logging.test.mjs", "tests/log-presentation.test.mjs", "docs/checks/logging-native-records.mjs"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["日志面板能解释失败原因和时间线", "敏感值只显示脱敏或指纹"],
+  "marketing": { "claim": "失败可见、证据可回查，同时诊断日志不把提示词和凭据暴露出来。", "evidence": "deterministic logging-contract" }
+}

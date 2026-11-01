@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
-import { mkdir, rename, writeFile } from 'node:fs/promises'
+import { createHash, randomUUID } from 'node:crypto'
+import { mkdir, rename, writeFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 
@@ -26,6 +27,8 @@ export function readUserConfig() {
   } catch {
     return {}
   }
+  // Legacy browser settings belong to the separately installed browser package.
+  if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) parsed = Object.fromEntries(Object.entries(parsed).filter(([key]) => !key.startsWith('browser')))
   const validated = validatePatch(parsed)
   return validated.ok ? validated.value : {}
 }
@@ -63,13 +66,48 @@ export function validatePatch(raw) {
  * 只替换这次提交的键，其余键保留——侧边栏保存一个开关不应该把别的设置清掉。
  * 先写临时文件再改名，避免写到一半断电留下半个 JSON。
  */
+export function configRevision(config = readUserConfig()) {
+  const ordered = Object.fromEntries(Object.entries(config).sort(([a], [b]) => a.localeCompare(b)))
+  return createHash('sha256').update(JSON.stringify(ordered)).digest('hex').slice(0, 16)
+}
+
+let writeQueue = Promise.resolve()
+
+export function mergeUserConfigState(patch, expectedRevision, authorize) {
+  const work = writeQueue.then(() => writeConfig(patch, expectedRevision, authorize))
+  writeQueue = work.catch(() => {})
+  return work
+}
+
 export async function mergeUserConfig(patch) {
+  return (await mergeUserConfigState(patch)).config
+}
+
+async function writeConfig(patch, expectedRevision, authorize) {
+  const assertAuthorized = () => {
+    if (authorize && !authorize()) {
+      const error = new Error('patchwork-agent-required')
+      error.code = 'patchwork-agent-required'
+      throw error
+    }
+  }
+  assertAuthorized()
   const current = readUserConfig()
+  if (expectedRevision !== undefined && expectedRevision !== configRevision(current)) {
+    const error = new Error('revision-conflict')
+    error.code = 'revision-conflict'
+    throw error
+  }
   const next = { ...current, ...patch }
   const path = userConfigPath()
   await mkdir(join(path, '..'), { recursive: true, mode: 0o700 })
-  const temporary = `${path}.tmp`
-  await writeFile(temporary, `${JSON.stringify(next, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 })
-  await rename(temporary, path)
-  return next
+  const temporary = `${path}.${randomUUID()}.tmp`
+  try {
+    await writeFile(temporary, `${JSON.stringify(next, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 })
+    assertAuthorized()
+    await rename(temporary, path)
+  } finally {
+    await rm(temporary, { force: true })
+  }
+  return { config: next, revision: configRevision(next) }
 }

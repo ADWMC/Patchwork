@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "patchwork-coding-tasks",
+  "version": "0.1.0",
+  "date": "2026-10-31",
+  "externalShape": [
+    { "name": "SWE-bench Verified", "url": "https://github.com/SWE-bench/SWE-bench", "role": "issue-to-patch and hidden regression" },
+    { "name": "Terminal-Bench", "url": "https://github.com/laude-institute/terminal-bench", "role": "isolated task/test/oracle execution" }
+  ],
+  "taskCount": 8,
+  "tasks": [
+    "tasks/retry-backoff/task.json",
+    "tasks/path-boundary/task.json",
+    "tasks/nested-redaction/task.json",
+    "tasks/stable-ranking/task.json",
+    "tasks/jsonl-recovery/task.json",
+    "tasks/memory-cas/task.json",
+    "tasks/task-status/task.json",
+    "tasks/search-dedup/task.json"
+  ],
+  "marketing": {
+    "qualityMetric": "oracleTaskQualityRate",
+    "agentMetric": "agentTaskPassRate",
+    "requiredEvidence": ["task-set-version", "model", "DSH version", "isolated workspace", "hidden test output", "run id"],
+    "prohibitedInference": "oracle pass rate is not model completion rate"
+  }
+}

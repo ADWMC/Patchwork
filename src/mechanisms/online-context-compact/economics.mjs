@@ -65,7 +65,7 @@ export function decideCompaction({
   if (breakeven * HORIZON_MARGIN > horizon.expected) {
     return reject('deferred-breakeven', { saving, breakeven, horizon })
   }
-  const debtPerSaving = (carriedDebtTokens + writeTokens * cacheWriteReadRatio) / saving
+  const debtPerSaving = (carriedDebtTokens + writeTokens * incrementalRatio) / saving
   if (debtPerSaving > horizon.expected) {
     return reject('deferred-debt', { saving, breakeven, horizon, debtPerSaving })
   }

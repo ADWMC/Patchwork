@@ -42,14 +42,17 @@ export function completedIds(steps) {
  * 压缩，否则一次任务会被反复压缩。
  */
 export function analyzeTransition(previousSteps, nextSteps) {
-  const before = completedIds(previousSteps ?? [])
-  const newlyCompleted = nextSteps.filter(step => step.status === 'completed' && !before.has(step.id)).map(step => step.id)
+  const previousById = new Map((previousSteps ?? []).map(step => [step.id, step]))
+  const newlyCompleted = nextSteps.filter(step => {
+    const prior = previousById.get(step.id)
+    return step.status === 'completed' && prior?.text === step.text &&
+      (prior.status === 'pending' || prior.status === 'in_progress')
+  }).map(step => step.id)
 
   const warnings = []
   const inProgress = nextSteps.filter(step => step.status === 'in_progress')
   if (inProgress.length > 1) warnings.push(`multiple-steps-in-progress:${inProgress.length}`)
 
-  const previousById = new Map((previousSteps ?? []).map(step => [step.id, step]))
   for (const step of nextSteps) {
     const prior = previousById.get(step.id)
     if (prior && prior.text !== step.text) warnings.push(`step-text-changed:${step.id}`)

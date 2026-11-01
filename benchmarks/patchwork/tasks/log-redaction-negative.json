@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "log-redaction-negative",
+  "title": "诊断日志拒绝提示词、命令和凭据泄露",
+  "suite": "security-negative",
+  "capability": "logging-security",
+  "userPrompt": "把包含 token、长提示词和命令正文的工具输入送入诊断路径，读取导出结果，确认只保留白名单元数据和指纹。",
+  "allowedTools": ["Patchwork diagnostics", "log exporter"],
+  "oracle": { "commands": [{ "id": "redaction", "program": "node", "args": ["--test", "tests/logging.test.mjs", "tests/log-presentation.test.mjs"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["日志详情页没有原始 token、提示词或网页全文"],
+  "marketing": { "claim": "诊断日志可审查，但默认不写入提示词正文、命令全文、网页正文或凭据。", "evidence": "security-negative" }
+}

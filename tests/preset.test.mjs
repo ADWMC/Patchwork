@@ -9,14 +9,7 @@ const root = join(import.meta.dirname, '..')
 
 /** 宿主随包发布的 standard preset；源码检出或未装 dsh 时可能不存在。 */
 function hostStandardPath() {
-  if (process.env.DSH_HOST_STANDARD_YML) return process.env.DSH_HOST_STANDARD_YML
-  try {
-    const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-    const globalRoot = execFileSync(npm, ['root', '-g'], { encoding: 'utf8', shell: process.platform === 'win32' }).trim()
-    return join(globalRoot, '@deepseek-ai', 'dsh', 'node_modules', '@deepseek-ai', 'dsh-web-app', 'presets', 'standard.patch.yml')
-  } catch {
-    return null
-  }
+  return join(root, 'tests', 'fixtures', 'dsh-v0.2.1-rc.2.standard.patch.yml')
 }
 
 // 注释与空行不参与比较：preset 声明里的说明文字是手工补充的。
@@ -25,11 +18,12 @@ const contentLines = text =>
     .split(/\r?\n/)
     .filter(line => line.trim() !== '' && !/^\s*#/.test(line))
 
-test('bundle patch registers the Patchwork plugin on the profile root', () => {
+test('bundle patch installs only the host web bridge at root', () => {
   const patch = readFileSync(join(root, 'cordis.patch.yml'), 'utf8')
   assert.match(patch, /- insert:/)
   assert.match(patch, /- id: patchwork-agent/)
   assert.match(patch, /name: '@patchwork\/coding-agent'/)
+  assert.doesNotMatch(patch, /@patchwork\/coding-agent\/runtime/)
 })
 
 test('bundle patch declares the agent preset alongside the plugin', () => {
@@ -39,7 +33,7 @@ test('bundle patch declares the agent preset alongside the plugin', () => {
   assert.equal(existsSync(join(root, 'presets/patchwork/agent.cordis.yml')), false)
 })
 
-test('generated preset exposes host tools without remounting the plugin', () => {
+test('generated preset preserves host tools and adds scoped runtime and browser', () => {
   const work = mkdtempSync(join(tmpdir(), 'patchwork-preset-'))
   const host = join(work, 'standard.patch.yml')
   const out = join(work, 'out')
@@ -71,7 +65,9 @@ test('generated preset exposes host tools without remounting the plugin', () => 
     const generated = readFileSync(join(out, 'patchwork.patch.yml'), 'utf8')
     assert.match(generated, /- id: preset-patchwork/)
     assert.match(generated, /^ {8}id: patchwork$/m)
-    assert.doesNotMatch(generated, /@patchwork\/coding-agent/)
+    assert.match(generated, /name: '@patchwork\/coding-agent\/runtime'/)
+    assert.equal((generated.match(/- id: patchwork-runtime/g) ?? []).length, 1)
+    assert.doesNotMatch(generated, /dsh-mcp-client|patchwork-browser/)
     assert.match(generated, /- id: tool-example/)
     assert.match(generated, /prefix: You are a coding agent\./)
   } finally {
@@ -86,15 +82,17 @@ test('committed preset carries the 0.1.7 host rows', () => {
   assert.doesNotMatch(preset, /dsh-workflow-worker-thread/)
   assert.doesNotMatch(preset, /text: >-/)
   assert.match(preset, /prefix: You are a coding agent powered by the \{\{model\}\} model\./)
-  assert.match(preset, /- id: tool-ralph\n {16}name: '@deepseek-ai\/dsh-tool-ralph'\n {16}disabled: true/)
+  assert.match(preset, /- id: patchwork-runtime\n {12}name: '@patchwork\/coding-agent\/runtime'/)
+  assert.doesNotMatch(preset, /dsh-mcp-client|patchwork-browser/)
 })
 
-test('committed preset rows match the installed host standard verbatim', t => {
+test('committed host rows match the pinned DSH standard verbatim', t => {
   const hostPath = hostStandardPath()
   if (!hostPath || !existsSync(hostPath)) return t.skip('no installed host standard to compare against')
   const rows = text => {
     const lines = contentLines(text)
-    return lines.slice(lines.findIndex(line => line.trim() === 'plugins:'))
+    const stop = lines.findIndex(line => line.includes('- id: patchwork-runtime'))
+    return lines.slice(lines.findIndex(line => line.trim() === 'plugins:'), stop < 0 ? undefined : stop)
   }
   // 正文逐行等于宿主 standard：本仓库不抄写宿主默认值，抄过的那份 persona 文案
   // 就是 0.1.7 的失效点。
@@ -103,6 +101,8 @@ test('committed preset rows match the installed host standard verbatim', t => {
 
 test('profile installs Patchwork as a bundle layer', () => {
   const profile = JSON.parse(readFileSync(join(root, 'profiles/patchwork/package.json'), 'utf8'))
-  assert.equal(profile.dependencies['@patchwork/coding-agent'], '0.1.2')
+  assert.equal(profile.dependencies['@patchwork/coding-agent'], JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version)
+  assert.equal(profile.dependencies['@deepseek-ai/dsh-base'], '0.2.1-rc.2')
+  assert.equal(profile.dependencies['@deepseek-ai/dsh-web-app'], '0.2.1-rc.2')
   assert.equal(profile.dsh.profile.bundles.includes('@patchwork/coding-agent'), true)
 })

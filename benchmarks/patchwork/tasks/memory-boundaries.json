@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "memory-boundaries",
+  "title": "记忆默认不注入，确认后按 scope 读取",
+  "suite": "public-marketing",
+  "capability": "memory",
+  "userPrompt": "提出一条 session-private 记忆，确认前不得自动召回；确认后当前 session 能读取，另一个 session 不能读取；删除后重启也不能复活。",
+  "allowedTools": ["patchwork_memory", "official DSH persistence"],
+  "oracle": { "commands": [{ "id": "memory", "program": "node", "args": ["--test", "tests/memory.test.mjs"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["界面区分候选、已确认和已删除", "上下文中没有无提示的记忆注入"],
+  "marketing": { "claim": "记忆先提议、再确认，并按 session/project scope 隔离；不会悄悄挤占上下文。", "evidence": "deterministic store-contract" }
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "jsonl-recovery",
+  "title": "恢复 JSONL 尾部半行",
+  "issue": "parseJsonl 读取追加中的日志文件时，最后一行可能还没写完。忽略空行和最后一条不完整 JSON，但不能丢弃之前的完整记录。中间损坏行仍应抛错。",
+  "workspace": "workspace",
+  "acceptance": { "public": "node --test test/public.test.mjs", "hidden": "node --test test/public.test.mjs oracle/hidden.test.mjs" },
+  "allowedPaths": ["src/jsonl.mjs"],
+  "marketing": "长任务日志被截断时能恢复已有证据，不会把半行误当完整事件。"
+}

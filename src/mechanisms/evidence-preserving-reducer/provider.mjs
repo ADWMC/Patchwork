@@ -28,7 +28,7 @@ export function resolveRoute(ctx, config = {}) {
  * （`finish.kind` 为 `aborted`/`error`）不会抛。只处理其中一条会让失败的
  * 调用被当成有效输出。
  */
-export async function callReducer(llm, { route, system, userText, signal, sessionId }) {
+export async function callReducer(llm, { route, system, userText, signal, sessionId, maxTokens = MAX_OUTPUT_TOKENS }) {
   if (!llm) return { ok: false, reason: 'llm-service-unavailable' }
   if (!route) return { ok: false, reason: 'reducer-route-unavailable' }
 
@@ -47,7 +47,7 @@ export async function callReducer(llm, { route, system, userText, signal, sessio
           source: { kind: 'patchwork', form: 'notice', summary: 'Evidence-Preserving Reducer request' },
         }),
       ],
-      maxTokens: MAX_OUTPUT_TOKENS,
+      maxTokens,
       signal: composed,
       sessionId,
     })
@@ -65,5 +65,10 @@ export async function callReducer(llm, { route, system, userText, signal, sessio
     .filter(block => block?.type === 'text')
     .map(block => block.text)
     .join('')
+  if (!text.trim()) return {
+    ok: false,
+    reason: finish.kind === 'max-tokens' ? 'reducer-output-budget-exhausted' : 'empty-reducer-output',
+    usage: assembler.usage,
+  }
   return { ok: true, text, usage: assembler.usage, model: route.model, provider: route.provider }
 }

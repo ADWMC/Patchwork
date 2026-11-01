@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "memory-cas-negative",
+  "title": "旧 revision 不能确认、删除或复活记忆",
+  "suite": "security-negative",
+  "capability": "memory-security",
+  "userPrompt": "并发确认和删除同一条记忆，故意使用旧 revision，确认 CAS 冲突被拒绝，删除 tombstone 不会被迟到写入复活。",
+  "allowedTools": ["patchwork_memory", "memory route"],
+  "oracle": { "commands": [{ "id": "memory-cas", "program": "node", "args": ["--test", "tests/memory.test.mjs"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["界面把 revision conflict 解释为需要重新读取，而不是静默覆盖"],
+  "marketing": { "claim": "记忆写入和删除使用 revision CAS，旧请求不能覆盖新决定。", "evidence": "security-negative" }
+}

@@ -24,11 +24,26 @@ test('the reducer route stays unset unless configured', () => {
     reducerProvider: 'p',
     reducerModel: 'm',
     skillsEnabled: true,
+    skillsMode: 'core',
     evidenceGate: true,
+    taskPolicyMode: 'structured',
+    nativeSearch: true,
+    nativeSearchProviders: ['bing-html', 'brave-html', 'duckduckgo-html'],
+    nativeSearchMaxResults: 8,
+    nativeSearchTimeoutMs: 15000,
+    nativeFetch: true,
+    nativeFetchAllowedHosts: [],
+    nativeFetchTimeoutMs: 15000,
+    nativeFetchMaxBytes: 2000000,
+    nativeFetchMaxChars: 6000,
+    nativeFetchRobots: true,
+    memoryEnabled: true,
   })
 })
 
 test('invalid configuration fails instead of being silently corrected', () => {
   assert.throws(() => Config({ cacheWriteReadRatio: 'fast' }), /expected number/)
   assert.throws(() => Config({ actionFusion: 'yes' }), /expected boolean/)
+  assert.throws(() => Config({ nativeSearchProviders: ['unknown-html'] }))
+  assert.throws(() => Config({ skillsMode: 'unknown' }))
 })

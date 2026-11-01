@@ -1,0 +1,173 @@
+{
+  "date": "2026-11-01",
+  "status": "passed",
+  "packages": {
+    "main": "@patchwork/coding-agent@0.2.0",
+    "optional": "@patchwork/browser@0.2.0",
+    "publishedToNpm": false,
+    "mainDshModified": false
+  },
+  "boundaries": {
+    "mainBundlesBrowser": false,
+    "mainInstallsBrowserDependencies": false,
+    "optionalRequiresCodingAgent": false,
+    "optionalAutoInstalled": false,
+    "engineBundled": false,
+    "installHooks": false,
+    "authorization": "Explicit opt-in per live Agent/session/workspace/composed preset; switch, disable, dispose or unload revoke access",
+    "display": "Independent DSH sidebar using the existing authenticated frame stream",
+    "operation": "DOM/ARIA observation, fresh observationId, exact unique semantic locators"
+  },
+  "regression": {
+    "command": "pnpm test",
+    "tests": 300,
+    "passed": 300,
+    "failed": 0,
+    "skipped": 0
+  },
+  "privateBrowser": {
+    "date": "2026-11-01",
+    "browserPlugin": "absent",
+    "fallback": "Browser plugin not available; use a private Playwright instance",
+    "fullDshApp": false,
+    "nativeDshRegistries": true,
+    "patchworkRuntimeLoaded": false,
+    "modelRequests": 0,
+    "hostBrowserUsed": false,
+    "checks": [
+      "optional package mounts without Patchwork runtime; native tool schemas appear only in the explicitly authorized standard session",
+      "real native tool calls fill and click an observed appliance control; stale observations, ambiguous targets and user takeover reject writes",
+      "two real private browsers keep DOM/input state independent",
+      "preset switch closes only its owner; a fresh grant cannot revive old clients; stale access revocation is rejected"
+    ],
+    "screenshots": [
+      "optional-browser-900-light.png",
+      "optional-browser-380-light.png",
+      "optional-browser-380-dark.png"
+    ],
+    "expectedAccessDenials": [],
+    "consoleErrors": [],
+    "nativeToolCalls": 9,
+    "status": "passed",
+    "cleanedUp": true,
+    "testServerStopped": true
+  },
+  "independentInstallation": {
+    "offlineAttempt": "missing cached electron-to-chromium@1.5.471 tarball; retried using proxy",
+    "temporaryProjectCleanedUp": true,
+    "mainDshModified": false,
+    "installs": [
+      {
+        "package": "@patchwork/browser",
+        "version": "0.2.0",
+        "importPassed": true,
+        "applyExport": true,
+        "configExport": true,
+        "packageFromLocalTarball": true,
+        "installScriptsRun": false,
+        "patchworkAgentInstalled": false
+      },
+      {
+        "package": "@patchwork/coding-agent",
+        "version": "0.2.0",
+        "importPassed": true,
+        "applyExport": true,
+        "configExport": true,
+        "packageFromLocalTarball": true,
+        "installScriptsRun": false,
+        "browserDependenciesInstalled": false
+      }
+    ],
+    "status": "passed",
+    "source": "local tarballs, pnpm through process-specific proxy, isolated temporary directories"
+  },
+  "packageChecks": {
+    "commands": [
+      "pnpm check:release",
+      "pnpm --filter @patchwork/browser check:release"
+    ],
+    "mainBrowserFiles": 0,
+    "mainBrowserDependencies": 0,
+    "clientBrowserMarkers": false,
+    "independentEntryAndInstallerRequired": true,
+    "forbiddenPackFiles": 0
+  },
+  "limitations": [
+    "Native DSH registries with isolated HTTP/session fixtures; not the full DSH App",
+    "No real model requests or ZCode product comparison",
+    "No Electron embedding; background CDP freezing is not implemented or claimed",
+    "Default system engine reuse; downloaded components and dependencies are outside tarball sizes",
+    "Local tarballs only; neither npm publication nor installation into the main DSH"
+  ],
+  "evidenceDirectory": "../Patchwork-source-research/2026-11-01/browser-gap-qa",
+  "evidenceHashes": {
+    "optional-browser-result.json": "1a60023a17b8f874b204114fa798113707890e82a3cd93c46783c39d31ff0908",
+    "optional-browser-probe-plugin.mjs": "1099baa45a8bcfd72585e8f2ecbb49f6060e8cf0f30bd425adf94b691fca9bbd",
+    "optional-browser-qa.mjs": "cca7c7e0ad5abc21cf84734643515bd0371ad385d97dcc53709f15682b84773b",
+    "check-independent-install.ps1": "b5c51f30bbf1e8e1c483c187cbcb6087d2f63346c4b0396a28120b2c3136b1e4",
+    "optional-split-full.tap": "9e737dcb712830b0f32b4d22f27bba9b157bdd1f202c5b3b0c4b97373a8460c4",
+    "optional-browser-900-light.png": "beea437971329bdf0afab05c4f89032fb40b1a74ae90d45958842828da9064ec",
+    "optional-browser-380-light.png": "a190870db02bf9b141d6ef5894f5a4f3b23136e873e495aefb0bb5dc89ea15a4",
+    "optional-browser-380-dark.png": "645a5cf55d80124e4bdc58a32ab829f4ccfafa948ca1530cab42fa44111e36b8"
+  },
+  "sourceHashes": {
+    "packages/browser/src/browser/artifacts.mjs": "e8e9372bbb82968c6df8fc1ce07ea1380f06a368f83cf9918f039c3f2cd7f9ee",
+    "packages/browser/src/browser/backends.mjs": "092f57ffa9a13b38a15ce6ffc5a245f701a726fd48a8204e99866526db36a533",
+    "packages/browser/src/browser/components/catalog.mjs": "16cef85a70e7806554e15e74fc466fd20332ce4055a9013592b0478fe5ae0277",
+    "packages/browser/src/browser/components/extract.mjs": "fb4397f890dbc12abf9b8dde18ff250cfe2c8e90224ce32e4b0783c09965f91a",
+    "packages/browser/src/browser/components/installer.mjs": "989af475a6b8bc7acdbdb2a5b45e9b78f124f1e49a08e15e8863c6ecdacbc93f",
+    "packages/browser/src/browser/components/network.mjs": "49e471fc63f8ffeeb1da02028cdb7be7d94e5c845c21620033410c0186abfd35",
+    "packages/browser/src/browser/components/process.mjs": "daa7d21e74f369c71f23da2986b028d1bb9b0c4dbcff5f16415016dc24238711",
+    "packages/browser/src/browser/components/provision.mjs": "f6bcb5e089619ad642dcb0d0a3035a76e59b1e09170bfccded78234b42397ab9",
+    "packages/browser/src/browser/components/store.mjs": "68227db00ac0ce06302e16b752467566de83e2e1f4c95496ba2d8c675df11c2e",
+    "packages/browser/src/browser/evidence.mjs": "bf2c22e667abb4383ed052d757e5e9c9ae6638da44f7d852654859338a2a7a1c",
+    "packages/browser/src/browser/health.mjs": "eda96071a820d31a97ed7ac344ae953ac876e94f98370b300af45accb21394aa",
+    "packages/browser/src/browser/identity.mjs": "f0ba3b629f00a68cd9cb2c6f0fb4dd652b70ec32302a7a56ef53eacb187ea75f",
+    "packages/browser/src/browser/lease.mjs": "e53bf80975d2f9ef48083919ef17566d7b9a828c41751b1290722dc611035eb3",
+    "packages/browser/src/browser/locator.mjs": "e38ac5a8f9b7e9d1462b1c8de2ba0a9e32fd86d5894e6374bae058f87040f9bf",
+    "packages/browser/src/browser/policy.mjs": "3593963a711819c190949242d80ba2c1bcac2269397f2af688078a60267f2fd4",
+    "packages/browser/src/browser/profiles.mjs": "083103490300c8f0d6dd7692bf2d80c67eb9ed83c6db703937381b095eb6a475",
+    "packages/browser/src/browser/recording.mjs": "45cb33be34c1f69c2e1f262d3e800804866df3215841fdbd60c221b95c0b493d",
+    "packages/browser/src/browser/resource-memory.mjs": "ecd57f338b499837c964efedfbd13a99fb20896cd3f134c6699a131f8b17a1a0",
+    "packages/browser/src/browser/resources.mjs": "e9e28f3cb3c7a2ec10a7e8ea0ab168224708d462eccf0037a913b8c8d3dce974",
+    "packages/browser/src/browser/route.mjs": "ddc9ee7edfe3caaae6f47ccc27b38f9e3d28d9f86ff3bb3d6e4e54b7a7b6fd22",
+    "packages/browser/src/browser/session.mjs": "6a27a2b9878b2d7b3da2fbc29c4b17b95ae895632dbb2c0399986719df023bf9",
+    "packages/browser/src/browser/storage-crypto.mjs": "5cd5668aa4a15d97500ea3aaf2667178e2cf43b59fbb327c9c2ae178e4b7ed96",
+    "packages/browser/src/browser/stream.mjs": "d9a85526980269462d0491944ad279b39f92fcc7beb23490430376393f6553e1",
+    "packages/browser/src/browser/tool.mjs": "ab5f4b9266dc7d17e4842a848ee7a812c103e1016740136bce7d01054baee6fa",
+    "packages/browser/src/client/browser-stream.mjs": "e8a05a8076c25b5ca8de445c1de5a5ea96a36a26ea803ee168d42bf7122f3054",
+    "packages/browser/src/client/BrowserPanel.jsx": "d491c04f784cc877622ca26cf569c7841cee5ca29f05cacf2697374dde332325",
+    "packages/browser/src/client/BrowserResources.jsx": "1d2eb2f6369ff327834a4a3ec14303a1832262ff61795cd4e4eb9bcbe6edc941",
+    "packages/browser/src/client/BrowserWorkspace.jsx": "ecf5b3e9a3ca47c3ba5f682cb202843d607a6da4e807924cdef01631df46e3e2",
+    "packages/browser/src/client/connection.mjs": "5c29c960da2bcafa947edb32a3460570470a500178e7ae76fd915630d1be91f0",
+    "packages/browser/src/client/index.jsx": "48a01e6da01d28911f0b0574fe29177ca7126ad66989c90e4727f6087ed2b33c",
+    "packages/browser/src/client/styles.mjs": "5a2995ece65c1e12b85502a1918064428bdb7d34b70ff96d436e68ab24a2d4b3",
+    "packages/browser/src/index.mjs": "ca7fa37d42a1e0393341b8d6fe0642e6393d5982895e06615b36a3eedf730793",
+    "packages/browser/src/logging/redact.mjs": "26b2a1dda3c6126c8fc118d740c2619635a00d215f1207c0cccc0ed48f312daa",
+    "packages/browser/src/scope.mjs": "84cf14fb654c13746b68431dd730d8d94bf7b15c0aecc54a0f87d0d5f1aa4f6c",
+    "packages/browser/src/ui/web-runtime.mjs": "40bc50a768771145ba8dda96913516f98b3d51a608f69cc6f5ae5e26076f7f5e",
+    "packages/browser/tests/access-and-locators.test.mjs": "c4e47cbe6e2c6ccce13930693efd34b3bcaae17edeb5a74afe0b5636945ec4d4",
+    "packages/browser/tests/browser-components.test.mjs": "2cb9a46a85d8feb4cbb29258c54d0e2b9ed6d97d1ea6f05c05ad8075ce54fd6c",
+    "packages/browser/tests/browser-identity.test.mjs": "4d87372a03c14a94e2da8f98fb54f58d11c95d4204e7c88accfccc563212e078",
+    "packages/browser/tests/browser-resources.test.mjs": "714dcee14dd373370838ec2514c98058d2c3ff6647e8f490b01e014a86379198",
+    "packages/browser/tests/browser-security.test.mjs": "e318c928fc897368c469f72cd2d92ad53fcda1d083b35b4c034a823098eccdb5",
+    "packages/browser/tests/browser-tool.test.mjs": "664c974215f6f5ca21966f4c7d286b309c8787d497e62bf87c6848bb8f29ad64",
+    "packages/browser/tests/helpers/agent.mjs": "9fc52bd4ed994232b4482a3475fb459a4411df09237bb202bb97fc5c2cb3308e",
+    "packages/browser/package.json": "da334576e3d86b4bb7c1725813b3fd1ba976c70a2df7710da2afc214c832bcb3",
+    "packages/browser/cordis.patch.yml": "63b5f6391fbc793a952fd137b3769776b90c3e0ce917dd3232a36d2197ffab8b",
+    "packages/browser/lib/client.js": "3096443201b86b9d18403b2ba4a972229d47b5323f17d214690600656517f393",
+    "packages/browser/scripts/check-release.mjs": "9bd08f1d9b3366d20f2a22dd1930b594c2a968f229a8bc52e32b9f64b9e6b903",
+    "package.json": "ebef5ae5d67b6c2fb3e921dc9d7d251980fc0bdc291a4acbadd8e9d71d8c9f41",
+    "pnpm-lock.yaml": "75c061e4c392b4b7c883cb87009b1e2438db89b5818b071a7aed8f1ddcda1efa",
+    "src/index.mjs": "c6e5da16354abe27e70ea666b341a2e9aa0cab554d8e626822074b187b449ca3",
+    "src/runtime.mjs": "cced29820149ab5b3b52d56770bb97ec22e4065938baa16508d1932beaa845b7",
+    "src/config/plugin-config.mjs": "00ae3775c7271ef806e180ea96cf7d0c1ed9fe36c2e2880ff26c0201541d7279",
+    "src/config/user-config.mjs": "c605025f5c616e6b979f1d48db3eb14cec544b4945b939ac9794cf875fec60fe",
+    "src/client/index.jsx": "7dc6ae3628afa4ad9070f5de75c8fc25b47e6bf6b25466fd60b12fefebdbe897",
+    "lib/client.js": "db0a618b259a2d24a34ab2d0559478280722a663fe204fdfb6dfdca242775c98",
+    "src/ui/stats-injection.mjs": "c3a11c07cb17a813f6cf4de3f79066097b26f763d27ecee59e3a593b24419a3f",
+    "scripts/package-check.mjs": "311348f8e2bc67b45101a5da3b3e61e9169c2d5662b64f4db1be5a9858f9849e",
+    "tests/real-composition/browser-resources.test.mjs": "57771568522a23e06e4b6c50f8414c54b79ed385c84a84e28bcf3448dfed7f72"
+  },
+  "distributionManifest": "External distribution-result.json contains final tarball sizes and SHA-256; excluded here to avoid a self-referential artifact hash"
+}

@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto'
-import { execFileSync } from 'node:child_process'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -9,8 +8,7 @@ const outArg = process.argv.indexOf('--out')
 const outputDir = outArg >= 0 ? process.argv[outArg + 1] : resolve(root, 'presets')
 const outputName = 'patchwork.patch.yml'
 
-// 声明行的显示字段（roster 里的位置与描述）。插件本体仍由 cordis.patch.yml 注册，
-// 这个文件只声明 preset，因此它不含 @patchwork/coding-agent 行。
+// Host tools remain verbatim; Patchwork behavior is a preset-scoped addition.
 const declaration = [
   `- insert:`,
   `    - id: preset-patchwork`,
@@ -25,9 +23,7 @@ const declaration = [
 
 function hostStandard() {
   if (process.env.DSH_HOST_STANDARD_YML) return resolve(process.env.DSH_HOST_STANDARD_YML)
-  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-  const globalRoot = execFileSync(npm, ['root', '-g'], { encoding: 'utf8', shell: process.platform === 'win32' }).trim()
-  return join(globalRoot, '@deepseek-ai', 'dsh', 'node_modules', '@deepseek-ai', 'dsh-web-app', 'presets', 'standard.patch.yml')
+  return join(root, 'tests', 'fixtures', 'dsh-v0.2.1-rc.2.standard.patch.yml')
 }
 
 /**
@@ -45,13 +41,13 @@ function generate(standard) {
   }
   while (rows.length && !rows[rows.length - 1].trim()) rows.pop()
   if (!rows.some(line => line.startsWith('          - id: '))) throw new Error('host standard declares no plugin rows')
-  return `${declaration.join('\n')}\n${rows.join('\n')}\n`
+  return `${declaration.join('\n')}\n${rows.join('\n')}\n          - id: patchwork-runtime\n            name: '@patchwork/coding-agent/runtime'\n`
 }
 
 const standardPath = hostStandard()
 const standard = await readFile(standardPath, 'utf8')
 // 手工补充的行内注释会在重跑时被覆盖；比对靠 tests/preset.test.mjs 的逐行核对。
-const generated = `# 由 scripts/gen-preset.mjs 生成，宿主 standard 行逐字搬运；下面的解释性注释是手工补充的，\n# 重跑本脚本会覆盖它们，改完请用 tests/preset.test.mjs 的逐行核对。\n# gen-preset: host=${createHash('sha256').update(standard).digest('hex')}\n\n${generate(standard)}`
+const generated = `# Generated from pinned DSH dsh-v0.2.1-rc.2 standard plus the scoped Patchwork runtime.\n# Source commit: 687f282e8625c6b8d11ff58211a90524be2e4317\n# gen-preset: host=${createHash('sha256').update(standard).digest('hex')}\n\n${generate(standard)}`
 await mkdir(outputDir, { recursive: true })
 const outputPath = resolve(outputDir, outputName)
 await writeFile(outputPath, generated)

@@ -1,0 +1,424 @@
+{
+  "schema": 1,
+  "date": "2026-11-01",
+  "status": "implemented-and-isolated-native-validated",
+  "scope": "DSH-internal-only",
+  "externalSources": false,
+  "externalDelivery": false,
+  "independentService": false,
+  "mainDshConfigured": false,
+  "implementation": {
+    "tool": "patchwork_superagent",
+    "command": "patchwork-superagent",
+    "nativePersistence": true,
+    "localNativeSpawnOnly": true,
+    "presetAndPermissionInheritance": true,
+    "maxJobs": 24,
+    "maxConcurrency": 4,
+    "defaultConcurrency": 2,
+    "maxAttemptsPerJob": 3,
+    "maxAttemptsPerQueue": 48,
+    "checkpointBytes": 262144,
+    "inheritedReadTools": [
+      "obs_recall",
+      "update_plan",
+      "patchwork_search",
+      "patchwork_fetch"
+    ]
+  },
+  "research": [
+    {
+      "repository": "OpenHands/software-agent-sdk",
+      "commit": "98849457621881ae2414719b82b8bc1cf535b4ab",
+      "license": "MIT",
+      "inspectedFiles": 4
+    },
+    {
+      "repository": "anomalyco/opencode",
+      "commit": "69269e4ebe309a08919b3c9be7948b9fd699c3a4",
+      "license": "MIT",
+      "inspectedFiles": 7
+    },
+    {
+      "repository": "langchain-ai/langgraph",
+      "commit": "e5c961d7fbe7ca6fdd4c94c84d90511372514d55",
+      "license": "MIT",
+      "inspectedFiles": 4
+    }
+  ],
+  "regression": {
+    "tests": 376,
+    "passed": 376,
+    "failed": 0,
+    "skipped": 0,
+    "logSha256": "934eda085f17590aac6243ad8ba56cb6f59923bfaf627c5e478ec9530e1b033e",
+    "superagentTests": 19,
+    "nativeRegistryScopeTest": true,
+    "otherSessionRealShellUnaffected": true
+  },
+  "pilots": [
+    {
+      "status": "failed-before-result",
+      "cause": "test driver setup callback returned non-transaction value; fixed",
+      "rootSuffix": "r1jaPF"
+    },
+    {
+      "status": "failed-before-result",
+      "cause": "flushing a closed native child Session; fixed by final turn-stopping flush",
+      "rootSuffix": "4qSO44"
+    },
+    {
+      "schema": 1,
+      "date": "2026-11-01",
+      "kind": "real-model-native-superagent-smoke-not-benchmark",
+      "model": "step-5-preview",
+      "contextWindow": 1000000,
+      "host": "0.2.1-rc.2",
+      "maxOutputTokens": 16384,
+      "root": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-native-superagent-Gi5pF1",
+      "sessionId": "session-f58dd4c0-1f2f-4554-9b29-996a9330aba8",
+      "requests": 38,
+      "elapsedMs": 200216,
+      "exitCode": 0,
+      "checks": {
+        "taskGraphCompleted": true,
+        "threeNativeChildren": true,
+        "acceptanceVerified": true,
+        "addition": true,
+        "ordinaryIsolation": true,
+        "notTimedOut": true
+      },
+      "toolErrors": 1,
+      "jobs": [
+        {
+          "id": "alpha",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "50f585ff-9552-4f74-987b-78c9e1d79251",
+            "revision": 4,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-39c45704-192b-4c02-b7f3-b5f8eef45c8c"
+        },
+        {
+          "id": "beta",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "303897e2-d12d-4c08-87ac-3cbd12dbdd6e",
+            "revision": 4,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-f4194140-423a-4ca6-b7f8-3ca522d6cc0f"
+        },
+        {
+          "id": "fix",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "79937d9e-3b5d-44a4-93d1-2ecda13ab3f5",
+            "revision": 7,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-eddcdabb-5cbf-485c-a876-6a9a2b8e44ad"
+        }
+      ],
+      "sourceHashes": {
+        "src/superagent/state.mjs": "9f2e496e2915c39e7ac2ecfae08689d60633ee1d096bc34ad10dbe460b5ac631",
+        "src/superagent/store.mjs": "98ec0c0a95f5010aa4fd26719d4d34cd091ffe9d7af7466a4449c500e8ef4b14",
+        "src/superagent/controller.mjs": "be875c828fab8cf6866223c433d3fcfd9b504c161131641c85ad1b1a2e05c154",
+        "src/superagent/index.mjs": "876fa0e29205d5d5a8b620c9d925fcb2d859364b6d8acf7c4caa76f93b2c7ee9",
+        "src/runtime.mjs": "a8ac2056c29f0c4d228347f244c8b2a7e26792abbf12b34f1659d8f6aa9e54bc",
+        "docs/experiments/2026-11-01-superagent/native-driver.mjs": "e3b1f97e1e732cd4ac9ddd61f35bf855729944256e2704a37061b133fc1ffd43",
+        "docs/experiments/2026-11-01-superagent/run-native.mjs": "140e081e9181ab16e57ebf95277a88268b309f483567f45755af0e3883dad880"
+      },
+      "mainDshConfigured": false,
+      "externalDelivery": false,
+      "benchmarkImprovementClaimed": false
+    },
+    {
+      "schema": 1,
+      "date": "2026-11-01",
+      "kind": "real-model-native-superagent-smoke-not-benchmark",
+      "model": "step-5-preview",
+      "contextWindow": 1000000,
+      "host": "0.2.1-rc.2",
+      "maxOutputTokens": 16384,
+      "root": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-native-superagent-7Fneyd",
+      "sessionId": "session-9375a9ff-8f33-4935-8a33-9bfc3b5af507",
+      "requests": 32,
+      "elapsedMs": 175909,
+      "exitCode": 0,
+      "checks": {
+        "taskGraphCompleted": true,
+        "threeNativeChildren": true,
+        "acceptanceVerified": true,
+        "addition": true,
+        "ordinaryIsolation": true,
+        "notTimedOut": true
+      },
+      "toolErrors": 1,
+      "jobs": [
+        {
+          "id": "alpha",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "732894e7-2d0e-423a-a6e8-e5a102a82f5e",
+            "revision": 4,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-6c5bbb2c-7205-4039-8231-176566bf5702"
+        },
+        {
+          "id": "beta",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "97ddd2b4-1a7e-45e3-9823-ff902b87a78f",
+            "revision": 4,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-a4dc947b-8235-4e96-a9f5-e749eed21051"
+        },
+        {
+          "id": "fix",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "27016592-b23b-4957-b34d-13f39f8fbd7d",
+            "revision": 7,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-bd04a720-2568-44ed-bc39-cce2f4033967"
+        }
+      ],
+      "sourceHashes": {
+        "src/superagent/state.mjs": "9f2e496e2915c39e7ac2ecfae08689d60633ee1d096bc34ad10dbe460b5ac631",
+        "src/superagent/store.mjs": "98ec0c0a95f5010aa4fd26719d4d34cd091ffe9d7af7466a4449c500e8ef4b14",
+        "src/superagent/controller.mjs": "b5637ae29e368e1a077257d328a7db0d6b47bfd42a3624ff9fb31445838fdc0c",
+        "src/superagent/index.mjs": "921854f7c4e616a82c0400b557d9f69d96455b0c419141d4af3f406c22c4976b",
+        "src/runtime.mjs": "a8ac2056c29f0c4d228347f244c8b2a7e26792abbf12b34f1659d8f6aa9e54bc",
+        "docs/experiments/2026-11-01-superagent/native-driver.mjs": "e3b1f97e1e732cd4ac9ddd61f35bf855729944256e2704a37061b133fc1ffd43",
+        "docs/experiments/2026-11-01-superagent/run-native.mjs": "140e081e9181ab16e57ebf95277a88268b309f483567f45755af0e3883dad880"
+      },
+      "mainDshConfigured": false,
+      "externalDelivery": false,
+      "benchmarkImprovementClaimed": false
+    },
+    {
+      "schema": 1,
+      "date": "2026-11-01",
+      "kind": "real-model-native-superagent-smoke-not-benchmark",
+      "model": "step-5-preview",
+      "contextWindow": 1000000,
+      "host": "0.2.1-rc.2",
+      "maxOutputTokens": 16384,
+      "root": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-native-superagent-nkssLt",
+      "sessionId": "session-d3cd09e3-c79f-4568-9c4e-c22809e2bd0b",
+      "requests": 38,
+      "elapsedMs": 194407,
+      "exitCode": 0,
+      "checks": {
+        "taskGraphCompleted": true,
+        "threeNativeChildren": true,
+        "acceptanceVerified": true,
+        "addition": true,
+        "ordinaryIsolation": true,
+        "notTimedOut": true,
+        "nativePostAdmissionFaultStopped": true
+      },
+      "toolErrors": 2,
+      "faultProbe": {
+        "injected": true,
+        "childId": "session-pw-091e919f-081c-4c83-8427-6ab4db6dc6b2",
+        "failClosed": true,
+        "noActiveAssignment": true,
+        "nativeChildReleased": true
+      },
+      "jobs": [
+        {
+          "id": "alpha",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "f82b4427-cbe9-4bed-b54e-dbf840b379ed",
+            "revision": 4,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-e5cf88ee-6240-4301-8be4-c3d3dc8b5457"
+        },
+        {
+          "id": "beta",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "e6369aae-6f2a-4df6-9509-126fd17fb4cb",
+            "revision": 4,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-d478d6ca-5958-489a-9edc-310844310242"
+        },
+        {
+          "id": "fix",
+          "status": "done",
+          "attempt": 1,
+          "evidence": {
+            "taskId": "46603978-73ac-4c3b-bcf7-59bdb6de4264",
+            "revision": 7,
+            "status": "ready",
+            "verified": true
+          },
+          "childId": "session-pw-6ac639e2-d8f2-46ff-8655-2e676c50b88c"
+        }
+      ],
+      "sourceHashes": {
+        "src/superagent/state.mjs": "9f2e496e2915c39e7ac2ecfae08689d60633ee1d096bc34ad10dbe460b5ac631",
+        "src/superagent/store.mjs": "98ec0c0a95f5010aa4fd26719d4d34cd091ffe9d7af7466a4449c500e8ef4b14",
+        "src/superagent/controller.mjs": "5dbf6e8d63b9e5af8d3a1cf036ae8a584ad4d9351b048aa3d81b43926f97ba3f",
+        "src/superagent/index.mjs": "921854f7c4e616a82c0400b557d9f69d96455b0c419141d4af3f406c22c4976b",
+        "src/runtime.mjs": "a8ac2056c29f0c4d228347f244c8b2a7e26792abbf12b34f1659d8f6aa9e54bc",
+        "docs/experiments/2026-11-01-superagent/native-driver.mjs": "eb1aacbcf67c8da8a4f26959932342950c80afec2342001c930ae7f9261fa94d",
+        "docs/experiments/2026-11-01-superagent/run-native.mjs": "dbe456294ee71c66e6cc839f29221e577894ebb6b685108b4f5a61dfa85634e0"
+      },
+      "mainDshConfigured": false,
+      "externalDelivery": false,
+      "benchmarkImprovementClaimed": false
+    }
+  ],
+  "limits": [
+    "Not a benchmark; no improvement score claimed",
+    "No cross-process lock or OS sandbox",
+    "Restore pauses uncertain side effects and marks historical passes review",
+    "Retry creates a new native child and may repeat side effects; explicit review required",
+    "Graphical queue editor not added; tool/command and read-only runtime projection only"
+  ],
+  "rawModelLogsInRepository": false,
+  "credentialsInRepository": false,
+  "limitNotes": [
+    "Search/fetch remain read-only retrieval requests through existing DSH tools; no external task sources or result delivery",
+    "Fault probe intentionally adds a fourth native child after the three-job graph, then cancels it through a checkpoint failure"
+  ],
+  "packageCheck": {
+    "dryRun": true,
+    "requiredContentPresent": true,
+    "noBrowserDependencies": true,
+    "noInstallHooks": true,
+    "ok": true,
+    "checkedFiles": 238,
+    "knownCredentialMatches": [],
+    "browserBundled": false,
+    "researchArtifactsBundled": false
+  },
+  "credentialScanScope": "Known user-provided credential prefix across the dry-run shipping file list; raw private model logs remain in TEMP",
+  "finalNativeRun": {
+    "schema": 1,
+    "date": "2026-11-01",
+    "kind": "real-model-native-superagent-smoke-not-benchmark",
+    "model": "step-5-preview",
+    "contextWindow": 1000000,
+    "host": "0.2.1-rc.2",
+    "maxOutputTokens": 16384,
+    "root": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-native-superagent-9Omlji",
+    "sessionId": "session-e4dc7e78-46b3-46e6-981d-ffe3fbefe0c9",
+    "requests": 38,
+    "elapsedMs": 192053,
+    "exitCode": 0,
+    "checks": {
+      "taskGraphCompleted": true,
+      "threeNativeChildren": true,
+      "acceptanceVerified": true,
+      "addition": true,
+      "ordinaryIsolation": true,
+      "notTimedOut": true,
+      "nativePostAdmissionFaultStopped": true,
+      "nativeCheckpointRecoveryPaused": true
+    },
+    "toolErrors": 2,
+    "faultProbe": {
+      "injected": true,
+      "childId": "session-pw-678eb32a-19d3-45f2-9287-b207f07e6595",
+      "failClosed": true,
+      "noActiveAssignment": true,
+      "nativeChildReleased": true
+    },
+    "recoveryProbe": {
+      "fromNativeCheckpoint": true,
+      "status": "paused",
+      "historicalPassesRequireReview": true,
+      "uncertainAssignmentBlocked": true
+    },
+    "jobs": [
+      {
+        "id": "alpha",
+        "status": "done",
+        "attempt": 1,
+        "evidence": {
+          "taskId": "ea935f1a-c7e3-4eb6-bd36-9250b601e496",
+          "revision": 4,
+          "status": "ready",
+          "verified": true
+        },
+        "childId": "session-pw-cfd0fae6-b20a-438b-81ca-5cbec150f064"
+      },
+      {
+        "id": "beta",
+        "status": "done",
+        "attempt": 1,
+        "evidence": {
+          "taskId": "7500b524-0883-47d1-ba79-4cbc25678e1a",
+          "revision": 4,
+          "status": "ready",
+          "verified": true
+        },
+        "childId": "session-pw-86e51b81-6e3d-4404-b2ed-a21c7ca7b402"
+      },
+      {
+        "id": "fix",
+        "status": "done",
+        "attempt": 1,
+        "evidence": {
+          "taskId": "4a2eebd1-573e-40c9-93a4-4ccfed4d5704",
+          "revision": 7,
+          "status": "ready",
+          "verified": true
+        },
+        "childId": "session-pw-a0ff8297-4452-4e59-87a2-91028a06fb0e"
+      }
+    ],
+    "sourceHashes": {
+      "src/superagent/state.mjs": "9f2e496e2915c39e7ac2ecfae08689d60633ee1d096bc34ad10dbe460b5ac631",
+      "src/superagent/store.mjs": "98ec0c0a95f5010aa4fd26719d4d34cd091ffe9d7af7466a4449c500e8ef4b14",
+      "src/superagent/controller.mjs": "5dbf6e8d63b9e5af8d3a1cf036ae8a584ad4d9351b048aa3d81b43926f97ba3f",
+      "src/superagent/index.mjs": "c1a5a2de77de911be47b7716f30c4fa627ca70af5e3a3adcf0c2630dacf795b2",
+      "src/runtime.mjs": "a8ac2056c29f0c4d228347f244c8b2a7e26792abbf12b34f1659d8f6aa9e54bc",
+      "docs/experiments/2026-11-01-superagent/native-driver.mjs": "e7dcfc7ce3b78cc4a9e569a16b9317837857c777f79141f7674ac8ed4c283a6a",
+      "docs/experiments/2026-11-01-superagent/run-native.mjs": "244266bb98ff86fe62629d9e400b3cba19f08f51774b92a016fb8317b927421f"
+    },
+    "mainDshConfigured": false,
+    "externalDelivery": false,
+    "benchmarkImprovementClaimed": false
+  },
+  "finalSourceHashesMatch": true,
+  "recoveryValidation": "Real DSH native Session checkpoint reader after explicit pause, plus deterministic restore tests; not a separate-process crash/restart experiment",
+  "noModelImprovementClaim": true,
+  "finalModelToolErrors": [
+    {
+      "kind": "delegated-effect-channel-denied",
+      "recoveredInMainGraph": true
+    },
+    {
+      "kind": "artifact-target-not-registered",
+      "recoveredInMainGraph": true
+    }
+  ]
+}

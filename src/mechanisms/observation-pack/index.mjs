@@ -2,6 +2,10 @@ import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { readObject, writeObject } from '../../util/content-archive.mjs'
 import { record } from '../../ui/mechanism-stats.mjs'
 import { appendLedger } from './ledger.mjs'
+import { isPatchworkAgent, requirePatchworkAgent } from '../../scope.mjs'
+import { commandFailed } from '../../util/tool-outcome.mjs'
+import { tailText } from './observation.mjs'
+import { logDiagnostic } from '../../logging/session-log.mjs'
 import {
   EXCERPT_BYTES,
   HANDLE_PATTERN,
@@ -44,17 +48,24 @@ export function registerObservationPack(ctx) {
     // 先让下游（含原生 dsh-spill-policy 的 prepend 监听器）完成，再变换结果，
     // 这样两者是组合关系而不是互相覆盖。
     const decision = await next()
+    if (!isPatchworkAgent(exec?.agent)) return decision
     try {
-      return await replaceWithHandle(exec, result, decision)
+      return await replaceWithHandle(ctx, exec, result, decision)
     } catch (error) {
-      console.warn(`[patchwork] ObservationPack left a tool result untouched: ${error?.message ?? error}`)
+      logDiagnostic(ctx, exec, { mechanism: 'op', event: 'failure', level: 'warn', reason: 'archive-failed', error })
       return decision
     }
   })
 }
 
-async function replaceWithHandle(exec, result, decision) {
+async function replaceWithHandle(ctx, exec, result, decision) {
   if (decision.kind !== 'accept') return decision
+  // Recall is already bounded and must reach the model verbatim. Packing it
+  // again would replace the requested page with another handle indefinitely.
+  if (exec.name === RECALL_TOOL_NAME) return decision
+  // A bounded recovery snapshot is operational context, not a bulk observation.
+  // In particular, UTF-16-bounded Chinese text can exceed the byte threshold.
+  if (exec.name === 'patchwork_task' && exec.arguments?.action === 'handoff') return decision
   const sessionId = sessionIdOf(exec.agent)
   if (!sessionId) return decision
 
@@ -63,20 +74,26 @@ async function replaceWithHandle(exec, result, decision) {
 
   const body = textOf(content)
   const buffer = Buffer.from(body, 'utf8')
-  if (!shouldPack({ isError: result.isError, content, byteLength: buffer.length })) return decision
+  if (!shouldPack({ isError: commandFailed(result, body), content, byteLength: buffer.length })) return decision
 
   const handle = handleFor(exec.name, exec.callId, contentHashOf(body))
   const root = sessionRoot(sessionId)
   await writeObject(root, handle, body)
   const lineCount = countLines(buffer)
-  await appendLedger(root, {
+  if (!isPatchworkAgent(exec.agent)) return decision
+  try { await appendLedger(root, {
     kind: 'placeholder',
     handle,
     tool: exec.name,
     callId: exec.callId,
+    rootCallId: exec.rootCallId ?? exec.callId,
     bytes: buffer.length,
     lines: lineCount,
-  })
+  }, { authorize: () => isPatchworkAgent(exec.agent) }) } catch (error) {
+    logDiagnostic(ctx, exec, { mechanism: 'op', event: 'failure', level: 'warn', reason: 'state-update-failed', error })
+  }
+  if (!isPatchworkAgent(exec.agent)) return decision
+  logDiagnostic(ctx, exec, { mechanism: 'op', event: 'packed', reason: 'packed', handle, source: contentHashOf(body), sourceBytes: buffer.length, lines: lineCount })
   record('observationPack', 'packedResults')
   record('observationPack', 'packedBytes', buffer.length)
 
@@ -90,6 +107,7 @@ async function replaceWithHandle(exec, result, decision) {
           byteLength: buffer.length,
           lineCount,
           excerpt: pageText(buffer, 0, { maxBytes: EXCERPT_BYTES }).chunk,
+          tailExcerpt: tailText(buffer),
         }),
       },
     ],
@@ -126,6 +144,7 @@ function registerRecallTool(ctx) {
       render: (_args, value) => [{ type: 'text', text: renderPage(value) }],
     },
     async execute(args, exec) {
+      requirePatchworkAgent(exec?.agent)
       const sessionId = sessionIdOf(exec.agent)
       if (!sessionId) throw new Error('obs_recall requires a session')
 
@@ -134,8 +153,12 @@ function registerRecallTool(ctx) {
       const offset = Number.isFinite(args?.offset) ? Math.max(0, Math.trunc(args.offset)) : 0
 
       const buffer = await readObject(sessionRoot(sessionId), id)
+      requirePatchworkAgent(exec.agent)
       const page = pageText(buffer, offset)
-      await appendLedger(sessionRoot(sessionId), { kind: 'recall', handle: id, offset, nextOffset: page.nextOffset })
+      try { await appendLedger(sessionRoot(sessionId), { kind: 'recall', handle: id, offset, nextOffset: page.nextOffset, callId: exec.callId, rootCallId: exec.rootCallId ?? exec.callId }, { authorize: () => isPatchworkAgent(exec.agent) }) }
+      catch (error) { logDiagnostic(ctx, exec, { mechanism: 'op', event: 'failure', level: 'warn', reason: 'state-update-failed', error }) }
+      requirePatchworkAgent(exec.agent)
+      logDiagnostic(ctx, exec, { mechanism: 'op', event: 'recall', reason: 'recalled', handle: id, offset, nextOffset: page.nextOffset, resultBytes: Buffer.byteLength(page.chunk) })
       return { id, offset, nextOffset: page.nextOffset, done: page.done, chunk: page.chunk }
     },
   })

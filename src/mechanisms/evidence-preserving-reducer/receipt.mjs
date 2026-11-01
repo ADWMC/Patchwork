@@ -113,11 +113,13 @@ export function parseReceipt(text, { body, sourceHash, isError }) {
   }
 }
 
-export function renderReceipt(receipt, { model, provider } = {}) {
+export function renderReceipt(receipt, { model, provider, isError, archivePath } = {}) {
   const lines = [
     `${RECEIPT_MARKER} status=${receipt.status}${receipt.uncertain ? ' uncertain=true' : ''}`,
     `The full log is archived as ${receipt.source_sha256}; every quote below is an exact excerpt.`,
   ]
+  if (isError) lines.push('command_failed=true (observed tool/process outcome; not inferred by the reducer)')
+  if (archivePath) lines.push(`full_log_path=${archivePath}`)
   if (model) lines.push(`reducer_model=${model}`)
   if (provider) lines.push(`reducer_provider=${provider}`)
   for (const item of receipt.evidence) {

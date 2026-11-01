@@ -1,4 +1,5 @@
 import { PatchworkPanel, PatchworkTitle } from './PatchworkPanel.jsx'
+import { PANEL_CSS } from './panel-styles.mjs'
 
 /**
  * 浏览器半边：往右侧栏注册一个 `patchwork` 类型的标签。
@@ -19,9 +20,16 @@ const title = () => 'Patchwork'
  * - 这个导出是**服务名**，由客户端 Cordis 用来等待服务就绪。
  * 填错的表现是客户端启动报 `pending (waiting for services: …)`。
  */
-export const inject = ['slots', 'sidebarRightTabs']
+export const inject = ['slots', 'sidebarRightTabs', 'sessions']
 
 export function apply(ctx) {
+  ctx.effect(() => {
+    const style = document.createElement('style')
+    style.dataset.plugin = '@patchwork/coding-agent'
+    style.textContent = PANEL_CSS
+    document.head.appendChild(style)
+    return () => style.remove()
+  }, 'patchwork: token-based panel styles')
   ctx.effect(
     () =>
       ctx.sidebarRightTabs.register({
@@ -37,7 +45,7 @@ export function apply(ctx) {
             id: TAB_KIND,
             order: 50,
             title,
-            description: () => '机制配置与本次运行的实际计量',
+            description: () => '仅限 Patchwork Agent 的配置与运行证据',
           },
         ],
       }),
@@ -47,7 +55,7 @@ export function apply(ctx) {
   ctx.effect(
     () =>
       ctx.slots.inject('sidebar.right.pane.tab', () =>
-        ctx.slots.register({ name: 'sidebar.right.pane.tab', key: TAB_ID }, PatchworkPanel),
+        ctx.slots.register({ name: 'sidebar.right.pane.tab', key: TAB_ID, inject: sessionId => ({ sessionId, sessionStore: ctx.sessions.list }) }, PatchworkPanel),
       ),
     'patchwork: sidebar tab body',
   )
@@ -59,4 +67,5 @@ export function apply(ctx) {
       ),
     'patchwork: sidebar tab title',
   )
+
 }

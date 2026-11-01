@@ -1,3 +1,4 @@
+import { scopedAgent } from './helpers/agent.mjs'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { mkdtemp } from 'node:fs/promises'
@@ -9,6 +10,7 @@ import { decideCompaction } from '../src/mechanisms/online-context-compact/econo
 // 状态落在宿主用户数据根下；指到临时目录，测试不污染真实 ~/.dsh。
 process.env.DSH_HOME = await mkdtemp(join(tmpdir(), 'patchwork-occ-home-'))
 const { registerOnlineContextCompact } = await import('../src/mechanisms/online-context-compact/index.mjs')
+const { loadState, saveState, emptyState } = await import('../src/mechanisms/online-context-compact/state.mjs')
 
 const step = (id, status, text = `do ${id}`) => ({ id, text, status })
 
@@ -36,7 +38,11 @@ test('a boundary only fires on a real transition into completed', () => {
 
   // 重复提交同一份计划不应再产生边界，否则一次任务会被反复压缩。
   assert.deepEqual(analyzeTransition(after, after).newlyCompleted, [])
-  assert.deepEqual(analyzeTransition(undefined, after).newlyCompleted, ['a', 'b'])
+  assert.deepEqual(analyzeTransition(undefined, after).newlyCompleted, [])
+  assert.deepEqual(analyzeTransition([], after).newlyCompleted, [])
+  assert.deepEqual(analyzeTransition(before, [...after, step('new', 'completed')]).newlyCompleted, ['b'])
+  assert.deepEqual(analyzeTransition(before, [step('b', 'completed', 'different task')]).newlyCompleted, [])
+  assert.deepEqual(analyzeTransition([step('a', 'pending')], [step('a', 'completed')]).newlyCompleted, ['a'])
 })
 
 test('plan warnings surface ambiguous submissions', () => {
@@ -144,7 +150,7 @@ function harness({ contextWindow = 110_000, tokenTotal = 100_000, compactNow, se
     },
     tools: { register: definition => definitions.push(definition) },
     get(name) {
-      if (name === 'tokenMeter') return { measure: () => ({ totalTokens: tokenTotal }) }
+      if (name === 'tokenMeter') return { measure: () => ({ totalTokens: typeof tokenTotal === 'function' ? tokenTotal() : tokenTotal, nodes: [] }) }
       if (name === 'compaction') {
         return {
           compactNow: async (...args) => {
@@ -161,6 +167,7 @@ function harness({ contextWindow = 110_000, tokenTotal = 100_000, compactNow, se
     runMaintenance: task => task(new AbortController().signal),
     followup: message => followups.push(message),
   }
+  scopedAgent(agent)
   registerOnlineContextCompact(ctx, { cacheWriteReadRatio: 12.5 })
 
   const emit = async (event, payload, next) => {
@@ -168,7 +175,7 @@ function harness({ contextWindow = 110_000, tokenTotal = 100_000, compactNow, se
   }
   const submitPlan = steps =>
     definitions.find(definition => definition.name === 'update_plan').execute({ steps }, { agent })
-  return { definitions, followups, compactions, emit, submitPlan, agent }
+  return { definitions, followups, compactions, emit, submitPlan, agent, ctx }
 }
 
 const PLAN_PENDING = [
@@ -179,6 +186,49 @@ const PLAN_STEP_DONE = [
   { id: 'a', text: 'write the code', status: 'completed' },
   { id: 'b', text: 'run the tests', status: 'in_progress' },
 ]
+
+test('cancelled or corrected task cannot be resumed from a stale plan boundary', async () => {
+  const { transitionTask } = await import('../src/task/store.mjs')
+  for (const kind of ['cancel', 'incoming']) {
+    const h = harness()
+    await h.submitPlan(PLAN_PENDING)
+    await h.submitPlan(PLAN_STEP_DONE)
+    await h.emit('agent/turn-stopping', { agent: h.agent })
+    transitionTask(h.agent, { kind, eventId: 'correction', sourceKind: 'user' })
+    await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+    assert.equal(h.compactions.length, 0)
+    assert.equal(h.followups.length, 0)
+  }
+})
+
+test('a correction during native compaction cannot enqueue an old continuation', async () => {
+  const { transitionTask } = await import('../src/task/store.mjs')
+  const h = harness({ compactNow: async a => {
+    transitionTask(a, { kind: 'incoming', eventId: 'new-request', sourceKind: 'user' })
+    return { ok: true }
+  } })
+  await h.submitPlan(PLAN_PENDING)
+  await h.submitPlan(PLAN_STEP_DONE)
+  await h.emit('agent/turn-stopping', { agent: h.agent })
+  await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  assert.equal(h.compactions.length, 1)
+  assert.equal(h.followups.length, 0)
+})
+
+test('mode selection aborts in-flight compaction even when it ignores cancellation', async () => {
+  let h, aborted = false
+  h = harness({ compactNow: async (_a, signal) => {
+    await h.emit('agent-preset/selected', h.agent.session.header.id)
+    aborted = signal.aborted
+    return { ok: true }
+  } })
+  await h.submitPlan(PLAN_PENDING)
+  await h.submitPlan(PLAN_STEP_DONE)
+  await h.emit('agent/turn-stopping', { agent: h.agent })
+  await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  assert.equal(aborted, true)
+  assert.equal(h.followups.length, 0)
+})
 
 test('a boundary under window pressure compacts once and continues the task', async () => {
   const h = harness()
@@ -203,6 +253,7 @@ test('a boundary under window pressure compacts once and continues the task', as
 test('a boundary without an economic case is evaluated and declined', async () => {
   // 窗口 200k 时没有压力；轨迹里还没有间隔样本，因此视界不可得 -> 推迟。
   const h = harness({ contextWindow: 200_000 })
+  await h.submitPlan(PLAN_PENDING)
   await h.submitPlan(PLAN_STEP_DONE)
   await h.emit('agent/turn-stopping', { agent: h.agent })
   await h.emit('agent/status', { agent: h.agent, status: 'idle' })
@@ -212,6 +263,7 @@ test('a boundary without an economic case is evaluated and declined', async () =
 
 test('resubmitting the same finished plan does not compact again', async () => {
   const h = harness()
+  await h.submitPlan(PLAN_PENDING)
   await h.submitPlan(PLAN_STEP_DONE)
   await h.emit('agent/turn-stopping', { agent: h.agent })
   await h.emit('agent/status', { agent: h.agent, status: 'idle' })
@@ -229,23 +281,135 @@ test('a failing compaction is contained and does not continue the task', async (
       throw new Error('compaction busy')
     },
   })
+  await h.submitPlan(PLAN_PENDING)
   await h.submitPlan(PLAN_STEP_DONE)
   await h.emit('agent/turn-stopping', { agent: h.agent })
   await h.emit('agent/status', { agent: h.agent, status: 'idle' })
   assert.equal(h.followups.length, 0)
 })
 
-test('requests are counted through the request waterfall', async () => {
+test('only admitted stream starts are counted, not request assembly or chunks', async () => {
   const h = harness()
-  let passed = false
-  await h.emit('agent/request', { agent: h.agent }, async () => {
-    passed = true
-    return { kind: 'delegated' }
-  })
-  assert.equal(passed, true, 'the listener must delegate instead of taking over the request')
+  await h.emit('agent/request', { agent: h.agent }, async () => ({}))
+  await h.emit('agent/assistant-stream', { agent: h.agent, frame: { type: 'chunk' } })
+  await h.emit('agent/assistant-stream', { agent: h.agent, frame: { type: 'start' } })
+  assert.equal((await loadState(h.agent.session.header.id)).requests, 1)
 })
 
 test('an invalid plan is rejected loudly', async () => {
   const h = harness()
   await assert.rejects(() => h.submitPlan([{ id: 'a', text: 'x', status: 'done' }]), /invalid plan/)
+})
+
+test('historical completed snapshots and finished tasks never schedule maintenance', async () => {
+  const h = harness()
+  await h.submitPlan(PLAN_STEP_DONE)
+  await h.emit('agent/turn-stopping', { agent: h.agent })
+  await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  assert.equal(h.compactions.length, 0)
+  await h.submitPlan(PLAN_STEP_DONE.map(step => ({ ...step, status: 'completed' })))
+  await h.emit('agent/turn-stopping', { agent: h.agent })
+  await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  assert.equal(h.compactions.length, 0)
+  assert.equal((await loadState(h.agent.session.header.id)).lastDecision, 'plan-complete')
+})
+
+test('compactNow owns the native non-reentrant maintenance lock', async () => {
+  let locked = false
+  const h = harness({ compactNow: agent => agent.runMaintenance(async () => ({ ok: true })) })
+  h.agent.runMaintenance = async task => {
+    assert.equal(locked, false, 'must not enter maintenance twice')
+    locked = true
+    try { return await task(new AbortController().signal) } finally { locked = false }
+  }
+  await h.submitPlan(PLAN_PENDING)
+  await h.submitPlan(PLAN_STEP_DONE)
+  await h.emit('agent/turn-stopping', { agent: h.agent })
+  await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  assert.equal((await loadState(h.agent.session.header.id)).compactions, 1)
+  assert.equal(h.followups.length, 1)
+})
+
+test('a no-op or cancellation does not count a compaction or continue', async () => {
+  for (const compactNow of [async () => null, async () => { throw new DOMException('cancelled', 'AbortError') }]) {
+    const h = harness({ compactNow })
+    await saveState(h.agent.session.header.id, { ...emptyState(), compactions: 2, carriedDebtTokens: 500 })
+    await h.submitPlan(PLAN_PENDING)
+    await h.submitPlan(PLAN_STEP_DONE)
+    await h.emit('agent/turn-stopping', { agent: h.agent })
+    await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+    const state = await loadState(h.agent.session.header.id)
+    assert.equal(state.compactions, 2)
+    assert.equal(state.carriedDebtTokens, 500)
+    assert.equal(h.followups.length, 0)
+    assert.equal(state.lastCompactedAt, undefined)
+  }
+})
+
+test('overlapping idle notifications cannot start a second compaction', async () => {
+  let release
+  const gate = new Promise(resolve => { release = resolve })
+  const h = harness({ compactNow: async () => { await gate; return { ok: true } } })
+  await h.submitPlan(PLAN_PENDING)
+  await h.submitPlan(PLAN_STEP_DONE)
+  await h.emit('agent/turn-stopping', { agent: h.agent })
+  const first = h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  release()
+  await first
+  assert.equal(h.compactions.length, 1)
+  assert.equal(h.followups.length, 1)
+})
+
+test('request samples use token growth, and concurrent updates do not lose counts', async () => {
+  let total = 30000
+  const h = harness({ tokenTotal: () => total })
+  const request = () => h.emit('agent/assistant-stream', { agent: h.agent, frame: { type: 'start' } })
+  await request()
+  total += 5000
+  await request()
+  await Promise.all(Array.from({ length: 12 }, request))
+  const state = await loadState(h.agent.session.header.id)
+  assert.equal(state.requests, 14)
+  assert.deepEqual(state.tokenDeltas, [5000])
+})
+
+test('scoped native retention overrides prevent an optimistic shrinking estimate', async () => {
+  const h = harness()
+  const originalGet = h.ctx.get.bind(h.ctx)
+  h.agent.session.requestContext = () => ({ contextWindow: 110000, provider: 'host', model: 'exact' })
+  h.ctx.get = name => name === 'agentPresets' ? {
+    serviceFor(agent, service) {
+      assert.equal(agent, h.agent)
+      assert.equal(service, 'compaction')
+      return { ...originalGet('compaction'), config: { retainTokens: 1000, modelPolicies: [{ provider: 'host', model: 'exact', retainTokens: 100000 }] } }
+    },
+  } : name === 'compaction' ? (() => { throw new Error('must not select the global compactor') })() : originalGet(name)
+  await h.submitPlan(PLAN_PENDING)
+  await h.submitPlan(PLAN_STEP_DONE)
+  await h.emit('agent/turn-stopping', { agent: h.agent })
+  await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  const state = await loadState(h.agent.session.header.id)
+  assert.equal(state.lastKeepRecentTokens, 100000)
+  assert.equal(state.lastDecision, 'non-positive-saving')
+  assert.equal(h.compactions.length, 0)
+})
+
+test('native ratio overrides replace inherited absolute retention', async () => {
+  const h = harness({ tokenTotal: 65000 })
+  const originalGet = h.ctx.get.bind(h.ctx)
+  h.agent.session.requestContext = () => ({ contextWindow: 110000, provider: 'host', model: 'exact' })
+  h.ctx.get = name => name === 'agentPresets' ? {
+    serviceFor() {
+      return { ...originalGet('compaction'), config: { retainTokens: 1000, modelPolicies: [{ provider: 'host', model: 'exact', retainRatio: 0.6 }] } }
+    },
+  } : originalGet(name)
+  await h.submitPlan(PLAN_PENDING)
+  await h.submitPlan(PLAN_STEP_DONE)
+  await h.emit('agent/turn-stopping', { agent: h.agent })
+  await h.emit('agent/status', { agent: h.agent, status: 'idle' })
+  const state = await loadState(h.agent.session.header.id)
+  assert.equal(state.lastKeepRecentTokens, 66000)
+  assert.equal(state.lastDecision, 'non-positive-saving')
+  assert.equal(h.compactions.length, 0)
 })

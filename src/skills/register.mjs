@@ -1,8 +1,9 @@
-import { readdir, readFile } from 'node:fs/promises'
+import { readdir, readFile, stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 
 const skillsRoot = fileURLToPath(new URL('../../assets/skills', import.meta.url))
+const coreSkills = new Set(['anti-slop', 'architecture', 'collaborator', 'evidence', 'patchwork', 'standards', 'web-ui'])
 
 function parseFrontmatter(raw, fallbackName) {
   const text = raw.replace(/^﻿/, '')
@@ -33,6 +34,8 @@ function parseFrontmatter(raw, fallbackName) {
  */
 export async function registerPatchworkSkills(ctx, config = {}) {
   if (config.skillsEnabled === false) return []
+  const mode = config.skillsMode ?? 'core'
+  if (mode !== 'core' && mode !== 'expanded') throw new Error(`invalid skillsMode: ${mode}`)
   if (!ctx.skills?.register) {
     console.warn('[patchwork] skills service unavailable; skill catalog not registered')
     return []
@@ -49,6 +52,7 @@ export async function registerPatchworkSkills(ctx, config = {}) {
   const registered = []
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
+    if (mode === 'core' && !coreSkills.has(entry.name)) continue
     const mdPath = join(skillsRoot, entry.name, 'SKILL.md')
     let raw
     try {
@@ -59,10 +63,21 @@ export async function registerPatchworkSkills(ctx, config = {}) {
     const parsed = parseFrontmatter(raw, entry.name)
     if (!parsed.name || !parsed.description || !parsed.content) continue
 
+    let resourceBase
+    try {
+      const references = join(skillsRoot, entry.name, 'references')
+      if ((await stat(references)).isDirectory()) {
+        resourceBase = { kind: 'directory', path: join(skillsRoot, entry.name) }
+      }
+    } catch {
+      // Self-contained skills have no supporting resources.
+    }
+
     ctx.skills.register({
       name: parsed.name,
       description: parsed.description,
       content: parsed.content,
+      ...(resourceBase ? { resourceBase } : {}),
       // rc.2 的 get() 走 validateDefinition 强制 source:string，而 register 时
       // 校验宽松——缺这个字段会在模型首次 skill({name}) 拉正文时才爆（实证：
       // dsh-session-aa61be86 会话里连续 Error: loaded skill "…" source must be a string）。

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "ui-contract",
+  "title": "WebUI 与 DSH 主题、token 和窄屏契约一致",
+  "suite": "public-marketing",
+  "capability": "web-ui",
+  "userPrompt": "打开 Patchwork 侧栏，验证 token 路由、暗色主题、窄屏布局、检索/记忆/改进证据面板和切换后轮询停止。",
+  "allowedTools": ["Patchwork WebUI", "client build"],
+  "oracle": { "commands": [{ "id": "ui-tests", "program": "node", "args": ["--test", "tests/client-bundle.test.mjs", "tests/runtime-state.test.mjs", "tests/ui-stats.test.mjs", "tests/plugin-config.test.mjs"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }, { "id": "ui-build", "program": "node", "args": ["scripts/build-client.mjs", "--check"], "timeoutMs": 120000, "expect": { "exitCode": 0 } }] },
+  "humanChecks": ["暗色/浅色由 DSH 主题控制，视觉不另起一套", "切换到 standard 后面板不再轮询或显示 Patchwork 数据"],
+  "marketing": { "claim": "Patchwork 直接融入 DSH 侧栏和主题，证据面板不会把其他会话的状态带进来。", "evidence": "deterministic bundle-contract plus manual UX" }
+}

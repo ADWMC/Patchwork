@@ -1,4 +1,5 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile, rename, rm } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { STATE_ENTRY_KIND } from './config.mjs'
@@ -7,10 +8,9 @@ import { STATE_ENTRY_KIND } from './config.mjs'
  * 本机制需要跨请求保存的东西：计划、已完成数、请求计数、边界间隔样本、
  * 已欠的压缩债务。
  *
- * 与 SoL-Pi 的差异：它写进 session log 的非上下文条目；这里写会话级旁挂文件。
- * 两者都不进模型上下文；差别是它随会话日志迁移，这里不随。这样选是因为 DSH 的
- * 自定义 session 事件要先合并进 `SessionEventMap` 才有稳定契约，而本机制的
- * 状态只是运行时决策输入。
+ * 这里保留会话级旁挂文件作为可恢复的决策状态，并非事件审计，
+ * 也不会自动随原生会话导出。历次判断与异常由 lifecycle.mjs 另外写入
+ * 宿主非上下文插件诊断；两者都不进入模型消息。
  */
 export function stateRoot(sessionId) {
   return dshHomePath('patchwork', STATE_ENTRY_KIND, sessionId)
@@ -26,10 +26,13 @@ export function emptyState() {
     plan: [],
     completed: 0,
     requests: 0,
+    lastContextTokens: null,
+    tokenDeltas: [],
     lastBoundaryRequest: null,
     intervals: [],
     compactions: 0,
     carriedDebtTokens: 0,
+    debtRepaymentTokens: 0,
   }
 }
 
@@ -45,7 +48,12 @@ export async function loadState(sessionId) {
 
 export async function saveState(sessionId, state) {
   await mkdir(stateRoot(sessionId), { recursive: true, mode: 0o700 })
-  await writeFile(statePath(sessionId), JSON.stringify(state, null, 1), { encoding: 'utf8', mode: 0o600 })
+  const path = statePath(sessionId)
+  const temporary = `${path}.${randomUUID()}.tmp`
+  try {
+    await writeFile(temporary, JSON.stringify(state, null, 1), { encoding: 'utf8', mode: 0o600 })
+    await rename(temporary, path)
+  } finally { await rm(temporary, { force: true }) }
 }
 
 /**

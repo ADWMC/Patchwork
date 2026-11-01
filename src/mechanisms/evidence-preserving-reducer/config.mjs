@@ -15,7 +15,7 @@ export const EVIDENCE_KINDS = new Set(['fatal', 'failure', 'warning', 'target', 
 
 /** 只有诊断类命令的输出才值得做证据压缩。 */
 export const DIAGNOSTIC_COMMAND =
-  /(?:^|[;&|()\s])(?:cargo(?:\s+(?:build|test|check))?|pytest|python(?:3)?\s+-m\s+(?:pytest|unittest|py_compile)|ctest|cmake\s+--build|ninja|make|npm\s+test|pnpm\s+test|yarn\s+test|go\s+test|bazel\s+test|dotnet\s+test|mvn\s+test|gradle(?:\s+\w+)*\s+test|tsc|vitest|jest)(?:\s|$)/i
+  /(?:^|[;&|()\s])(?:cargo(?:\s+(?:build|test|check))?|pytest|python(?:3)?\s+-m\s+(?:pytest|unittest|py_compile)|node(?:\s+--[\w=-]+)*\s+--test(?:=[^\s;&|()]+)?|node\s+[^\s;&|()]+\.test\.[cm]?js|ctest|cmake\s+--build|ninja|make|npm\s+test|pnpm\s+test|yarn\s+test|go\s+test|bazel\s+test|dotnet\s+test|mvn\s+test|gradle(?:\s+\w+)*\s+test|tsc|vitest|jest)(?:\s|$)/i
 
 export const FAILURE_SIGNAL = /error|failed|failure|fatal|exception|panic|timeout|unsolved|type mismatch|assert/i
 

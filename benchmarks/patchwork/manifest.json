@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "patchwork-contract-benchmark",
+  "version": "0.1.0",
+  "date": "2026-10-31",
+  "primaryReference": {
+    "name": "Terminal-Bench task/oracle shape",
+    "url": "https://github.com/laude-institute/terminal-bench",
+    "license": "Apache-2.0",
+    "adaptation": "Patchwork contract tests; not an official Terminal-Bench leaderboard run"
+  },
+  "externalReferences": [
+    { "name": "SWE-bench Verified", "url": "https://github.com/SWE-bench/SWE-bench", "license": "MIT", "role": "software-maintenance comparison" },
+    { "name": "LiveCodeBench", "url": "https://github.com/LiveCodeBench/LiveCodeBench", "license": "MIT", "role": "held-out coding comparison" }
+  ],
+  "suites": [
+    { "id": "public-marketing", "visibility": "public", "purpose": "stable user-visible capabilities", "taskIds": ["scope-isolation", "task-correction", "retrieval-boundaries", "memory-boundaries", "logging-evidence", "improvement-loop", "mechanism-economics", "ui-contract"] },
+    { "id": "hidden-regression", "visibility": "hidden", "purpose": "high-risk regression coverage", "taskIds": ["correction-ledger", "cancel-and-timeout", "counterfactual-discipline", "real-dsh-composition"] },
+    { "id": "security-negative", "visibility": "security", "purpose": "expected refusals and isolation failures", "taskIds": ["forged-scope", "web-boundary-negative", "memory-cas-negative", "log-redaction-negative"] }
+  ],
+  "scoring": {
+    "taskPassRate": "passed tasks / executed tasks",
+    "securityRefusalRate": "expected negative checks rejected / expected negative checks",
+    "scopeLeakageRate": "unauthorized observations / scope checks",
+    "staleReferenceMisuseRate": "accepted stale references / stale-reference attempts",
+    "evidenceRetentionRate": "retained failure evidence / failure evidence cases",
+    "marketingRule": "Only deterministic host-contract results may be advertised; model quality requires a separate external benchmark run."
+  },
+  "tasks": [
+    "tasks/scope-isolation.json",
+    "tasks/task-correction.json",
+    "tasks/retrieval-boundaries.json",
+    "tasks/memory-boundaries.json",
+    "tasks/logging-evidence.json",
+    "tasks/improvement-loop.json",
+    "tasks/mechanism-economics.json",
+    "tasks/ui-contract.json",
+    "tasks/correction-ledger.json",
+    "tasks/cancel-and-timeout.json",
+    "tasks/counterfactual-discipline.json",
+    "tasks/real-dsh-composition.json",
+    "tasks/forged-scope.json",
+    "tasks/web-boundary-negative.json",
+    "tasks/memory-cas-negative.json",
+    "tasks/log-redaction-negative.json"
+  ]
+}

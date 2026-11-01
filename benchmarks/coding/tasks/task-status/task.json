@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "task-status",
+  "title": "区分工具派发成功和进程验收成功",
+  "issue": "isPassed 不能只看 exitCode 或 isError。只有 receipt.outcome 为 passed 且 exitCode 为 0 才算通过；工具派发成功但进程失败必须失败。",
+  "workspace": "workspace",
+  "acceptance": { "public": "node --test test/public.test.mjs", "hidden": "node --test test/public.test.mjs oracle/hidden.test.mjs" },
+  "allowedPaths": ["src/status.mjs"],
+  "marketing": "代码 Agent 不会把工具调用成功误报成测试通过。"
+}

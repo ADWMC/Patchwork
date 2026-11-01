@@ -6,6 +6,8 @@ import {
   RECEIPT_MARKER,
 } from './config.mjs'
 import { HANDLE_PREFIX } from '../observation-pack/observation.mjs'
+import { commandFailed } from '../../util/tool-outcome.mjs'
+import { redactPreview } from '../../logging/redact.mjs'
 
 const SHELL_TOOLS = new Set(['bash', 'pwsh'])
 
@@ -33,7 +35,7 @@ export function reducibleLog(exec, result, contentOverride) {
   if (!isTextOnly(content)) return { ok: false, reason: 'not-plain-text' }
 
   const body = textOf(content)
-  if (body.startsWith(RECEIPT_MARKER) || body.startsWith(HANDLE_PREFIX)) {
+  if (body.startsWith(RECEIPT_MARKER) || body.startsWith(HANDLE_PREFIX) || body.startsWith('[observation-pack] ')) {
     return { ok: false, reason: 'already-reduced' }
   }
   if (body.length > MAX_CHARS) return { ok: false, reason: 'source-over-max-chars' }
@@ -42,7 +44,7 @@ export function reducibleLog(exec, result, contentOverride) {
   if (bytes < MIN_BYTES) return { ok: false, reason: 'below-threshold' }
 
   // 疑似密钥一律不外发。这是预防而不是完整的密钥扫描器。
-  if (LIKELY_SECRET.test(body)) return { ok: false, reason: 'likely-secret' }
+  if (LIKELY_SECRET.test(body) || redactPreview(command) !== command) return { ok: false, reason: 'likely-secret' }
 
-  return { ok: true, command, body }
+  return { ok: true, command, body, isError: commandFailed(result, body) }
 }

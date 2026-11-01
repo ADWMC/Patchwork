@@ -57,6 +57,11 @@ test('an invalid plan is rejected by the tool rather than accepted quietly', { s
   try {
     const { createAgent } = await loadDriver()
     const { agent, tools } = createAgent({ sessionId: nextSessionId() })
+    const wrongField = await callPlan(tools, agent, [{ id: 'a', content: 'x', status: 'pending' }], 'plan-wrong-field')
+    assert.equal(wrongField.isError, true)
+    assert.match(wrongField.content[0].text, /text \(not content\)/)
+    const recovered = await callPlan(tools, agent, [{ id: 'a', text: 'x', status: 'pending' }], 'plan-recovered')
+    assert.equal(recovered.isError, false)
     const result = await callPlan(tools, agent, [{ id: 'a', text: 'x', status: 'done' }])
     assert.equal(result.isError, true)
     assert.match(result.content[0].text, /invalid plan/)
@@ -97,6 +102,7 @@ test('with a compaction service the boundary compacts and the task continues', {
     const { createAgent, observed } = await loadDriver()
     const { agent, tools } = createAgent({ sessionId: nextSessionId() })
 
+    await callPlan(tools, agent, PLAN.map(step => ({ ...step, status: 'pending' })), 'call-plan-before')
     await callPlan(tools, agent, PLAN, 'call-plan-3')
     await boot.ctx.serial('agent/turn-stopping', { agent, turn: 1, signal: new AbortController().signal })
     await new Promise(resolve => setTimeout(resolve, 10))
