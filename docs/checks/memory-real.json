@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "executedAt": "2026-10-31T03:51:30.316Z",
+  "checks": {
+    "catalogIsolation": {
+      "patchworkHasMemory": true,
+      "standardHasMemory": false
+    },
+    "proposal": {
+      "isError": false,
+      "status": "committed",
+      "recordId": true,
+      "automaticInjection": null
+    },
+    "noAutoRecall": {
+      "status": "indexed",
+      "entries": 0
+    },
+    "confirm": {
+      "status": "committed",
+      "recordId": true
+    },
+    "privateIsolation": {
+      "bEntries": 0
+    },
+    "stolenReference": {
+      "rejected": true,
+      "message": "Patchwork requires the Patchwork agent preset"
+    },
+    "restartRecovery": {
+      "status": "indexed",
+      "entries": 1,
+      "automaticInjection": null
+    }
+  },
+  "isolation": {
+    "dshHome": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-real-memory-matw33\\dsh-home",
+    "workspace": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-real-memory-matw33\\workspace",
+    "mainDshTouched": false
+  }
+}

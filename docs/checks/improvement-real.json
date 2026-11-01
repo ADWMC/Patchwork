@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "executedAt": "2026-10-31T04:18:32.807Z",
+  "host": "official-dsh-composition",
+  "isolation": {
+    "dshHome": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-real-improvement-orl7np",
+    "workspace": "C:\\Users\\Administrator\\Documents\\GitHub\\Patchwork",
+    "mainDshTouched": false
+  },
+  "checks": {
+    "catalogIsolation": {
+      "patchworkHasImprovement": true,
+      "standardHasImprovement": false
+    },
+    "realIncident": {
+      "isError": false,
+      "status": "committed",
+      "hasSource": true
+    },
+    "list": {
+      "isError": false,
+      "incidentCount": 1,
+      "automaticActivation": "disabled"
+    },
+    "stolenReference": {
+      "rejected": true
+    }
+  }
+}

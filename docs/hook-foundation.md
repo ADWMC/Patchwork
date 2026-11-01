@@ -5,9 +5,9 @@ Patchwork 只将 [Ponytail](https://github.com/DietrichGebert/ponytail) 作为 H
 
 ## 当前边界
 
-Agent 的行为规则由 `src/index.mjs` 经 `ctx.skills` 注册为六条按需技能（不进系统
-提示词）；Hook 只注入一行 `[pw:structure]`/`[pw:evidence]` 短码，不重复注入规则正文、
-不承担维护阶段状态，避免增加 token 和运行复杂度。
+Agent 的行为规则由 `src/runtime.mjs` 经 `ctx.skills` 注册为七条按需技能（不进系统
+提示词）；Hook 只注入一行 `[pw:structure]`/`[pw:evidence]` 短码，不重复注入规则正文。
+任务状态、动作检查与验收现由 `src/task/` 共用机制承载；详见[统一执行方案](upgrade/2026-10-30-integration.md)。
 
 未来如果需要 Hook，应只承载 Agent 之外的独立生命周期能力，并先以 DSH 原生
 Cordis 事件契约为准实现。

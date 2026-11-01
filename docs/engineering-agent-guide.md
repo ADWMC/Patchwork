@@ -101,9 +101,29 @@ For changes to a shared contract or user-facing workflow, verify more broadly.
 For documentation-only changes, check links, terminology, and the rendered
 structure rather than claiming a build was run.
 
+## Documentation and changelog at handoff
+
+Decide whether each change needs a user-facing changelog entry as part of the
+task, and check that decision before handing it back. Follow the repository's
+existing convention. Inspect staged, unstaged, and untracked work while keeping
+unrelated changes outside the task. Update usage documentation and release notes
+alongside changes to behavior, interfaces, defaults, permissions, persistence,
+compatibility, deprecations, or migration steps. Agent skill text can change
+behavior even though its source is Markdown.
+
+For internal-only changes or wording corrections with no behavior change, state
+the specific exemption. Merge repeated edits to the same unreleased change; do
+not copy the commit log. A README explains usage, a changelog explains impact and
+upgrade actions, and a verification report explains the evidence. Check content,
+not merely file existence, and distinguish prior results from checks run now.
+
+See the [changelog guide](changelog-guide.md) and the
+[official-source comparison](changelog-research-2026-10-30.md). These are handoff
+rules; they do not add a runtime completion gate or authorize a release.
+
 ## Git 提交
 
-完成一个明确任务后提交一次。推送必须由用户明确要求；“完成代码后关机/结束”
+获得提交授权后，一个明确任务提交一次。推送必须由用户明确要求；“完成代码后关机/结束”
 也不触发推送。提交遵循
 [Git 提交规范](git-commit-conventions.md)：使用 Conventional Commits，
 一个提交只包含一个逻辑变化，并在提交前检查差异和验证结果。

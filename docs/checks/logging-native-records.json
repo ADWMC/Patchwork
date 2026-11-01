@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-30",
+  "probe": "installed DSH native in-memory Session; not disk/export/authorization end-to-end",
+  "recordType": "plugin:patchwork/audit",
+  "ignorable": true,
+  "modelContextUnchanged": true,
+  "snapshotRestorePreservesRecord": true,
+  "mainDshTouched": false,
+  "runtimeLoggingIntegrationImplemented": false
+}

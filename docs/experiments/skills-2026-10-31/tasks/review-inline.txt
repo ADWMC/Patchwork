@@ -1,0 +1,7 @@
+只做代码评审，不修改任何文件、不运行命令。审查下面的路径检查是否能确保 target 在 root 内，给出最多一条有具体反例的发现。如果没有问题就说没有。
+
+```js
+function inside(root, target) {
+  return target.startsWith(root)
+}
+```

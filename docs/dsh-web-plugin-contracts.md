@@ -1,5 +1,9 @@
 # DSH Web 插件契约（0.1.5-rc.1 实测，0.1.7-rc.1 复核）
 
+> 当前实施（2026-10-30）：本文按日期保留历史接口观察。现用 root Web 桥接、preset
+> runtime、原生 task 记录及隔离 0.2.1-rc.2 UI/恢复/导出结果见[统一执行方案](upgrade/2026-10-30-integration.md)。
+> 不能把下文旧版本的全局挂载或计数断言直接当作当前契约。
+
 本文件记录构建 Patchwork 的 Web 半边时**实测出来**的宿主契约。每条都来自本机安装
 （`~/.dsh/profiles/**/node_modules`、全局 `@deepseek-ai/dsh`、以及前端产物
 `dsh-web-frontend/dist/assets/*.js`），不是从示例推导的。

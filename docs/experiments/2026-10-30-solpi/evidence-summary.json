@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-30",
+  "observationPack": {
+    "sessionId": "session-dec4ba96-1d2a-4763-902f-0ca7af521a70",
+    "sourceBytes": 13386,
+    "placeholderBytes": 1334,
+    "recallCalls": 0,
+    "files": 78,
+    "lastTwo": [
+      {
+        "file": "tests/ui-stats.test.mjs",
+        "sha256": "21C647B3879B794E08B7AD12BC96262BE98997CDC40044CAB2B508302B92838F"
+      },
+      {
+        "file": "tests/user-config.test.mjs",
+        "sha256": "E77938901E7898244C1D020DED1E440ABE789783B6EF0F8FBA9781163EAAD784"
+      }
+    ]
+  },
+  "evidencePreservingReducer": {
+    "sessionId": "session-90bf50ec-519a-40d4-9200-116c4cd4ed31",
+    "sourceBytes": 5084,
+    "receiptBytes": 3566,
+    "quotes": 6,
+    "failures": 3,
+    "completeFailureSection": true,
+    "extraModelCalls": 0,
+    "journal": {
+      "kind": "local",
+      "model": "node-spec",
+      "provider": "local",
+      "elapsedMs": 0,
+      "sourceBytes": 5084,
+      "receiptBytes": 3566
+    }
+  },
+  "nativeCompaction": {
+    "sessionId": "session-96552a02-8df0-4260-8e2c-9e298369e005",
+    "automaticOccBenefitEstablished": false,
+    "probes": [
+      {
+        "action": "cancelled",
+        "outcome": "error",
+        "code": 20,
+        "name": "AbortError",
+        "message": "experiment cancellation"
+      },
+      {
+        "action": "compact",
+        "outcome": "compacted",
+        "before": 19590,
+        "after": 11191
+      },
+      {
+        "action": "repeat",
+        "outcome": "error",
+        "code": "summary",
+        "name": "ManualCompactionError",
+        "message": "manual compaction could not produce a smaller summary"
+      }
+    ],
+    "freshSessionProbes": [
+      {
+        "action": "fresh-session",
+        "outcome": "noop"
+      }
+    ]
+  },
+  "finalRegression": {
+    "tests": 158,
+    "pass": 158,
+    "fail": 0,
+    "skipped": 0
+  }
+}

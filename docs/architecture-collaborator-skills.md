@@ -1,8 +1,9 @@
+<!-- 当前任务状态/回执/技能融合与能力边界见 upgrade/2026-10-30-integration.md；本文保留技能架构说明。 -->
 # Patchwork 架构设计 v2 — DSH 原生 Skill · 最少导航
 
-> 状态：**按 DSH 源码修订 → 可实现**  
-> 包名：`@patchwork/coding-agent` · MIT · 非商用  
-> 硬约束：**零 systemPrompt 注入**  
+> 状态：**按 DSH 源码修订 → 可实现**
+> 包名：`@patchwork/coding-agent` · [AGPL-3.0-only](../LICENSE)
+> 硬约束：**零 systemPrompt 注入**
 > 依据：`deepseek-harness` `docs/subsystems/skills.zh.md`、`packages/skill/*`、`.agents/.../skill-system.zh.md`
 
 ---
@@ -37,7 +38,7 @@ Skill 系统决策原文要点：
 ### 注册契约
 
 ```js
-export const inject = ['skills', 'commands', 'tools']  // 无 systemPrompt
+export const inject = ['skills', 'commands', 'tools', 'agentPresets']  // 无 systemPrompt
 
 ctx.skills.register({
   name,            // kebab-case
@@ -67,7 +68,7 @@ ctx.skills.register({
 | `architecture` | 职责树、拆分、命名、何时 ADR | 本仓结构提示压缩 |
 | `collaborator` | 冲突时事实优先，A/B+推荐 | engineering-guide + 反迎合契约 |
 | `standards` | 提交/命名/验证/文档唯一权威 | `docs/*` 清单化 |
-| `evidence` | 完成必须命令+退出码 | 审查纪律 fail-closed |
+| `evidence` | 按任务类型绑定真实验收与来源 | 命令/结构/语义分开，未知不补通过 |
 
 旧 86 行 `maintainable-coding-agent-prompt.md` **不再进 systemPrompt**，拆进上述 skill。
 
@@ -77,7 +78,9 @@ ctx.skills.register({
 
 ```
 src/
-  index.mjs              # apply：skills + commands + hook；禁 systemPrompt
+  index.mjs              # profile：仅 Web 桥接
+  runtime.mjs            # preset 范围：skills + task + hook + mechanisms
+  task/                  # 状态、动作、验收与恢复
   skills/register.mjs    # 读 assets/skills/*/SKILL.md → register
   quality/evidence-gate.mjs
   structure/             # 短码警告
@@ -91,10 +94,10 @@ assets/skills/<name>/SKILL.md   # frontmatter + 短正文
 
 ## 5. 信息流
 
-1. 会话首轮：DSH 注入 6 条 name+description 目录。  
-2. 模型需要规则 → `skill({name})` 拉正文（一次性）。  
-3. write/edit 结构问题 → 一行 `[pw:structure] skill: architecture`。  
-4. 输出含完成断言且无 shell 证据 → 一行 `[pw:evidence]`。  
+1. 会话首轮：DSH 展示 7 条 name+description 目录。
+2. 模型需要规则 → `skill({name})` 拉正文（一次性）。
+3. write/edit 结构问题 → 一行 `[pw:structure] skill: architecture`。
+4. 工具结果含完成断言且当前登记验收未通过 → 一行 `[pw:evidence]`。
 5. systemPrompt：**无 Patchwork 段**。
 
 ---
@@ -109,6 +112,7 @@ Config = {
   onlineContextCompact: false,
   skillsEnabled: true,
   evidenceGate: true,
+  taskPolicyMode: 'structured',
 }
 ```
 
@@ -139,10 +143,10 @@ Config = {
 
 ## 9. 成功定义
 
-1. `sections.length === 0`（测试断言）。  
-2. 恰 7 个 skill；description ≤500；正文 <4KB。  
-3. 结构/证据 Hook ≤1 行。  
-4. `node --test` 全绿。  
+1. `sections.length === 0`（测试断言）。
+2. 恰 7 个 skill；description ≤500；正文 <4KB。
+3. 结构/证据 Hook ≤1 行。
+4. `node --test` 全绿。
 5. 未要求不 push。
 
 ---

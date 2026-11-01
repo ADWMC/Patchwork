@@ -1,48 +1,32 @@
 # Agent 基础
 
-`src/index.mjs` 是 Patchwork 的第一个 DSH Agent 插件入口。
+当前实现以 `src/runtime.mjs` 为 Agent 运行时入口，`src/index.mjs` 只提供 profile 级 Web 桥接。依据与验证见[全文档融合执行方案](upgrade/2026-10-30-integration.md)。
 
-- 导出 `name = patchwork-agent`，供 Cordis 识别插件。
-- 声明依赖 `skills`、`commands`、`tools`（**无 `systemPrompt`**）；读取
-  `assets/skills/*/SKILL.md` 经 `ctx.skills.register` 注册七条技能，目录只带
-  name + description，正文由宿主 `skill` 工具按需加载（见
-  [协作技能架构](architecture-collaborator-skills.md)）。
-- 声明依赖 `commands`，注册 `/patchwork-review` 斜杠命令（`src/review/review-command.mjs`）：
-  站在用户立场评审代码的主入口。命令把[用户视角评审提示词](../assets/prompts/user-review-prompt.md)
-  作为一条用户消息经 `agent.followup` 提交给 Agent 执行，支持可选的评审范围参数。
-- 不修改 Harness 的 agent loop；Agent 行为由六条按需加载的技能与 Hook 短码约束，
-  不占用系统提示词。
-- Hook 不参与规则正文注入，避免重复上下文和额外 token；Hook 基础只保留
-  独立的宿主安全与生命周期能力。
+## 挂载与隔离
 
-## 在 DSH 中挂载
+安装 bundle 提供 Patchwork preset 和原生侧栏入口；只有真实组合为 `patchwork` 的会话加载运行时。standard、PTC 或其他 preset 不加载 Patchwork 技能、任务工具、Hook 和机制。不能用 header、cwd 或保留旧工具引用获得能力。
 
-包通过 `dsh.bundle` 声明 bundle patch（`cordis.patch.yml`），patch 在 profile
-根插入 `patchwork-agent` 一行：
+运行时依赖 `skills`、`commands`、`tools`、`agentPresets`，不注册 systemPrompt 段。七条技能经 `ctx.skills.register` 渐进披露；profile 桥接不注册模型侧能力。preset 从固定 standard fixture 生成，再追加 runtime；不要在 profile 根重复挂载 runtime。
 
-```yaml
-- insert:
-    - id: patchwork-agent
-      name: '@patchwork/coding-agent'
-```
+## 执行闭环
 
-`dsh plugin --profile <name> add @patchwork/coding-agent` 会安装依赖并把该
-bundle 并入 profile 的层栈——插件（七条技能、`/patchwork-review` 命令、
-结构与证据 Hook）随即对 profile 内所有 agent 注册生效，无需编辑任何 preset。命令插件注入的
-`commands` 服务由每个 profile 的第一层 `@deepseek-ai/dsh-base` 提供。
+- `src/task/state.mjs` 管任务版本、纠正、依赖失效、验收聚合与任务内候选经验。
+- `store.mjs` 复用宿主原生 `plugin:patchwork/task` 记录；恢复、模型短投影与 UI 展示是独立路径，损坏恢复阻塞而非推导全权限。
+- `lifecycle.mjs` 注册 `patchwork_task` 与 `/patchwork-task`，观察 inbox 来源类型并在 pre-step 发送有界任务投影。来源类型不等于人类授权，不能保证第一句展示顺序。
+- `action-check.mjs` 在 pre-execute 做路径解析，原生同步 guard 复查实际参数与 revision；解析 junction 和不存在文件的父路径。已知结构化工具受检查，任意 shell 不是强沙箱。
+- `acceptance.mjs` 通过宿主真实派发取得进程退出状态；缺退出码、失败、取消、过期与覆盖不足不计通过。文件结构检查不等于事实/语义正确。
+- AF 在排队前与写入后核对 revision；OCC 保留原 idle/维护锁语义，压缩续跑带当前任务短投影。
 
-`presets/patchwork.patch.yml` 是同一个 bundle 声明的 `patchwork` agent preset
-（0.1.7-alpha.2 起 preset 只能这样声明，`$DSH_HOME/.agent-presets/` 已无读者）。
-它由 `scripts/gen-preset.mjs` 逐字搬运宿主 standard 的行，只承载工具编排
-（shell、文件、任务等），不再重复挂载插件本体；插件也可与 Helmd 等
-其他 preset 共用。切换 preset 不卸载插件；从 profile 移除 bundle
-（`dsh plugin --profile <name> remove`）才是卸载。
+`/patchwork-review` 提交命令派生的评审消息，producer 为 `patchwork-command`；不得把它伪装成原始人类授权。结构/证据 Hook 只提示相关问题，不冒称可以否决 assistant 最终回复。
 
-## 最小验证
+## 配置与验证
+
+部署默认值放 preset 的 `patchwork-runtime` 行；可编辑用户覆盖仍以 DSH_HOME 为作用域。`taskPolicyMode` 默认 structured，可设 strict 拒绝不支持的效果通道；严格模式也不提供 OS 沙箱或任意代码权限证明。
 
 ```text
 node --test
+node scripts/build-client.mjs
+node scripts/build-client.mjs --check
 ```
 
-测试验证插件注册契约、`/patchwork-review` 命令契约、配置校验、结构警告的冷却与
-工作区过滤，以及 bundle patch / preset / profile 三处的挂载声明一致性。
+本机真实宿主验证必须使用独立 home、agents、工作区和端口；主实例不可达时也不回退、停止或重启主 DSH。测试证据和未覆盖能力记录在统一执行方案中，不将组合 fixture 冒充真实模型调用。

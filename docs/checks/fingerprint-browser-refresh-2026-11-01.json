@@ -1,0 +1,2566 @@
+{
+  "schemaVersion": 1,
+  "collectedOn": "2026-11-01",
+  "collectionMethod": "gh search repos and gh api through a child-process HTTP(S) proxy; fixed-commit contents and recursive trees",
+  "scope": "follow-up to fingerprint-browser-research-2026-11-01.json; independent counts",
+  "repositoryCount": 18,
+  "readmeCount": 24,
+  "sourceBuildLicenseFileCount": 46,
+  "sourceBlobHashesVerified": true,
+  "releaseSelection": "Up to three records returned by releases?per_page=3, not a promise of the globally latest or stable release",
+  "runtimeTestingPerformed": false,
+  "thirdPartyBrowserBinariesInstalled": false,
+  "implementationChangesMade": false,
+  "proxyFailures": {
+    "repositories": [
+      "Virtual-Browser/VirtualBrowser",
+      "itbrowser-net/undetectable-fingerprint-browser"
+    ],
+    "recoveredBySingleRepositoryRetry": true
+  },
+  "searchTerms": [
+    "fingerprint browser",
+    "anti detect browser chromium",
+    "camoufox",
+    "BotBrowser",
+    "chromium fingerprint patches",
+    "chromix browser",
+    "Apostate chromium"
+  ],
+  "localGeneratorProbe": {
+    "generator": "2.1.89",
+    "probeConstraints": {
+      "os": "windows",
+      "device": "desktop",
+      "strict": true
+    },
+    "results": [
+      {
+        "requested": 145,
+        "actual": 145,
+        "status": "generated"
+      },
+      {
+        "requested": 146,
+        "actual": 146,
+        "status": "generated"
+      },
+      {
+        "requested": 147,
+        "actual": 147,
+        "status": "generated"
+      },
+      {
+        "requested": 148,
+        "actual": 148,
+        "status": "generated"
+      },
+      {
+        "requested": 149,
+        "actual": 149,
+        "status": "generated"
+      },
+      {
+        "requested": 150,
+        "status": "unsupported-under-these-constraints",
+        "reason": "No headers based on this input can be generated. Please relax or change some of the requirements you specified."
+      },
+      {
+        "requested": 151,
+        "status": "unsupported-under-these-constraints",
+        "reason": "No headers based on this input can be generated. Please relax or change some of the requirements you specified."
+      },
+      {
+        "requested": 152,
+        "status": "unsupported-under-these-constraints",
+        "reason": "No headers based on this input can be generated. Please relax or change some of the requirements you specified."
+      },
+      {
+        "requested": 153,
+        "status": "unsupported-under-these-constraints",
+        "reason": "No headers based on this input can be generated. Please relax or change some of the requirements you specified."
+      },
+      {
+        "requested": 154,
+        "status": "unsupported-under-these-constraints",
+        "reason": "No headers based on this input can be generated. Please relax or change some of the requirements you specified."
+      },
+      {
+        "requested": 155,
+        "status": "unsupported-under-these-constraints",
+        "reason": "No headers based on this input can be generated. Please relax or change some of the requirements you specified."
+      },
+      {
+        "requested": 156,
+        "status": "unsupported-under-these-constraints",
+        "reason": "No headers based on this input can be generated. Please relax or change some of the requirements you specified."
+      }
+    ]
+  },
+  "repositories": [
+    {
+      "repo": "adryfish/fingerprint-chromium",
+      "commit": "698a1002bd54c021ac2001cc6298bbc45826dcbb",
+      "branch": "main",
+      "license": "BSD-3-Clause",
+      "stars": 3220,
+      "pushedAt": "2026-10-02T14:02:29Z",
+      "filesCount": 4,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "fedda042293952c0e6fd2863e82f081d53a96300",
+          "bytes": 1543,
+          "url": "https://github.com/adryfish/fingerprint-chromium/blob/698a1002bd54c021ac2001cc6298bbc45826dcbb/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README-ZH.md",
+          "blob": "72c9c6324a7b5f6420af24bf58b1e04f8681571f",
+          "bytes": 21855,
+          "url": "https://github.com/adryfish/fingerprint-chromium/blob/698a1002bd54c021ac2001cc6298bbc45826dcbb/README-ZH.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "4e41663bdae33da6745db866500e204768ff16a5",
+          "bytes": 23491,
+          "url": "https://github.com/adryfish/fingerprint-chromium/blob/698a1002bd54c021ac2001cc6298bbc45826dcbb/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "150.0.7871.186",
+          "publishedAt": "2026-10-02T14:02:29Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "ungoogled-chromium-150.0.7871.186-1-x86_64.AppImage",
+              "bytes": 194623992,
+              "digest": "sha256:ce42439eb6b385e50d28e3cec25ba5b50acb9fd322d9e9cbe6ec14e116cdb2bf"
+            },
+            {
+              "name": "ungoogled-chromium-150.0.7871.186-1-x86_64_linux.tar.xz",
+              "bytes": 145806232,
+              "digest": "sha256:48eff860053efd9ad498d51370f0a1f59f983df39c02a72ad2a8682cdead4055"
+            },
+            {
+              "name": "ungoogled-chromium_150.0.7871.186-1.1_installer_x64.exe",
+              "bytes": 122627584,
+              "digest": "sha256:91f998755946823f400af3f84be4ec50a325f668f5994cd686e56532d9c65fac"
+            },
+            {
+              "name": "ungoogled-chromium_150.0.7871.186-1.1_windows_x64.zip",
+              "bytes": 193743241,
+              "digest": "sha256:4d549c326e51ebbabf562fd365eb5380d9d4a81200da2c60f075c688d9a77e03"
+            }
+          ]
+        },
+        {
+          "tag": "148.0.7778.215",
+          "publishedAt": "2026-06-21T04:34:00Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "ungoogled-chromium-148.0.7778.215-1-x86_64.AppImage",
+              "bytes": 188811768,
+              "digest": "sha256:a5fa5e6c05cb7fa3617ec2ca642ad3cc6e586ac5249cc29edb0a602d695685f0"
+            },
+            {
+              "name": "ungoogled-chromium-148.0.7778.215-1-x86_64_linux.tar.xz",
+              "bytes": 141269020,
+              "digest": "sha256:70d239830332e5820aa34dfcb284161cac0429eee25da642830afe04bda717f4"
+            },
+            {
+              "name": "ungoogled-chromium_148.0.7778.215-1.1_installer_x64.exe",
+              "bytes": 119831040,
+              "digest": "sha256:1604e008130fbc2f6d10b9292fda5ff0a12f97dc9d27fef75312decd2df1cde2"
+            },
+            {
+              "name": "ungoogled-chromium_148.0.7778.215-1.1_macos.dmg",
+              "bytes": 140187500,
+              "digest": "sha256:b72f091e2e1a7583eed389c4b8e3534ed355e568af8c8bbf8fc30a25e23ca679"
+            },
+            {
+              "name": "ungoogled-chromium_148.0.7778.215-1.1_windows_x64.zip",
+              "bytes": 189767686,
+              "digest": "sha256:9ef3f471b7a6641b4224532522b29141ce3746e27d55788d88e2fd951f362579"
+            }
+          ]
+        },
+        {
+          "tag": "144.0.7559.132",
+          "publishedAt": "2026-02-27T09:02:24Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "ungoogled-chromium-144.0.7559.132-1-x86_64.AppImage",
+              "bytes": 178612728,
+              "digest": "sha256:79bad4c8eda407ebfd8ae7d7ce62034c06d118b1db9640ef82e42f63d2ae6d2e"
+            },
+            {
+              "name": "ungoogled-chromium-144.0.7559.132-1-x86_64_linux.tar.xz",
+              "bytes": 133493680,
+              "digest": "sha256:bb4c44840bae7e881f6258ed5b33f972f284384d898b6289e1f0c0bf47555ede"
+            },
+            {
+              "name": "ungoogled-chromium_144.0.7559.132-1.1_installer_x64.exe",
+              "bytes": 111739392,
+              "digest": "sha256:9727b3f3de06b6b878b55ecb12a8b9758b4e89001e4ab8482bc119f1a557593b"
+            },
+            {
+              "name": "ungoogled-chromium_144.0.7559.132-1.1_windows_x64.zip",
+              "bytes": 176796270,
+              "digest": "sha256:ab409667ca7ec3d67a060f1ffea8bd3a450b71ed54d17b361024986e7edd0996"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "aliasmode/aliasmode-chromium",
+      "commit": "8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa",
+      "branch": "main",
+      "license": "GPL-3.0",
+      "stars": 2,
+      "pushedAt": "2026-10-26T16:35:51Z",
+      "filesCount": 511,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+          "bytes": 35149,
+          "url": "https://github.com/aliasmode/aliasmode-chromium/blob/8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "b76d59974fe5e5f15c568e52e68522d63cab4979",
+          "bytes": 2932,
+          "url": "https://github.com/aliasmode/aliasmode-chromium/blob/8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "build/MANIFEST.lock",
+          "blob": "54c6e27674dbeecbf749876f1ac36fb4fb2120d1",
+          "bytes": 1787,
+          "url": "https://github.com/aliasmode/aliasmode-chromium/blob/8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa/build/MANIFEST.lock",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "patches/series",
+          "blob": "e56b6b8757cfea71697b611ad6c22353afa82e9c",
+          "bytes": 7801,
+          "url": "https://github.com/aliasmode/aliasmode-chromium/blob/8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa/patches/series",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "patches/0004-base-device-profile-loader.patch",
+          "blob": "75526a7225a1008f52d8ff4279273e3b3e10b689",
+          "bytes": 18093,
+          "url": "https://github.com/aliasmode/aliasmode-chromium/blob/8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa/patches/0004-base-device-profile-loader.patch",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "patches/0009-close-platform-identity-triangle.patch",
+          "blob": "f88c4890f00832ece51bb6a895946a5b3dba321e",
+          "bytes": 5526,
+          "url": "https://github.com/aliasmode/aliasmode-chromium/blob/8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa/patches/0009-close-platform-identity-triangle.patch",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "config/launch.schema.json",
+          "blob": "e6da605efeb5436b162030040db958449da74448",
+          "bytes": 6400,
+          "url": "https://github.com/aliasmode/aliasmode-chromium/blob/8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa/config/launch.schema.json",
+          "gitBlobVerified": true
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "blob": "808bfa426f3347b2f5254f4ec7e54af5db04a413",
+          "bytes": 10220,
+          "url": "https://github.com/aliasmode/aliasmode-chromium/blob/8aa0a24c0638ed926f8c12f9bb1350d97cbf75aa/.github/workflows/release.yml",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v155.0.8059.85-aliasmode.4",
+          "publishedAt": "2026-10-26T16:36:11Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "aliasmode-chromium-155.0.8059.85-linux-x64.tar.zst",
+              "bytes": 198069298,
+              "digest": "sha256:00981c9e79e80accabd5707b140cf710c68797b6f905e990393d2a1224121f98"
+            },
+            {
+              "name": "aliasmode-chromium-155.0.8059.85-windows-x64.zip",
+              "bytes": 203519527,
+              "digest": "sha256:cfea275e4b7f3274b701e64c0483b46cbf6cd12ead9a6cfda6ff77b2680e7a23"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 232,
+              "digest": "sha256:42155ffce597ee36665b0b028a974fa272587e3740d8981f2120b60817c7996f"
+            }
+          ]
+        },
+        {
+          "tag": "v155.0.8059.85-aliasmode.3",
+          "publishedAt": "2026-10-24T03:51:56Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "aliasmode-chromium-155.0.8059.85-windows-x64.zip",
+              "bytes": 203519818,
+              "digest": "sha256:80ab530d0c5280b427c58298987636cd003b12183b61f15a99c0a82598ca9580"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 115,
+              "digest": "sha256:8c42ad357114aea1028fd07c621cc91738baeb355aa264ceedc85d5999f06574"
+            }
+          ]
+        },
+        {
+          "tag": "v155.0.8059.85-aliasmode.2",
+          "publishedAt": "2026-10-19T13:05:11Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "aliasmode-chromium-155.0.8059.85-windows-x64.zip",
+              "bytes": 203510209,
+              "digest": "sha256:f52c6db95f039f7c93996e0a0f22687f8260f6fa88a9738eec2557be29e841c3"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 115,
+              "digest": "sha256:b911a2fdeb7484fa3318150fd54816454754f1e898df04f4325b2114fa499965"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "aliasmode/aliasmode-firefox",
+      "commit": "d798ef5dac7285c65a94baba4ff97f3d392b4044",
+      "branch": "main",
+      "license": "MPL-2.0",
+      "stars": 2,
+      "pushedAt": "2026-10-26T17:38:19Z",
+      "filesCount": 1228,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "a612ad9813b006ce81d1ee438dd784da99a54007",
+          "bytes": 16725,
+          "url": "https://github.com/aliasmode/aliasmode-firefox/blob/d798ef5dac7285c65a94baba4ff97f3d392b4044/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "426c2f72a2568dcc353e4bfd7dc2a9f4bdae1151",
+          "bytes": 3581,
+          "url": "https://github.com/aliasmode/aliasmode-firefox/blob/d798ef5dac7285c65a94baba4ff97f3d392b4044/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "aliasmode-runtime-156.0.1-beta.36-r11",
+          "publishedAt": "2026-10-26T17:38:35Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "aliasmode-156.0.1-beta.36-lin.x86_64.zip",
+              "bytes": 150447510,
+              "digest": "sha256:0a514af4e4463eb43626fca6fb4d685273c1d4b1f7c652f83940ad3b4cda3736"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-mac.arm64.zip",
+              "bytes": 145439950,
+              "digest": "sha256:69f4b0b0851a4891d1f1b77b41d95f0fbebeb856248f42b6713733c6bf615797"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-mac.x86_64.zip",
+              "bytes": 152888470,
+              "digest": "sha256:365ef3e5df8ded5f4ad199a0d91c6872f2485ecfbe8b7caecdfbdacfffbacf5b"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-win.x86_64.zip",
+              "bytes": 168047472,
+              "digest": "sha256:5709d0e194a2b75bcb6c909079c67404a63cca713eeca9380c409de23fb3b8b4"
+            },
+            {
+              "name": "aliasmode-fonts-1.json",
+              "bytes": 729,
+              "digest": "sha256:885ca7c8af3b8ffd964914264c07f49335c9203d9c4e9d7df9f696b8a73e108d"
+            },
+            {
+              "name": "aliasmode-fonts-linux-1.zip",
+              "bytes": 29123241,
+              "digest": "sha256:09caec637ecba08ad267955db9903b0635d7c799b0c5a9157e274b6b812e1a62"
+            },
+            {
+              "name": "aliasmode-fonts-macos-1.zip",
+              "bytes": 352907600,
+              "digest": "sha256:7edaf42dbdf4d32f23965ca3ac4170f9c268ee73d0f715c5d4045d991fc80cfb"
+            },
+            {
+              "name": "aliasmode-fonts-windows-1.zip",
+              "bytes": 189218542,
+              "digest": "sha256:e5ed1bea592a0bf8e43f4564c83ce418cc823d2f605454b806c1744df8215410"
+            },
+            {
+              "name": "SHA256SUMS",
+              "bytes": 800,
+              "digest": "sha256:9aff027ff8bdc96c65b38f2b23f7221c130575d47381e12de0f22db4047d9f8f"
+            }
+          ]
+        },
+        {
+          "tag": "aliasmode-runtime-156.0.1-beta.36-r10",
+          "publishedAt": "2026-10-24T19:07:22Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "aliasmode-156.0.1-beta.36-lin.x86_64.zip",
+              "bytes": 150447299,
+              "digest": "sha256:2b7239d7cfa7c1a87a9ed5f97460568b7eb7fb09b649e3b2485e14b335197cd2"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-mac.arm64.zip",
+              "bytes": 145439472,
+              "digest": "sha256:eec40acb87eb6c55d88003eb367136cf26796f9884263d7f091a58e61a308430"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-mac.x86_64.zip",
+              "bytes": 152888102,
+              "digest": "sha256:3235ae8d7b5b0935e8156db5d08a0bb69d617faf3b10e8aa3ed7fd8b96743c0d"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-win.x86_64.zip",
+              "bytes": 168047080,
+              "digest": "sha256:dd33f2a219db0878ec96548cc8b6ee00bdbb35569203394bc057ee5b11b98d5f"
+            },
+            {
+              "name": "aliasmode-fonts-1.json",
+              "bytes": 729,
+              "digest": "sha256:885ca7c8af3b8ffd964914264c07f49335c9203d9c4e9d7df9f696b8a73e108d"
+            },
+            {
+              "name": "aliasmode-fonts-linux-1.zip",
+              "bytes": 29123241,
+              "digest": "sha256:09caec637ecba08ad267955db9903b0635d7c799b0c5a9157e274b6b812e1a62"
+            },
+            {
+              "name": "aliasmode-fonts-macos-1.zip",
+              "bytes": 352907600,
+              "digest": "sha256:7edaf42dbdf4d32f23965ca3ac4170f9c268ee73d0f715c5d4045d991fc80cfb"
+            },
+            {
+              "name": "aliasmode-fonts-windows-1.zip",
+              "bytes": 189218542,
+              "digest": "sha256:e5ed1bea592a0bf8e43f4564c83ce418cc823d2f605454b806c1744df8215410"
+            },
+            {
+              "name": "SHA256SUMS",
+              "bytes": 800,
+              "digest": "sha256:4a713331e7b70f8b1b00f65dde24f96dc83272e7a876ef10e70c01a6e5ca0a20"
+            }
+          ]
+        },
+        {
+          "tag": "aliasmode-runtime-156.0.1-beta.36-r9",
+          "publishedAt": "2026-10-24T00:22:10Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "aliasmode-156.0.1-beta.36-lin.x86_64.zip",
+              "bytes": 150447181,
+              "digest": "sha256:6eba6aadc77d1e7d541637d7e3e78de277b3139370cbf6fe160749af49629504"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-mac.arm64.zip",
+              "bytes": 145439414,
+              "digest": "sha256:b03a0ba2252bb5020509b0193831a7f258f4ed60c6a20883c137e0466ad6689f"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-mac.x86_64.zip",
+              "bytes": 152888046,
+              "digest": "sha256:b290882e20b0000a018d4ad861f77aa18c4a50b9940996942603082359c96891"
+            },
+            {
+              "name": "aliasmode-156.0.1-beta.36-win.x86_64.zip",
+              "bytes": 168047045,
+              "digest": "sha256:c2fa7d3f1d765654958c4762ecfbc81a169f1e4e91087aa9c7e751183973daae"
+            },
+            {
+              "name": "aliasmode-fonts-1.json",
+              "bytes": 729,
+              "digest": "sha256:885ca7c8af3b8ffd964914264c07f49335c9203d9c4e9d7df9f696b8a73e108d"
+            },
+            {
+              "name": "aliasmode-fonts-linux-1.zip",
+              "bytes": 29123241,
+              "digest": "sha256:09caec637ecba08ad267955db9903b0635d7c799b0c5a9157e274b6b812e1a62"
+            },
+            {
+              "name": "aliasmode-fonts-macos-1.zip",
+              "bytes": 352907600,
+              "digest": "sha256:7edaf42dbdf4d32f23965ca3ac4170f9c268ee73d0f715c5d4045d991fc80cfb"
+            },
+            {
+              "name": "aliasmode-fonts-windows-1.zip",
+              "bytes": 189218542,
+              "digest": "sha256:e5ed1bea592a0bf8e43f4564c83ce418cc823d2f605454b806c1744df8215410"
+            },
+            {
+              "name": "SHA256SUMS",
+              "bytes": 800,
+              "digest": "sha256:795a3dd42ec790227966f626bc2ef30b84c9c3cf3c625a567d4f4c940541ac38"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "apify/fingerprint-suite",
+      "commit": "4f3f3eb8cc426c1c712cdacda5075a9ad005c5b2",
+      "branch": "master",
+      "license": "Apache-2.0",
+      "stars": 2647,
+      "pushedAt": "2026-10-27T13:23:03Z",
+      "filesCount": 118,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE.md",
+          "blob": "d382229f8251d9aad47fccad3d126032c4bbbba4",
+          "bytes": 10878,
+          "url": "https://github.com/apify/fingerprint-suite/blob/4f3f3eb8cc426c1c712cdacda5075a9ad005c5b2/LICENSE.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "ad1bc9433f2c718c7152d3f5897cf3201a5da755",
+          "bytes": 4602,
+          "url": "https://github.com/apify/fingerprint-suite/blob/4f3f3eb8cc426c1c712cdacda5075a9ad005c5b2/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v2.1.89",
+          "publishedAt": "2026-10-14T08:47:22Z",
+          "prerelease": false,
+          "assets": []
+        },
+        {
+          "tag": "v2.1.88",
+          "publishedAt": "2026-08-05T14:02:56Z",
+          "prerelease": false,
+          "assets": []
+        },
+        {
+          "tag": "v2.1.87",
+          "publishedAt": "2026-08-01T00:54:44Z",
+          "prerelease": false,
+          "assets": []
+        }
+      ]
+    },
+    {
+      "repo": "botswin/BotBrowser",
+      "commit": "450fe8970fd10f33151f32b8200ed9e91be56bed",
+      "branch": "main",
+      "license": "MIT",
+      "stars": 2657,
+      "pushedAt": "2026-10-29T01:18:13Z",
+      "filesCount": 381,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "README.md",
+          "blob": "29c2b1455d2d4ccc700dd2fe460c4071e7f1c37f",
+          "bytes": 28888,
+          "url": "https://github.com/botswin/BotBrowser/blob/450fe8970fd10f33151f32b8200ed9e91be56bed/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "patches/README.md",
+          "blob": "e0a88e68553b3069e2b64b8f66d8743ea132149e",
+          "bytes": 5103,
+          "url": "https://github.com/botswin/BotBrowser/blob/450fe8970fd10f33151f32b8200ed9e91be56bed/patches/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "profiles/README.md",
+          "blob": "72639f7baa0a36bdad45a8a8e4b0d6e2b363118e",
+          "bytes": 4173,
+          "url": "https://github.com/botswin/BotBrowser/blob/450fe8970fd10f33151f32b8200ed9e91be56bed/profiles/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "TRIMMED_BUILD.md",
+          "blob": "831d1fce2899ca76d29ce5706522e073780fb75f",
+          "bytes": 11019,
+          "url": "https://github.com/botswin/BotBrowser/blob/450fe8970fd10f33151f32b8200ed9e91be56bed/TRIMMED_BUILD.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "LICENSE",
+          "blob": "b4892cbe24d50d4e13cc10378c4f89693a419a46",
+          "bytes": 1058,
+          "url": "https://github.com/botswin/BotBrowser/blob/450fe8970fd10f33151f32b8200ed9e91be56bed/LICENSE",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "157.0.8103.14",
+          "publishedAt": "2026-10-29T01:18:13Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "botbrowser_20261029_157.0.8103.14_arm64.deb",
+              "bytes": 878418800,
+              "digest": "sha256:b2b7e3e8e3959efda07f4f0087519a30b8a443e37e59ef7cc5e189e36509a508"
+            },
+            {
+              "name": "botbrowser_20261029_157.0.8103.14_mac_arm64.dmg",
+              "bytes": 447993757,
+              "digest": "sha256:857a8f0609319184815b6693d0732daf3be24c0b055f6bb601adf2c6cad8aa0c"
+            },
+            {
+              "name": "botbrowser_20261029_157.0.8103.14_mac_x64.dmg",
+              "bytes": 456633885,
+              "digest": "sha256:a22dfd9443f59a95d709b13468b070ddcbf98f5dc5f1a285a97e9cd77c756d5f"
+            },
+            {
+              "name": "botbrowser_20261029_157.0.8103.14_win_x64.7z",
+              "bytes": 762173667,
+              "digest": "sha256:9332149789828bca57e87d17dfade79886d25855322d079d2f12fb9ed0929621"
+            },
+            {
+              "name": "botbrowser_20261029_157.0.8103.14_x64.deb",
+              "bytes": 902047128,
+              "digest": "sha256:daff3a5c426eb50754e2ddebc0c95b664425481d0c2f4634e5c3bf6283e4d1c2"
+            }
+          ]
+        },
+        {
+          "tag": "156.0.8078.47",
+          "publishedAt": "2026-10-23T12:03:02Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "botbrowser_20261023_156.0.8078.47_arm64.deb",
+              "bytes": 879128064,
+              "digest": "sha256:1af68423335bb0f70871a0496f69ec7d3f9d9b79ac4be162f555c5489d323463"
+            },
+            {
+              "name": "botbrowser_20261023_156.0.8078.47_mac_arm64.dmg",
+              "bytes": 446354247,
+              "digest": "sha256:2014884d3077cc933b916d6403d167ed89ce8a72565240e8ef870bfedbc50ec4"
+            },
+            {
+              "name": "botbrowser_20261023_156.0.8078.47_mac_x64.dmg",
+              "bytes": 454653016,
+              "digest": "sha256:31b77418af08fc71d96ec7c80b77e4197508ed4eabb66c95d7e526ec64ccf023"
+            },
+            {
+              "name": "botbrowser_20261023_156.0.8078.47_win_x64.7z",
+              "bytes": 762141670,
+              "digest": "sha256:68845f252c9a1b4ff72d8ff59bf5ed2f8aab6c11b067642cc70b4abf23e21390"
+            },
+            {
+              "name": "botbrowser_20261023_156.0.8078.47_x64.deb",
+              "bytes": 899754372,
+              "digest": "sha256:73b9b25bf51eb89d11e93db0ee44f2ab1e6e4b01edabbf3602ab7b84fa9b18da"
+            },
+            {
+              "name": "botbrowser_20261029_156.0.8078.47_arm64.deb",
+              "bytes": 879128028,
+              "digest": "sha256:b94dfe1ab835a842befcbbe2c8a461e77d0306c7e60a7d95a41c9c3e21620e96"
+            },
+            {
+              "name": "botbrowser_20261029_156.0.8078.47_mac_arm64.dmg",
+              "bytes": 446281429,
+              "digest": "sha256:0d668efc72c1bcaa18fb69ff26d50a8a4743ae609155d2bcc3916f601483ffbe"
+            },
+            {
+              "name": "botbrowser_20261029_156.0.8078.47_mac_x64.dmg",
+              "bytes": 454664912,
+              "digest": "sha256:e5bae9b9b1f63aa2a0e6fe3b89c63fcb4d5cd9b4b14a5aef3253c1abbbc34d33"
+            },
+            {
+              "name": "botbrowser_20261029_156.0.8078.47_win_x64.7z",
+              "bytes": 762176752,
+              "digest": "sha256:bfa677db868a0bcc4570dde6aa204be556d2b86aaf616243dca20abc0b77f8b1"
+            },
+            {
+              "name": "botbrowser_20261029_156.0.8078.47_x64.deb",
+              "bytes": 899762420,
+              "digest": "sha256:a5783cd370401e66521f9609bc3a7876e7c22c5953ad86eecfa53d30440ea78d"
+            }
+          ]
+        },
+        {
+          "tag": "156.0.8078.4",
+          "publishedAt": "2026-10-16T21:16:04Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "botbrowser_20261018_156.0.8078.4_arm64.deb",
+              "bytes": 879294200,
+              "digest": "sha256:37e08951808745eafc457e384900012d4dc629b2e9f036d48cfe56c76f2824ea"
+            },
+            {
+              "name": "botbrowser_20261018_156.0.8078.4_mac_arm64.dmg",
+              "bytes": 446959326,
+              "digest": "sha256:60534a696463b1ea195d2df8d203e76796e823de40eb93df3343c7709c62c6d0"
+            },
+            {
+              "name": "botbrowser_20261018_156.0.8078.4_mac_x64.dmg",
+              "bytes": 454822108,
+              "digest": "sha256:6a193ed4488585df84b3148847eb03d04aa7e4b1d3bf412ab8eb3570498a3161"
+            },
+            {
+              "name": "botbrowser_20261018_156.0.8078.4_win_x64.7z",
+              "bytes": 760537947,
+              "digest": "sha256:fdfc47bd602001a4d63d7e810b3fd9afa4f72572d5b6344b0465945a6ac6e90a"
+            },
+            {
+              "name": "botbrowser_20261018_156.0.8078.4_x64.deb",
+              "bytes": 898859984,
+              "digest": "sha256:5c66f6bba37c932ddcb5f23557ff07461746fc4958731d2e08604fd1a86d3552"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "CloakHQ/CloakBrowser",
+      "commit": "b860957b1299967e1f0226b629b1da2d36e53c82",
+      "branch": "main",
+      "license": "MIT",
+      "stars": 32663,
+      "pushedAt": "2026-10-31T09:35:32Z",
+      "filesCount": 244,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "BINARY-LICENSE.md",
+          "blob": "3a3acbfc9d0081ad4077575a21001361d383c881",
+          "bytes": 16465,
+          "url": "https://github.com/CloakHQ/CloakBrowser/blob/b860957b1299967e1f0226b629b1da2d36e53c82/BINARY-LICENSE.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "LICENSE",
+          "blob": "dda48a5731faeaa05d5a21d31869d3ed85a72b0a",
+          "bytes": 1064,
+          "url": "https://github.com/CloakHQ/CloakBrowser/blob/b860957b1299967e1f0226b629b1da2d36e53c82/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "bebb1aafd7d06e8e3a3dc0343c238c113a8ac49f",
+          "bytes": 68995,
+          "url": "https://github.com/CloakHQ/CloakBrowser/blob/b860957b1299967e1f0226b629b1da2d36e53c82/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "chromium-v155.0.8059.39.2-pro",
+          "publishedAt": "2026-10-27T21:02:17Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "SHA256SUMS",
+              "bytes": 218,
+              "digest": "sha256:33f1431f832fe0bde82aa1fffcff30dbca5dde02e9c1cef54f145c3395ac52b4"
+            },
+            {
+              "name": "SHA256SUMS.sig",
+              "bytes": 88,
+              "digest": "sha256:10b396deb4f3c5e3c6c13ef3497e69216904f6f93f7d663dd2a10dccf33b9b51"
+            }
+          ]
+        },
+        {
+          "tag": "chromium-v155.0.8059.39.1-pro",
+          "publishedAt": "2026-10-20T18:15:39Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "SHA256SUMS",
+              "bytes": 509,
+              "digest": "sha256:af56755771af3a333a09ab854c6fa3817b74c787ac15ab2c3abd72de81f9af2a"
+            },
+            {
+              "name": "SHA256SUMS.sig",
+              "bytes": 88,
+              "digest": "sha256:99b7d05b7fd138aaf7d49cc23ae7493b5a177e8991d9a373f301b0fd970dd7cc"
+            }
+          ]
+        },
+        {
+          "tag": "chromium-v154.0.8037.57.2-pro",
+          "publishedAt": "2026-10-13T18:29:30Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "SHA256SUMS",
+              "bytes": 218,
+              "digest": "sha256:68be6fab5382c2f630bb4f3cf8acc9bffcbebbfcd0b0e4bbb99d6bd2df2617ab"
+            },
+            {
+              "name": "SHA256SUMS.sig",
+              "bytes": 88,
+              "digest": "sha256:eff3233195d57ee6148a27c6e9dd58da122215b7601d224e550bfdee345bd868"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "daijro/camoufox",
+      "commit": "6e9a1de13b8afeefd13d43a3b35632aee5874583",
+      "branch": "main",
+      "license": "MPL-2.0",
+      "stars": 12956,
+      "pushedAt": "2026-10-31T06:20:35Z",
+      "filesCount": 594,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "a612ad9813b006ce81d1ee438dd784da99a54007",
+          "bytes": 16725,
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "d9f738dbe10649dc42d7a9cb5f7a978bc1073fb7",
+          "bytes": 44882,
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "typescript/src/fingerprints.ts",
+          "blob": "5789b585afec419ece1b43ca1c8b182c4bef231a",
+          "bytes": 63354,
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/typescript/src/fingerprints.ts",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "typescript/src/browser-pin.ts",
+          "blob": "c88ce822b868a217f7c1ea9fab436d443377cd55",
+          "bytes": 3015,
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/typescript/src/browser-pin.ts",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "typescript/src/coherence.ts",
+          "blob": "50428bcfc96e81331c861da67c3fd4538dd3d731",
+          "bytes": 16076,
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/typescript/src/coherence.ts",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "typescript/package.json",
+          "blob": "7fe73ac61e3cf10496ae1cd74ea8d6a11ba26818",
+          "bytes": 2492,
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/typescript/package.json",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "browser/patches/navigator-spoofing.patch",
+          "blob": "65940f6eb11ebe8b475805537083cd4e4f47c2e3",
+          "bytes": 19823,
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/browser/patches/navigator-spoofing.patch",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "browser/tests/playwright/patches/worker-config-reads.py",
+          "blob": "58bae750ccef60fc094251e5e3df941cf11385dc",
+          "bytes": 7538,
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/browser/tests/playwright/patches/worker-config-reads.py",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v158.0.1-beta.41",
+          "publishedAt": "2026-10-29T22:14:10Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "camoufox-158.0.1-beta.41-lin.arm64.zip",
+              "bytes": 1297503606,
+              "digest": "sha256:60e25f6eb95e13d9ec655bc02913d51057e669cb31542e6ace9d2190ab5380af"
+            },
+            {
+              "name": "camoufox-158.0.1-beta.41-lin.x86_64.zip",
+              "bytes": 1303577033,
+              "digest": "sha256:3f2eb1d0451fa58e45e43e55f5e6181565069791ae60c0574f0ceb1f01341c33"
+            },
+            {
+              "name": "camoufox-158.0.1-beta.41-mac.arm64.zip",
+              "bytes": 1297694189,
+              "digest": "sha256:9038f86d666c9780b6fff199d488737b8596c01f24e3e517845a0ecfb0cf8add"
+            },
+            {
+              "name": "camoufox-158.0.1-beta.41-mac.x86_64.zip",
+              "bytes": 1305712546,
+              "digest": "sha256:1afd6caa1e82caa41a4f56d8519f673e36b0835700b1c9c904e78a84c5711f3a"
+            },
+            {
+              "name": "camoufox-158.0.1-beta.41-win.i686.zip",
+              "bytes": 1304891471,
+              "digest": "sha256:5c6b4e57764ff6caa568c6ce77a01c03c7ad5da560c3e22097def2c28235f09d"
+            },
+            {
+              "name": "camoufox-158.0.1-beta.41-win.x86_64.zip",
+              "bytes": 1320075455,
+              "digest": "sha256:2644bd14f1cc345c768f6a70b576bcc87eb3d0bf0df54856d6fe0bbc3027515f"
+            },
+            {
+              "name": "manifest.json",
+              "bytes": 395,
+              "digest": "sha256:c7472b036a84811364fd46688c92310ce5dbf86fd057c707651317b4840a1342"
+            }
+          ]
+        },
+        {
+          "tag": "v158.0-beta.40",
+          "publishedAt": "2026-10-19T22:38:51Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "camoufox-158.0-beta.40-lin.arm64.zip",
+              "bytes": 1292898414,
+              "digest": "sha256:8a4dfdd85dfb5212dae716b4aa8e30041634edbbba6f6177a566a3ee6b1efe8c"
+            },
+            {
+              "name": "camoufox-158.0-beta.40-lin.x86_64.zip",
+              "bytes": 1299054257,
+              "digest": "sha256:2ead498d4765394addd3278d6a663962f3f99b189a99d3f966de56656cefc823"
+            },
+            {
+              "name": "camoufox-158.0-beta.40-mac.arm64.zip",
+              "bytes": 1293080825,
+              "digest": "sha256:b8aba26d86f761627651b8e7f0d90ade022a32a3d750e0b68ff5830ebefd3aab"
+            },
+            {
+              "name": "camoufox-158.0-beta.40-mac.x86_64.zip",
+              "bytes": 1301053358,
+              "digest": "sha256:cc662b9f4dfe05fcf1c23e874fb28ac0bd8048bceefe38757f8dc589d41de4ed"
+            },
+            {
+              "name": "camoufox-158.0-beta.40-win.i686.zip",
+              "bytes": 1300337433,
+              "digest": "sha256:62065f0234bab4dc98d1de178185c3f3da39aac13640bd53f368e8735eed81e3"
+            },
+            {
+              "name": "camoufox-158.0-beta.40-win.x86_64.zip",
+              "bytes": 1315506159,
+              "digest": "sha256:2d3e33207c2d5853e817e8317f0e33124ffb7054bd5102c8b84546e3d15a6447"
+            },
+            {
+              "name": "manifest.json",
+              "bytes": 174,
+              "digest": "sha256:86b7fae13a6b103b4145827b1802abc7e4ec6d31ea8e72c58c580f195e7bb72d"
+            }
+          ]
+        },
+        {
+          "tag": "v156.0.1-beta.39",
+          "publishedAt": "2026-10-15T03:57:03Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "camoufox-156.0.1-beta.39-lin.arm64.zip",
+              "bytes": 1284970417,
+              "digest": "sha256:b36f9df3a8f72c2bc7d11dd270be648b3b2d7e8d4d61096aa9ea8ac9644b32aa"
+            },
+            {
+              "name": "camoufox-156.0.1-beta.39-lin.x86_64.zip",
+              "bytes": 1294991102,
+              "digest": "sha256:a139582b00393525671528108bdb809ff434d2a9a3ec5becf8aae812b70c3cf8"
+            },
+            {
+              "name": "camoufox-156.0.1-beta.39-mac.arm64.zip",
+              "bytes": 1289869847,
+              "digest": "sha256:9f754b10adbb0e146fe1fa17e1f61136a90e15692fb51eb213b02922a932fb6c"
+            },
+            {
+              "name": "camoufox-156.0.1-beta.39-mac.x86_64.zip",
+              "bytes": 1297313982,
+              "digest": "sha256:4ce37ff4781c721dc520ba2719c9d9d9dcebee34279a66c6f78bb09ff986ff8a"
+            },
+            {
+              "name": "camoufox-156.0.1-beta.39-win.i686.zip",
+              "bytes": 1297367564,
+              "digest": "sha256:44a83f476f941fcbed1d8a79ba447a8cb3297fa9770dc9f3d0e6242b7f1760d1"
+            },
+            {
+              "name": "camoufox-156.0.1-beta.39-win.x86_64.zip",
+              "bytes": 1311805112,
+              "digest": "sha256:b38343bc3b596c16070d584c9344650011be6a8704443121f185cd8e55843177"
+            },
+            {
+              "name": "manifest.json",
+              "bytes": 176,
+              "digest": "sha256:5135cb61d2a161fc2287cd919514af5cc24cbdc44f26f07b2efb7046ffb7cc5f"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "DFarm6/Prism-Browser-Community",
+      "commit": "f23feb26ce998a75ba41529cc1464a34a03ee8c1",
+      "branch": "main",
+      "license": "MIT",
+      "stars": 743,
+      "pushedAt": "2026-10-03T00:43:02Z",
+      "filesCount": 332,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "cd134466dab5c96f46734a1178138965d6b5181b",
+          "bytes": 1083,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "dc476c396bf31e990f8237a5ac45fdf89955aaf5",
+          "bytes": 12990,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.zh-CN.md",
+          "blob": "da2d48eee3a76f3b9ac254004d01c04f02bd8427",
+          "bytes": 11471,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/README.zh-CN.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "SOURCE-MANIFEST.json",
+          "blob": "9f21a93c40945ac7a80769680efed0985b99382a",
+          "bytes": 58018,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/SOURCE-MANIFEST.json",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "src/main/kernel-catalog.ts",
+          "blob": "0451323122ed9bf38d34c085c06f019f86500208",
+          "bytes": 950,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/src/main/kernel-catalog.ts",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "src/main/kernel-integrity.ts",
+          "blob": "7adfd0a42ce2c43eb882d02087b2344236dac503",
+          "bytes": 8217,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/src/main/kernel-integrity.ts",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "src/shared/kernel-policy.ts",
+          "blob": "b53746820b8ae9df049de0c42cc934030ca185ef",
+          "bytes": 92,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/src/shared/kernel-policy.ts",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "tools/kernel-lock.json",
+          "blob": "7457b9e43997146201a99ee6b43d78d9a3c908b7",
+          "bytes": 20788,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/tools/kernel-lock.json",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "tools/kernel-patches/025-native-surface-consistency.patch",
+          "blob": "ef020a99728e15f205ca0706c3b6733d45120344",
+          "bytes": 5086,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/tools/kernel-patches/025-native-surface-consistency.patch",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "tools/kernel-maintenance/README.md",
+          "blob": "e815579dcc61daed9e71194e32403e007c18109a",
+          "bytes": 4881,
+          "url": "https://github.com/DFarm6/Prism-Browser-Community/blob/f23feb26ce998a75ba41529cc1464a34a03ee8c1/tools/kernel-maintenance/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v0.3.22",
+          "publishedAt": "2026-10-03T00:43:02Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "Prism-Browser-0.3.22-macos-arm64.dmg",
+              "bytes": 324440896,
+              "digest": "sha256:22454d150a69790bb11f60b45f59dc41431fc1315f60c1c0164825d0db01dabc"
+            },
+            {
+              "name": "Prism-Browser-0.3.22-macos-arm64.zip",
+              "bytes": 323416707,
+              "digest": "sha256:4f4fb24be15234cace9cf04db32996cb3af8cd23545c6c6da55e188097839d95"
+            },
+            {
+              "name": "Prism-Browser-0.3.22-windows-x64-portable.exe",
+              "bytes": 223677424,
+              "digest": "sha256:a5b6ea7cb57ec21f8181b19f80aae33c4d9fc95a7fdce55350c3fdbf1c2dd33d"
+            },
+            {
+              "name": "Prism-Browser-0.3.22-windows-x64-portable.zip",
+              "bytes": 363428133,
+              "digest": "sha256:7c977d0c396fb5e0a098057f41d4cb963aed7bab0b793fd7a5ecaeea53652dc9"
+            },
+            {
+              "name": "Prism-Browser-0.3.22-windows-x64.msi",
+              "bytes": 293122048,
+              "digest": "sha256:0a7a26aa7b3edec48d8d70abc10cb740752c9bea988bf691ac4ce3050808e527"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 533,
+              "digest": "sha256:c713a7d61f8ddbb9d9d18ca5e022f0502a2ce6ba990b94c3fd02490962d64780"
+            }
+          ]
+        },
+        {
+          "tag": "v0.3.19",
+          "publishedAt": "2026-10-01T03:41:00Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "Prism-Browser-0.3.19-macos-arm64.dmg",
+              "bytes": 324429725,
+              "digest": "sha256:456ff3b57d6d0a3fe7bdfbb5dba6557d8461c61ed606addbec513bc3bb27c1c1"
+            },
+            {
+              "name": "Prism-Browser-0.3.19-macos-arm64.zip",
+              "bytes": 323373580,
+              "digest": "sha256:a90a1c73c84ed5a41055256c8e4a95f7059a739c8daa38ff22d33910ab1095f1"
+            },
+            {
+              "name": "Prism-Browser-0.3.19-windows-x64-portable.exe",
+              "bytes": 223626614,
+              "digest": "sha256:e817b829c6f2e3b0d9da2c2a0e858881d93b3e739fc4726dbb1efdb12e999eb7"
+            },
+            {
+              "name": "Prism-Browser-0.3.19-windows-x64-portable.zip",
+              "bytes": 363387390,
+              "digest": "sha256:3bec35cb4de4edebb6b95f48ef26a95090c9ac09de8b4f618dfaecbc5e2bd0b0"
+            },
+            {
+              "name": "Prism-Browser-0.3.19-windows-x64.msi",
+              "bytes": 293093376,
+              "digest": "sha256:07d040fccb3a01797943e5608d43a695612ed86ef5540d42af95c026def7082c"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 533,
+              "digest": "sha256:00959892e62945a2bdf7e4dc64abc9c1192a466e10aada2d35a44ede6012a4f3"
+            }
+          ]
+        },
+        {
+          "tag": "v0.3.17",
+          "publishedAt": "2026-09-23T13:03:08Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "Prism-Browser-0.3.17-macos-arm64.dmg",
+              "bytes": 323264946,
+              "digest": "sha256:2b030d05a7b27bf2047bd1b718769da4556cf4002a6bdb7071426c1365f03ed4"
+            },
+            {
+              "name": "Prism-Browser-0.3.17-macos-arm64.zip",
+              "bytes": 322220934,
+              "digest": "sha256:f2ebf47bb186dd27b667825dc2bc13098341544f304e702f4091b39c8d795a6c"
+            },
+            {
+              "name": "Prism-Browser-0.3.17-windows-x64-portable.exe",
+              "bytes": 223360388,
+              "digest": "sha256:f9a4d08f87e7b620d41491b121c474aa44ab6800d2eb75784c28fcec104c71b0"
+            },
+            {
+              "name": "Prism-Browser-0.3.17-windows-x64-portable.zip",
+              "bytes": 362304885,
+              "digest": "sha256:6dd226920b10faec4e1c806c789b10a9299b9c1ca7b02a92dc1264819d7cef8c"
+            },
+            {
+              "name": "Prism-Browser-0.3.17-windows-x64.msi",
+              "bytes": 292442112,
+              "digest": "sha256:4bfaa9a829ff3fae8b04e66f9eef0da9de9779db84984c66678298223db82964"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 533,
+              "digest": "sha256:8640754d37bbd328134ce563e6d72ad1b1f85790e82d95e1110dd650cb3b92da"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "furyteamtop/fury-antidetect-browser",
+      "commit": "7b4fe8a167fdb0bd74331e836e888d0a83ce4973",
+      "branch": "main",
+      "license": "AGPL-3.0",
+      "stars": 99,
+      "pushedAt": "2026-10-31T17:05:42Z",
+      "filesCount": 530,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "be3f7b28e564e7dd05eaf59d64adba1a4065ac0e",
+          "bytes": 34523,
+          "url": "https://github.com/furyteamtop/fury-antidetect-browser/blob/7b4fe8a167fdb0bd74331e836e888d0a83ce4973/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "815d1289ecd561befee51ee26b5beb1d39967aa6",
+          "bytes": 26439,
+          "url": "https://github.com/furyteamtop/fury-antidetect-browser/blob/7b4fe8a167fdb0bd74331e836e888d0a83ce4973/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "core/CHROMIUM_VERSION",
+          "blob": "c14408d752f3e19d27455a5e3940cc616e1cbf61",
+          "bytes": 14,
+          "url": "https://github.com/furyteamtop/fury-antidetect-browser/blob/7b4fe8a167fdb0bd74331e836e888d0a83ce4973/core/CHROMIUM_VERSION",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "core/patches/LICENSE",
+          "blob": "b9e287213866a947cd724aa8afa3e9eb400c6f4c",
+          "bytes": 2825,
+          "url": "https://github.com/furyteamtop/fury-antidetect-browser/blob/7b4fe8a167fdb0bd74331e836e888d0a83ce4973/core/patches/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "core/patches/0010-navigator-basic.patch",
+          "blob": "1a3d0300a26bc93eb810fa90f0d9977fbb65b7e0",
+          "bytes": 8180,
+          "url": "https://github.com/furyteamtop/fury-antidetect-browser/blob/7b4fe8a167fdb0bd74331e836e888d0a83ce4973/core/patches/0010-navigator-basic.patch",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "agent/src/launcher.rs",
+          "blob": "c534e413ca56ba66cc754a10cc0e82cd8b8d1bd3",
+          "bytes": 27944,
+          "url": "https://github.com/furyteamtop/fury-antidetect-browser/blob/7b4fe8a167fdb0bd74331e836e888d0a83ce4973/agent/src/launcher.rs",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "tools/release/pack-core-windows.sh",
+          "blob": "b88b1d657537792c3d9ad41a4bea26a425e65a9a",
+          "bytes": 7370,
+          "url": "https://github.com/furyteamtop/fury-antidetect-browser/blob/7b4fe8a167fdb0bd74331e836e888d0a83ce4973/tools/release/pack-core-windows.sh",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v0.4.20",
+          "publishedAt": "2026-10-31T17:05:43Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "fury-0.4.20-macos-arm64.app.tar.gz",
+              "bytes": 12573658,
+              "digest": "sha256:9116e52838e6d8a967d03bb665b464fce02b1e335909340b1ccda8a1c998b499"
+            },
+            {
+              "name": "fury-0.4.20-macos-arm64.app.tar.gz.sig",
+              "bytes": 428,
+              "digest": "sha256:099914e6c6d5928b8ff4cea9f361a024018ee636baa5efd6b8359228572aaa4e"
+            },
+            {
+              "name": "fury-0.4.20-macos-arm64.dmg",
+              "bytes": 13503519,
+              "digest": "sha256:8080251119edf2369863596e83323fa3aaf1cf956e00dfda6051afe7de7a54ed"
+            },
+            {
+              "name": "fury-0.4.20-windows-x64-setup.exe",
+              "bytes": 9901503,
+              "digest": "sha256:1661aca0c78ab03bb8e086a60e6efeef100885348c987df00fc2b3f59c3780b5"
+            },
+            {
+              "name": "fury-0.4.20-windows-x64-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:3cf75eac10d60588480342f00f04518df3e3bb3a7a8342b479ac19dbfd71c121"
+            },
+            {
+              "name": "fury-core-0.4.20-macos-arm64.tar.xz",
+              "bytes": 104498752,
+              "digest": "sha256:2c63b05cc9f95a11bcf0cccf893f29bdee35b8d2ff306a683261fba7a7ef14f6"
+            },
+            {
+              "name": "fury-core-0.4.20-windows-x64.tar.xz",
+              "bytes": 147935076,
+              "digest": "sha256:3918ae93063bcbc20ab60b176230e11f8f7d762be3460a8f50f935f92beb91ad"
+            },
+            {
+              "name": "fury-server-0.4.20-linux-aarch64.tar.gz",
+              "bytes": 3265027,
+              "digest": "sha256:21503e922f1a37e0059bcf710580b3b5f1299afa034e68ffb90d93169bb0b027"
+            },
+            {
+              "name": "fury-server-0.4.20-linux-aarch64.tar.gz.sha256",
+              "bytes": 106,
+              "digest": "sha256:975946fbd67b0544650d07a32681c6c9b6a19ef508cee4580bf3906e533f4a47"
+            },
+            {
+              "name": "fury-server-0.4.20-linux-x86_64.tar.gz",
+              "bytes": 3530847,
+              "digest": "sha256:0c087273492834fbfa6d98c99339940feefe0080cbc67c1bcebab0e65aa240ba"
+            },
+            {
+              "name": "fury-server-0.4.20-linux-x86_64.tar.gz.sha256",
+              "bytes": 105,
+              "digest": "sha256:cea9ea199df5772fce8c91398b1f6d181243d2c49eecfadfe15302e3dc710f8f"
+            },
+            {
+              "name": "latest.json",
+              "bytes": 1395,
+              "digest": "sha256:c49907736baac8e9d71262adf69c07d9cad0067676bbfc2f5aa553afeddc6a6e"
+            },
+            {
+              "name": "REPORT.md",
+              "bytes": 1964,
+              "digest": "sha256:8869e572542ac3924b5d77073ff554b95487074248b6f6254651a3a1de131724"
+            },
+            {
+              "name": "SHA256SUMS",
+              "bytes": 862,
+              "digest": "sha256:d6217a11e1ef44aa0473c92d302bd63f5f198c7443b45bbbbae79a5c0ac4b3fe"
+            }
+          ]
+        },
+        {
+          "tag": "v0.4.19",
+          "publishedAt": "2026-10-31T09:40:11Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "fury-0.4.19-macos-arm64.app.tar.gz",
+              "bytes": 12291136,
+              "digest": "sha256:05fe5c971b67e2a7aca98456540d1e305e9b2d0d6a8352bd6ae18dbe817f8738"
+            },
+            {
+              "name": "fury-0.4.19-macos-arm64.app.tar.gz.sig",
+              "bytes": 428,
+              "digest": "sha256:daedd2bd663c09519e8d0400096118ff52fbccdc6c3fe44c756650fe0faf8533"
+            },
+            {
+              "name": "fury-0.4.19-macos-arm64.dmg",
+              "bytes": 13176306,
+              "digest": "sha256:0747e85b2b066cddd5d8aab837d7bf9a851e3aa41357e3e983f716af1d8879b7"
+            },
+            {
+              "name": "fury-0.4.19-windows-x64-setup.exe",
+              "bytes": 9725177,
+              "digest": "sha256:5624809e47a5f81cfac52b42784aca816b7a9d8274f2021ca27aa152de735b4d"
+            },
+            {
+              "name": "fury-0.4.19-windows-x64-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:bff9acaad8e8beb02f3f59630445597e35188db1e94dd818f76facffdeba8cd3"
+            },
+            {
+              "name": "fury-core-0.4.19-macos-arm64.tar.xz",
+              "bytes": 104498752,
+              "digest": "sha256:2c63b05cc9f95a11bcf0cccf893f29bdee35b8d2ff306a683261fba7a7ef14f6"
+            },
+            {
+              "name": "fury-core-0.4.19-windows-x64.tar.xz",
+              "bytes": 147935076,
+              "digest": "sha256:3918ae93063bcbc20ab60b176230e11f8f7d762be3460a8f50f935f92beb91ad"
+            },
+            {
+              "name": "fury-server-0.4.19-linux-aarch64.tar.gz",
+              "bytes": 3264685,
+              "digest": "sha256:4a9a801b50eaee0fdc0c647a58b5ae1f3bd5c1257a3bbb4baa0b43a05431e9d6"
+            },
+            {
+              "name": "fury-server-0.4.19-linux-aarch64.tar.gz.sha256",
+              "bytes": 106,
+              "digest": "sha256:ea484fe0fa5e880d66b0f0e04be6cfc8c62a995c0b9bed4718bbdab66759b94d"
+            },
+            {
+              "name": "fury-server-0.4.19-linux-x86_64.tar.gz",
+              "bytes": 3530701,
+              "digest": "sha256:e3c2fd136eb7a5530c19ad28158e51c62ddb64a81689875f81eecfe06e78c37c"
+            },
+            {
+              "name": "fury-server-0.4.19-linux-x86_64.tar.gz.sha256",
+              "bytes": 105,
+              "digest": "sha256:1eb90a606ebebdf4d53dcc873ea80cf49f1aa64b76c0d1ed72c87f0efdac4cbb"
+            },
+            {
+              "name": "latest.json",
+              "bytes": 1395,
+              "digest": "sha256:9245fef8b207722be7f1c8678852ec137f30e0db8e8a7f7f4f38c7c985f001bc"
+            },
+            {
+              "name": "REPORT.md",
+              "bytes": 1964,
+              "digest": "sha256:8869e572542ac3924b5d77073ff554b95487074248b6f6254651a3a1de131724"
+            },
+            {
+              "name": "SHA256SUMS",
+              "bytes": 862,
+              "digest": "sha256:469bea28533aa5acd27daa97b4b6c506875fc70e58da0614e39f1412fea68313"
+            }
+          ]
+        },
+        {
+          "tag": "v0.4.18",
+          "publishedAt": "2026-10-28T18:03:32Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "fury-0.4.18-macos-arm64.app.tar.gz",
+              "bytes": 12245157,
+              "digest": "sha256:8866de45d66e04da247d5366620feb35abaad2870752177858560c953a542ac3"
+            },
+            {
+              "name": "fury-0.4.18-macos-arm64.app.tar.gz.sig",
+              "bytes": 428,
+              "digest": "sha256:adda455fcce8b3e7c13a2b42b99b97b883c81cc15179bb59edc1202c34f94165"
+            },
+            {
+              "name": "fury-0.4.18-macos-arm64.dmg",
+              "bytes": 13131411,
+              "digest": "sha256:081828e7a6fdf924ba1a6666b302ba5c8d41ca4f067235e1df900f3c78df298c"
+            },
+            {
+              "name": "fury-0.4.18-windows-x64-setup.exe",
+              "bytes": 9687905,
+              "digest": "sha256:7d7957cee77e8554cc2adaf5090470b376c7fd1f7e14926d886aba1b42097cd0"
+            },
+            {
+              "name": "fury-0.4.18-windows-x64-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:330b80ebb0773437693bbeb266e08d3e6de9a85a967daf45b4d0614a6c90ce50"
+            },
+            {
+              "name": "fury-core-0.4.18-macos-arm64.tar.xz",
+              "bytes": 104498752,
+              "digest": "sha256:2c63b05cc9f95a11bcf0cccf893f29bdee35b8d2ff306a683261fba7a7ef14f6"
+            },
+            {
+              "name": "fury-core-0.4.18-windows-x64.tar.xz",
+              "bytes": 147935076,
+              "digest": "sha256:3918ae93063bcbc20ab60b176230e11f8f7d762be3460a8f50f935f92beb91ad"
+            },
+            {
+              "name": "fury-server-0.4.18-linux-aarch64.tar.gz",
+              "bytes": 3254780,
+              "digest": "sha256:dfe62f7a000d2a14ee0ed95c382a47128a45e08b4b2c04fdf641ce5682325bae"
+            },
+            {
+              "name": "fury-server-0.4.18-linux-aarch64.tar.gz.sha256",
+              "bytes": 106,
+              "digest": "sha256:b3fe4a4259078a895f97340b743a9271f6e820fef59326051eb71d55729ef11b"
+            },
+            {
+              "name": "fury-server-0.4.18-linux-x86_64.tar.gz",
+              "bytes": 3516010,
+              "digest": "sha256:03dda3f9505d38ec0864fca1db936893d4fd8fb9bd76aff1abb9a04482dee2ea"
+            },
+            {
+              "name": "fury-server-0.4.18-linux-x86_64.tar.gz.sha256",
+              "bytes": 105,
+              "digest": "sha256:3bc427dbbd94ee13f160f9b738b78892a4c0d0d1d160d964eaf12d1f389de014"
+            },
+            {
+              "name": "latest.json",
+              "bytes": 1395,
+              "digest": "sha256:160909937eecbf26d3727c2aad7c668cd1adc5aaa735ca9c6275724a43f1e972"
+            },
+            {
+              "name": "REPORT.md",
+              "bytes": 1964,
+              "digest": "sha256:8869e572542ac3924b5d77073ff554b95487074248b6f6254651a3a1de131724"
+            },
+            {
+              "name": "SHA256SUMS",
+              "bytes": 862,
+              "digest": "sha256:85b86578d17d578062e270ca9d475eee08a03544ac42e12322d4217985144878"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "itbrowser-net/undetectable-fingerprint-browser",
+      "commit": "6df77401149f82fa089589946859a92a0d9f6bb7",
+      "branch": "main",
+      "license": null,
+      "stars": 873,
+      "pushedAt": "2025-04-25T03:28:07Z",
+      "filesCount": 9,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "README.md",
+          "blob": "f313c7890d95117678bbfb3189cdd0c001dcb682",
+          "bytes": 6226,
+          "url": "https://github.com/itbrowser-net/undetectable-fingerprint-browser/blob/6df77401149f82fa089589946859a92a0d9f6bb7/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v1.0.1",
+          "publishedAt": "2025-04-25T03:31:49Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "finngerprints-browser-v1.0.1.7z",
+              "bytes": 245081536,
+              "digest": null
+            }
+          ]
+        },
+        {
+          "tag": "v1.0.0",
+          "publishedAt": "2025-04-13T02:30:33Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "fingerprint_browser_v1.0.7z",
+              "bytes": 242257301,
+              "digest": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "Kaliiiiiiiiii-Vinyzu/patchright",
+      "commit": "bd714e6090344762d7c241b7e8f3d37ebdc5dab7",
+      "branch": "main",
+      "license": "Apache-2.0",
+      "stars": 5038,
+      "pushedAt": "2026-10-31T18:38:56Z",
+      "filesCount": 69,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "30bf7f8bb34d055ac95702081f850398d6ebaaab",
+          "bytes": 11336,
+          "url": "https://github.com/Kaliiiiiiiiii-Vinyzu/patchright/blob/bd714e6090344762d7c241b7e8f3d37ebdc5dab7/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "c22964a5ba766bbba6eabcd508337321ab4b8c93",
+          "bytes": 15066,
+          "url": "https://github.com/Kaliiiiiiiiii-Vinyzu/patchright/blob/bd714e6090344762d7c241b7e8f3d37ebdc5dab7/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v1.64.1",
+          "publishedAt": "2026-10-15T13:33:38Z",
+          "prerelease": false,
+          "assets": []
+        },
+        {
+          "tag": "v1.64.0",
+          "publishedAt": "2026-10-14T14:40:22Z",
+          "prerelease": false,
+          "assets": []
+        },
+        {
+          "tag": "v1.63.0",
+          "publishedAt": "2026-09-08T18:44:47Z",
+          "prerelease": false,
+          "assets": []
+        }
+      ]
+    },
+    {
+      "repo": "Maishan-Inc/Veil-Chromium",
+      "commit": "96eba4b95b7aac9c536a98c2a5deda5e5f2e5fdc",
+      "branch": "main",
+      "license": "BSD-3-Clause",
+      "stars": 0,
+      "pushedAt": "2026-10-10T17:09:56Z",
+      "filesCount": 86,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "fbce1674c9f938a781a22c6b0128e781baf62f22",
+          "bytes": 1503,
+          "url": "https://github.com/Maishan-Inc/Veil-Chromium/blob/96eba4b95b7aac9c536a98c2a5deda5e5f2e5fdc/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "3bb8f307246fda04614110f15e7b9450f8884074",
+          "bytes": 7629,
+          "url": "https://github.com/Maishan-Inc/Veil-Chromium/blob/96eba4b95b7aac9c536a98c2a5deda5e5f2e5fdc/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "151.0.7922.137-1.1002",
+          "publishedAt": "2026-10-10T17:04:44Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "SHA256SUMS",
+              "bytes": 248,
+              "digest": "sha256:2b89297a88f3028ba04be7a198aa13f7655259ad75e65097b95f5d76c2cda305"
+            },
+            {
+              "name": "ungoogled-chromium_151.0.7922.137-1.1002_installer_x64.exe",
+              "bytes": 128764928,
+              "digest": "sha256:72744c12523068aa13cf88691bedd90b5aa88c5f1c70bc9b0cfe015a84584ada"
+            },
+            {
+              "name": "ungoogled-chromium_151.0.7922.137-1.1002_windows_x64.zip",
+              "bytes": 205046286,
+              "digest": "sha256:2761e8def52daa1b4f230dd1c254a9b1393cf660a2883abc6cd6f11cbdbe3292"
+            }
+          ]
+        },
+        {
+          "tag": "151.0.7922.137-1.1001",
+          "publishedAt": "2026-08-23T10:00:17Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "ungoogled-chromium_151.0.7922.137-1.1001_windows_x64.zip",
+              "bytes": 205007900,
+              "digest": "sha256:ad35529a52fc101c1a38a4461891fd7cf4aacc7402e03e726b5615560d60419c"
+            }
+          ]
+        },
+        {
+          "tag": "151.0.7922.137-1.1000",
+          "publishedAt": "2026-08-18T13:24:02Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "ungoogled-chromium_151.0.7922.137-1.1000_windows_x64.zip",
+              "bytes": 204956520,
+              "digest": "sha256:daf54fafdfeee886eec40459506450bf3400fadfc738242ef33adb2dcfe00fa9"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "polyackiy/camoufox-profile-manager",
+      "commit": "6d442fd5df6c29cb52c141c2583b0a41981e2276",
+      "branch": "main",
+      "license": "MIT",
+      "stars": 84,
+      "pushedAt": "2026-11-01T01:26:09Z",
+      "filesCount": 529,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "729f8cf207010569101e53444e9a684b6713413c",
+          "bytes": 1094,
+          "url": "https://github.com/polyackiy/camoufox-profile-manager/blob/6d442fd5df6c29cb52c141c2583b0a41981e2276/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "053d214600c88359d6d890b9fc5d99c1ad3abc65",
+          "bytes": 20472,
+          "url": "https://github.com/polyackiy/camoufox-profile-manager/blob/6d442fd5df6c29cb52c141c2583b0a41981e2276/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v0.6.0",
+          "publishedAt": "2026-10-19T20:25:41Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "camoufox-pm-linux-x86_64.deb",
+              "bytes": 249637234,
+              "digest": "sha256:cde1f33a60accecef737b0e63f0d42cd0fb5a2727611a206cf8465bfdf827692"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.deb.sha256",
+              "bytes": 95,
+              "digest": "sha256:4c546376d467c896754a91c6bb936a278fe7f5372b7f5ac9fb3e7f3c6863662f"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.tar.gz",
+              "bytes": 315443832,
+              "digest": "sha256:d54823673f44510b21459b5bbf9f23458ab2c7843b93f65073f5f8732d3f0b77"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.tar.gz.sha256",
+              "bytes": 98,
+              "digest": "sha256:a3e381371359e3e53b0da7626fc53b3fbab68b5ba183444033be32d1eea62e22"
+            },
+            {
+              "name": "camoufox-pm-macos-arm64.dmg",
+              "bytes": 94764524,
+              "digest": "sha256:dc9db9d87c25569bdb41ca46d9f7c8f0ba58d29e43666203efb8ea062210942c"
+            },
+            {
+              "name": "camoufox-pm-macos-arm64.dmg.sha256",
+              "bytes": 94,
+              "digest": "sha256:bc4815a5977f10c0912c400030460da8f4def022f4cff45559e5a97cbeaf2cea"
+            },
+            {
+              "name": "camoufox-pm-macos-x86_64.dmg",
+              "bytes": 99278832,
+              "digest": "sha256:b6d4df284caa64cc7de1da89e9cb9f59675554797dc51cd1bc1ec33a71badc4b"
+            },
+            {
+              "name": "camoufox-pm-macos-x86_64.dmg.sha256",
+              "bytes": 95,
+              "digest": "sha256:ef7931ca00437518aaa5d845c73289fea5eefeff1ed55785366d2640fe1f6b1d"
+            },
+            {
+              "name": "camoufox-pm-windows-x86_64-setup.exe",
+              "bytes": 86335015,
+              "digest": "sha256:c5aafebfb32a6f71fd51e3d084c83b08cc75cc3609153a94527153f13a191afe"
+            },
+            {
+              "name": "camoufox-pm-windows-x86_64-setup.exe.sha256",
+              "bytes": 104,
+              "digest": "sha256:fd983929a3c378b3e37338a4f63046ab311f275aec21c6d08217da7cd22001c2"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0-py3-none-any.whl",
+              "bytes": 1486872,
+              "digest": "sha256:d1aef0037030a085bf6d167a60e1026dafc3b1f1b4c4d39764e24354324e45e8"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0-py3-none-any.whl.sha256",
+              "bytes": 114,
+              "digest": "sha256:ecd5344de39f68f95a4c3abc1f2ad91c31eaa38616dd63c6026f17de831ae1ba"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0.tar.gz",
+              "bytes": 2309861,
+              "digest": "sha256:7bd1abf0f095a4206d4de3e7fc06827c27c5e6cea8eb9a973fe30892d38b30e8"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0.tar.gz.sha256",
+              "bytes": 104,
+              "digest": "sha256:8c6cce6c61106fa8b0f8ebad4b6105b7384bc62e22ab89d971b9327eaba0edc0"
+            }
+          ]
+        },
+        {
+          "tag": "v0.6.0-rc.8",
+          "publishedAt": "2026-10-15T20:59:04Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "camoufox-pm-linux-x86_64.deb",
+              "bytes": 250881292,
+              "digest": "sha256:fd3d84c8b354d322edb59056b4624f17bae159a19a7009cc06b1f81a45eedb84"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.deb.sha256",
+              "bytes": 95,
+              "digest": "sha256:209bcece51cf47f41f65b651612a3aa0abd39437a73f18ee98e7a0ac39318002"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.tar.gz",
+              "bytes": 316977892,
+              "digest": "sha256:10bb972cb44fb427b7aeeb54062518adc39ce0e72aa4583b5c73da58ae6ffaea"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.tar.gz.sha256",
+              "bytes": 98,
+              "digest": "sha256:9f96ed2004f67b73318a5056e11ebedeb5947f6da5928467c1cebdb96fd2c561"
+            },
+            {
+              "name": "camoufox-pm-macos-arm64.dmg",
+              "bytes": 94145439,
+              "digest": "sha256:301960fff505847f40c1703fa2ebc75b6f6699c1ff4d1ced57838e7b0d97611a"
+            },
+            {
+              "name": "camoufox-pm-macos-arm64.dmg.sha256",
+              "bytes": 94,
+              "digest": "sha256:7bf66c91ecfd9cf36f20804f2a6e882a7c443d45aacc800f05260dc166ad9d82"
+            },
+            {
+              "name": "camoufox-pm-macos-x86_64.dmg",
+              "bytes": 99271489,
+              "digest": "sha256:aa77eb335a31caf3d0bfc544f3cf95ce8de5b48d2249af3e9caf109e0c870b27"
+            },
+            {
+              "name": "camoufox-pm-macos-x86_64.dmg.sha256",
+              "bytes": 95,
+              "digest": "sha256:345ca79d9bd541c863ab6f4872c9571a526e34ecd04934924ee69fb7f40ae4f4"
+            },
+            {
+              "name": "camoufox-pm-windows-x86_64-setup.exe",
+              "bytes": 86322905,
+              "digest": "sha256:e64fe3a166f3c371e18e40a648ca34f80071ef3a73e7c398f44d49d7e2aa9041"
+            },
+            {
+              "name": "camoufox-pm-windows-x86_64-setup.exe.sha256",
+              "bytes": 104,
+              "digest": "sha256:3e68d071efd09517b05c47c6d17bd01ed10e559756a9f43c6c7aea426167c200"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0rc8-py3-none-any.whl",
+              "bytes": 1486458,
+              "digest": "sha256:48c26109a885fbeb34c3eba6a01f136cfdcfc5b618e5797df6c65bf603b40af6"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0rc8-py3-none-any.whl.sha256",
+              "bytes": 117,
+              "digest": "sha256:26029a0e70f53b49de748bfb4b1a29f9f27697a16218192c27d47fcc814b0bc8"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0rc8.tar.gz",
+              "bytes": 2289371,
+              "digest": "sha256:8123bff0666f02c085a9c72cda81708e813d2bb01afcd45ef2eeafcdbf48f03a"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0rc8.tar.gz.sha256",
+              "bytes": 107,
+              "digest": "sha256:8d6fc0e3c4dd5f68f89217cbad23293e3765c946e49add82fa538143fcd66455"
+            }
+          ]
+        },
+        {
+          "tag": "v0.6.0-rc.7",
+          "publishedAt": "2026-10-15T18:03:30Z",
+          "prerelease": true,
+          "assets": [
+            {
+              "name": "camoufox-pm-linux-x86_64.deb",
+              "bytes": 250884320,
+              "digest": "sha256:3ee4e2a02aaf2879cd182f390eb659a4d6b61e596ac15b914b580faf039da32e"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.deb.sha256",
+              "bytes": 95,
+              "digest": "sha256:3f94542d46eada9621b2872c13f4bd82cddbdc3569fc0345d22827ea6ccb2695"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.tar.gz",
+              "bytes": 316978372,
+              "digest": "sha256:5526dd2bca4c3cf431b682b21e3d2bcd5bcb06b749f4f614f593157d51e12f73"
+            },
+            {
+              "name": "camoufox-pm-linux-x86_64.tar.gz.sha256",
+              "bytes": 98,
+              "digest": "sha256:275dd25c87af0f71d4def158b63e81fd55f6e20a25dd6f4eb633fb880483f1a9"
+            },
+            {
+              "name": "camoufox-pm-macos-arm64.dmg",
+              "bytes": 94762074,
+              "digest": "sha256:e728fd427cdd7485d7efab675ab2a4e34e827e84841fe112d8420250790300e9"
+            },
+            {
+              "name": "camoufox-pm-macos-arm64.dmg.sha256",
+              "bytes": 94,
+              "digest": "sha256:b15e08fc9e10bfa4c3645c004a241a92812d7ac28d05651f05be3b61dade980f"
+            },
+            {
+              "name": "camoufox-pm-macos-x86_64.dmg",
+              "bytes": 99244416,
+              "digest": "sha256:631f34e77e9ca5cb463513da566adbe1e42f08f54140efac9ae35320cf28838c"
+            },
+            {
+              "name": "camoufox-pm-macos-x86_64.dmg.sha256",
+              "bytes": 95,
+              "digest": "sha256:e762a993beead8699dc5cf48085c9cad32ab79815a2f9edb812a2745c86d7f03"
+            },
+            {
+              "name": "camoufox-pm-windows-x86_64-setup.exe",
+              "bytes": 86319164,
+              "digest": "sha256:6b90b2c7c692e3586bc5f6c4b709fcaa7058b2891e915989505d941735b0b8bc"
+            },
+            {
+              "name": "camoufox-pm-windows-x86_64-setup.exe.sha256",
+              "bytes": 104,
+              "digest": "sha256:43237f45a350b0b064c31b24d3f997c70cdc55ef4d2a31a9281e892252d812b2"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0rc7-py3-none-any.whl",
+              "bytes": 1486325,
+              "digest": "sha256:9bd6b3b73071f7f7849a82c54ca00235938893a6b765190f1a60aac10bd41029"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0rc7-py3-none-any.whl.sha256",
+              "bytes": 117,
+              "digest": "sha256:64f4c2dce109cc080e74ab84c3f00b6a672987424597d1d00ced8b4be066a8c7"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0rc7.tar.gz",
+              "bytes": 2284246,
+              "digest": "sha256:19b6d3c4c6c79b0a1a79c0956e97047482b6061b911e23c1575b9a9a7500abfd"
+            },
+            {
+              "name": "camoufox_profile_manager-0.6.0rc7.tar.gz.sha256",
+              "bytes": 107,
+              "digest": "sha256:a792b07fe1a49150a7fe239f6151118259c55a5708b5b1a54f37bea932109949"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "Simprint/simprint",
+      "commit": "d2dc939bfae8efda8e4e4d791587d7a364ca4dd8",
+      "branch": "main",
+      "license": "AGPL-3.0",
+      "stars": 671,
+      "pushedAt": "2026-09-14T03:18:57Z",
+      "filesCount": 991,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "a666a4daa16b03d5b47a7b9df1d24a2d7cb99137",
+          "bytes": 34573,
+          "url": "https://github.com/Simprint/simprint/blob/d2dc939bfae8efda8e4e4d791587d7a364ca4dd8/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "d7a9b449ae0a090da7a14645127bbf036b5594e5",
+          "bytes": 7118,
+          "url": "https://github.com/Simprint/simprint/blob/d2dc939bfae8efda8e4e4d791587d7a364ca4dd8/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.zh-CN.md",
+          "blob": "3ecef9b52e9fa3157ade5399f7712b55343aa3f7",
+          "bytes": 6499,
+          "url": "https://github.com/Simprint/simprint/blob/d2dc939bfae8efda8e4e4d791587d7a364ca4dd8/README.zh-CN.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "src-tauri/crates/business/resources/default-browser-kernels.json",
+          "blob": "2e33601e08a6d0187ac15f5f8e3b00d849f36ea7",
+          "bytes": 1048,
+          "url": "https://github.com/Simprint/simprint/blob/d2dc939bfae8efda8e4e4d791587d7a364ca4dd8/src-tauri/crates/business/resources/default-browser-kernels.json",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "src-tauri/src/services/environment/launch_runtime/fingerprint.rs",
+          "blob": "b13cae2611a108b52dacac82255b263fde8d890d",
+          "bytes": 5461,
+          "url": "https://github.com/Simprint/simprint/blob/d2dc939bfae8efda8e4e4d791587d7a364ca4dd8/src-tauri/src/services/environment/launch_runtime/fingerprint.rs",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "src-tauri/crates/runtime/src/services/environment/kernel/launcher.rs",
+          "blob": "44ad240606273a570638ff5a6c018f98a75faa5e",
+          "bytes": 30040,
+          "url": "https://github.com/Simprint/simprint/blob/d2dc939bfae8efda8e4e4d791587d7a364ca4dd8/src-tauri/crates/runtime/src/services/environment/kernel/launcher.rs",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v0.2.32",
+          "publishedAt": "2026-09-14T04:49:56Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "latest-fixed.json",
+              "bytes": 3981,
+              "digest": "sha256:ca34c6094e5a65a9f7028258958210ea81725d44584bddc35948847b03b32229"
+            },
+            {
+              "name": "latest.json",
+              "bytes": 3951,
+              "digest": "sha256:21b3f464ead00824c49177c9dcabdf5c355b02659b505781a55f5eb60969e9b6"
+            },
+            {
+              "name": "Simprint_0.2.32_arm64-full-setup.exe",
+              "bytes": 225868183,
+              "digest": "sha256:1f0b30256e965eb872c7b09a0e5fc17fff453cae4effb0bf33689bf31fe20bf5"
+            },
+            {
+              "name": "Simprint_0.2.32_arm64-full-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:3595029c6db1eefa2c3035ece640fff4fda79867020fc3b6f3255e71e934553c"
+            },
+            {
+              "name": "Simprint_0.2.32_arm64-setup.exe",
+              "bytes": 18355927,
+              "digest": "sha256:988fa57138747dfd33cbe11587feff4ec5e9a6a1bda3f12ce79d31151b9b4dd5"
+            },
+            {
+              "name": "Simprint_0.2.32_arm64-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:d09db5be3724a0e80f8a4ca1ea44aa978a214cf85e9a86ed3c7eb377a7ba234d"
+            },
+            {
+              "name": "Simprint_0.2.32_x64-full-setup.exe",
+              "bytes": 248086177,
+              "digest": "sha256:a20c6dd6db904eb47cdc3aeace0deaa3e99fb25a8b79dfeedaf58e5424c0899c"
+            },
+            {
+              "name": "Simprint_0.2.32_x64-full-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:ac7a774de18c3541d3f02d9eb435133c5c827cee4a81895848693255ad82cbb1"
+            },
+            {
+              "name": "Simprint_0.2.32_x64-setup.exe",
+              "bytes": 19839448,
+              "digest": "sha256:1366e89c8d2a4d6edac438a4428eb5150a30af8c24b04b991a8a95bc7852eb08"
+            },
+            {
+              "name": "Simprint_0.2.32_x64-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:44e22598b4971bac9fb24742fd83ebcaf8c77d71efc3cb09f2959d411920d1f6"
+            },
+            {
+              "name": "Simprint_0.2.32_x86-full-setup.exe",
+              "bytes": 214319876,
+              "digest": "sha256:388bc7211da25c7eb441ac7347d8982a35117450923616eb6fd3a54f54f45e0d"
+            },
+            {
+              "name": "Simprint_0.2.32_x86-full-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:971e116e9651a5f36244e2fdf25326715ab4b84899bcb7cc3bee377f3e8d8877"
+            },
+            {
+              "name": "Simprint_0.2.32_x86-setup.exe",
+              "bytes": 18604315,
+              "digest": "sha256:b4e76b8a72072ec1cbcd5ca050193f5b1eeba51156a26aed70be46bf265cb983"
+            },
+            {
+              "name": "Simprint_0.2.32_x86-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:b8beb8342d735f4ad6555762d3c00c7d6508e6968162c19b2ffa998ce9ba6ea8"
+            }
+          ]
+        },
+        {
+          "tag": "v0.2.31",
+          "publishedAt": "2026-08-13T05:23:25Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "latest-fixed.json",
+              "bytes": 5056,
+              "digest": "sha256:c313f81aafff702b4f7517d5cc94c75ef02af1a7f969b7b36edc7dc73c850014"
+            },
+            {
+              "name": "latest.json",
+              "bytes": 5026,
+              "digest": "sha256:3b1b0799c11da9ea1ad097e774651c7391047812d9902e247ba8ed1219b435d5"
+            },
+            {
+              "name": "Simprint_0.2.31_arm64-full-setup.exe",
+              "bytes": 225742904,
+              "digest": "sha256:50343f0d7ba7e33cc9b69d1da58ba4f563155dad77e2514bea233508a2154d56"
+            },
+            {
+              "name": "Simprint_0.2.31_arm64-full-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:be4dec960e917d571c33e28902bdc0df52864e0ebc4dc24dbf683421c8aaf150"
+            },
+            {
+              "name": "Simprint_0.2.31_arm64-setup.exe",
+              "bytes": 18159349,
+              "digest": "sha256:02ca10aaee7f7ca72aad1a9dc95608f8cd10c56f76abaf2e4770f591aa7eb5a8"
+            },
+            {
+              "name": "Simprint_0.2.31_arm64-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:94327d9992f105b95bbb1c92b840473347893481417523c3d66d207e13dfcdc8"
+            },
+            {
+              "name": "Simprint_0.2.31_x64-full-setup.exe",
+              "bytes": 248051632,
+              "digest": "sha256:76c90a4b046d449e02b5a3b386c3500ca7d8a0430447b5759c357c4b1091ccca"
+            },
+            {
+              "name": "Simprint_0.2.31_x64-full-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:1164908e2135f1ebf9fb2e8f82234591771eaa2cdb38cdb8accffa195b0ab372"
+            },
+            {
+              "name": "Simprint_0.2.31_x64-setup.exe",
+              "bytes": 19677275,
+              "digest": "sha256:958d07bcb330d259da23ab753af2f3bdc9d4491535766e3143704d75dd7dd34f"
+            },
+            {
+              "name": "Simprint_0.2.31_x64-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:6c3bda38f21b44b12740156799c6abbe91f85c3dcd407970471bf31ae9d91323"
+            },
+            {
+              "name": "Simprint_0.2.31_x86-full-setup.exe",
+              "bytes": 214230920,
+              "digest": "sha256:f68c132ca7579c02e98a5e6c87f3a6386b8e89704c27e9d9088055a4254ed3e3"
+            },
+            {
+              "name": "Simprint_0.2.31_x86-full-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:b3c2e93edc75a8db0873e315b3be87a2425f88ce213ecf69d4b752a12f4d6432"
+            },
+            {
+              "name": "Simprint_0.2.31_x86-setup.exe",
+              "bytes": 18405617,
+              "digest": "sha256:18b50dcb8823762cb85a234fd0c02d306642e7b0c97318e3b2e726e30b72e3fb"
+            },
+            {
+              "name": "Simprint_0.2.31_x86-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:79dfd499507b17def5d97b164c6834cb6c3abc7e8076f285d573a8ea1e360116"
+            }
+          ]
+        },
+        {
+          "tag": "v0.2.30",
+          "publishedAt": "2026-08-13T03:15:39Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "latest-fixed.json",
+              "bytes": 4810,
+              "digest": "sha256:86a844b0b149347de25a465437606c1f9ea64012bda12e78c751bd2b2a72004f"
+            },
+            {
+              "name": "latest.json",
+              "bytes": 4780,
+              "digest": "sha256:b47f967fcb6c11ac7fd0c703068728dcd276eff2b7d15e9ce455047f9c070b41"
+            },
+            {
+              "name": "Simprint_0.2.30_arm64-full-setup.exe",
+              "bytes": 225866880,
+              "digest": "sha256:c5f4f5e04e696660ac023aebe43bb06cf22eebf50c63f8efdad280d4b5992770"
+            },
+            {
+              "name": "Simprint_0.2.30_arm64-full-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:80671b8ae512db5795944abeb6f562cf677a4bd8161f321873a7873a483e1def"
+            },
+            {
+              "name": "Simprint_0.2.30_arm64-setup.exe",
+              "bytes": 18251971,
+              "digest": "sha256:cbbe613788cac7c0d7e8eda00b6bc9946305356c44fcf88494617ecd45fc79a0"
+            },
+            {
+              "name": "Simprint_0.2.30_arm64-setup.exe.sig",
+              "bytes": 424,
+              "digest": "sha256:511dad0fcb70efb0472ebfa16c96549babecf382b2eb161ddba1fff5b5b790f5"
+            },
+            {
+              "name": "Simprint_0.2.30_x64-full-setup.exe",
+              "bytes": 248064287,
+              "digest": "sha256:83c7938c44b18a150664a141ac128f4565ce4eadc5aa662c72b6dceee7ea4a78"
+            },
+            {
+              "name": "Simprint_0.2.30_x64-full-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:06e62e339356b3a4faf59fb23ab9d454ef30ab13c84f2956e7f029951978994f"
+            },
+            {
+              "name": "Simprint_0.2.30_x64-setup.exe",
+              "bytes": 19768597,
+              "digest": "sha256:526a83f6e22f64ec567f66834036809546becd9f3ff314f2ef4e1adc7a5d82d6"
+            },
+            {
+              "name": "Simprint_0.2.30_x64-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:1358aa43e84cfd87ee3e8f2758eb9b79585cb563c5a29806daecf04c42fb7182"
+            },
+            {
+              "name": "Simprint_0.2.30_x86-full-setup.exe",
+              "bytes": 214260925,
+              "digest": "sha256:4bbb1bbdf2cef7ef2130dea35f7c4756a41effaced66e7f4961819980c7a5abc"
+            },
+            {
+              "name": "Simprint_0.2.30_x86-full-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:7531193c7c294dd85a744cb89e2e7cf37027411664ae605917eb659ae78d6d3c"
+            },
+            {
+              "name": "Simprint_0.2.30_x86-setup.exe",
+              "bytes": 18454761,
+              "digest": "sha256:f39a56f27a564f15bce144f3d6351bc066067636d5add4f0b5792c60362313dd"
+            },
+            {
+              "name": "Simprint_0.2.30_x86-setup.exe.sig",
+              "bytes": 420,
+              "digest": "sha256:1649622d9b1abfcda6b365a71c2de65aca5a0e867d422d20033d67265ef714f5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "True-Utopian/vesper-antidetect-browser",
+      "commit": "7591a5d374e76fc8701bab0f532c7a6aa41d1863",
+      "branch": "main",
+      "license": "MIT",
+      "stars": 87,
+      "pushedAt": "2026-10-13T18:27:24Z",
+      "filesCount": 180,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "f2e483a3d54556e22245baf51176a7b79e260884",
+          "bytes": 1069,
+          "url": "https://github.com/True-Utopian/vesper-antidetect-browser/blob/7591a5d374e76fc8701bab0f532c7a6aa41d1863/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "96e229229a005cb36cb57854d2ba8d424b27cc63",
+          "bytes": 6069,
+          "url": "https://github.com/True-Utopian/vesper-antidetect-browser/blob/7591a5d374e76fc8701bab0f532c7a6aa41d1863/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": []
+    },
+    {
+      "repo": "Virtual-Browser/VirtualBrowser",
+      "commit": "0c6e8ab41b15fedc7a125b7c4314faa974dd87a9",
+      "branch": "main",
+      "license": "BSD-3-Clause",
+      "stars": 3236,
+      "pushedAt": "2026-10-16T00:25:30Z",
+      "filesCount": 259,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "8a85dae2266d87957798782ec07119d45625fe82",
+          "bytes": 1502,
+          "url": "https://github.com/Virtual-Browser/VirtualBrowser/blob/0c6e8ab41b15fedc7a125b7c4314faa974dd87a9/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "6defa16a07e9988cf55681137b41286b396d3bbc",
+          "bytes": 5891,
+          "url": "https://github.com/Virtual-Browser/VirtualBrowser/blob/0c6e8ab41b15fedc7a125b7c4314faa974dd87a9/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "2.4.0",
+          "publishedAt": "2026-10-16T00:25:31Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "VirtualBrowser-2.4.0-arm64.dmg",
+              "bytes": 387805668,
+              "digest": "sha256:a3460977c16751d53c40b3432b32e4ea4917d8abbb4c2a28e467082aad0f659d"
+            },
+            {
+              "name": "VirtualBrowser-2.4.0-linux-amd64.deb",
+              "bytes": 247830652,
+              "digest": "sha256:8525961ae939a5cfa67cb5b2ff12c7d69ff37c76631bc851d5ff1f75769b0a09"
+            },
+            {
+              "name": "VirtualBrowser.Setup.2.4.0.exe",
+              "bytes": 338903088,
+              "digest": "sha256:410653334656c875e0771768f32990dd9af6ab6ac04a5b981ab1f69cfe31d8c1"
+            },
+            {
+              "name": "VirtualBrowser.Setup_bing_2.4.0.exe",
+              "bytes": 338903088,
+              "digest": "sha256:410653334656c875e0771768f32990dd9af6ab6ac04a5b981ab1f69cfe31d8c1"
+            },
+            {
+              "name": "VirtualBrowser.Setup_github_2.4.0.exe",
+              "bytes": 338903088,
+              "digest": "sha256:410653334656c875e0771768f32990dd9af6ab6ac04a5b981ab1f69cfe31d8c1"
+            },
+            {
+              "name": "VirtualBrowser.Setup_google_2.4.0.exe",
+              "bytes": 338903088,
+              "digest": "sha256:410653334656c875e0771768f32990dd9af6ab6ac04a5b981ab1f69cfe31d8c1"
+            }
+          ]
+        },
+        {
+          "tag": "2.3.1",
+          "publishedAt": "2026-07-30T04:30:51Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "VirtualBrowser-2.3.1-arm64.dmg",
+              "bytes": 343036295,
+              "digest": "sha256:699d214353033328248298e00c578e1005f18198b96c9ce66f03a4ee05dd436c"
+            },
+            {
+              "name": "VirtualBrowser-2.3.1-linux.deb",
+              "bytes": 323738874,
+              "digest": "sha256:7d1ef903051550c9d9000f6d12fefdc889bb09dcd351857188341e270eafba2e"
+            },
+            {
+              "name": "VirtualBrowser-2.3.1-x64.dmg",
+              "bytes": 389429718,
+              "digest": "sha256:955a26cd9055662cc2baa29d0cb3557c7424c9a45b06e1db1e83b15008f24ff5"
+            },
+            {
+              "name": "VirtualBrowser.Setup.2.3.1.exe",
+              "bytes": 302080928,
+              "digest": "sha256:fdddafa9ef7c3e7b873d0c64f9dc438b219af9a61210b458ff951872ea4f6275"
+            },
+            {
+              "name": "VirtualBrowser.Setup_bing_2.3.1.exe",
+              "bytes": 302080928,
+              "digest": "sha256:fdddafa9ef7c3e7b873d0c64f9dc438b219af9a61210b458ff951872ea4f6275"
+            },
+            {
+              "name": "VirtualBrowser.Setup_github_2.3.1.exe",
+              "bytes": 302080928,
+              "digest": "sha256:fdddafa9ef7c3e7b873d0c64f9dc438b219af9a61210b458ff951872ea4f6275"
+            },
+            {
+              "name": "VirtualBrowser.Setup_google_2.3.1.exe",
+              "bytes": 302080928,
+              "digest": "sha256:fdddafa9ef7c3e7b873d0c64f9dc438b219af9a61210b458ff951872ea4f6275"
+            }
+          ]
+        },
+        {
+          "tag": "2.3.0",
+          "publishedAt": "2026-07-29T01:22:49Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "VirtualBrowser.Setup.2.3.0.exe",
+              "bytes": 279461152,
+              "digest": "sha256:c241937dc85bbe98b911447d8811fe7d0b0d2ded84173270c5ef9921756b4315"
+            },
+            {
+              "name": "VirtualBrowser.Setup_bing_2.3.0.exe",
+              "bytes": 279461152,
+              "digest": "sha256:c241937dc85bbe98b911447d8811fe7d0b0d2ded84173270c5ef9921756b4315"
+            },
+            {
+              "name": "VirtualBrowser.Setup_github_2.3.0.exe",
+              "bytes": 279461152,
+              "digest": "sha256:c241937dc85bbe98b911447d8811fe7d0b0d2ded84173270c5ef9921756b4315"
+            },
+            {
+              "name": "VirtualBrowser.Setup_google_2.3.0.exe",
+              "bytes": 279461152,
+              "digest": "sha256:c241937dc85bbe98b911447d8811fe7d0b0d2ded84173270c5ef9921756b4315"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "xiaozhou26/Cloaksession",
+      "commit": "98cfea2b60d5ea732d43498b05cd8f96e7eeddf8",
+      "branch": "main",
+      "license": "Apache-2.0",
+      "stars": 31,
+      "pushedAt": "2026-10-09T11:09:39Z",
+      "filesCount": 179,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "LICENSE",
+          "blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "bytes": 11358,
+          "url": "https://github.com/xiaozhou26/Cloaksession/blob/98cfea2b60d5ea732d43498b05cd8f96e7eeddf8/LICENSE",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "README.md",
+          "blob": "3d6f05d6bea9331b60a0e455dcbe897090e4d5a2",
+          "bytes": 25086,
+          "url": "https://github.com/xiaozhou26/Cloaksession/blob/98cfea2b60d5ea732d43498b05cd8f96e7eeddf8/README.md",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "desktop/internal/browser/config.go",
+          "blob": "76538cc2186467d42d3426f4f1ff72b22c9c1705",
+          "bytes": 8646,
+          "url": "https://github.com/xiaozhou26/Cloaksession/blob/98cfea2b60d5ea732d43498b05cd8f96e7eeddf8/desktop/internal/browser/config.go",
+          "gitBlobVerified": true
+        },
+        {
+          "path": "desktop/internal/browser/executable.go",
+          "blob": "5db94b5b6857e7129a3e14b1591a67414506ca14",
+          "bytes": 4047,
+          "url": "https://github.com/xiaozhou26/Cloaksession/blob/98cfea2b60d5ea732d43498b05cd8f96e7eeddf8/desktop/internal/browser/executable.go",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "v1.5.2",
+          "publishedAt": "2026-10-09T11:18:32Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "Cloaksession-1.5.2-linux-amd64.tar.gz",
+              "bytes": 21132627,
+              "digest": "sha256:819b6bc4d7038dc194a6bdbfce3982bf060f9d0c231cd6e49d0fd3b292342645"
+            },
+            {
+              "name": "Cloaksession-1.5.2-macos-universal.zip",
+              "bytes": 32223274,
+              "digest": "sha256:63053be355706e927102e9fc85499ae31d0614833be7436a27a3f01ca5c85590"
+            },
+            {
+              "name": "Cloaksession-1.5.2-windows-amd64-setup.exe",
+              "bytes": 15252694,
+              "digest": "sha256:3424389f6622867d4eee23f7c0136eea2350860fb19f13b8cb1757cb4ef621e4"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 318,
+              "digest": "sha256:86f06590974aee428d6ddff32ee951757bce9950de63009e94713c9c36060843"
+            }
+          ]
+        },
+        {
+          "tag": "v1.5.1",
+          "publishedAt": "2026-10-09T11:06:39Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "Cloaksession-1.5.1-linux-amd64.tar.gz",
+              "bytes": 21132105,
+              "digest": "sha256:705a3279a84f24192832a19c8f0b4ff8a5bd0a1170e28dfa09d3719487428c34"
+            },
+            {
+              "name": "Cloaksession-1.5.1-macos-universal.zip",
+              "bytes": 32223272,
+              "digest": "sha256:0cf45b20cb9027785e109062cfc48f2bdb49742e624301ceeaea27a658864254"
+            },
+            {
+              "name": "Cloaksession-1.5.1-windows-amd64-setup.exe",
+              "bytes": 9549300,
+              "digest": "sha256:0f5192084a16769d7c512564222a99fbf94e23a9a8d9d71c4f468bb983bf0feb"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 318,
+              "digest": "sha256:8dffd41db553119fadaf8b5070e1bfd3d5d2fbe753b5b8f183c0ef0de2e8b3df"
+            }
+          ]
+        },
+        {
+          "tag": "v1.4.4",
+          "publishedAt": "2026-10-09T09:46:50Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "Cloaksession-1.4.4-linux-amd64.tar.gz",
+              "bytes": 9844306,
+              "digest": "sha256:fcecbe9ff76c8e373c07f7da03a77f06f067ba840dfd926e9d5a8c3e21182190"
+            },
+            {
+              "name": "Cloaksession-1.4.4-macos-universal.zip",
+              "bytes": 16504652,
+              "digest": "sha256:4e22c75cc3efbced03a4472cb497be8c5abf016751525bbce6178b26186afb6e"
+            },
+            {
+              "name": "Cloaksession-1.4.4-windows-amd64-setup.exe",
+              "bytes": 9499530,
+              "digest": "sha256:16f2ff7706d7bdce95318e400a938c10d915cdf5021152b4d27c91f08d6cef66"
+            },
+            {
+              "name": "SHA256SUMS.txt",
+              "bytes": 318,
+              "digest": "sha256:82a2036beff113a155bac218158dd701e6c5a251e08eda63ec32728e49edb96a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "za515217965/OKBrowser",
+      "commit": "ca052e30ed931ccd31fdf5e5ac20f07a4679d0fe",
+      "branch": "main",
+      "license": null,
+      "stars": 1639,
+      "pushedAt": "2026-04-20T12:42:13Z",
+      "filesCount": 9,
+      "treeTruncated": false,
+      "read": [
+        {
+          "path": "README.md",
+          "blob": "298bb50e97286262a17725cb00999fa9a1def2c6",
+          "bytes": 8407,
+          "url": "https://github.com/za515217965/OKBrowser/blob/ca052e30ed931ccd31fdf5e5ac20f07a4679d0fe/README.md",
+          "gitBlobVerified": true
+        }
+      ],
+      "releases": [
+        {
+          "tag": "4.3.8",
+          "publishedAt": "2025-07-28T07:39:02Z",
+          "prerelease": false,
+          "assets": []
+        },
+        {
+          "tag": "3.1.4",
+          "publishedAt": "2024-10-30T14:12:13Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "HubBrobwser-win-x64.7.rar",
+              "bytes": 276997618,
+              "digest": null
+            }
+          ]
+        },
+        {
+          "tag": "3.13",
+          "publishedAt": "2024-10-22T02:38:09Z",
+          "prerelease": false,
+          "assets": [
+            {
+              "name": "HubBrobwser-win-x64.5.rar",
+              "bytes": 239259355,
+              "digest": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

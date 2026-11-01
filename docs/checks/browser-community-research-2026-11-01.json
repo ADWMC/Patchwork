@@ -1,0 +1,586 @@
+{
+  "schemaVersion": 1,
+  "collectedOn": "2026-11-01",
+  "collectionMethod": "GitHub CLI through the configured local HTTP proxy",
+  "scope": "README and repository metadata for discovery; selected source and license files pinned to recorded commits",
+  "readmeReference": "Default branch at retrieval; HEAD was recorded during the same repository collection",
+  "runtimeTestingPerformed": false,
+  "repositoryCount": 26,
+  "mainTreeCount": 15,
+  "sourceFileCount": 33,
+  "limitations": [
+    "No third-party browser binaries installed or executed.",
+    "Upstream detection scores and performance claims were not independently reproduced.",
+    "fingerprint-chromium historical-tag source fetch was not completed because the local proxy connection failed.",
+    "GitHub license metadata does not establish licensing of separately downloaded browser binaries."
+  ],
+  "repositories": [
+    {
+      "repository": "abrahamjuliot/creepjs",
+      "repositoryUrl": "https://github.com/abrahamjuliot/creepjs",
+      "headCommit": "10aa6724cd33a1015db1574211890518cd04f0cc",
+      "defaultBranch": "master",
+      "starsAtCheck": 2538,
+      "createdAtUtc": "2020-05-23T07:38:13Z",
+      "pushedAtUtc": "2026-06-11T02:46:58Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "adryfish/fingerprint-chromium",
+      "repositoryUrl": "https://github.com/adryfish/fingerprint-chromium",
+      "headCommit": "698a1002bd54c021ac2001cc6298bbc45826dcbb",
+      "defaultBranch": "main",
+      "starsAtCheck": 3220,
+      "createdAtUtc": "2024-12-09T10:27:32Z",
+      "pushedAtUtc": "2026-10-02T14:02:29Z",
+      "archived": false,
+      "licenseReportedByGitHub": "BSD-3-Clause",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": []
+    },
+    {
+      "repository": "apify/camoufox-js",
+      "repositoryUrl": "https://github.com/apify/camoufox-js",
+      "headCommit": "703562c13b44bb1923c35c06600441b4b56a4adf",
+      "defaultBranch": "master",
+      "starsAtCheck": 277,
+      "createdAtUtc": "2025-02-14T13:20:19Z",
+      "pushedAtUtc": "2026-10-26T13:18:34Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MPL-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "apify/fingerprint-suite",
+      "repositoryUrl": "https://github.com/apify/fingerprint-suite",
+      "headCommit": "4f3f3eb8cc426c1c712cdacda5075a9ad005c5b2",
+      "defaultBranch": "master",
+      "starsAtCheck": 2647,
+      "createdAtUtc": "2022-05-04T14:25:01Z",
+      "pushedAtUtc": "2026-10-27T13:23:03Z",
+      "archived": false,
+      "licenseReportedByGitHub": "Apache-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "browserbase/stagehand",
+      "repositoryUrl": "https://github.com/browserbase/stagehand",
+      "headCommit": "b7a4b899079f198a0ee78a6dcb62ad02f545cf49",
+      "defaultBranch": "main",
+      "starsAtCheck": 25891,
+      "createdAtUtc": "2024-03-24T19:19:44Z",
+      "pushedAtUtc": "2026-10-30T23:33:45Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "browserless/browserless",
+      "repositoryUrl": "https://github.com/browserless/browserless",
+      "headCommit": "463fc4c5e9e5711617dec2f5ac2958cb4d484cd2",
+      "defaultBranch": "main",
+      "starsAtCheck": 13880,
+      "createdAtUtc": "2017-11-17T04:35:31Z",
+      "pushedAtUtc": "2026-10-30T21:39:21Z",
+      "archived": false,
+      "licenseReportedByGitHub": "NOASSERTION",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "LICENSE",
+          "upstreamGitBlob": "4d8c088c8055c4b558723d0fa1e202bbdadf7dcc",
+          "url": "https://github.com/browserless/browserless/blob/463fc4c5e9e5711617dec2f5ac2958cb4d484cd2/LICENSE"
+        }
+      ]
+    },
+    {
+      "repository": "CloakHQ/CloakBrowser",
+      "repositoryUrl": "https://github.com/CloakHQ/CloakBrowser",
+      "headCommit": "b860957b1299967e1f0226b629b1da2d36e53c82",
+      "defaultBranch": "main",
+      "starsAtCheck": 32658,
+      "createdAtUtc": "2026-02-22T08:09:57Z",
+      "pushedAtUtc": "2026-10-31T09:35:32Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "BINARY-LICENSE.md",
+          "upstreamGitBlob": "3a3acbfc9d0081ad4077575a21001361d383c881",
+          "url": "https://github.com/CloakHQ/CloakBrowser/blob/b860957b1299967e1f0226b629b1da2d36e53c82/BINARY-LICENSE.md"
+        },
+        {
+          "path": "js/src/download.ts",
+          "upstreamGitBlob": "964ccc905258bb6f0cddf8b4a8c17ac76d71a6f4",
+          "url": "https://github.com/CloakHQ/CloakBrowser/blob/b860957b1299967e1f0226b629b1da2d36e53c82/js/src/download.ts"
+        },
+        {
+          "path": "js/src/human/mouse.ts",
+          "upstreamGitBlob": "91befc85d349b9be980e11c5fc43989ce3a36fd8",
+          "url": "https://github.com/CloakHQ/CloakBrowser/blob/b860957b1299967e1f0226b629b1da2d36e53c82/js/src/human/mouse.ts"
+        },
+        {
+          "path": "js/src/license.ts",
+          "upstreamGitBlob": "6cf14eda6c959efc7759920434f3dbdcc2b0f791",
+          "url": "https://github.com/CloakHQ/CloakBrowser/blob/b860957b1299967e1f0226b629b1da2d36e53c82/js/src/license.ts"
+        }
+      ]
+    },
+    {
+      "repository": "CloakHQ/CloakBrowser-Manager",
+      "repositoryUrl": "https://github.com/CloakHQ/CloakBrowser-Manager",
+      "headCommit": "11e0043d9c65828f347c0e10fcf4c15e196a05ca",
+      "defaultBranch": "main",
+      "starsAtCheck": 993,
+      "createdAtUtc": "2026-03-11T04:24:38Z",
+      "pushedAtUtc": "2026-10-14T17:15:45Z",
+      "archived": false,
+      "licenseReportedByGitHub": "NOASSERTION",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "backend/runtime.py",
+          "upstreamGitBlob": "1724e34f611ef43cb0d1a9b8f189340ed174bdaf",
+          "url": "https://github.com/CloakHQ/CloakBrowser-Manager/blob/11e0043d9c65828f347c0e10fcf4c15e196a05ca/backend/runtime.py"
+        },
+        {
+          "path": "backend/vnc_manager.py",
+          "upstreamGitBlob": "830e08cc52dc7dd03a63c314c683a907a1b2fdf5",
+          "url": "https://github.com/CloakHQ/CloakBrowser-Manager/blob/11e0043d9c65828f347c0e10fcf4c15e196a05ca/backend/vnc_manager.py"
+        },
+        {
+          "path": "LICENSE",
+          "upstreamGitBlob": "333e6213e74c0d131a59d538a375ddac4712c8be",
+          "url": "https://github.com/CloakHQ/CloakBrowser-Manager/blob/11e0043d9c65828f347c0e10fcf4c15e196a05ca/LICENSE"
+        }
+      ]
+    },
+    {
+      "repository": "daijro/browserforge",
+      "repositoryUrl": "https://github.com/daijro/browserforge",
+      "headCommit": "a38c328d0e04ff0f968a2c7b47ba0027d6006335",
+      "defaultBranch": "main",
+      "starsAtCheck": 1286,
+      "createdAtUtc": "2024-03-13T04:56:46Z",
+      "pushedAtUtc": "2026-10-29T16:44:53Z",
+      "archived": false,
+      "licenseReportedByGitHub": "Apache-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "daijro/camoufox",
+      "repositoryUrl": "https://github.com/daijro/camoufox",
+      "headCommit": "6e9a1de13b8afeefd13d43a3b35632aee5874583",
+      "defaultBranch": "main",
+      "starsAtCheck": 12955,
+      "createdAtUtc": "2024-07-26T11:31:27Z",
+      "pushedAtUtc": "2026-10-31T06:20:35Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MPL-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "browser/patches/fingerprint-injection.patch",
+          "upstreamGitBlob": "985e16c95ef55208da19e6752ed8d6dbaa28b58d",
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/browser/patches/fingerprint-injection.patch"
+        },
+        {
+          "path": "typescript/README.md",
+          "upstreamGitBlob": "2fc439b127f93780e47742514ad7f60901e35118",
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/typescript/README.md"
+        },
+        {
+          "path": "typescript/src/browser-pin.ts",
+          "upstreamGitBlob": "c88ce822b868a217f7c1ea9fab436d443377cd55",
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/typescript/src/browser-pin.ts"
+        },
+        {
+          "path": "typescript/src/coherence.ts",
+          "upstreamGitBlob": "50428bcfc96e81331c861da67c3fd4538dd3d731",
+          "url": "https://github.com/daijro/camoufox/blob/6e9a1de13b8afeefd13d43a3b35632aee5874583/typescript/src/coherence.ts"
+        }
+      ]
+    },
+    {
+      "repository": "donutbrowser/donutbrowser",
+      "repositoryUrl": "https://github.com/donutbrowser/donutbrowser",
+      "headCommit": "f51bd587a4660de84c9c6f887fc57f25499c6371",
+      "defaultBranch": "main",
+      "starsAtCheck": 4180,
+      "createdAtUtc": "2025-05-29T06:13:50Z",
+      "pushedAtUtc": "2026-10-31T02:13:39Z",
+      "archived": false,
+      "licenseReportedByGitHub": "AGPL-3.0",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "src-tauri/src/browser_version_manager.rs",
+          "upstreamGitBlob": "fd85e53180a72c83ba112ef4e5a21085fe5b4fcf",
+          "url": "https://github.com/donutbrowser/donutbrowser/blob/f51bd587a4660de84c9c6f887fc57f25499c6371/src-tauri/src/browser_version_manager.rs"
+        },
+        {
+          "path": "src-tauri/src/fingerprint_consistency.rs",
+          "upstreamGitBlob": "8cedf8d9e8c32494ae647eab5ad1c5e1bb9dcc5d",
+          "url": "https://github.com/donutbrowser/donutbrowser/blob/f51bd587a4660de84c9c6f887fc57f25499c6371/src-tauri/src/fingerprint_consistency.rs"
+        },
+        {
+          "path": "src-tauri/src/human_hold.rs",
+          "upstreamGitBlob": "3b61fa000ca61365c261048a4f79de1260d60c48",
+          "url": "https://github.com/donutbrowser/donutbrowser/blob/f51bd587a4660de84c9c6f887fc57f25499c6371/src-tauri/src/human_hold.rs"
+        },
+        {
+          "path": "src-tauri/src/profile/encryption.rs",
+          "upstreamGitBlob": "e669731f6b1b512d1e83b22d44f6ebb365a37e57",
+          "url": "https://github.com/donutbrowser/donutbrowser/blob/f51bd587a4660de84c9c6f887fc57f25499c6371/src-tauri/src/profile/encryption.rs"
+        }
+      ]
+    },
+    {
+      "repository": "fingerprintjs/BotD",
+      "repositoryUrl": "https://github.com/fingerprintjs/BotD",
+      "headCommit": "193c471ac70530afcebe5b09664c09f611d19218",
+      "defaultBranch": "main",
+      "starsAtCheck": 1492,
+      "createdAtUtc": "2021-03-10T16:41:46Z",
+      "pushedAtUtc": "2026-10-26T09:47:09Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "jiabirc6/ZenCloak",
+      "repositoryUrl": "https://github.com/jiabirc6/ZenCloak",
+      "headCommit": "ef2b422070a29c6aafeecf19e9d90ec07f657e88",
+      "defaultBranch": "main",
+      "starsAtCheck": 3,
+      "createdAtUtc": "2026-08-11T01:15:20Z",
+      "pushedAtUtc": "2026-10-16T06:48:02Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "Kaliiiiiiiiii-Vinyzu/patchright",
+      "repositoryUrl": "https://github.com/Kaliiiiiiiiii-Vinyzu/patchright",
+      "headCommit": "bd714e6090344762d7c241b7e8f3d37ebdc5dab7",
+      "defaultBranch": "main",
+      "starsAtCheck": 5036,
+      "createdAtUtc": "2023-11-07T19:50:56Z",
+      "pushedAtUtc": "2026-10-31T18:38:56Z",
+      "archived": false,
+      "licenseReportedByGitHub": "Apache-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": []
+    },
+    {
+      "repository": "lightpanda-io/browser",
+      "repositoryUrl": "https://github.com/lightpanda-io/browser",
+      "headCommit": "cebb8d51e60a68815591a5c7874823b988530aa8",
+      "defaultBranch": "main",
+      "starsAtCheck": 39286,
+      "createdAtUtc": "2023-02-07T15:19:34Z",
+      "pushedAtUtc": "2026-11-01T01:05:43Z",
+      "archived": false,
+      "licenseReportedByGitHub": "AGPL-3.0",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "m1k1o/neko",
+      "repositoryUrl": "https://github.com/m1k1o/neko",
+      "headCommit": "22e35dd52560acc4c17522b029c215c5cc6e14de",
+      "defaultBranch": "master",
+      "starsAtCheck": 22576,
+      "createdAtUtc": "2020-03-14T20:46:07Z",
+      "pushedAtUtc": "2026-10-28T16:15:38Z",
+      "archived": false,
+      "licenseReportedByGitHub": "Apache-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "server/internal/api/room/control.go",
+          "upstreamGitBlob": "1f9dd4c74acc36ba667a21f586c32204eb4f6d4f",
+          "url": "https://github.com/m1k1o/neko/blob/22e35dd52560acc4c17522b029c215c5cc6e14de/server/internal/api/room/control.go"
+        },
+        {
+          "path": "server/internal/capture/screencast.go",
+          "upstreamGitBlob": "3850c64df0308a752f2e7d75b24e70c66071c4de",
+          "url": "https://github.com/m1k1o/neko/blob/22e35dd52560acc4c17522b029c215c5cc6e14de/server/internal/capture/screencast.go"
+        }
+      ]
+    },
+    {
+      "repository": "N4darae/anti-mage",
+      "repositoryUrl": "https://github.com/N4darae/anti-mage",
+      "headCommit": "b398299ca5760f09c41734cf20da574bfc229885",
+      "defaultBranch": "main",
+      "starsAtCheck": 2067,
+      "createdAtUtc": "2026-08-22T04:11:00Z",
+      "pushedAtUtc": "2026-09-22T05:22:43Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "internal/scan/band.go",
+          "upstreamGitBlob": "8367d320a74fb7f8aec5a1932440db5a0253f5a7",
+          "url": "https://github.com/N4darae/anti-mage/blob/b398299ca5760f09c41734cf20da574bfc229885/internal/scan/band.go"
+        },
+        {
+          "path": "internal/scan/sec_scopes.go",
+          "upstreamGitBlob": "4d0b00e40cbeb675d52450a7a3ffb6fd9c29983b",
+          "url": "https://github.com/N4darae/anti-mage/blob/b398299ca5760f09c41734cf20da574bfc229885/internal/scan/sec_scopes.go"
+        },
+        {
+          "path": "internal/scan/sec_webrtc.go",
+          "upstreamGitBlob": "2c01aecc09ef418bdd340bc6b1e1ef21e8ef07a0",
+          "url": "https://github.com/N4darae/anti-mage/blob/b398299ca5760f09c41734cf20da574bfc229885/internal/scan/sec_webrtc.go"
+        }
+      ]
+    },
+    {
+      "repository": "ProxyShard/ShardBrowser",
+      "repositoryUrl": "https://github.com/ProxyShard/ShardBrowser",
+      "headCommit": "880fef120393a0707e258484a731784f5d39e7ae",
+      "defaultBranch": "main",
+      "starsAtCheck": 1366,
+      "createdAtUtc": "2026-05-30T23:05:14Z",
+      "pushedAtUtc": "2026-10-25T07:53:06Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "runtime.json",
+          "upstreamGitBlob": "8d2b6035ee54300c8458542e2e65e16d82e86447",
+          "url": "https://github.com/ProxyShard/ShardBrowser/blob/880fef120393a0707e258484a731784f5d39e7ae/runtime.json"
+        },
+        {
+          "path": "sdks/node/src/runtime.ts",
+          "upstreamGitBlob": "f959cef331e8eb5b1fefe898020675fa40ce3b61",
+          "url": "https://github.com/ProxyShard/ShardBrowser/blob/880fef120393a0707e258484a731784f5d39e7ae/sdks/node/src/runtime.ts"
+        }
+      ]
+    },
+    {
+      "repository": "rebrowser/rebrowser-patches",
+      "repositoryUrl": "https://github.com/rebrowser/rebrowser-patches",
+      "headCommit": "00c62cde68d78d734330ca1b558db16fe09755df",
+      "defaultBranch": "main",
+      "starsAtCheck": 1454,
+      "createdAtUtc": "2024-08-06T21:47:09Z",
+      "pushedAtUtc": "2026-10-19T22:51:16Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "patches/playwright-core/1.64.1/src.patch",
+          "upstreamGitBlob": "e8fb4d23d0c8273a5228f437f1e94ee704f94ac6",
+          "url": "https://github.com/rebrowser/rebrowser-patches/blob/00c62cde68d78d734330ca1b558db16fe09755df/patches/playwright-core/1.64.1/src.patch"
+        }
+      ]
+    },
+    {
+      "repository": "rrweb-io/rrweb",
+      "repositoryUrl": "https://github.com/rrweb-io/rrweb",
+      "headCommit": "339683f34bf2dd5df2e7cc18fe59fb924b65661b",
+      "defaultBranch": "main",
+      "starsAtCheck": 20333,
+      "createdAtUtc": "2018-10-06T13:35:55Z",
+      "pushedAtUtc": "2026-10-30T09:42:30Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "scrapfly/fingerprint-generator",
+      "repositoryUrl": "https://github.com/scrapfly/fingerprint-generator",
+      "headCommit": "fc7e489687821f691bae9308d73e294497d015fb",
+      "defaultBranch": "main",
+      "starsAtCheck": 166,
+      "createdAtUtc": "2025-02-18T02:06:19Z",
+      "pushedAtUtc": "2026-02-18T14:50:36Z",
+      "archived": false,
+      "licenseReportedByGitHub": "Apache-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    },
+    {
+      "repository": "steel-dev/steel-browser",
+      "repositoryUrl": "https://github.com/steel-dev/steel-browser",
+      "headCommit": "9fb9b9239325794b3e2d2a56c7e54c400a7d30bd",
+      "defaultBranch": "main",
+      "starsAtCheck": 7898,
+      "createdAtUtc": "2024-11-01T18:15:29Z",
+      "pushedAtUtc": "2026-10-31T22:53:20Z",
+      "archived": false,
+      "licenseReportedByGitHub": "Apache-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "api/src/plugins/browser-socket/handlers/cast.handler.ts",
+          "upstreamGitBlob": "dd68b8ebe2eebee3fda3d6d62cd449323e29c7cd",
+          "url": "https://github.com/steel-dev/steel-browser/blob/9fb9b9239325794b3e2d2a56c7e54c400a7d30bd/api/src/plugins/browser-socket/handlers/cast.handler.ts"
+        },
+        {
+          "path": "api/src/plugins/browser-socket/page-screencast.ts",
+          "upstreamGitBlob": "1a2854e67b600ec7cbf7ebcc88bd6cdd8f1624dd",
+          "url": "https://github.com/steel-dev/steel-browser/blob/9fb9b9239325794b3e2d2a56c7e54c400a7d30bd/api/src/plugins/browser-socket/page-screencast.ts"
+        },
+        {
+          "path": "api/src/services/cdp/instrumentation/browser-interaction-sanitize.ts",
+          "upstreamGitBlob": "69ece529c35b0207b7974b4542d4f07a674bf8e0",
+          "url": "https://github.com/steel-dev/steel-browser/blob/9fb9b9239325794b3e2d2a56c7e54c400a7d30bd/api/src/services/cdp/instrumentation/browser-interaction-sanitize.ts"
+        }
+      ]
+    },
+    {
+      "repository": "TechQaiser/persona-studio",
+      "repositoryUrl": "https://github.com/TechQaiser/persona-studio",
+      "headCommit": "aea2029cb9690b1220010bb851a857ea0856eed4",
+      "defaultBranch": "main",
+      "starsAtCheck": 87,
+      "createdAtUtc": "2025-09-07T16:13:17Z",
+      "pushedAtUtc": "2026-10-25T21:19:21Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "engine/persona/crypto.py",
+          "upstreamGitBlob": "4385906e96fa00e3d89aa8558856238003fc7151",
+          "url": "https://github.com/TechQaiser/persona-studio/blob/aea2029cb9690b1220010bb851a857ea0856eed4/engine/persona/crypto.py"
+        },
+        {
+          "path": "engine/persona/engines.py",
+          "upstreamGitBlob": "d027bb4b0ccdedaf580a104c6fcca1898a6a1e4c",
+          "url": "https://github.com/TechQaiser/persona-studio/blob/aea2029cb9690b1220010bb851a857ea0856eed4/engine/persona/engines.py"
+        },
+        {
+          "path": "engine/persona/probe.py",
+          "upstreamGitBlob": "8d69fc51d1536b851be6f5ac72a54559241d3134",
+          "url": "https://github.com/TechQaiser/persona-studio/blob/aea2029cb9690b1220010bb851a857ea0856eed4/engine/persona/probe.py"
+        }
+      ]
+    },
+    {
+      "repository": "ulixee/hero",
+      "repositoryUrl": "https://github.com/ulixee/hero",
+      "headCommit": "9f89f92c1f7ff2a10537e8a5ca03454d1c0f6689",
+      "defaultBranch": "main",
+      "starsAtCheck": 1560,
+      "createdAtUtc": "2021-07-28T23:50:43Z",
+      "pushedAtUtc": "2026-05-16T10:41:45Z",
+      "archived": false,
+      "licenseReportedByGitHub": "MIT",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": []
+    },
+    {
+      "repository": "vercel-labs/agent-browser",
+      "repositoryUrl": "https://github.com/vercel-labs/agent-browser",
+      "headCommit": "5868f7c05020e047c00e68e4abf9253cce864f41",
+      "defaultBranch": "main",
+      "starsAtCheck": 45038,
+      "createdAtUtc": "2026-01-11T05:38:15Z",
+      "pushedAtUtc": "2026-10-31T21:14:02Z",
+      "archived": false,
+      "licenseReportedByGitHub": "Apache-2.0",
+      "readmeRead": true,
+      "mainTreeFetched": true,
+      "mainTreeTruncated": false,
+      "sourceFiles": [
+        {
+          "path": "cli/src/native/diff.rs",
+          "upstreamGitBlob": "5474ff0e3abef33de4f45492e643981dc5251fa6",
+          "url": "https://github.com/vercel-labs/agent-browser/blob/5868f7c05020e047c00e68e4abf9253cce864f41/cli/src/native/diff.rs"
+        },
+        {
+          "path": "cli/src/native/stream/websocket.rs",
+          "upstreamGitBlob": "fbcc601acf428d5f546bfc92828ae8d911905431",
+          "url": "https://github.com/vercel-labs/agent-browser/blob/5868f7c05020e047c00e68e4abf9253cce864f41/cli/src/native/stream/websocket.rs"
+        },
+        {
+          "path": "cli/src/native/webmcp.rs",
+          "upstreamGitBlob": "1a5c9582fc0720844804b7c4bd41bc4e3ce80ffe",
+          "url": "https://github.com/vercel-labs/agent-browser/blob/5868f7c05020e047c00e68e4abf9253cce864f41/cli/src/native/webmcp.rs"
+        }
+      ]
+    },
+    {
+      "repository": "webrecorder/browsertrix-crawler",
+      "repositoryUrl": "https://github.com/webrecorder/browsertrix-crawler",
+      "headCommit": "3aff4355cfbe8a197439f9682621ef1f2b62ea36",
+      "defaultBranch": "main",
+      "starsAtCheck": 1179,
+      "createdAtUtc": "2020-11-02T04:37:14Z",
+      "pushedAtUtc": "2026-10-29T17:47:11Z",
+      "archived": false,
+      "licenseReportedByGitHub": "AGPL-3.0",
+      "readmeRead": true,
+      "mainTreeFetched": false,
+      "mainTreeTruncated": null,
+      "sourceFiles": []
+    }
+  ]
+}

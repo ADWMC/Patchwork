@@ -1,0 +1,24 @@
+# Overlay for an isolated DSH_HOME only. Supply PATCHWORK_STEPFUN_KEY in the process environment.
+- id: llm-pi-ai
+  config:
+    providers:
+      stepfun-isolated:
+        displayName: StepFun isolated skills evaluation
+        api: openai-completions
+        apiKeyEnv: PATCHWORK_STEPFUN_KEY
+        baseURL: https://api.stepfun.com/step_plan/v1
+        defaultMaxTokens: 4096
+        timeoutMs: 90000
+        retryPolicy:
+          mode: normal
+          maxRetries: 1
+        models:
+          - id: step-5-preview
+            name: Step 5 Preview isolated
+            contextWindow: 1000000
+            maxTokens: 4096
+            reasoningEfforts: false
+- id: agent-default-model
+  config:
+    provider: stepfun-isolated
+    model: step-5-preview

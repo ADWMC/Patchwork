@@ -25,16 +25,13 @@ product.
 
 ## Status
 
-The runtime plugin is delivered in the package and registered by the package-level
-`cordis.patch.yml`, which inserts one `@patchwork/coding-agent` row at the profile
-root: installing the bundle applies the plugin to every agent in that profile.
-Since the 0.1.7-alpha.2 cohort a preset is declared the same way, so
-`dsh.bundle.patch` lists a second file, `presets/patchwork.patch.yml`, whose
-`@deepseek-ai/dsh-agent-preset` row carries only the host tool composition
-(`scripts/gen-preset.mjs` copies the host standard row for row) and deliberately
-does **not** remount the plugin (asserted in `tests/preset.test.mjs`). Nothing
-reads `$DSH_HOME/.agent-presets/` any more. Switching presets does not unload the
-plugin; removing the bundle from the profile is what unloads it.
+The bundle declares two separate owners. `cordis.patch.yml` mounts the shared Web
+bridge at the profile root. `presets/patchwork.patch.yml` declares a preset that
+copies the pinned DSH 0.2.1-rc.2 standard fixture and appends
+`@patchwork/coding-agent/runtime`. Only the Patchwork composition mounts model-side
+skills, tools, hooks and mechanisms. Switching away revokes those capabilities;
+the shared Web entry remains available with a locked explanation. Nothing reads
+`$DSH_HOME/.agent-presets/` to activate this preset.
 
 The plugin registers seven skills through `ctx.skills` (no `systemPrompt` section)
 and observes the
@@ -45,10 +42,12 @@ Path extraction is limited to mutating tools and to files inside the session
 workspace, so reading a large third-party file produces no warning.
 
 The generated preset keeps the host `standard` persona and adds exactly one
-`@patchwork/coding-agent` row. This
+`@patchwork/coding-agent/runtime` row. This
 avoids copying behavior rules into the preset: `assets/skills` is the
 single source of truth and is registered once by the runtime plugin.
 
-Verified against DSH `0.1.1-rc.2`: `dsh --profile web --no-open` reached the
-web server after reinstalling the local file dependency, and the repository
-test suite passed.
+The earlier DSH 0.1.1-rc.2 startup was a historical baseline. Current isolated
+0.2.1-rc.2 task, persistence and UI evidence is recorded in the
+[2026-10-30 integration plan](upgrade/2026-10-30-integration.md). Native task
+records and explicit short task projections are separate: records are ignorable,
+while task-tool results and notices deliberately enter the Patchwork model context.

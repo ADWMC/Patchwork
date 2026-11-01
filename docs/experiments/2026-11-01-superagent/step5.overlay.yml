@@ -1,0 +1,24 @@
+# Isolated Superagent handoff smoke only. Supply credentials via the process environment.
+- id: llm-pi-ai
+  config:
+    providers:
+      stepfun-isolated:
+        displayName: StepFun isolated handoff validation
+        api: openai-completions
+        apiKeyEnv: PATCHWORK_STEPFUN_KEY
+        baseURL: https://api.stepfun.com/step_plan/v1
+        defaultMaxTokens: 16384
+        timeoutMs: 240000
+        retryPolicy:
+          mode: normal
+          maxRetries: 1
+        models:
+          - id: step-5-preview
+            name: Step 5 Preview isolated handoff
+            contextWindow: 1000000
+            maxTokens: 16384
+            reasoningEfforts: false
+- id: agent-default-model
+  config:
+    provider: stepfun-isolated
+    model: step-5-preview

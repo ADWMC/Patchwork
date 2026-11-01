@@ -68,6 +68,18 @@ part of the supported workflow, verify it through PowerShell invoking
 
 ## Release with explicit evidence
 
+Maintain release notes alongside user-visible changes, then review their scope
+against the actual release contents. Record compatibility changes, deprecations,
+configuration moves, and required upgrade actions. Internal-only changes may be
+exempt with a specific reason; skill text that changes agent behavior is not
+automatically exempt as documentation. See the [changelog guide](changelog-guide.md)
+and [official-source comparison](changelog-research-2026-10-30.md).
+
+Keep unreleased work separate from published versions. Generated notes based on
+merged PRs are draft material, not evidence that local work is included. Before
+release, reconcile the notes, usage docs, verified package contents, version, and
+actual release date. Writing notes does not authorize tagging or publishing.
+
 Release automation should verify the exact assets it publishes. Check the tag,
 asset count and names, stable download location when one is promised, and a
 fresh installation of the released archive. Keep release checklists concise
