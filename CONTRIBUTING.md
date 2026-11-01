@@ -6,6 +6,8 @@
 
 CI 使用 Node.js 24、pnpm 12.4.2 和 Windows。包的运行时版本范围仍以各自 `package.json` 为准。
 
+文本文件按 `.gitattributes` 使用 LF，避免 Windows 检出改变技能、YAML 夹具或已提交构建产物的字节内容；二进制文件不做换行转换。
+
 ```powershell
 npm install --global pnpm@12.4.2
 pnpm install --frozen-lockfile
