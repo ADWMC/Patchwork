@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 私密安全反馈 / Private security report
+    url: https://github.com/ADWMC/Patchwork/security/advisories/new
+    about: 工具、提示词或跨会话信息泄露等安全问题，请通过私密渠道反馈。

@@ -137,7 +137,7 @@ Config = {
 | 1 | 七 SKILL.md + register.mjs |
 | 2 | 结构一行码 + EvidenceGate |
 | 3 | 测试断言更新 |
-| 4 | README / index.html 对齐 |
+| 4 | README / 技能预览对齐（旧预览现归档至 `docs/archive/skills-preview/`） |
 
 ---
 

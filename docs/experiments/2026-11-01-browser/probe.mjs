@@ -84,7 +84,7 @@ async function run(ctx) {
     screenshot = { isError: captured.isError, contentTypes: captured.content.map(item => item.type), content: captured.content.filter(item => item.type === 'text').map(item => item.text).join('\n').slice(0, 300) }
     const closed = await call(patchwork, 'patchwork_browser', { action: 'close' })
     image = { closeError: closed.isError, secondStillSecond: (await call(secondPatchwork, 'patchwork_browser', { action: 'snapshot' })).content.some(item => item.text?.includes('Second session')) }
-    const opened = await call(patchwork, 'patchwork_browser', { action: 'navigate', url: pathToFileURL(join(process.cwd(), 'index.html')).href })
+    const opened = await call(patchwork, 'patchwork_browser', { action: 'navigate', url: pathToFileURL(join(process.cwd(), 'docs/archive/skills-preview/index.html')).href })
     localFile = { isError: opened.isError, fileUrl: opened.value?.url?.startsWith('file:') ?? false }
     const outside = await call(patchwork, 'patchwork_browser', { action: 'navigate', url: pathToFileURL(process.execPath).href })
     outsideFile = { rejected: outside.isError, stillLocal: (await call(patchwork, 'patchwork_browser', { action: 'snapshot' })).value?.url === opened.value?.url }

@@ -2,6 +2,10 @@
 
 中文版本：[README.md](README.md)
 
+[![Validate](https://github.com/ADWMC/Patchwork/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/ADWMC/Patchwork/actions/workflows/validate.yml)
+
+[Documentation](docs/README.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+
 Change history: [CHANGELOG.md](CHANGELOG.md), including unreleased changes (Chinese).
 
 ## License

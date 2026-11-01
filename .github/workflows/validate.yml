@@ -1,0 +1,52 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: validate
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      DSH_HOME: ${{ runner.temp }}/patchwork-ci-dsh
+      CI: 'true'
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: Install pinned package manager
+        run: npm install --global pnpm@12.4.2
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Require native DSH test dependencies
+        run: node --input-type=module -e "const {hostAvailable}=await import('./tests/real-composition/harness.mjs'); if(!hostAvailable()) throw new Error('DSH test dependencies missing');"
+      - name: Check committed client bundles
+        run: |
+          node scripts/build-client.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node packages/browser/scripts/build-client.mjs --check
+      - name: Run regression tests
+        run: npm test
+      - name: Check coding-agent package
+        run: npm run check:release
+      - name: Check optional browser package
+        run: npm --prefix packages/browser run check:release
+      - name: Check working tree
+        run: git diff --exit-code

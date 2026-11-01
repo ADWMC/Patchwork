@@ -24,6 +24,7 @@ dsh-test-*.yml
 .idea/
 .playwright-cli/
 .workbuddy/
+/.patchwork/
 
 # Browser verification output
 /output/playwright/

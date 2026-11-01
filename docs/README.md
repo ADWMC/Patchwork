@@ -1,0 +1,42 @@
+# 文档导航
+
+当前行为以实现和对应使用指南为准。带日期的调研、方案与验证记录保留当时的范围、失败和未知项；旧方案不能自动当作已完成能力。
+
+## 使用与维护
+
+- [项目介绍与安装](../README.md)
+- [更新日志](../CHANGELOG.md)与[写作指南](changelog-guide.md)
+- [贡献流程](../CONTRIBUTING.md)与[安全反馈](../SECURITY.md)
+- [日志系统](logging.md)
+- [Preset 切换与隔离排查](troubleshooting-agent-preset-switching.md)
+
+## 当前功能与验证
+
+- [DSH 内部 Superagent 主控](superagent-native-2026-11-01.md)、[提示词优化与实跑](superagent-prompt-optimization-2026-11-01.md)
+- [受控改进执行记录](improvement-execution-2026-10-31.md)
+- [独立浏览器包](../packages/browser/README.md)、[迁移说明](browser-optional-package-2026-11-01.md)、[检索接入](browser-runtime-integration-2026-11-01.md)
+- [编码任务评测](../benchmarks/coding/README.md)与[插件场景](../benchmarks/patchwork/README.md)
+- [SoL 会话分析工具](../benchmark/README.md)与[机制研究门](../research/README.md)：与上述任务题集用途不同，继续保留原 CLI 入口。
+
+## 调研与方案
+
+- 记忆与改进：[产品体验方案](product-experience-evolution-plan-2026-10-31.md)、[融合设计](memory-evolution-design-2026-10-30.md)、[记忆再调研](memory-deep-dive-2026-10-31.md)
+- 技能与 UI：[技能融合方案](skills-fusion-plan-2026-10-31.md)、[执行记录](skills-fusion-execution-2026-10-31.md)、[UI 判断与配色](human-centered-ai-ui-research-2026-10-31.md)
+- 信息检索：[来源研究](information-retrieval-research-2026-10-31.md)、[执行方案](information-retrieval-execution-plan-2026-10-31.md)
+- 浏览器：[ZCode 研究](zcode-browser-research-2026-11-01.md)、[社区项目](browser-community-research-2026-11-01.md)、[指纹内核](fingerprint-browser-research-2026-11-01.md)
+- 提示词：[ZCode / OpenClaude 源码](zcode-openclaude-prompt-engineering-research-2026-10-31.md)、[社区样本取舍](system-prompts-community-research-2026-11-01.md)
+- [其余方案的执行路线](remaining-plans-execution-roadmap-2026-10-31.md)；历史状态保留，不推断全部完成。
+
+## 文件边界
+
+运行代码位于 `src/`，客户端构建载荷位于 `lib/`；浏览器所有权在 `packages/browser/`。`docs/checks/` 保存整理后的验证证据，`docs/experiments/` 保存可审查的隔离实验输入和驱动。
+
+最初的七技能静态展示页归档到 [archive/skills-preview](archive/skills-preview/README.md)，不作为当前 WebUI。研究源码副本、生成页面、截图、运行日志及私人会话审计移出仓库保存，不进入 Git 或发行包。不要为整理目录删除已有研究结论。
+
+## 仓库维护
+
+仓库只维护 `main`，默认分支也是 `main`；主分支禁止强推和删除，要求线性历史。为支持单分支维护，没有设置强制 PR 或必须先在临时分支通过的检查。维护者先执行本地验证，再提交推送；外部 fork PR 使用 squash 合并，合并后自动清理本仓库中的来源分支。
+
+GitHub 启用依赖漏洞提醒、秘密扫描、推送保护和私密漏洞反馈。自动依赖更新 PR 未开启，避免后台创建额外分支。
+
+[Validate 工作流](../.github/workflows/validate.yml)使用 Windows、Node.js 24 和固定 pnpm 12.4.2，官方 Actions 固定到完整 commit SHA；令牌只读，不保留检出凭据。验证包含冻结依赖锁、原生 DSH 测试依赖检查、客户端载荷一致性、回归测试和两个独立包的发行预检。CI 不调用付费模型、不安装浏览器内核、不自动发布包。

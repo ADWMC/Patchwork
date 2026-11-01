@@ -2,6 +2,10 @@
 
 English version: [README.en.md](README.en.md)
 
+[![Validate](https://github.com/ADWMC/Patchwork/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/ADWMC/Patchwork/actions/workflows/validate.yml)
+
+[文档导航](docs/README.md) · [贡献指南](CONTRIBUTING.md) · [安全反馈](SECURITY.md)
+
 更新记录：[CHANGELOG.md](CHANGELOG.md)（含未发布变更）。
 
 ## 开源协议

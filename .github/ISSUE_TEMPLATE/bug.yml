@@ -1,0 +1,33 @@
+name: 问题反馈 / Bug report
+description: 提供可复现的行为、环境和预期结果。
+body:
+  - type: markdown
+    attributes:
+      value: 请勿公开模型密钥、Cookie 或完整私人会话。疑似安全漏洞请使用仓库的私密安全反馈入口。
+  - type: input
+    id: versions
+    attributes:
+      label: 版本与环境
+      description: Patchwork commit / 包版本、DSH 版本、系统、Node.js 版本；浏览器问题注明可选包版本。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 注明 Agent / preset、相关开关，以及可公开的最小输入。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为与证据
+      description: 提供脱敏后的错误、截图或最小产物；区分模型报告与真实验收结果。
+    validations:
+      required: true

@@ -2,6 +2,15 @@
   "name": "@patchwork/browser",
   "version": "0.2.0",
   "description": "Optional session-isolated browser workspace for DeepSeek Harness.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ADWMC/Patchwork.git",
+    "directory": "packages/browser"
+  },
+  "homepage": "https://github.com/ADWMC/Patchwork/tree/main/packages/browser#readme",
+  "bugs": {
+    "url": "https://github.com/ADWMC/Patchwork/issues"
+  },
   "type": "module",
   "main": "src/index.mjs",
   "exports": {

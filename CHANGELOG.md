@@ -8,6 +8,8 @@
 
 ### 变更
 
+- 仓库统一维护 `main` 分支，补充固定依赖版本的 GitHub CI、贡献和安全反馈入口；旧技能静态预览移至 `docs/archive/skills-preview/`，原生 WebUI 入口仍为 `src/client`。调研和验证文档增加分类导航，本地研究快照及会话审计数据移出仓库备份，不进入版本控制。
+
 - Superagent 执行器指令按 read/write 和父任务约束列出允许能力，与派发守卫共用定义；补充 `update_plan` 的 text 字段示例、任务与队列 revision 区分，以及“登记产物后直接 check，独立 shell 会使产物失效”的验收语义和恢复提示。针对真实调用误用，不扩大工具权限；社区提示词的取舍与复验见[优化记录](docs/superagent-prompt-optimization-2026-11-01.md)。
 
 - 可选浏览器的人工输入改为有界、有序、去重的轻量通道，不再逐字符做 ARIA 观察和完整状态读取；普通点击、滚动不再终止画面流。显示优先采用已鉴权的一次性票据和二进制 WebSocket，保留 SSE／JPEG 回退，并按实际显示确认保留最新帧。

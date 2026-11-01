@@ -2,7 +2,16 @@
   "name": "@patchwork/coding-agent",
   "version": "0.2.0",
   "description": "Maintainable coding agent for DeepSeek Harness.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ADWMC/Patchwork.git"
+  },
+  "homepage": "https://github.com/ADWMC/Patchwork#readme",
+  "bugs": {
+    "url": "https://github.com/ADWMC/Patchwork/issues"
+  },
   "type": "module",
+  "packageManager": "pnpm@12.4.2",
   "main": "src/index.mjs",
   "exports": {
     ".": "./src/index.mjs",
