@@ -2,6 +2,8 @@ import { Config } from './config/plugin-config.mjs'
 import { registerStatsInjection } from './ui/stats-injection.mjs'
 import { registerConfigRoute } from './ui/config-route.mjs'
 import { registerRuntimeState } from './ui/runtime-state.mjs'
+import { registerSettingsRoute } from './ui/settings-route.mjs'
+import { registerUpdateRoute } from './ui/update-route.mjs'
 import { webRuntime } from './ui/web-runtime.mjs'
 import { registerDiagnosticRoute } from './logging/route.mjs'
 import { registerMemoryRoute } from './memory/route.mjs'
@@ -22,6 +24,8 @@ export function apply(ctx) {
     const sharedWriteToken = webRuntime.token
     registerConfigRoute(webCtx, { token: sharedWriteToken })
     registerRuntimeState(webCtx, { token: sharedWriteToken })
+    registerSettingsRoute(webCtx, { token: sharedWriteToken })
+    registerUpdateRoute(webCtx, { token: sharedWriteToken })
     registerDiagnosticRoute(webCtx, { token: sharedWriteToken })
     registerMemoryRoute(webCtx, { token: sharedWriteToken })
     registerImprovementRoute(webCtx, { token: sharedWriteToken })

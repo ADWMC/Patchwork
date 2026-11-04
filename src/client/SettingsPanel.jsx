@@ -5,10 +5,15 @@ import { SETTING_FIELDS, validateSettings } from '../config/fields.mjs'
 import { SectionHeading, TechnicalDetails } from './panel-elements.jsx'
 import { Facets, SearchField, SummaryStrip } from './workspace-elements.jsx'
 const display = value => value === undefined ? '未知' : Array.isArray(value) ? value.join(', ') || '空列表' : typeof value === 'boolean' ? value ? '开启' : '关闭' : String(value) || '沿用宿主默认'
-export function SettingsPanel({ data, draft, saving, invalid, conflict, dirty, message, connected, pending, edit, persist, discard }) {
+export function SettingsPanel({ data, draft, saving, invalid, conflict, dirty, message, connected, pending, edit, persist, discard, checkUpdate }) {
   const [query, setQuery] = useState(''), [group, setGroup] = useState('all'), [notice, setNotice] = useState('')
+  const [update, setUpdate] = useState(null), [checking, setChecking] = useState(false), [updateError, setUpdateError] = useState('')
   const fileRef = useRef(null)
   const desired = data.config ?? {}, loaded = data.loadedConfig ?? {}
+  async function runUpdateCheck() {
+    setChecking(true); setUpdateError(''); setUpdate(null)
+    try { setUpdate(await checkUpdate()) } catch (error) { setUpdateError(error instanceof Error ? error.message : String(error)) } finally { setChecking(false) }
+  }
   function resetDefaults() {
     for (const field of SETTING_FIELDS) edit(field.key, field.defaultValue)
     setNotice('已把全部可配置项恢复为默认值；仍需保存后生效。')
@@ -32,9 +37,13 @@ export function SettingsPanel({ data, draft, saving, invalid, conflict, dirty, m
     } catch { setNotice('导入失败：文件不是有效 JSON。') }
   }
   return <>
-    <div className="pw-page-heading pw-heading-actions"><div><h2>运行设置</h2><p>配置作用于当前 DSH_HOME 的 Patchwork；保存后重新加载生效。</p></div><div className="pw-actions"><Button size="sm" variant="ghost" disabled={saving} onClick={resetDefaults}>恢复默认</Button><Button size="sm" variant="ghost" disabled={saving} onClick={exportConfig}>导出</Button><Button size="sm" variant="ghost" disabled={saving} onClick={() => fileRef.current?.click()}>导入</Button><input ref={fileRef} type="file" accept="application/json,.json" hidden aria-label="导入配置 JSON" onChange={importConfig}/></div></div>
+    <div className="pw-page-heading pw-heading-actions"><div><h2>运行设置</h2><p>配置作用于当前 DSH_HOME 的 Patchwork；保存后重新加载生效。</p></div><div className="pw-actions"><Button size="sm" variant="ghost" disabled={saving} onClick={resetDefaults}>恢复默认</Button><Button size="sm" variant="ghost" disabled={saving} onClick={exportConfig}>导出</Button><Button size="sm" variant="ghost" disabled={saving} onClick={() => fileRef.current?.click()}>导入</Button><Button size="sm" variant="outline" disabled={checking} onClick={runUpdateCheck}>{checking ? '检查中…' : '检查更新'}</Button><input ref={fileRef} type="file" accept="application/json,.json" hidden aria-label="导入配置 JSON" onChange={importConfig}/></div></div>
     {notice && <p className="pw-live-note" role="status">{notice}</p>}
-    <SummaryStrip label="配置状态" items={[{ label: '可配置项', value: SETTING_FIELDS.length }, { label: '草稿变更', value: dirty }, { label: '等待重载', value: pending }]}/>
+    {updateError && <p className="pw-error" role="alert">更新检查失败：{updateError}</p>}
+    {update?.ok === false && !updateError && <p className="pw-error" role="alert">更新检查失败：{update.reason}</p>}
+    {update?.ok && update.supported === false && <p className="pw-muted">当前发布来源不是 GitHub Release，未启用更新检查。</p>}
+    {update?.ok && update.supported !== false && <p className="pw-live-note" role="status">{update.updateAvailable ? `发现新版本 ${update.latest}（当前 ${update.current}）` : `已是最新版本 ${update.current}`}{update.url ? <>，<a href={update.url} target="_blank" rel="noreferrer">查看 Release</a></> : null}</p>}
+    <SummaryStrip label="配置状态" items={[{ label: '可配置项', value: SETTING_FIELDS.length }, { label: '当前版本', value: data.version ?? '未知' }, { label: '草稿变更', value: dirty }, { label: '等待重载', value: pending }]}/>
     <SearchField label="搜索设置" value={query} onChange={setQuery} placeholder="搜索用途、名称或配置键"/>
     <Facets label="设置分类" value={group} onChange={setGroup} items={[['all', '全部'], ['mechanism', '执行'], ['reducer', '约简'], ['retrieval', '检索'], ['code', '代码'], ['skills', '技能'], ['memory', '记忆']].map(([value, label]) => ({ value, label }))}/>
     <SettingsFields data={data} draft={draft} saving={saving} edit={edit} query={query} group={group}/>

@@ -58,6 +58,8 @@ test('the global page contains only bridge metadata, never config or counters', 
   assert.doesNotMatch(html, /"maintenance"|"counters"|"config"/)
   // 写入口与密钥随页面一起下发，面板保存时要用。
   assert.match(html, /"writePath":"\/api\/plugins\/patchwork-coding-agent\/config"/)
+  assert.match(html, /"settingsPath":"\/api\/plugins\/patchwork-coding-agent\/settings"/)
+  assert.match(html, /"updatePath":"\/api\/plugins\/patchwork-coding-agent\/update-check"/)
   assert.match(html, /"token":"write-token"/)
   reset()
 })

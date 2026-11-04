@@ -1,5 +1,7 @@
 import { CONFIG_ROUTE_PATH } from './config-route.mjs'
 import { STATE_ROUTE_PATH } from './runtime-state.mjs'
+import { SETTINGS_ROUTE_PATH } from './settings-route.mjs'
+import { UPDATE_ROUTE_PATH } from './update-route.mjs'
 import { LOGS_ROUTE_PATH } from '../logging/route.mjs'
 import { MEMORY_ROUTE_PATH } from '../memory/route.mjs'
 import { IMPROVEMENT_ROUTE_PATH } from '../improvement/route.mjs'
@@ -22,6 +24,8 @@ export function registerStatsInjection(ctx, { token } = {}) {
       // Session-addressed endpoints perform their own host composition check.
       writePath: CONFIG_ROUTE_PATH,
       statePath: STATE_ROUTE_PATH,
+      settingsPath: SETTINGS_ROUTE_PATH,
+      updatePath: UPDATE_ROUTE_PATH,
       logsPath: LOGS_ROUTE_PATH,
       memoryPath: MEMORY_ROUTE_PATH,
       improvementPath: IMPROVEMENT_ROUTE_PATH,

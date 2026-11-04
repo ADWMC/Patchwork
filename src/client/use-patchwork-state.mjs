@@ -10,6 +10,7 @@ export function readConnectionMetadata() {
 
 export function usePatchworkState(sessionId) {
   const [snapshot, setSnapshot] = useState(null)
+  const [settings, setSettings] = useState(null)
   const [connection, setConnection] = useState('loading')
   const [error, setError] = useState('')
   const [refreshKey, refresh] = useState(0)
@@ -128,5 +129,29 @@ export function usePatchworkState(sessionId) {
   }
   const superagentAction = body => mutate('superagentPath', body)
   const evidenceAction = body => mutate('evidencePath', body)
-  return { snapshot, connection, error, save, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction, evidenceAction, refresh: () => refresh(x => x+1) }
+  // Update check is global and explicit. It does not need a Patchwork session,
+  // but it still requires the page credential injected with the bridge metadata.
+  async function checkUpdate() {
+    const metadata = readConnectionMetadata()
+    if (!metadata?.updatePath || !metadata.token) throw new Error('update-unavailable')
+    const response = await fetch(metadata.updatePath, { method: 'POST', headers: { 'x-patchwork-token': metadata.token }, cache: 'no-store' })
+    const data = await response.json()
+    if (!response.ok || data.ok === false) throw new Error(data.reason ?? 'update-check-failed')
+    return data
+  }
+  // Sessionless read-only settings. It never returns task/evidence/memory state,
+  // so a standard or absent Agent can still inspect configuration before saving.
+  const loadSettings = useCallback(async () => {
+    const metadata = readConnectionMetadata()
+    if (!active.current || !metadata?.settingsPath || !metadata.token) { setSettings(null); return null }
+    try {
+      const response = await fetch(metadata.settingsPath, { headers: { 'x-patchwork-token': metadata.token }, cache: 'no-store' })
+      const data = await response.json()
+      if (!active.current) return null
+      if (!response.ok || !data.ok) throw new Error(data.reason ?? 'settings-unavailable')
+      setSettings(data)
+      return data
+    } catch { if (active.current) setSettings(null); return null }
+  }, [])
+  return { snapshot, settings, connection, error, save, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction, evidenceAction, loadSettings, checkUpdate, refresh: () => refresh(x => x+1) }
 }

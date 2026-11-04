@@ -1,6 +1,6 @@
 {
   "name": "@patchwork/browser",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "Optional session-isolated browser workspace for DeepSeek Harness.",
   "repository": {
     "type": "git",

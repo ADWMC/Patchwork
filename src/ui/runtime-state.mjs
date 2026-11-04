@@ -6,6 +6,7 @@ import { lstatSync, readFileSync } from 'node:fs'
 import { readWorkspaceConfigSync } from '../code/workspace-config.mjs'
 import { isCodeGraphStarted } from '../code/tool.mjs'
 import { webRuntime } from './web-runtime.mjs'
+import { packageVersion } from '../util/version.mjs'
 import { isPatchworkAgent, resolvePatchworkAgent } from '../scope.mjs'
 import { diagnosticSnapshot, logDiagnostic } from '../logging/session-log.mjs'
 import { fingerprint } from '../logging/schema.mjs'
@@ -173,6 +174,7 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
   return {
     schemaVersion: 1, generatedAt: new Date().toISOString(), sessionId,
     scope: 'current-process-session', status: state?.status ?? 'not-started',
+    version: packageVersion,
     config: effectiveConfig(rowConfig, readUserConfig()), loadedConfig,
     revision: configRevision(), context,
     skills: { names: [...state.skillNames ?? []], mode: loadedConfig.skillsMode ?? 'core', bodies: 'on-demand' },
@@ -201,6 +203,10 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
 
 export function registerRuntimeCollector(ctx, { rowConfig = {}, loadedConfig = {}, skillNames = [] } = {}) {
   const ownedAgents = new Set()
+  // The web bridge mounts in another realm but shares this process registry.
+  // Publish the loaded values so the sessionless settings view can show the
+  // saved-vs-loaded difference without exposing any session state.
+  Object.assign(webRuntime, { rowConfig, loadedConfig })
   const sinks = globalThis[Symbol.for('@patchwork/browser/receipt-sinks/v1')] ??= new Set()
   const receive = (agent, receipt) => {
     if (!isPatchworkAgent(agent)) return

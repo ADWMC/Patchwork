@@ -1,4 +1,4 @@
-import { createElement, useState, useSyncExternalStore } from 'react'
+import { createElement, useState, useSyncExternalStore, useEffect } from 'react'
 import { Button, SegmentedTabs } from '@deepseek-ai/dsh-client-ui-primitives'
 import { usePatchworkState } from './use-patchwork-state.mjs'
 import { validateSettings } from '../config/fields.mjs'
@@ -32,7 +32,7 @@ export function PatchworkPanel({ sessionId, sessionStore, useTabInfo }) {
 }
 
 function SessionPanel({ sessionId }) {
-  const { snapshot: data, connection, error, save, refresh, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction, evidenceAction } = usePatchworkState(sessionId)
+  const { snapshot: data, settings, connection, error, save, refresh, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction, evidenceAction, loadSettings, checkUpdate } = usePatchworkState(sessionId)
   const [tab, setTab] = useState('overview')
   const [views, setViews] = useState({ execution: 'task', evidence: 'tools', management: 'memory', diagnostics: 'capabilities' })
   const [draft, setDraft] = useState({})
@@ -40,7 +40,11 @@ function SessionPanel({ sessionId }) {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [conflict, setConflict] = useState(null)
-  const desired = data?.config ?? {}, loaded = data?.loadedConfig ?? {}
+  // Settings are global to this DSH_HOME, so they remain inspectable without a
+  // Patchwork session. Saving still requires the session-authorized channel.
+  const panelData = data ?? (tab === 'settings' ? settings : null)
+  useEffect(() => { if (!data && tab === 'settings') void loadSettings() }, [data, tab, loadSettings])
+  const desired = panelData?.config ?? {}, loaded = panelData?.loadedConfig ?? {}
   const dirty = Object.keys(draft).length
   const pending = settingsKeys.filter(key => JSON.stringify(desired[key]) !== JSON.stringify(loaded[key])).length
   const ratio = draft.cacheWriteReadRatio ?? desired.cacheWriteReadRatio ?? 12.5
@@ -51,20 +55,20 @@ function SessionPanel({ sessionId }) {
     if (view && Object.hasOwn(views, next)) setViews(previous => ({ ...previous, [next]: view }))
   }
   function edit(key, value) {
-    if (!dirty) setBaseRevision(data?.revision)
+    if (!dirty) setBaseRevision(panelData?.revision)
     setDraft(previous => { const next = { ...previous }; if (JSON.stringify(value) === JSON.stringify(desired[key])) delete next[key]; else next[key] = value; return next })
     setMessage('')
   }
   async function persist() {
     setSaving(true); setMessage('')
     try {
-      await save(draft, baseRevision ?? data.revision)
+      await save(draft, baseRevision ?? panelData.revision)
       setDraft({}); setConflict(null); setBaseRevision(null)
       setMessage('已保存，重新加载后读取新配置。现有 Agent 以实际能力为准。')
     } catch (e) { setConflict(e.conflict); setMessage(e.conflict ? '配置已被其他页面修改，草稿已保留。' : e.message) }
     finally { setSaving(false) }
   }
-  function discard() { setDraft({}); setConflict(null); setBaseRevision(null); setMessage(''); refresh() }
+  function discard() { setDraft({}); setConflict(null); setBaseRevision(null); setMessage(''); refresh(); if (!data) void loadSettings() }
   const setView = domain => value => setViews(previous => ({ ...previous, [domain]: value }))
   return <div className="pw-panel"><div className="pw-panel-inner">
     <header className="pw-header"><div className="pw-scope" title={sessionId}><strong>Patchwork</strong><span>当前会话</span></div><div className="pw-header-actions"><span className="pw-connection" title={data ? `更新于 ${logTime(data.generatedAt)}` : undefined}><span className="pw-dot" data-tone={connection === 'connected' ? 'success' : connection === 'offline' ? 'warn' : undefined}/>{connectionLabels[connection]}</span><Button size="sm" variant="ghost" aria-label="刷新" title="刷新会话状态" icon={<PanelIcon name="refresh"/>} onClick={refresh} disabled={saving}/></div></header>
@@ -74,15 +78,16 @@ function SessionPanel({ sessionId }) {
     })}/></nav>
     <div className="pw-scroll">
       {connection === 'offline' && <div role="status" className="pw-note pw-warning"><PanelIcon name="activity"/><p>连接中断，当前显示上次快照。恢复前暂停保存与导出。{error}</p></div>}
-      {connection === 'unavailable' && <EmptyState title="等待会话状态">选中或建立 Patchwork 会话后，运行状态会显示在这里。</EmptyState>}
+      {connection === 'unavailable' && !(tab === 'settings' && settings) && <EmptyState title="等待会话状态">选中或建立 Patchwork 会话后，运行状态会显示在这里。</EmptyState>}
       {connection === 'loading' && !data && <div aria-busy="true"><EmptyState title="正在连接会话">正在读取 DSH 的真实运行状态。</EmptyState></div>}
-      {data && <section className={'pw-page pw-page-' + tab} id={prefix + '-panel'} role="tabpanel" aria-labelledby={prefix + '-' + tab}>
+      {!data && tab === 'settings' && settings && <div role="status" className="pw-note pw-warning"><PanelIcon name="activity"/><p>未连接 Patchwork 会话；设置为只读。保存需要切换到 Patchwork Agent 的会话。</p></div>}
+      {panelData && <section className={'pw-page pw-page-' + tab} id={prefix + '-panel'} role="tabpanel" aria-labelledby={prefix + '-' + tab}>
         {tab === 'overview' && <OverviewPanel data={data} pending={pending} navigate={navigate}/>}
         {tab === 'execution' && <ExecutionPanel data={data} view={views.execution} setView={setView('execution')} prefix={prefix} superagentAction={superagentAction}/>}
         {tab === 'evidence' && <EvidencePanel data={data} view={views.evidence} setView={setView('evidence')} prefix={prefix} evidenceAction={evidenceAction}/>}
         {tab === 'management' && <ManagementPanel data={data} view={views.management} setView={setView('management')} prefix={prefix} memoryAction={memoryAction} memoryQuery={memoryQuery} improvementAction={improvementAction}/>}
         {tab === 'diagnostics' && <DiagnosticsPanel data={data} view={views.diagnostics} setView={setView('diagnostics')} prefix={prefix} exportLogs={exportLogs} connected={connection === 'connected'}/>}
-        {tab === 'settings' && <SettingsPanel {...{data, draft, saving, invalid, ratio, conflict, dirty, message, pending, prefix, edit, persist, discard}} connected={connection === 'connected'}/>}
+        {tab === 'settings' && <SettingsPanel {...{data: panelData, draft, saving, invalid, ratio, conflict, dirty, message, pending, prefix, edit, persist, discard, checkUpdate}} connected={connection === 'connected'}/>}
       </section>}
     </div>
     <footer className="pw-footer"><span>仅限当前会话</span><span>{data ? `更新于 ${logTime(data.generatedAt)}` : connectionLabels[connection]}</span></footer>

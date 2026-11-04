@@ -2,15 +2,20 @@
 
 记录面向使用者的变化、升级动作和影响使用的限制。收录与写作规则见[更新日志指南](docs/changelog-guide.md)。
 
-## 1.0.2（2026-11-04）
+## 1.0.0（2026-11-04 · 覆盖发布）
+
+- 设置页支持无会话只读预览：新增 `GET /api/plugins/patchwork-coding-agent/settings`，只返回当前 `DSH_HOME` 的配置快照（`config` / `loadedConfig` / `revision`），不返回任何会话状态。未连接 Patchwork 会话时，设置页可查看配置并标为只读；保存仍然走会话鉴权的 config 路由，连接后才会启用。
+- 新增“检查更新”：设置页手动触发 `POST /api/plugins/patchwork-coding-agent/update-check`，只读查询 GitHub `releases/latest`，比较 SemVer 并显示当前版本/最新版本/Release 链接。不自动检查、不发送凭据或会话状态；非 GitHub 来源或网络失败时只报告原因。
+
+## 1.0.2（2026-11-04，仅 tag）
 
 - 修复 Windows 8.3 短路径（如 `RUNNER~1`）导致 Superagent 审阅把工作区内产物误判为越界的问题；工作区与产物路径统一改用 `realpathSync.native` 解析，并继续归一化扩展长度路径和大小写。
 
-## 1.0.1（2026-11-04）
+## 1.0.1（2026-11-04，仅 tag）
 
 - 修复 Windows 扩展长度路径（`\\?\...`）导致 Superagent 审阅把工作区内产物误判为越界的问题；CI 上该路径会返回扩展形式，现在比较前统一归一化。
 
-## 1.0.0（2026-11-04）
+## 1.0.0 初始内容（已被覆盖发布取代）
 
 以下为相对 v0.2.0 基线提交 `ef19dc7` 的累积变更。这是首个稳定版发布；包版本为 `1.0.0`。
 
