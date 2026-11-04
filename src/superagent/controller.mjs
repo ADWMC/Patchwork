@@ -22,7 +22,7 @@ function normalizePath(path) {
 }
 function workspaceKey(cwd) {
   let path
-  try { path = realpathSync(cwd) } catch { path = resolve(cwd) }
+  try { path = realpathSync.native(cwd) } catch { try { path = realpathSync(cwd) } catch { path = resolve(cwd) } }
   return normalizePath(path)
 }
 export function managedWorker(agent) { return workers.get(agent?.session?.header?.id) }
@@ -290,10 +290,10 @@ export class SuperagentController {
       const next = structuredClone(this.state), job = next.jobs.find(j => j.id === id)
       if (!job || job.status !== 'review' || !job.evidence?.reviewable || evidenceVersion !== job.evidence.version) throw new Error('Current reviewable evidence version required')
       for (const artifact of accept ? job.evidence.artifacts ?? [] : []) {
-        const resolved = normalizePath(realpathSync(artifact.path))
+        const resolved = normalizePath(realpathSync.native(artifact.path))
         const separator = process.platform === 'win32' ? '\\' : '/'
         const within = resolved === this.workspace || resolved.startsWith(this.workspace + separator)
-        if (!within) throw new Error(`Artifact is outside the controller workspace: artifact=${resolved} workspace=${this.workspace}`)
+        if (!within) throw new Error('Artifact is outside the controller workspace')
         const s = statSync(artifact.path)
         if (resolved !== normalizePath(artifact.path) || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
       }
