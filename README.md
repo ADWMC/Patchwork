@@ -11,6 +11,7 @@
 
 <p>
   <a href="https://github.com/ADWMC/Patchwork/actions/workflows/validate.yml"><img src="https://github.com/ADWMC/Patchwork/actions/workflows/validate.yml/badge.svg?branch=main" alt="Validate CI"></a>
+  <a href="https://github.com/ADWMC/Patchwork/actions/workflows/codeql.yml"><img src="https://github.com/ADWMC/Patchwork/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-2e7162?style=flat-square" alt="License: AGPL-3.0-only"></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Node.js-22%2B-53625b?style=flat-square" alt="Node.js 22 或以上"></a>
 </p>
@@ -49,7 +50,7 @@ pnpm build:client
 npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 ```
 
-该步骤只制作本地安装包，不发布到 npm，也不安装到 DSH。当前包版本为 `0.2.0`；`main` 上的未发布变化见 [CHANGELOG](CHANGELOG.md)。
+该步骤只制作本地安装包，不发布到 npm，也不安装到 DSH。当前包版本为 `1.0.0`；发布变化见 [CHANGELOG](CHANGELOG.md)。
 
 ### 2. 安装到指定 DSH 实例
 
@@ -57,10 +58,10 @@ npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 
 ```powershell
 $env:DSH_HOME = 'C:\dsh\patchwork-demo'
-dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-0.2.0.tgz"
+dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-1.0.0.tgz"
 ```
 
-Patchwork 复用宿主的模型与权限设置。`@deepseek-ai/dsh-agent-preset` 与 `@deepseek-ai/dsh-home-paths` 是 peer 依赖，由目标 DSH 的 base/web bundle 提供与宿主一致的版本；发布包不会携带旧版覆盖宿主。若 profile 曾手动固定旧版 `@deepseek-ai/dsh-agent-preset`，先移除或升级到与宿主一致，否则 DSH 的版本门禁会禁用 preset 行。依赖、随包 profile 模板、preset fixture 与真实调用基线均为 DSH `0.2.1-rc.5`；旧版宿主不再作为当前测试基线。
+Patchwork 复用宿主的模型与权限设置。`engines.dsh` 声明支持 `>=0.2.1-rc.2 <0.3.0-0`；`@deepseek-ai/dsh-agent-preset`、`@deepseek-ai/dsh-home-paths` 与 `@deepseek-ai/dsh-llm` 仍以 peer 形式由目标宿主提供，发布包不会携带旧副本。0.2.1-rc.2、0.2.1-rc.5 与 0.2.2-alpha.3 已通过同一套 452 项测试；随包 profile 模板仍以 rc.5 为基线，其他版本可直接用 `dsh plugin add` 创建 profile，或在源码检出运行 `node scripts/set-dsh-version.mjs <version> --install`。旧于 rc.2 或高于 0.2.x 的宿主会被 `engines.dsh` 拒绝。
 
 ### 3. 选择 Agent，打开面板
 
@@ -190,7 +191,7 @@ npm run check:release
 npm --prefix packages/browser run check:release
 ```
 
-CI 检查依赖锁、客户端构建一致性、回归测试和两个包的发行内容；不调用付费模型，也不下载浏览器内核。
+CI 分五层：`Validate` 在 Windows 上检查锁文件、依赖审计、审计证据、客户端构建一致性、回归测试和两个包的发行内容；`DSH compatibility` 用 0.2.1-rc.2 与 0.2.2-alpha.3 宿主重跑同一套测试；`CodeQL` 做静态分析；`Dependency review` 在 PR 中拦截高危依赖；`Security audit` 每周复查新披露的漏洞。推送 `v*` 标签或手动运行 `Package` 会生成两个 `.tgz` 构建产物，不自动发布到 npm 或创建 Release。所有工作流都不调用付费模型，也不下载浏览器内核。
 
 [插件合同题集](benchmarks/patchwork/README.md)覆盖作用域、纠正、记忆、检索与回滚；[编码题集](benchmarks/coding/README.md)验证真实维护形态。题集的 oracle 通过率不是模型完成率，单元测试成绩也不是模型能力排名。
 

@@ -4,7 +4,7 @@
 
 ## 开发环境
 
-CI 使用 Node.js 24、pnpm 12.4.2 和 Windows。包的运行时版本范围仍以各自 `package.json` 为准。
+CI 使用 Node.js 24、pnpm 12.4.2 和 Windows。`Validate` 跑确定性测试与发行预检，`DSH compatibility` 用下一版 DSH 宿主重跑同一套测试，`CodeQL` 做静态分析，`Dependency review` 在 PR 中拦截高危依赖，`Security audit` 每周复查漏洞；标签或手动 `Package` 只产出 tarball，不自动发布。包的运行时版本范围仍以各自 `package.json` 为准。
 
 文本文件按 `.gitattributes` 使用 LF，避免 Windows 检出改变技能、YAML 夹具或已提交构建产物的字节内容；二进制文件不做换行转换。
 
@@ -19,6 +19,8 @@ npm --prefix packages/browser run check:release
 ```
 
 修改客户端后先运行对应包的 `build:client`，再检查已提交的构建产物。CI 只执行确定性测试和发行预检，不使用模型密钥、不下载浏览器内核，也不把单元测试成绩作为模型能力评测。
+
+兼容开发可把开发依赖切到另一个已发布宿主版本：`node scripts/set-dsh-version.mjs 0.2.2-alpha.3 --install`。该命令会修改 `package.json` 和锁文件；验证后切回 `0.2.1-rc.5`，不要把切换产生的依赖改动提交。`engines.dsh` 是发布包的兼容声明，开发依赖不参与安装判定。
 
 ## 变更与验证
 

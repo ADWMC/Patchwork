@@ -4,6 +4,7 @@ import { record } from '../../ui/mechanism-stats.mjs'
 import { isPatchworkAgent, requirePatchworkAgent } from '../../scope.mjs'
 import { logDiagnostic } from '../../logging/session-log.mjs'
 import { assertTaskRevision, taskRevision } from '../../task/action-check.mjs'
+import { executeTool } from '../../util/tool-execute.mjs'
 
 const FUSABLE_TOOLS = ['write', 'edit']
 const SHELL_TOOLS = ['pwsh', 'bash']
@@ -105,7 +106,7 @@ async function runThenRun({ ctx, tools, shellName, agent, command, filePath, exe
   try {
     const started = Date.now()
     logDiagnostic(ctx, exec, { mechanism: 'af', event: 'start', reason: 'enabled', command })
-    const result = await tools.execute({
+    const result = await executeTool(tools, {
       callId: `${exec.callId}:then_run`,
       rootCallId: exec.rootCallId,
       name: shellName,

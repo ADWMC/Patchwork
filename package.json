@@ -1,6 +1,6 @@
 {
   "name": "@patchwork/coding-agent",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Maintainable coding agent for DeepSeek Harness.",
   "repository": {
     "type": "git",
@@ -44,7 +44,9 @@
     "presets",
     "profiles",
     "scripts",
+    "tests/fixtures/dsh-v0.2.1-rc.2.standard.patch.yml",
     "tests/fixtures/dsh-v0.2.1-rc.5.standard.patch.yml",
+    "tests/fixtures/dsh-v0.2.2-alpha.3.standard.patch.yml",
     "assets",
     "cordis.patch.yml",
     "docs/browser-optional-package-2026-11-01.md",
@@ -60,6 +62,8 @@
     "docs/checks/superagent-native-2026-11-01.json",
     "docs/checks/superagent-fusion-2026-11-01.json",
     "docs/checks/browser-chrome-2026-11-01.json",
+    "docs/dsh-multi-version-2026-11-04.md",
+    "docs/checks/dsh-compat-2026-11-04.json",
     "docs/closure-2026-11-01.md",
     "docs/memory-management-2026-11-01.md",
     "docs/ui-community-expansion-2026-11-01.md",
@@ -75,6 +79,7 @@
     "test": "node --test \"tests/*.test.mjs\" \"tests/real-composition/*.test.mjs\" \"packages/browser/tests/*.test.mjs\"",
     "test:benchmark": "node benchmarks/coding/run-isolated.mjs --mode=oracle",
     "check:docs": "node scripts/check-doc-links.mjs",
+    "dsh:version": "node scripts/set-dsh-version.mjs",
     "test:acceptance:ui": "node tests/ui.acceptance.mjs",
     "test:acceptance:browser": "node packages/browser/tests/interaction.acceptance.mjs",
     "test:acceptance:native": "node packages/browser/tests/native-browser.acceptance.mjs",
@@ -99,12 +104,13 @@
     }
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent-preset": ">=0.2.1-rc.5 <0.3.0-0",
-    "@deepseek-ai/dsh-home-paths": ">=0.2.1-rc.5 <0.3.0-0",
-    "@deepseek-ai/dsh-llm": ">=0.2.1-rc.5 <0.3.0-0"
+    "@deepseek-ai/dsh-agent-preset": ">=0.2.1-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-home-paths": ">=0.2.1-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-llm": ">=0.2.1-rc.2 <0.3.0-0"
   },
   "license": "AGPL-3.0-only",
   "dependencies": {

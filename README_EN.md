@@ -11,6 +11,7 @@
 
 <p>
   <a href="https://github.com/ADWMC/Patchwork/actions/workflows/validate.yml"><img src="https://github.com/ADWMC/Patchwork/actions/workflows/validate.yml/badge.svg?branch=main" alt="Validate CI"></a>
+  <a href="https://github.com/ADWMC/Patchwork/actions/workflows/codeql.yml"><img src="https://github.com/ADWMC/Patchwork/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-2e7162?style=flat-square" alt="License: AGPL-3.0-only"></a>
   <a href="package.json"><img src="https://img.shields.io/badge/Node.js-22%2B-53625b?style=flat-square" alt="Node.js 22 or later"></a>
 </p>
@@ -49,7 +50,7 @@ pnpm build:client
 npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 ```
 
-This creates a local tarball without publishing to npm or installing into DSH. The package version is currently `0.2.0`; see the [changelog](CHANGELOG.md) for unreleased changes on `main`.
+This creates a local tarball without publishing to npm or installing into DSH. The package version is `1.0.0`; see the [changelog](CHANGELOG.md) for released changes.
 
 ### 2. Install into the DSH instance you choose
 
@@ -57,10 +58,10 @@ Replace `DSH_HOME` with an **initialized instance that already has its model con
 
 ```powershell
 $env:DSH_HOME = 'C:\dsh\patchwork-demo'
-dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-0.2.0.tgz"
+dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-1.0.0.tgz"
 ```
 
-Patchwork uses the host's model and permission settings. `@deepseek-ai/dsh-agent-preset` and `@deepseek-ai/dsh-home-paths` are peer dependencies supplied by the target DSH base/web bundles, so the published package never pins an older copy over the host. If a profile still pins an older `@deepseek-ai/dsh-agent-preset`, remove it or align it with the host; otherwise the DSH version gate disables preset rows. The dependency baseline, bundled profile template, preset fixture and real-call verification all target DSH `0.2.1-rc.5`; older hosts are no longer the current test baseline.
+Patchwork uses the host's model and permission settings. `engines.dsh` declares `>=0.2.1-rc.2 <0.3.0-0`; `@deepseek-ai/dsh-agent-preset`, `@deepseek-ai/dsh-home-paths` and `@deepseek-ai/dsh-llm` remain peer dependencies supplied by the target host, so the published package never pins an older copy over it. DSH 0.2.1-rc.2, 0.2.1-rc.5 and 0.2.2-alpha.3 pass the same 452-test suite. The bundled profile template still targets rc.5; other hosts can let `dsh plugin add` create the profile, or run `node scripts/set-dsh-version.mjs <version> --install` in a source checkout. Hosts older than rc.2 or newer than the 0.2.x line are refused by `engines.dsh`.
 
 ### 3. Select the Agent and open the panel
 
@@ -192,7 +193,7 @@ npm run check:release
 npm --prefix packages/browser run check:release
 ```
 
-CI checks the lockfile, committed client bundles, regression tests and both package contents. It does not call paid models or download browser engines.
+CI has five layers: `Validate` checks the lockfile, dependency audit, audit evidence, committed client bundles, regression tests and both package contents on Windows; `DSH compatibility` reruns the same suite against 0.2.1-rc.2 and 0.2.2-alpha.3 hosts; `CodeQL` runs static analysis; `Dependency review` blocks high-severity dependency changes in pull requests; `Security audit` rechecks newly published advisories weekly. Pushing a `v*` tag or manually running `Package` builds both `.tgz` artifacts without publishing to npm or creating a release. No workflow calls paid models or downloads browser engines.
 
 The [plugin contract benchmark](benchmarks/patchwork/README.md) covers scope, corrections, memory, retrieval and rollback. The [coding benchmark](benchmarks/coding/README.md) covers maintenance tasks. Oracle pass rates validate the task set, not model completion rates; unit-test results are not model capability rankings.
 

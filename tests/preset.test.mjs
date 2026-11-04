@@ -1,22 +1,22 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 
 const root = join(import.meta.dirname, '..')
+const require = createRequire(import.meta.url)
 
-/** 宿主随包发布的 standard preset；源码检出或未装 dsh 时可能不存在。 */
-function hostStandardPath() {
-  return join(root, 'tests', 'fixtures', 'dsh-v0.2.1-rc.5.standard.patch.yml')
+/** Installed host version selects the matching pinned standard fixture. */
+function hostVersion() {
+  return JSON.parse(readFileSync(require.resolve('@deepseek-ai/dsh-agent-preset/package.json'), 'utf8')).version
 }
 
-// 注释与空行不参与比较：preset 声明里的说明文字是手工补充的。
-const contentLines = text =>
-  text
-    .split(/\r?\n/)
-    .filter(line => line.trim() !== '' && !/^\s*#/.test(line))
+function hostStandardPath(version = hostVersion()) {
+  return join(root, 'tests', 'fixtures', `dsh-v${version}.standard.patch.yml`)
+}
 
 test('bundle patch installs only the host web bridge at root', () => {
   const patch = readFileSync(join(root, 'cordis.patch.yml'), 'utf8')
@@ -86,23 +86,48 @@ test('committed preset carries the 0.1.7 host rows', () => {
   assert.doesNotMatch(preset, /dsh-mcp-client|patchwork-browser/)
 })
 
-test('committed host rows match the pinned DSH standard verbatim', t => {
-  const hostPath = hostStandardPath()
-  if (!hostPath || !existsSync(hostPath)) return t.skip('no installed host standard to compare against')
-  const rows = text => {
-    const lines = contentLines(text)
-    const stop = lines.findIndex(line => line.includes('- id: patchwork-runtime'))
-    return lines.slice(lines.findIndex(line => line.trim() === 'plugins:'), stop < 0 ? undefined : stop)
+test('committed preset keeps one owner for cross-version rows', () => {
+  const preset = readFileSync(join(root, 'presets/patchwork.patch.yml'), 'utf8')
+  // 0.2.2-alpha.3 folded list_agents into the main control package and removed
+  // the `./list-agents` subpath. The main row already supplies it there.
+  assert.doesNotMatch(preset, /dsh-tool-subagent-control\/list-agents/)
+  assert.match(preset, /- id: tool-subagent-control\n {16}name: '@deepseek-ai\/dsh-tool-subagent-control'/)
+  // 0.2.1 spells this `modelSelectionSettings`; 0.2.2 splits it into two keys.
+  // Schemastery ignores unknown keys, so one row carries both spellings.
+  assert.match(preset, /modelSelectionSettings: true/)
+  assert.match(preset, /modelSelection: true/)
+  assert.match(preset, /modelDiscovery: true/)
+})
+
+test('generated preset normalizes every pinned host standard', () => {
+  for (const version of ['0.2.1-rc.2', '0.2.1-rc.5', '0.2.2-alpha.3']) {
+    const host = hostStandardPath(version)
+    assert.ok(existsSync(host), `missing pinned standard fixture for ${version}`)
+    const work = mkdtempSync(join(tmpdir(), 'patchwork-preset-version-'))
+    const out = join(work, 'out')
+    try {
+      mkdirSync(out)
+      execFileSync(process.execPath, ['scripts/gen-preset.mjs', '--out', out], {
+        cwd: root,
+        env: { ...process.env, DSH_HOST_STANDARD_YML: host },
+      })
+      const generated = readFileSync(join(out, 'patchwork.patch.yml'), 'utf8')
+      assert.doesNotMatch(generated, /dsh-tool-subagent-control\/list-agents/, version)
+      assert.match(generated, /modelSelectionSettings: true/, version)
+      assert.match(generated, /modelSelection: true/, version)
+      assert.match(generated, /modelDiscovery: true/, version)
+      assert.match(generated, /- id: patchwork-runtime\n {12}name: '@patchwork\/coding-agent\/runtime'/, version)
+    } finally {
+      rmSync(work, { recursive: true, force: true })
+    }
   }
-  // 正文逐行等于宿主 standard：本仓库不抄写宿主默认值，抄过的那份 persona 文案
-  // 就是 0.1.7 的失效点。
-  assert.deepEqual(rows(readFileSync(join(root, 'presets/patchwork.patch.yml'), 'utf8')), rows(readFileSync(hostPath, 'utf8')))
 })
 
 test('profile installs Patchwork as a bundle layer', () => {
   const profile = JSON.parse(readFileSync(join(root, 'profiles/patchwork/package.json'), 'utf8'))
   assert.equal(profile.dependencies['@patchwork/coding-agent'], JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version)
-  assert.equal(profile.dependencies['@deepseek-ai/dsh-base'], '0.2.1-rc.5')
-  assert.equal(profile.dependencies['@deepseek-ai/dsh-web-app'], '0.2.1-rc.5')
+  const base = profile.dependencies['@deepseek-ai/dsh-base']
+  assert.match(base, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/)
+  assert.equal(profile.dependencies['@deepseek-ai/dsh-web-app'], base)
   assert.equal(profile.dsh.profile.bundles.includes('@patchwork/coding-agent'), true)
 })

@@ -45,6 +45,8 @@ export async function bootPatchwork(
 ) {
   const work = await mkdtemp(join(tmpdir(), 'patchwork-compose-'))
   const configPath = join(work, 'cordis.yml')
+  // 0.2.2-alpha makes the tool executor an explicit row; 0.2.1-rc.* bundles it.
+  const executor = (() => { try { return import.meta.resolve('@deepseek-ai/dsh-tool-executor-native') } catch { return null } })()
   const rows = [
     ['system-prompt', import.meta.resolve('@deepseek-ai/dsh-system-prompt')],
     ['commands', import.meta.resolve('@deepseek-ai/dsh-commands')],
@@ -52,6 +54,7 @@ export async function bootPatchwork(
     // 本 harness 无 agents，故只挂提供 ctx.skills 的注册表本体。
     ['skill', import.meta.resolve('@deepseek-ai/dsh-skill')],
     ['tools', import.meta.resolve('@deepseek-ai/dsh-tools')],
+    ...(executor ? [['tool-executor-native', executor]] : []),
     ['fs', import.meta.resolve('@deepseek-ai/dsh-fs-local')],
     ['session-projection', import.meta.resolve('@deepseek-ai/dsh-session-projection')],
     ['working-directory', import.meta.resolve('@deepseek-ai/dsh-working-directory')],

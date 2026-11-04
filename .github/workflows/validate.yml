@@ -33,14 +33,23 @@ jobs:
           # The pre-migration regression test reads its pinned historical commit.
           fetch-depth: 0
           persist-credentials: false
+      - name: Install pinned package manager
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: 12.4.2
+          run_install: false
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
-      - name: Install pinned package manager
-        run: npm install --global pnpm@12.4.2
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
+      - name: Audit locked dependencies
+        run: pnpm audit --audit-level=high
+      - name: Verify real-model audit evidence
+        run: npm run audit:verify
       - name: Require native DSH test dependencies
         run: node --input-type=module -e "const {hostAvailable}=await import('./tests/real-composition/harness.mjs'); if(!hostAvailable()) throw new Error('DSH test dependencies missing');"
       - name: Check committed client bundles

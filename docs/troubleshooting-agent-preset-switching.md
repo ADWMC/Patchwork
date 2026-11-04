@@ -37,7 +37,7 @@ standard fixture 再追加 runtime；测试验证只有 Patchwork 实际组合�
 ```powershell
 npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
 dsh plugin --profile web remove '@patchwork/coding-agent'
-dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-0.2.0.tgz"
+dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-1.0.0.tgz"
 ```
 
 改过宿主 standard 后重新生成声明文件（默认写回 `presets/patchwork.patch.yml`）：
@@ -46,8 +46,7 @@ dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-
 node scripts/gen-preset.mjs
 ```
 
-安装前确认 profile 的宿主依赖与目标 DSH 版本兼容，不默认追逐 `alpha` 标签。
-仓库依赖、profile 模板、preset fixture 与真实验证宿主均为 0.2.1-rc.5；旧版宿主不再作为当前测试基线。
+生成器按当前安装的宿主版本选择 fixture；也可用 `DSH_HOST_VERSION=0.2.2-alpha.3` 显式选择。仓库依赖、profile 模板与默认 fixture 以 0.2.1-rc.5 为基线，`engines.dsh` 声明支持 `>=0.2.1-rc.2 <0.3.0-0`；同一套测试已在 0.2.1-rc.2、0.2.1-rc.5 与 0.2.2-alpha.3 通过。安装前仍需确认 profile 的宿主依赖与目标 DSH 版本一致，不默认追逐 `alpha` 标签。
 
 需要重启时，只操作明确识别的目标实例。开发验证使用独立 home/agents/work/端口，
 不停止或修改主 DSH。运行中的 standing preset mount 不保证安全热替换。

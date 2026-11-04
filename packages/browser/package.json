@@ -1,6 +1,6 @@
 {
   "name": "@patchwork/browser",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Optional session-isolated browser workspace for DeepSeek Harness.",
   "repository": {
     "type": "git",
@@ -57,7 +57,8 @@
     }
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
   },
   "license": "AGPL-3.0-only",
   "dependencies": {
@@ -69,7 +70,7 @@
     "yauzl": "3.2.1"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-home-paths": ">=0.2.1-rc.5 <0.3.0-0",
+    "@deepseek-ai/dsh-home-paths": ">=0.2.1-rc.2 <0.3.0-0",
     "@deepseek-ai/dsh-tools": ">=0.2.0-rc.2 <0.3.0"
   },
   "devDependencies": {

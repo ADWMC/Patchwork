@@ -1,0 +1,73 @@
+name: DSH compatibility
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'presets/**'
+      - 'tests/**'
+      - 'scripts/set-dsh-version.mjs'
+      - 'package.json'
+      - 'packages/browser/package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/dsh-compat.yml'
+  schedule:
+    # Catch host API drift even when this repository is quiet.
+    - cron: '17 6 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dsh-compat-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  alpha:
+    name: dsh ${{ matrix.dsh-version }}
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dsh-version: ['0.2.1-rc.2', '0.2.2-alpha.3']
+    env:
+      CI: 'true'
+    steps:
+      - name: Configure isolated test home
+        shell: pwsh
+        run: |
+          "DSH_HOME=$env:RUNNER_TEMP/patchwork-compat-dsh" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The pre-migration regression test reads its pinned historical commit.
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pinned package manager
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: 12.4.2
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Re-pin host packages
+        run: node scripts/set-dsh-version.mjs ${{ matrix.dsh-version }} --install
+      - name: Require native DSH test dependencies
+        run: node --input-type=module -e "const {hostAvailable}=await import('./tests/real-composition/harness.mjs'); if(!hostAvailable()) throw new Error('DSH test dependencies missing');"
+      - name: Run regression tests
+        run: npm test
+      - name: Check local documentation links
+        run: npm run check:docs
+      - name: Check committed client bundles
+        run: |
+          node scripts/build-client.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node packages/browser/scripts/build-client.mjs --check

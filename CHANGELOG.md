@@ -2,9 +2,9 @@
 
 记录面向使用者的变化、升级动作和影响使用的限制。收录与写作规则见[更新日志指南](docs/changelog-guide.md)。
 
-## 未发布（Unreleased）
+## 1.0.0（2026-11-04）
 
-以下为相对 v0.2.0 基线提交 `ef19dc7` 的本地变更；包版本仍为 `0.2.0`，尚未创建新版本或发布。
+以下为相对 v0.2.0 基线提交 `ef19dc7` 的累积变更。这是首个稳定版发布；包版本为 `1.0.0`。
 
 ### 安全修复
 
@@ -34,6 +34,8 @@
 - **依赖与宿主基线直接迁移到 DSH 0.2.1-rc.5**：开发依赖、peer 最低版本、`@deepseek-ai/cordis` 与 schemastery 统一升级；随包 profile 模板改用 `dsh-base` / `dsh-web-app@0.2.1-rc.5`；preset fixture 重命名为 `tests/fixtures/dsh-v0.2.1-rc.5.standard.patch.yml`，生成器不再引用 rc.2 源码 commit。`dsh-web-app@0.2.1-rc.5` 的 standard 工具行与旧 fixture 内容一致，因此 preset 工具行未变；真实组合 harness 补充 `session-projections` 和 `working-directory`，以匹配 rc.5 工具对投影与工作目录服务的依赖。历史日期文档、实验和检查记录保留当时的版本与结论。
 - 工作台重组为 **总览 / 执行 / 证据 / 管理 / 诊断 / 设置** 六个一级页面，每个重领域最多两个二级视图：执行（任务、主控）、证据（工具、检索）、管理（记忆、改进）、诊断（能力、日志）。一级和二级标签显示待处理数量；没有队列、检索或改进数据时隐藏对应二级视图，记忆在关闭或空数据时保留查看入口。宽屏下主控、日志和记忆使用列表/详情布局，机制与设置使用双列网格。
 - 任务、主控、技能加载、引用对比、配置保存、结构检查以及 UI 端记忆/改进操作统一写入诊断日志；新增任务、主控、技能、引用、设置、结构检查机制和对应事件文案，日志支持最近 15 分钟 / 1 小时 / 4 小时范围筛选。日志仍只保存白名单元数据，不记录提示词、命令原文或凭据。
+- GitHub Actions 扩充：`Validate` 增加 pnpm 缓存、依赖审计和真模型审计证据校验；新增 `CodeQL` 静态分析、PR `Dependency review`、每周 `Security audit`，以及标签/手动触发的 `Package`（只上传两个 `.tgz`，不发布 npm、不创建 Release）。所有 Actions 固定到完整 commit SHA，不调用付费模型。
+- 支持 DSH 多版本：主包与可选浏览器包声明 `engines.dsh: ">=0.2.1-rc.2 <0.3.0-0"`；新增单次/批处理工具执行适配，兼容 0.2.2-alpha.3 的 `tools.execute({ calls })`；preset 归一化移除被删除的 `list-agents` 子路径，并同时携带新旧子代理模型选择键。0.2.1-rc.2、0.2.1-rc.5 与 0.2.2-alpha.3 均通过 452 项测试；新增 `DSH compatibility` 工作流与 `scripts/set-dsh-version.mjs`，详见[多版本说明](docs/dsh-multi-version-2026-11-04.md)。
 
 ### 新增
 

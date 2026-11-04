@@ -13,6 +13,7 @@
 ## 当前功能与验证
 
 - [2026-11-04 三方案执行与真实模型验证](closure-2026-11-04.md) · [机器证据](checks/closure-2026-11-04.json)
+- [DSH 多版本支持：0.2.1-rc.5 与 0.2.2-alpha.3](dsh-multi-version-2026-11-04.md) · [机器证据](checks/dsh-compat-2026-11-04.json)
 
 - [全功能工作台社区调研、扩充矩阵与实现](ui-community-expansion-2026-11-01.md) · [10 项目固定源码快照](checks/ui-community-expansion-2026-11-01.json)
 
@@ -51,4 +52,4 @@
 
 GitHub 启用依赖漏洞提醒、秘密扫描、推送保护和私密漏洞反馈。自动依赖更新 PR 未开启，避免后台创建额外分支。
 
-[Validate 工作流](../.github/workflows/validate.yml)使用 Windows、Node.js 24 和固定 pnpm 12.4.2，官方 Actions 固定到完整 commit SHA；令牌只读，不保留检出凭据。验证包含冻结依赖锁、原生 DSH 测试依赖检查、客户端载荷一致性、回归测试和两个独立包的发行预检。CI 不调用付费模型、不安装浏览器内核、不自动发布包。
+[Validate 工作流](../.github/workflows/validate.yml)使用 Windows、Node.js 24 和固定 pnpm 12.4.2，所有 Actions 固定到完整 commit SHA；令牌只读，不保留检出凭据。`DSH compatibility` 用 0.2.1-rc.2 与 0.2.2-alpha.3 宿主重跑同一套测试，`CodeQL` 做 JavaScript/TypeScript 静态分析，`Dependency review` 在 PR 中拦截高危依赖变更，`Security audit` 每周复查新披露漏洞，标签或手动 `Package` 只生成两个 `.tgz` 产物并保留 14 天。验证包含冻结依赖锁、依赖审计、真模型审计证据校验、原生 DSH 测试依赖检查、客户端载荷一致性、回归测试和两个独立包的发行预检。CI 不调用付费模型、不安装浏览器内核、不自动发布包。

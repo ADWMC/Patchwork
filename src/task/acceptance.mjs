@@ -6,6 +6,7 @@ import { canonicalPath, inside, withTaskCheck } from './action-check.mjs'
 import { taskState, transitionTask, flushTasks } from './store.mjs'
 import { safeLabel, taskId } from './state.mjs'
 import { commandOutcome } from '../util/tool-outcome.mjs'
+import { executeTool } from '../util/tool-execute.mjs'
 
 export async function artifactStamp(path) {
   const s = await stat(path)
@@ -53,7 +54,7 @@ export async function executeAcceptance(agent, args, exec) {
     callId = `${exec.callId}:check`
     transitionTask(agent, { kind: 'receipt', receipt: { id: randomUUID(), requirementId: requirement.id, revision, unit, kind: 'command',
       outcome: 'unknown', current: true, exitCode: null, tool, callId, targets: targets.map(({ id, version }) => ({ id, version })), at: Date.now() } })
-    result = await withTaskCheck(agent, callId, () => agent.ctx.tools.execute({
+    result = await withTaskCheck(agent, callId, () => executeTool(agent.ctx.tools, {
       callId, rootCallId: exec.rootCallId ?? exec.callId, name: tool,
       arguments: args.arguments, agent, signal: exec.signal, parent: exec.token,
     }))

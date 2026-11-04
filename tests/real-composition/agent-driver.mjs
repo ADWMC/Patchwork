@@ -1,4 +1,5 @@
 import { createScope, scopeOf, scopeTarget, bindScopeParent, scopeParentOf } from '@deepseek-ai/dsh-scope'
+import { executeTool } from '../../src/util/tool-execute.mjs'
 
 /**
  * Test-only 驱动插件。它只做一件事：在被测插件挂载完成后，按真实形状造出
@@ -87,7 +88,15 @@ export function createAgent({ id = 'test-agent', cwd = process.cwd(), sessionId 
   observed.rootToolNames = rootCtx.tools.schemas().map(schema => schema.name)
   observed.agentToolNames = rootCtx.tools.schemas(agentKey).map(schema => schema.name)
 
-  return { agent, agentKey, tools: rootCtx.tools, followups }
+  // The acceptance tests call the registry directly. DSH 0.2.2-alpha moved
+  // that API to batches, so expose the same single-call adapter production uses.
+  const tools = new Proxy(rootCtx.tools, {
+    get(target, property, receiver) {
+      if (property === 'execute') return call => executeTool(target, call)
+      return Reflect.get(target, property, receiver)
+    },
+  })
+  return { agent, agentKey, tools, followups }
 }
 
 export function selectPreset(agent, preset) {

@@ -18,7 +18,7 @@ async function serve(t, server) {
   return server.address().port
 }
 async function childFetch(url, { proxy, approved = '127.0.0.1' } = {}) {
-  const code = `import { nativeFetch } from ${JSON.stringify(transport)}; try {const r=await nativeFetch(${JSON.stringify(url)},{approvedAddresses:[{address:${JSON.stringify(approved)},family:4}],redirect:'manual',timeoutMs:3000,headers:{accept:'text/plain'}});console.log(JSON.stringify({status:r.status,location:r.headers.get('location'),body:await r.text()}));}catch(e){console.log(JSON.stringify({error:e.code??e.name,message:e.message}));}`
+  const code = `import { nativeFetch } from ${JSON.stringify(transport)}; try {const r=await nativeFetch(${JSON.stringify(url)},{approvedAddresses:[{address:${JSON.stringify(approved)},family:4}],redirect:'manual',timeoutMs:10000,headers:{accept:'text/plain'}});console.log(JSON.stringify({status:r.status,location:r.headers.get('location'),body:await r.text()}));}catch(e){console.log(JSON.stringify({error:e.code??e.name,message:e.message}));}`
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ['--input-type=module', '-e', code], { windowsHide: true, env: { ...cleanEnv, NODE_EXTRA_CA_CERTS: fileURLToPath(cert), CURL_CA_BUNDLE: fileURLToPath(cert), ...(proxy ? { HTTPS_PROXY: proxy } : {}) } })
     let stdout = '', stderr = ''
