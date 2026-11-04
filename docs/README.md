@@ -36,6 +36,8 @@
 - 代码检索：[Cursor 式本地检索与 Explore](plan-cursor-style-retrieval-2026-11-04.md)、[实现与真实模型证据](code-retrieval-2026-11-04.md)
 - 项目文档：[AGENTS.md / DESIGN.md 受控创建与更新](project-docs-2026-11-04.md)
 - Agent 社区对照（维护者备忘，不随包）：[社区项目借/不借](community-agent-patterns-2026-11-04.md)
+- 营销渠道与首发清单（维护者备忘，不随包）：[营销渠道方案](marketing-channels-plan-2026-11-04.md)
+- GitHub 发布规范与检查单（维护者备忘，不随包）：[发布检查单](release-checklist-2026-11-04.md)
 - 浏览器：[ZCode 研究](zcode-browser-research-2026-11-01.md)、[社区项目](browser-community-research-2026-11-01.md)、[指纹内核](fingerprint-browser-research-2026-11-01.md)
 - 提示词：[ZCode / OpenClaude 源码](zcode-openclaude-prompt-engineering-research-2026-10-31.md)、[社区样本取舍](system-prompts-community-research-2026-11-01.md)
 - [其余方案的执行路线](remaining-plans-execution-roadmap-2026-10-31.md)；历史状态保留，不推断全部完成。
