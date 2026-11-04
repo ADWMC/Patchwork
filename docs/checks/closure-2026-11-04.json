@@ -8,7 +8,7 @@
   "checks": {
     "automatedTests": {
       "status": "passed",
-      "tests": 443,
+      "tests": 445,
       "failed": 0
     },
     "clientBundle": {
@@ -16,8 +16,8 @@
     },
     "docsLinks": {
       "status": "passed",
-      "markdownFiles": 185,
-      "localLinks": 433,
+      "markdownFiles": 205,
+      "localLinks": 454,
       "broken": 0
     },
     "uiAcceptance": {
@@ -31,14 +31,15 @@
     },
     "realModelAudit": {
       "status": "verified-with-failures",
-      "runs": 21,
+      "runs": 22,
       "statuses": {
-        "passed": 15,
+        "passed": 16,
         "failed": 6
       },
       "index": "docs/checks/real-model/2026-11-04/index.json",
       "taskCommandBlocker": "task-check-db31 on the older patchwork profile failed at the Windows Job runner; task-check-pass-5448 on the fresh regression profile passed with brief, artifact and npm test output, no standalone shell",
-      "nativeCodeGraph": "native-graph-2a85 passed; native-graph-pre-fix-1477 retained as a schema failure sample"
+      "nativeCodeGraph": "native-graph-2a85 passed; native-graph-pre-fix-1477 retained as a schema failure sample",
+      "projectDocs": "project-docs-4e25 passed: status/apply/read, CAS update, no direct writes or shell"
     }
   },
   "boundaries": {

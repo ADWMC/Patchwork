@@ -15,6 +15,7 @@ test('native composition exposes patchwork_code and returns a bounded workspace 
     const { createAgent } = await loadDriver()
     const { agent, tools } = createAgent({ cwd })
     assert.ok(tools.get('patchwork_code', agent))
+    assert.ok(tools.get('patchwork_project_docs', agent))
     const result = await tools.execute({ agent, name: 'patchwork_code', arguments: { action: 'map' }, callId: 'code-map-1', signal: new AbortController().signal })
     assert.equal(result.isError, false, JSON.stringify(result.content))
     assert.match(result.value.text, /src\/service\.mjs/)

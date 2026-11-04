@@ -47,7 +47,9 @@
 - Superagent 新增 `explore` 只读任务模式：只允许读取/代码检索，不登记任务验收，要求返回 findings/deadEnds/confidence；主控继续以原生执行器隔离上下文。
 - 诊断/能力新增本地代码检索计数和探索成本（read/grep/glob/code、重复查询、读入字节）；连续 8 次探索且无编辑时注入一次模型可见的软提示，不硬拦合法搜索。
 - 新增真实模型审计 schema/报告生成器和离线校验器：`scripts/real-model-audit.mjs` 从 session dump 生成 manifest、events、tool-calls、result、report；`scripts/verify-real-model-audit.mjs` 校验哈希、状态与 `mainDshTouched:false`。2026-11-04 的旧会话证据已迁移到 `docs/checks/real-model/2026-11-04/`。
+- 新增 `patchwork_project_docs`：受控读取/校验/创建/更新 `AGENTS.md` 与 `DESIGN.md`。更新必须匹配当前 sha256，只允许这两个文件名，路径限制在工作区，拒绝明显密钥和超大内容；不自动创建、不授予权限。诊断/能力页显示两文件状态，报告见[项目文档说明](docs/project-docs-2026-11-04.md)。
 - 设置项增至 26 项，新增代码检索开关、索引文件上限与地图 token 预算；工作台“代码”分类可搜索、恢复默认、导入导出。
+- 技能参考按需扩充：`web-ui` 增加 Flex/Grid 布局心智模型，`debugging` 增加 JS 异步排查，`collaborator` 增加需求澄清清单，`standards` 增加 Git 恢复与提交边界；正文仍只做路由，不常驻提示词。
 
 - 重整仓库首页的安装路径、能力与边界说明，提供适配浅深色的横幅和双语导航；英文入口从 `README.en.md` 改为 `README_EN.md`，详细调研与验证记录继续由文档导航索引。
 

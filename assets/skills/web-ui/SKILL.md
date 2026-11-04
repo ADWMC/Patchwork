@@ -13,7 +13,7 @@ description: 设计、实现或评审 Web 界面、HTML/CSS/React/Vue 页面及�
 - **新页面或整体改版**：先确定方向和主视口，再实现代表性画面、查看截图、修正最明显的问题。用户只要方案或评审时，不擅自实装。
 - **现有产品**：先读入口、布局、真实组件、语义 tokens、字体、主题和设计记录，核对目标页现状画面。沿用已成立的规则，只替换造成问题的默认值。
 
-新页或大改版先看 [资料路由与分层审查](references/review-route.md)，按需读 [设计契约](references/design-contract.md)；涉及配色或主题读 [配色决策](references/color-decision.md)；指出模板味时读 [去模板味复核](references/anti-template.md)；交付前读 [验证矩阵](references/verification.md)。小修复只加载相关项。
+新页/改版先看[资料路由](references/review-route.md)与[设计契约](references/design-contract.md)；布局读[布局](references/layout.md)；可访问性读[可访问性](references/accessibility-motion.md)；配色/主题读[配色决策](references/color-decision.md)；模板味读[反模板](references/anti-template.md)；交付前读[验证矩阵](references/verification.md)。
 
 ## 新设计先作决定
 

@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 export const RECORD_TYPE = 'plugin:patchwork/diagnostic'
 export const LOG_LIMIT = 200
 export const LEVELS = new Set(['info', 'warn', 'error'])
-const MECHANISMS = new Set(['runtime', 'af', 'op', 'epr', 'occ', 'search', 'fetch', 'memory', 'improvement', 'browser', 'task', 'superagent', 'skill', 'evidence', 'settings', 'maintenance', 'code'])
+const MECHANISMS = new Set(['runtime', 'af', 'op', 'epr', 'occ', 'search', 'fetch', 'memory', 'improvement', 'browser', 'task', 'superagent', 'skill', 'evidence', 'settings', 'maintenance', 'code', 'docs'])
 const EVENTS = new Set(['loaded', 'inactive', 'boundary', 'decision', 'start', 'success', 'failure', 'noop', 'skipped', 'packed', 'recall', 'continued', 'incident', 'candidate', 'experiment', 'approval', 'rollback',
   'define', 'correct', 'artifact', 'check', 'assessment', 'cancel', 'handoff', 'inspect', 'submit', 'report', 'input', 'retry', 'pause', 'resume', 'reconcile', 'review', 'load', 'cite', 'compare', 'save', 'warning', 'blocked', 'propose', 'revise', 'confirm', 'forget', 'validity'])
 const REASONS = new Set([
@@ -32,6 +32,7 @@ const REASONS = new Set([
   'code-started', 'code-map', 'code-outline', 'code-find', 'code-references', 'code-search', 'code-failed',
   'code-graph-status', 'code-graph-enabled', 'code-graph-disabled', 'code-graph-started', 'code-graph-stopped',
   'code-callers', 'code-callees', 'code-impact', 'code-affected',
+  'docs-started', 'docs-status', 'docs-read', 'docs-validate', 'docs-apply', 'docs-failed',
 ])
 const NUMBERS = ['sourceBytes', 'resultBytes', 'lines', 'offset', 'nextOffset', 'elapsedMs', 'contextTokens', 'afterTokens',
   'keepRecentTokens', 'estimatedSaving', 'measuredSaving', 'requests', 'remaining', 'carriedDebtTokens', 'breakeven', 'expectedRequests', 'evidenceItems', 'resultCount', 'providerCount', 'failedProviderCount']
@@ -43,6 +44,9 @@ const ERROR_CODES = new Set(['ENOSPC', 'EACCES', 'EPERM', 'ENOENT', 'EIO', 'ETIM
   'CODE_SYMBOL_REQUIRED', 'CODE_PATH_REQUIRED', 'CODE_PATH_OUTSIDE_WORKSPACE', 'CODE_PATH_NOT_FOUND', 'CODE_PATH_NOT_FILE',
   'CODE_FILE_NOT_INDEXED', 'CODE_WORKSPACE_REQUIRED', 'CODE_FAILED',
   'CODE_GRAPH_CONFIG_INVALID', 'CODE_GRAPH_DISABLED', 'CODE_GRAPH_NOT_STARTED',
+  'PROJECT_DOC_INVALID_ACTION', 'PROJECT_DOC_KIND_REQUIRED', 'PROJECT_DOC_PATH_OUTSIDE', 'PROJECT_DOC_NAME_REQUIRED',
+  'PROJECT_DOC_CONTENT_REQUIRED', 'PROJECT_DOC_TOO_LARGE', 'PROJECT_DOC_INVALID_CONTENT', 'PROJECT_DOC_SECRET',
+  'PROJECT_DOC_EXISTS', 'PROJECT_DOC_CONFLICT', 'PROJECT_DOC_NOT_FOUND', 'PROJECT_DOC_FAILED',
 ])
 
 export function fingerprint(value) {

@@ -27,3 +27,13 @@
 **设计记录不是页面文案。** “简化大陆 · 日照明暗 · 星空”这类实现或效果清单可在会话中说明，不应自动变成页面副标题。逐段检查可见文字：用户在页面内读到它，是否更容易识别对象、完成动作或理解真实状态？若只是解释制作方法或替作品自评，就从 UI 删除，并放到交付说明。操作提示只在发现性确有需要时保留，且用动作语言而非功能列表。
 
 参考做法：OpenDesign 将 `DESIGN.md`、`tokens.css`、组件样例与来源拆成可核对的设计系统包；这里借用“契约与产物分离”的方法，不复制其品牌包。来源：https://github.com/nexu-io/open-design/blob/main/docs/design-systems.md
+
+## 可机读设计契约（DESIGN.md）
+
+Google Labs 的 [DESIGN.md](https://github.com/google-labs-code/design.md) 把设计系统写成“机器可读 token + 人读理由”：
+
+- front matter / 代码块放颜色、字体、圆角、间距等精确值；
+- 正文解释为什么这样设计、如何应用；
+- 提供 lint/diff 思路：检查 token 引用、对比度、版本差异。
+
+适合已有品牌系统或跨页面改版。不要为一个按钮新建 DESIGN.md；没有设计系统时，先复用现有语义 token。契约不是截图替代品，最终仍要在目标尺寸看真实渲染。

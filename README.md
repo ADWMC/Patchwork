@@ -81,6 +81,7 @@ Patchwork 复用宿主的模型与权限设置。`@deepseek-ai/dsh-agent-preset`
 | **按需技能** | 默认注册 7 个核心技能，可显式试用 13 技能目录；目录只提供名称与描述，正文按需读取。 |
 | **信息检索** | `patchwork_search` 并行查询 Bing、Brave、DuckDuckGo 公共页面，无需 API key；`patchwork_fetch` 受控读取公开 URL。 |
 | **本地代码检索** | `patchwork_code` 提供仓库地图、文件 outline、符号定义、词法引用和文本/正则检索；只在当前工作区读取，跳过依赖、构建产物和敏感文件，结果有界。工作区代码图默认关闭，模型可先 `graph-enable` 写 `.patchwork/config.json`，再 `graph-start` 使用 callers/callees/impact/affected。 |
+| **项目文档** | DSH 自动注入 `AGENTS.md`/`CLAUDE.md`；`patchwork_project_docs` 负责 hash/CAS 创建与更新 `AGENTS.md`、`DESIGN.md`，只允许这两个文件名，不静默覆盖、不授予权限。 |
 | **显式记忆与改进** | 记忆管理支持搜索筛选、手动提案、版本修订、暂停恢复、来源历史、导出与批量遗忘；私有与共享分开确认，自动注入关闭。失败和纠正进入受控改进。 |
 | **原生工作台** | **总览 / 执行 / 证据 / 管理 / 诊断 / 设置**，二级视图按需显示并带待处理计数；任务 handoff 与纠正历史、主控补充输入 / 对账、记忆召回预览、通用改进候选、独立来源对比、机制计数 / 计划 / 归档、任务 / 主控 / 配置等日志、26 项设置及恢复默认 / 导入导出。宽屏使用列表 / 详情和双列布局，空数据动态隐藏；沿用 DSH 控件、浅暗主题与侧栏布局，见[扩充记录](docs/ui-community-expansion-2026-11-01.md)。 |
 

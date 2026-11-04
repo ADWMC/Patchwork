@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-04T05:54:16.983Z",
+  "updatedAt": "2026-11-04T07:51:51.601Z",
   "runs": [
     {
       "runId": "6b6e",
@@ -103,6 +103,12 @@
       "scenario": "native-code-graph",
       "status": "failed",
       "report": "native-graph-pre-fix-1477\\report.md"
+    },
+    {
+      "runId": "project-docs-4e25",
+      "scenario": "project-docs",
+      "status": "passed",
+      "report": "project-docs-4e25\\report.md"
     },
     {
       "runId": "rc5",

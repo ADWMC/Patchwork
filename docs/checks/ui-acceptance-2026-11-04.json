@@ -572,8 +572,8 @@
   "hostBrowserAttached": false,
   "sourceFingerprint": {
     "algorithm": "sha256",
-    "hash": "becfe07faf59f25a236af3f2ebe2472117f9187f3e1d63f64fdcd39b3a8043a8",
-    "fileCount": 400
+    "hash": "67a64b1bdc4751dabff372b5d16401cb4d2222731393d1c94c80f5e2ec03dad3",
+    "fileCount": 420
   },
   "engine": "156.0.4314.58",
   "experimentEvidence": "ordinary-session-hidden",

@@ -1,6 +1,8 @@
 import { effectiveConfig, readUserConfig, configRevision } from '../config/user-config.mjs'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
-import { isAbsolute } from 'node:path'
+import { isAbsolute, join } from 'node:path'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { readWorkspaceConfigSync } from '../code/workspace-config.mjs'
 import { isCodeGraphStarted } from '../code/tool.mjs'
 import { webRuntime } from './web-runtime.mjs'
@@ -122,6 +124,18 @@ function explorationSnapshot(state) {
   return { ...counts, duplicateQueries: duplicates, totalCalls: Object.values(counts).reduce((sum, value) => sum + value, 0), bytesRead: bytes }
 }
 
+function projectDocsSnapshot(agent) {
+  const cwd = agent?.session?.header?.cwd
+  if (typeof cwd !== 'string' || !isAbsolute(cwd)) return null
+  const read = name => {
+    try {
+      const content = readFileSync(join(cwd, name), 'utf8')
+      return { name, exists: true, bytes: Buffer.byteLength(content, 'utf8'), sha256: createHash('sha256').update(content).digest('hex') }
+    } catch { return { name, exists: false, bytes: null, sha256: null } }
+  }
+  return { agents: read('AGENTS.md'), design: read('DESIGN.md') }
+}
+
 function workspaceGraphSnapshot(agent) {
   const cwd = agent?.session?.header?.cwd
   if (typeof cwd !== 'string' || !isAbsolute(cwd)) return null
@@ -170,6 +184,7 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
     exploration: explorationSnapshot(state),
     code: { configured: loadedConfig.codeEnabled !== false, available: Boolean(state.agent.ctx?.tools?.get?.(`patchwork_code`, state.agent)), ...(stats.code ?? {}) },
     codeGraph: workspaceGraphSnapshot(state.agent),
+    projectDocs: projectDocsSnapshot(state.agent),
     plan: planSnapshot(state.agent),
     observations: observationSnapshot(state.agent),
     taskHandoff: state ? (() => { try { return taskProjection(state.agent)?.title ? taskHandoff(state.agent) : null } catch { return null } })() : null,

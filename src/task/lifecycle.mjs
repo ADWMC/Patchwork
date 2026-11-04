@@ -54,7 +54,7 @@ export function registerTaskLifecycle(ctx, config = {}) {
       tool: { type: 'string', enum: ['pwsh', 'bash'], description: 'Command check shell; defaults to pwsh.' },
       command: { type: 'string', description: 'TOP LEVEL shell command that check executes itself. Do not pre-run it through shell just to attach a result. Register current targets first; never a nested arguments object.' },
       description: { type: 'string', description: 'Purpose of the check command.' },
-      rules: { type: 'object', description: 'Required for check on an artifact requirement: inspect its registered target file for these structure rules. Command requirements instead use command/tool; assessment is only for semantic requirements.', properties: { minLength: { type: 'integer' }, maxLength: { type: 'integer' }, anchors: { type: 'array', items: { type: 'string' } } }, additionalProperties: false },
+      rules: { type: 'object', description: 'Required for check on an artifact requirement: inspect its registered target file for these structure rules. Command requirements instead use command/tool; assessment is only for semantic requirements.', properties: { minLength: { type: 'integer', description: 'Minimum character count (not bytes).' }, maxLength: { type: 'integer', description: 'Maximum character count (not bytes).' }, anchors: { type: 'array', items: { type: 'string' } } }, additionalProperties: false },
       verdict: { type: 'string', enum: ['supported', 'contradicted', 'unknown'] },
       sourceReceiptId: { type: 'string' }, trigger: { type: 'string' }, label: { type: 'string' },
     }, required: ['action'], additionalProperties: false },

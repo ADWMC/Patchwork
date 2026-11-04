@@ -1,4 +1,4 @@
-export const mechanismLabels = { runtime: '运行时', af: 'AF', op: 'OP', epr: 'EPR', occ: 'OCC', search: '检索', fetch: '抓取', memory: '记忆', improvement: '改进', browser: '浏览器', task: '任务', superagent: '主控', skill: '技能', evidence: '引用', settings: '设置', maintenance: '结构检查', code: '代码检索' }
+export const mechanismLabels = { runtime: '运行时', af: 'AF', op: 'OP', epr: 'EPR', occ: 'OCC', search: '检索', fetch: '抓取', memory: '记忆', improvement: '改进', browser: '浏览器', task: '任务', superagent: '主控', skill: '技能', evidence: '引用', settings: '设置', maintenance: '结构检查', code: '代码检索', docs: '项目文档' }
 export const levelLabels = { info: '信息', warn: '警告', error: '错误' }
 
 const reasonLabels = {
@@ -36,6 +36,7 @@ const reasonLabels = {
   'code-graph-status': '已读取代码图状态', 'code-graph-enabled': '工作区代码图已启用', 'code-graph-disabled': '工作区代码图已停用',
   'code-graph-started': '工作区代码图已启动', 'code-graph-stopped': '工作区代码图已停止',
   'code-callers': '已查询调用者', 'code-callees': '已查询被调用者', 'code-impact': '已查询影响面', 'code-affected': '已查询受影响测试',
+  'docs-started': '开始项目文档操作', 'docs-status': '已读取项目文档状态', 'docs-read': '已读取项目文档', 'docs-validate': '项目文档校验完成', 'docs-apply': '项目文档已写入', 'docs-failed': '项目文档操作失败',
   'memory-proposed': '记忆提案已创建', 'memory-revised': '记忆修订已创建', 'memory-confirmed': '记忆版本已确认', 'memory-forgotten': '记忆已停止召回', 'memory-validity': '记忆召回状态已更新',
 }
 const eventTitles = {
@@ -55,6 +56,7 @@ const eventTitles = {
   evidence: { cite: '引用已绑定', compare: '独立来源已对比', list: '引用证据已读取' },
   settings: { save: '配置已保存' },
   code: { start: '开始代码检索', success: '代码检索完成', failure: '代码检索失败' },
+  docs: { start: '开始项目文档操作', success: '项目文档操作完成', failure: '项目文档操作失败' },
   maintenance: { warning: '结构或证据提示', blocked: '结构检查阻断' },
 }
 

@@ -114,6 +114,18 @@ export const SCENARIOS = {
       { id: 'no-tool-errors', status: summary.toolErrors === 0 ? 'passed' : 'failed', detail: `${summary.toolErrors} tool errors` },
     ],
   },
+  'project-docs': {
+    title: 'AGENTS.md and DESIGN.md managed with CAS',
+    assertions: summary => {
+      const actions = new Set(call(summary, 'patchwork_project_docs').map(item => item.arguments?.action))
+      const writes = call(summary, 'write').length + call(summary, 'edit').length + call(summary, 'pwsh').length + call(summary, 'bash').length
+      return [
+        ...['status', 'apply', 'read'].map(action => ({ id: `docs-${action}`, status: actions.has(action) ? 'passed' : 'failed', detail: actions.has(action) ? 'observed' : 'missing' })),
+        { id: 'no-direct-writes-or-shell', status: writes ? 'failed' : 'passed', detail: `${writes} write/edit/shell calls` },
+        { id: 'no-tool-errors', status: summary.toolErrors === 0 ? 'passed' : 'failed', detail: `${summary.toolErrors} tool errors` },
+      ]
+    },
+  },
   'native-code-graph': {
     title: 'Opt-in workspace graph started by the model',
     assertions: summary => {

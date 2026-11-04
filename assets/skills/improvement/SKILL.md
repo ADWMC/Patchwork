@@ -12,3 +12,5 @@ description: 用户要求根据真实失败或纠正改进 Patchwork 规则、�
 `experiment` 只传 candidateId 与当前 expectedRevision；由内置 runner 启动两个隔离 Node 进程运行固定调优/留出契约，保留版本、来源、SHA256 和证据文件。不要传入自行编写的 baseline/candidate 成绩；伪造来源、跨会话证据、被改动文件及重启前未重新签发的实验均不可准入。契约通过只说明受限策略能执行且边界正确，不能证明模型回答更好。模型收益实验另需固定模型、宿主、工具、任务及预算，读[实验准入](references/experiment.md)。
 
 `trial`、`approve`、`rollback` 需宿主确认通道里的用户确认和当前 revision。前两者成功后 `applied:true` 才表示本会话受限策略已生效；`rollback` 实际撤销此候选并恢复此前策略。切换 Agent 或卸载立即撤销，重启后不自动继承应用。用户可在“证据 → 改进”查看来源、差异、退化、副作用及证据，再确认或回滚；未确认不能以模型文本自行批准。
+
+扩展阅读：[实验设计与改进](references/experiment-design.md)。

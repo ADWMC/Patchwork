@@ -103,6 +103,7 @@ function CapabilitiesPanel({ data }) {
     <MechanismsPanel data={data}/>
     <MechanismStatsPanel stats={data.stats}/>
     <CodePanel code={data.code} codeGraph={data.codeGraph}/>
+    <ProjectDocsPanel docs={data.projectDocs}/>
     <ExplorationPanel exploration={data.exploration}/>
     <PlanPanel plan={data.plan}/>
     <ObservationPanel items={data.observations ?? []}/>
@@ -122,6 +123,15 @@ function CodePanel({ code, codeGraph }) {
     { label: '代码图', value: codeGraph?.started ? '已启动' : codeGraph?.enabled ? '已启用/未启动' : '未启用' },
   ]
   return <section className="pw-section" aria-label="本地代码检索"><SectionHeading title="本地代码检索" description="只读代码地图/符号/文本检索；工作区代码图按需启用并由模型启动。不读依赖、构建产物或密钥文件，不把原文写入诊断。"/><SummaryStrip label="代码检索计数" items={items.map(item => ({ label: item.label, value: item.value }))}/>{codeGraph && <p className="pw-live-note">工作区配置：{codeGraph.configPath}；{codeGraph.status === 'invalid' ? `配置无效 ${codeGraph.failureCode ?? ''}` : codeGraph.exists ? '已存在' : '尚未创建'}。代码图仅在 graph-start 后提供 callers/callees/impact/affected。</p>}<p className="pw-live-note">计数是进程内动作，不等于召回率、正确率或 token 收益。</p></section>
+}
+
+function ProjectDocsPanel({ docs }) {
+  if (!docs) return null
+  const items = ['agents', 'design'].map(key => {
+    const item = docs[key]
+    return { label: key === 'agents' ? 'AGENTS.md' : 'DESIGN.md', value: item?.exists ? `${formatBytes(item.bytes) ?? item.bytes + ' B'} · ${item.sha256.slice(0, 8)}` : '未创建' }
+  })
+  return <section className="pw-section" aria-label="项目文档"><SectionHeading title="项目文档" description="AGENTS.md 和 DESIGN.md 会持续影响后续 agent；修改必须带当前 hash，防止静默覆盖。"/><SummaryStrip label="项目文档状态" items={items}/><p className="pw-live-note">由 patchwork_project_docs 读取/校验/写入；只允许这两个文件名，不授予权限。</p></section>
 }
 
 function ExplorationPanel({ exploration }) {
