@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto'
-import { mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, open, readFile, readdir, realpath, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, resolve } from 'node:path'
 import { logDiagnostic } from '../logging/session-log.mjs'
 import { record } from '../ui/mechanism-stats.mjs'
@@ -9,6 +9,10 @@ import { inside, workspaceRoot } from '../code/code-index.mjs'
 export const PROJECT_DOCS_TOOL = 'patchwork_project_docs'
 const DOC_NAMES = { agents: 'AGENTS.md', design: 'DESIGN.md' }
 const MAX_BYTES = 64 * 1024
+const MAX_SCAN_DEPTH = 4
+const LOCK_STALE_MS = 30_000
+const LOCK_ATTEMPTS = 100
+const LOCK_DELAY_MS = 20
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', 'coverage', '.next', '.cache', '.patchwork'])
 
 class DocError extends Error {
@@ -27,17 +31,73 @@ function targetPath(root, kind, requested) {
   return target
 }
 
+async function assertTargetSafe(root, target, { mustExist = false } = {}) {
+  let dir = dirname(target)
+  while (true) {
+    try {
+      const real = await realpath(dir)
+      if (!inside(root, real)) throw new DocError('path resolves outside the workspace', 'PROJECT_DOC_PATH_OUTSIDE')
+      break
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error
+      const parent = dirname(dir)
+      if (parent === dir) throw new DocError('path has no existing workspace ancestor', 'PROJECT_DOC_PATH_OUTSIDE')
+      dir = parent
+    }
+  }
+  try {
+    const info = await lstat(target)
+    if (info.isSymbolicLink()) throw new DocError('symlink targets are not allowed', 'PROJECT_DOC_SYMLINK')
+    if (!info.isFile()) throw new DocError('target is not a regular file', 'PROJECT_DOC_INVALID_CONTENT')
+    return true
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      if (mustExist) throw new DocError('file does not exist', 'PROJECT_DOC_NOT_FOUND')
+      return false
+    }
+    throw error
+  }
+}
+
+async function withDocLock(root, target, work) {
+  const lockDir = join(root, '.patchwork', 'locks')
+  const lockPath = join(lockDir, `${sha256(target).slice(0, 24)}.lock`)
+  await mkdir(lockDir, { recursive: true, mode: 0o700 })
+  let handle
+  for (let attempt = 0; attempt < LOCK_ATTEMPTS; attempt++) {
+    try {
+      handle = await open(lockPath, 'wx')
+      await handle.writeFile(`${process.pid}
+${Date.now()}
+`)
+      break
+    } catch (error) {
+      if (error?.code !== 'EEXIST') throw error
+      try {
+        const info = await stat(lockPath)
+        if (Date.now() - info.mtimeMs > LOCK_STALE_MS) { await rm(lockPath, { force: true }); continue }
+      } catch { /* lock disappeared */ }
+      await new Promise(resolve => setTimeout(resolve, LOCK_DELAY_MS))
+    }
+  }
+  if (!handle) throw new DocError('project document is locked by another writer', 'PROJECT_DOC_LOCKED')
+  try { return await work() }
+  finally { await handle.close().catch(() => {}); await rm(lockPath, { force: true }).catch(() => {}) }
+}
+
 async function findDocs(root, kind, depth = 0, found = []) {
   if (found.length >= 50) return found
   let entries
   try { entries = await readdir(root, { withFileTypes: true }) } catch { return found }
   for (const entry of entries) {
     if (entry.isDirectory()) {
-      if (depth >= 2 || SKIP_DIRS.has(entry.name) || entry.name.startsWith('.')) continue
+      if (depth >= MAX_SCAN_DEPTH || SKIP_DIRS.has(entry.name) || entry.name.startsWith('.')) continue
       await findDocs(join(root, entry.name), kind, depth + 1, found)
       continue
     }
-    if (!entry.isFile() || entry.name !== DOC_NAMES[kind]) continue
+    if (entry.name !== DOC_NAMES[kind]) continue
+    if (entry.isSymbolicLink()) { found.push({ kind, path: join(root, entry.name), bytes: null, sha256: null, symlink: true }); continue }
+    if (!entry.isFile()) continue
     const path = join(root, entry.name)
     const info = await stat(path)
     const content = await readFile(path, 'utf8')
@@ -69,8 +129,7 @@ function assertWritable(content) {
   return content
 }
 
-export function registerProjectDocsTool(ctx, config = {}) {
-  if (config.codeEnabled === false) return
+export function registerProjectDocsTool(ctx, _config = {}) {
   ctx.tools.register({
     name: PROJECT_DOCS_TOOL,
     description: 'Create, read, validate or update the project AGENTS.md / DESIGN.md. Existing files require expectedSha256 for compare-and-swap; missing/wrong hashes fail instead of overwriting. Only these two filenames are writable, paths stay inside the workspace, secrets are rejected. This tool never grants permissions and does not auto-create project rules.',
@@ -116,6 +175,7 @@ export function registerProjectDocsTool(ctx, config = {}) {
           result = { action, status: 'ok', docs }
         } else if (action === 'read') {
           const path = targetPath(root, args?.kind, args?.path)
+          await assertTargetSafe(root, path, { mustExist: true })
           const content = await readFile(path, 'utf8')
           if (Buffer.byteLength(content, 'utf8') > MAX_BYTES) throw new DocError('file is too large to read here', 'PROJECT_DOC_TOO_LARGE')
           result = { action, status: 'ok', kind: args.kind, path, content, sha256: sha256(content), bytes: Buffer.byteLength(content, 'utf8') }
@@ -125,24 +185,27 @@ export function registerProjectDocsTool(ctx, config = {}) {
         } else {
           const path = targetPath(root, args?.kind, args?.path)
           const checked = validate(args?.kind, args?.content)
-          let existing
-          try { existing = await readFile(path, 'utf8') } catch (error) { if (error?.code !== 'ENOENT') throw error }
-          if (existing !== undefined) {
-            const current = sha256(existing)
-            if (!args?.expectedSha256) throw new DocError(`file exists; pass expectedSha256=${current}`, 'PROJECT_DOC_EXISTS')
-            if (args.expectedSha256 !== current) throw new DocError(`hash mismatch; current=${current}`, 'PROJECT_DOC_CONFLICT')
-          } else if (args?.expectedSha256) {
-            throw new DocError('expectedSha256 was provided but the file does not exist', 'PROJECT_DOC_NOT_FOUND')
-          }
-          const content = assertWritable(args.content)
-          const bytes = Buffer.byteLength(content, 'utf8')
-          const temp = `${path}.${randomUUID()}.tmp`
-          await mkdir(dirname(path), { recursive: true, mode: 0o700 })
-          try {
-            await writeFile(temp, content, { encoding: 'utf8', mode: 0o600 })
-            await rename(temp, path)
-          } finally { await rm(temp, { force: true }) }
-          result = { action, status: 'ok', kind: args.kind, path, mode: existing === undefined ? 'created' : 'updated', bytes, warnings: checked.warnings, sha256: sha256(content), ...(existing !== undefined ? { expectedSha256: sha256(existing) } : {}), refreshHint: args.kind === 'agents' ? 'call the structured read tool on this path (or reopen the session) so DSH refreshes the injected instructions; shell cd does not trigger discovery' : 'DESIGN.md is not auto-injected; read it explicitly when needed' }
+          result = await withDocLock(root, path, async () => {
+            await assertTargetSafe(root, path)
+            let existing
+            try { existing = await readFile(path, 'utf8') } catch (error) { if (error?.code !== 'ENOENT') throw error }
+            if (existing !== undefined) {
+              const current = sha256(existing)
+              if (!args?.expectedSha256) throw new DocError(`file exists; pass expectedSha256=${current}`, 'PROJECT_DOC_EXISTS')
+              if (args.expectedSha256 !== current) throw new DocError(`hash mismatch; current=${current}`, 'PROJECT_DOC_CONFLICT')
+            } else if (args?.expectedSha256) {
+              throw new DocError('expectedSha256 was provided but the file does not exist', 'PROJECT_DOC_NOT_FOUND')
+            }
+            const content = assertWritable(args.content)
+            const bytes = Buffer.byteLength(content, 'utf8')
+            const temp = `${path}.${randomUUID()}.tmp`
+            await mkdir(dirname(path), { recursive: true, mode: 0o700 })
+            try {
+              await writeFile(temp, content, { encoding: 'utf8', mode: 0o600 })
+              await rename(temp, path)
+            } finally { await rm(temp, { force: true }) }
+            return { action, status: 'ok', kind: args.kind, path, mode: existing === undefined ? 'created' : 'updated', bytes, warnings: checked.warnings, sha256: sha256(content), ...(existing !== undefined ? { expectedSha256: sha256(existing) } : {}), refreshHint: args.kind === 'agents' ? 'call the structured read tool on this path (or reopen the session) so DSH refreshes the injected instructions; shell cd does not trigger discovery' : 'DESIGN.md is not auto-injected; read it explicitly when needed' }
+          })
         }
         record('docs', `${action}Calls`)
         logDiagnostic(ctx, exec, { mechanism: 'docs', event: 'success', reason: `docs-${action}`, provider: action, elapsedMs: Date.now() - started, resultCount: result.docs?.length ?? 1 })

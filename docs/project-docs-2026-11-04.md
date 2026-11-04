@@ -36,10 +36,12 @@ AGENTS.md 和 DESIGN.md 会持续影响后续 agent 的行为，因此不能当�
 安全边界：
 
 - 只允许 `AGENTS.md` / `DESIGN.md` 两个文件名；
-- 路径必须留在当前工作区；
+- 路径必须留在当前工作区；`read`/`status` 拒绝或标记 symlink，写入前校验最近已存在父目录的 realpath；
 - 已有文件没有正确 hash 就失败，不静默覆盖；
 - 拒绝 PEM 私钥和明显 `sk-...` 密钥；
 - 最大 64KB；
+- 写入通过 `.patchwork/locks/` 文件锁串行化；锁超过 30 秒视为陈旧；拿不到锁返回 `PROJECT_DOC_LOCKED`；
+- 不依赖代码检索开关；`codeEnabled:false` 时仍注册；
 - 不自动创建、不自动改项目规则、不授予权限。
 
 ## 使用顺序

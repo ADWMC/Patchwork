@@ -103,7 +103,7 @@ export function registerCodeTool(ctx, config = {}) {
           enabled: { type: 'boolean' }, started: { type: 'boolean' }, configPath: { type: 'string' }, configExists: { type: 'boolean' },
           configStatus: { type: 'string' }, maxFiles: { type: 'integer' }, maxFileBytes: { type: 'integer' }, tokenBudget: { type: 'integer' },
           exclude: { type: 'array', items: { type: 'string' } }, callers: { type: 'array', items: { type: 'object', additionalProperties: true } },
-          callees: { type: 'array', items: { type: 'object', additionalProperties: true } }, impacted: { type: 'array', items: { type: 'object', additionalProperties: true } },
+          callees: { type: 'array', items: { type: 'object', additionalProperties: true } }, targets: { type: 'array', items: { type: 'object', additionalProperties: true } }, ambiguous: { type: 'boolean' }, impacted: { type: 'array', items: { type: 'object', additionalProperties: true } },
           tests: { type: 'array', items: { type: 'string' } }, dependents: { type: 'array', items: { type: 'string' } }, depth: { type: 'integer' },
         },
         required: ['action', 'status'], additionalProperties: true,

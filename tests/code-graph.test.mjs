@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { scopedAgent } from './helpers/agent.mjs'
 import { registerCodeTool } from '../src/code/tool.mjs'
+import { affectedTests, buildCodeIndex } from '../src/code/code-index.mjs'
 
 async function fixture() {
   process.env.DSH_HOME = await mkdtemp(join(tmpdir(), 'patchwork-code-graph-home-'))
@@ -67,4 +68,16 @@ test('workspace config excludes are honored and invalid config fails closed', as
     const broken = await f.tool.execute({ action: 'graph-status' }, { agent: f.agent })
     assert.equal(broken.status, 'failed'); assert.equal(broken.failureCode, 'CODE_GRAPH_CONFIG_INVALID')
   } finally { f.dispose() }
+})
+
+test('affected tests resolve tsconfig path aliases', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'patchwork-code-alias-'))
+  await mkdir(join(root, 'src'))
+  await mkdir(join(root, 'test'))
+  await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ compilerOptions: { baseUrl: '.', paths: { '@/*': ['src/*'] } } }))
+  await writeFile(join(root, 'src', 'target.mjs'), 'export function target() { return 1 }')
+  await writeFile(join(root, 'test', 'target.test.mjs'), "import { target } from '@/target.mjs'; target()")
+  const index = await buildCodeIndex(root, { refresh: true })
+  const result = affectedTests(index, { files: ['src/target.mjs'] })
+  assert.ok(result.tests.includes('test/target.test.mjs'))
 })

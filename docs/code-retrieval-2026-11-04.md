@@ -124,6 +124,9 @@ npm run audit:verify
 ## 8. 边界
 
 - 词法 `references` 不是 LSP；跨文件类型推断、重命名和语义引用仍需人工或后续 LSP 实验。
+- `affected` 支持相对 import 和 `tsconfig.json`/`jsconfig.json` 的 `paths` 别名；包名导入、条件 `exports` 仍可能漏。
+- `callers`/`callees`/`impact` 返回 `targets` 和 `ambiguous`；同名符号跨文件时先看目标，不能把合并结果当语义唯一。
 - 当前不引入 tree-sitter/embedding；若真实任务集证明词法漏召回，再按[人类式认知方案](plan-human-like-agent-2026-11-04.md) P2 隔离评估。
+- `map/search` 的文件 token 使用 Bloom 预筛；查询有英文标识符时只扫描可能命中的文件，无 token 或正则查询才回退全量扫描。
 - 索引缓存是性能优化，不是权威源；删除缓存后重建不得复活已删除文件内容。
 - 真实模型报告是单次运行证据，不是普遍正确性声明。

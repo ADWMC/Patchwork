@@ -2,7 +2,7 @@ import { effectiveConfig, readUserConfig, configRevision } from '../config/user-
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { isAbsolute, join } from 'node:path'
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { lstatSync, readFileSync } from 'node:fs'
 import { readWorkspaceConfigSync } from '../code/workspace-config.mjs'
 import { isCodeGraphStarted } from '../code/tool.mjs'
 import { webRuntime } from './web-runtime.mjs'
@@ -129,9 +129,12 @@ function projectDocsSnapshot(agent) {
   if (typeof cwd !== 'string' || !isAbsolute(cwd)) return null
   const read = name => {
     try {
+      const info = lstatSync(join(cwd, name))
+      if (info.isSymbolicLink()) return { name, exists: true, symlink: true, bytes: null, sha256: null }
+      if (info.size > 64 * 1024) return { name, exists: true, symlink: false, bytes: info.size, sha256: null, tooLarge: true }
       const content = readFileSync(join(cwd, name), 'utf8')
-      return { name, exists: true, bytes: Buffer.byteLength(content, 'utf8'), sha256: createHash('sha256').update(content).digest('hex') }
-    } catch { return { name, exists: false, bytes: null, sha256: null } }
+      return { name, exists: true, symlink: false, bytes: Buffer.byteLength(content, 'utf8'), sha256: createHash('sha256').update(content).digest('hex') }
+    } catch { return { name, exists: false, symlink: false, bytes: null, sha256: null } }
   }
   return { agents: read('AGENTS.md'), design: read('DESIGN.md') }
 }

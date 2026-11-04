@@ -3,12 +3,11 @@ import { mkdir, open, readFile, readdir, realpath, stat, writeFile } from 'node:
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 
-export const CODE_INDEX_SCHEMA = 2
+export const CODE_INDEX_SCHEMA = 5
 export const CODE_DEFAULTS = Object.freeze({
   maxFiles: 4000,
   maxFileBytes: 512 * 1024,
   maxResults: 30,
-  maxResultFiles: 40,
   maxTokenBudget: 8000,
   maxQueryChars: 300,
   cacheMaxAgeMs: 5 * 60 * 1000,
@@ -17,11 +16,13 @@ export const CODE_DEFAULTS = Object.freeze({
 const HARD_IGNORED_DIRS = new Set([
   '.git', '.hg', '.svn', 'node_modules', 'bower_components', 'dist', 'build', 'out', 'coverage',
   '.next', '.nuxt', '.cache', '.parcel-cache', '.turbo', '.venv', 'venv', '__pycache__',
-  '.mypy_cache', '.pytest_cache', 'target', 'vendor', 'Pods', 'DerivedData',
+  '.mypy_cache', '.pytest_cache', 'target', 'vendor', 'Pods', 'DerivedData', '.patchwork', '.codegraph',
 ])
 const SENSITIVE_NAMES = new Set(['.env', '.npmrc', '.pypirc', '.netrc', 'id_rsa', 'id_dsa', 'id_ecdsa', 'id_ed25519', 'credentials', 'secrets'])
 const SENSITIVE_EXT = new Set(['.pem', '.key', '.p12', '.pfx', '.jks', '.keystore'])
 const ENTRY_NAMES = new Set(['index', 'main', 'app', 'server', 'cli', 'bootstrap', 'entry'])
+const BLOOM_BYTES = 256
+const BLOOM_BITS = BLOOM_BYTES * 8
 const TEST_RE = /(^|\/)(__tests__|test|tests|spec)(\/|$)|\.(test|spec)\.[^.]+$/i
 
 export class CodeError extends Error {
@@ -80,6 +81,41 @@ export function isIgnoredPath(rel, rules = []) {
   if (parts.some(part => HARD_IGNORED_DIRS.has(part))) return true
   if (/\.(min\.(js|css)|map|lock|snap|wasm|zip|gz|tgz|7z|rar|png|jpe?g|gif|webp|ico|pdf|mp4|mov|woff2?|ttf|otf|eot|exe|dll|so|dylib|class|jar)$/i.test(clean)) return true
   return rules.some(regex => regex.test(clean))
+}
+
+function bloomHash(value) {
+  let hash = 2166136261
+  for (let i = 0; i < value.length; i++) { hash ^= value.charCodeAt(i); hash = Math.imul(hash, 16777619) }
+  return hash >>> 0
+}
+
+function bloomFor(text) {
+  const bytes = Buffer.alloc(BLOOM_BYTES)
+  const seen = new Set()
+  for (const token of text.match(/[A-Za-z_$][A-Za-z0-9_$]*/g) ?? []) {
+    if (token.length < 2 || seen.has(token)) continue
+    seen.add(token)
+    for (const seed of [0, 1, 2]) {
+      const bit = bloomHash(`${seed}:${token}`) % BLOOM_BITS
+      bytes[bit >> 3] |= 1 << (bit & 7)
+    }
+  }
+  return bytes.toString('base64')
+}
+
+function bloomHas(bloom, token) {
+  if (typeof bloom !== 'string') return true
+  let bytes
+  try { bytes = Buffer.from(bloom, 'base64') } catch { return true }
+  for (const seed of [0, 1, 2]) {
+    const bit = bloomHash(`${seed}:${token}`) % BLOOM_BITS
+    if (!(bytes[bit >> 3] & (1 << (bit & 7)))) return false
+  }
+  return true
+}
+
+function queryTokens(query) {
+  return [...new Set((String(query).match(/[A-Za-z_$][A-Za-z0-9_$]*/g) ?? []).filter(token => token.length >= 2))].slice(0, 8)
 }
 
 export function languageFor(path) {
@@ -266,6 +302,26 @@ async function loadCache(root, head) {
   } catch { return null }
 }
 
+async function readAliases(root) {
+  for (const name of ['tsconfig.json', 'jsconfig.json']) {
+    try {
+      const raw = await readFile(join(root, name), 'utf8')
+      const clean = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/,\s*([}\]])/g, '$1')
+      const parsed = JSON.parse(clean)
+      const options = parsed?.compilerOptions ?? {}
+      const baseUrl = typeof options.baseUrl === 'string' ? normalizeRel(options.baseUrl) : ''
+      const paths = options.paths && typeof options.paths === 'object' ? options.paths : {}
+      const aliases = []
+      for (const [pattern, targets] of Object.entries(paths)) {
+        if (typeof pattern !== 'string' || !Array.isArray(targets)) continue
+        for (const target of targets) if (typeof target === 'string') aliases.push({ pattern, target, baseUrl })
+      }
+      if (aliases.length) return aliases
+    } catch { /* try next config */ }
+  }
+  return []
+}
+
 async function saveCache(root, data) {
   try {
     const dir = indexRoot(root)
@@ -292,12 +348,12 @@ export async function buildCodeIndex(root, { refresh = false, maxFiles = CODE_DE
     const parsed = extractSymbols(text, live.path)
     const firstLine = text.split(/\r?\n/, 1)[0] ?? ''
     files.push({
-      ...live, language: parsed.language, lines: parsed.lines, symbols: parsed.symbols, imports: parsed.imports,
+      ...live, language: parsed.language, lines: parsed.lines, symbols: parsed.symbols, imports: parsed.imports, bloom: bloomFor(text),
       test: TEST_RE.test(live.path), generated: /@generated|do not edit|auto-generated/i.test(firstLine) || text.split(/\r?\n/).some(line => line.length > 2000),
     })
   }
   const result = {
-    schemaVersion: CODE_INDEX_SCHEMA, root, gitHead: head, builtAt: new Date().toISOString(),
+    schemaVersion: CODE_INDEX_SCHEMA, root, gitHead: head, aliases: await readAliases(root), builtAt: new Date().toISOString(),
     cacheHit: Boolean(cached), truncated: walked.truncated, ignoredFiles: walked.ignored, files,
   }
   await saveCache(root, result)
@@ -344,7 +400,8 @@ async function readFileText(root, file, maxBytes) {
   } catch { return null }
 }
 
-export async function searchCode(index, { query, mode = 'literal', caseSensitive = true, path, glob, maxResults = CODE_DEFAULTS.maxResults, maxFiles = CODE_DEFAULTS.maxResultFiles } = {}) {
+export async function searchCode(index, { query, mode = 'literal', caseSensitive = true, path, glob, maxResults = CODE_DEFAULTS.maxResults, maxFiles = null } = {}) {
+  const scanLimit = maxFiles === null ? index.files.length : Math.max(1, Math.min(index.files.length, Math.trunc(Number(maxFiles) || index.files.length)))
   const matcher = compileMatcher(query, mode, caseSensitive)
   const rawPath = path ? normalizeRel(path).replace(/\/$/, '') : null
   const pathFilter = rawPath && rawPath !== '.' ? rawPath : null
@@ -354,11 +411,18 @@ export async function searchCode(index, { query, mode = 'literal', caseSensitive
     if (globRegex && !globRegex.test(file.path)) return false
     return true
   })
-  const ranked = records.slice().sort((a, b) => Number(Boolean(b.test)) - Number(Boolean(a.test)) || Number(Boolean(a.generated)) - Number(Boolean(b.generated)))
+  let ranked = records.slice().sort((a, b) => Number(Boolean(b.test)) - Number(Boolean(a.test)) || Number(Boolean(a.generated)) - Number(Boolean(b.generated)))
+  if (mode !== 'regex') {
+    const tokens = queryTokens(query)
+    if (tokens.length) {
+      const candidates = ranked.filter(file => tokens.every(token => bloomHas(file.bloom, token)))
+      if (candidates.length) ranked = candidates
+    }
+  }
   const matches = []
   let scanned = 0, truncated = false
   for (const file of ranked) {
-    if (scanned >= maxFiles) { truncated = true; break }
+    if (scanned >= scanLimit) { truncated = true; break }
     scanned++
     const read = await readFileText(index.root, file, CODE_DEFAULTS.maxFileBytes)
     if (!read) continue
@@ -465,6 +529,7 @@ function enclosingSymbol(file, line) {
 export async function callersOf(index, { symbol, maxResults = CODE_DEFAULTS.maxResults } = {}) {
   if (typeof symbol !== 'string' || !symbol.trim()) throw new CodeError('symbol is required', 'CODE_SYMBOL_REQUIRED')
   const target = symbol.trim()
+  const targets = index.files.flatMap(file => (file.symbols ?? []).filter(item => item.name === target).map(item => ({ name: item.name, path: file.path, line: item.line, kind: item.kind })))
   const searched = await searchCode(index, { query: target, mode: 'word', caseSensitive: true, maxResults: 100 })
   const callers = [], seen = new Set()
   for (const match of searched.matches) {
@@ -477,7 +542,7 @@ export async function callersOf(index, { symbol, maxResults = CODE_DEFAULTS.maxR
     callers.push({ name: caller.name, kind: caller.kind, path: match.path, line: caller.line, callLine: match.line, test: Boolean(file?.test) })
     if (callers.length >= maxResults) break
   }
-  return { symbol: target, callers, matchCount: searched.matches.length, truncated: searched.truncated || callers.length >= maxResults, lexical: true }
+  return { symbol: target, targets, ambiguous: targets.length > 1, callers, matchCount: searched.matches.length, truncated: searched.truncated || callers.length >= maxResults, lexical: true }
 }
 
 /** Direct callees inside a symbol body; names are matched to indexed definitions when possible. */
@@ -509,7 +574,7 @@ export async function calleesOf(index, { symbol, maxResults = CODE_DEFAULTS.maxR
     }
     if (callees.length >= maxResults) break
   }
-  return { symbol: target, definitions: definitions.length, callees, truncated: callees.length >= maxResults || predefined.truncated, lexical: true }
+  return { symbol: target, targets: definitions.map(item => ({ name: item.symbol, path: item.path, line: item.line, kind: item.symbolKind })), ambiguous: definitions.length > 1, definitions: definitions.length, callees, truncated: callees.length >= maxResults || predefined.truncated, lexical: true }
 }
 
 /** Reverse-call impact approximation, bounded by depth and node count. */
@@ -518,7 +583,7 @@ export async function impactOf(index, { symbol, depth = 2, maxNodes = 80 } = {})
   const limit = Math.max(1, Math.min(4, Math.trunc(Number(depth) || 2)))
   const cap = Math.max(1, Math.min(200, Math.trunc(Number(maxNodes) || 80)))
   const start = symbol.trim()
-  const visited = new Set([start])
+  const visited = new Set([`target:${start}`])
   const impacted = [], queue = [{ name: start, depth: 0 }]
   let truncated = false
   while (queue.length) {
@@ -526,22 +591,36 @@ export async function impactOf(index, { symbol, depth = 2, maxNodes = 80 } = {})
     if (current.depth >= limit) continue
     const result = await callersOf(index, { symbol: current.name, maxResults: 100 })
     for (const caller of result.callers) {
-      if (visited.has(caller.name)) continue
-      visited.add(caller.name)
+      const key = `${caller.path}:${caller.name}`
+      if (visited.has(key)) continue
+      visited.add(key)
       impacted.push({ ...caller, depth: current.depth + 1 })
       queue.push({ name: caller.name, depth: current.depth + 1 })
       if (impacted.length >= cap) { truncated = true; break }
     }
     if (truncated) break
   }
-  return { symbol: start, depth: limit, impacted, tests: impacted.filter(item => item.test), truncated, lexical: true }
+  return { symbol: start, targets: (index.files.flatMap(file => (file.symbols ?? []).filter(item => item.name === start).map(item => ({ name: item.name, path: file.path, line: item.line, kind: item.kind })))), ambiguous: index.files.reduce((n, file) => n + (file.symbols ?? []).filter(item => item.name === start).length, 0) > 1, depth: limit, impacted, tests: impacted.filter(item => item.test), truncated, lexical: true }
+}
+
+function aliasCandidates(index, specifier) {
+  const found = []
+  for (const alias of index.aliases ?? []) {
+    const star = alias.pattern.indexOf('*')
+    if (star < 0) { if (specifier === alias.pattern) found.push({ target: alias.target, baseUrl: alias.baseUrl }); continue }
+    const prefix = alias.pattern.slice(0, star), suffix = alias.pattern.slice(star + 1)
+    if (!specifier.startsWith(prefix) || !specifier.endsWith(suffix)) continue
+    const middle = specifier.slice(prefix.length, specifier.length - suffix.length)
+    found.push({ target: alias.target.replace('*', middle), baseUrl: alias.baseUrl })
+  }
+  return found.map(item => normalizeRel(join(item.baseUrl, item.target)))
 }
 
 function resolveSpecifier(index, fromPath, specifier) {
-  if (typeof specifier !== 'string' || !specifier.startsWith('.')) return null
-  const base = normalizeRel(join(dirname(fromPath), specifier))
-  const candidates = [base, ...['.mjs', '.js', '.cjs', '.jsx', '.ts', '.tsx', '.py', '.go', '.rs'].map(ext => base + ext),
-    ...['index.mjs', 'index.js', 'index.ts', 'index.tsx', '__init__.py'].map(name => `${base}/${name}`)]
+  if (typeof specifier !== 'string') return null
+  const bases = specifier.startsWith('.') ? [normalizeRel(join(dirname(fromPath), specifier))] : aliasCandidates(index, specifier)
+  const candidates = bases.flatMap(base => [base, ...['.mjs', '.js', '.cjs', '.jsx', '.ts', '.tsx', '.py', '.go', '.rs'].map(ext => base + ext),
+    ...['index.mjs', 'index.js', 'index.ts', 'index.tsx', '__init__.py'].map(name => `${base}/${name}`)])
   return candidates.find(candidate => index.files.some(file => file.path === candidate)) ?? null
 }
 

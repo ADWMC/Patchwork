@@ -5,12 +5,15 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { scopedAgent } from './helpers/agent.mjs'
 import { registerCodeTool } from '../src/code/tool.mjs'
+import { buildCodeIndex, callersOf, searchCode } from '../src/code/code-index.mjs'
 
 async function fixture() {
   process.env.DSH_HOME = await mkdtemp(join(tmpdir(), 'patchwork-code-tool-'))
   const root = await mkdtemp(join(tmpdir(), 'patchwork-code-work-'))
   await mkdir(join(root, 'src'))
   await mkdir(join(root, 'node_modules', 'pkg'), { recursive: true })
+  await mkdir(join(root, '.patchwork'), { recursive: true })
+  await writeFile(join(root, '.patchwork', 'config.json'), '{"not":"code"}\n')
   await writeFile(join(root, 'src', 'math.mjs'), [
     "import { readFile } from 'node:fs/promises'",
     'export function sum(a, b) { return a + b }',
@@ -81,4 +84,21 @@ test('code tool rejects path traversal, invalid regex and non-Patchwork scope', 
     f.agent.selectPreset('standard')
     await assert.rejects(f.tool.execute({ action: 'map' }, { agent: f.agent }), /Patchwork/)
   } finally { f.dispose() }
+})
+
+test('code graph scans all indexed files, not only the first result page', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'patchwork-code-scan-'))
+  await mkdir(join(root, 'src'))
+  await writeFile(join(root, 'src', 'target.mjs'), 'export function target() { return 1 }\n')
+  for (let i = 0; i < 60; i++) {
+    const body = i === 59
+      ? "import { target } from './target.mjs'\nexport function lastCaller() { return target() }\n"
+      : `export const v${i} = ${i}\n`
+    await writeFile(join(root, 'src', `z${String(i).padStart(2, '0')}.mjs`), body)
+  }
+  const index = await buildCodeIndex(root, { refresh: true })
+  const callers = await callersOf(index, { symbol: 'target' })
+  assert.ok(callers.callers.some(caller => caller.name === 'lastCaller'))
+  const search = await searchCode(index, { query: 'lastCaller', mode: 'word' })
+  assert.ok(search.scanned < index.files.length, 'bloom prefilter should avoid scanning unrelated files')
 })

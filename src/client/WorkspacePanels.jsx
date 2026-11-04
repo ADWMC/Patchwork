@@ -129,7 +129,7 @@ function ProjectDocsPanel({ docs }) {
   if (!docs) return null
   const items = ['agents', 'design'].map(key => {
     const item = docs[key]
-    return { label: key === 'agents' ? 'AGENTS.md' : 'DESIGN.md', value: item?.exists ? `${formatBytes(item.bytes) ?? item.bytes + ' B'} · ${item.sha256.slice(0, 8)}` : '未创建' }
+    return { label: key === 'agents' ? 'AGENTS.md' : 'DESIGN.md', value: item?.symlink ? '符号链接（不支持）' : item?.tooLarge ? `${formatBytes(item.bytes) ?? item.bytes + ' B'} · 过大` : item?.exists ? `${formatBytes(item.bytes) ?? item.bytes + ' B'} · ${item.sha256.slice(0, 8)}` : '未创建' }
   })
   return <section className="pw-section" aria-label="项目文档"><SectionHeading title="项目文档" description="AGENTS.md 和 DESIGN.md 会持续影响后续 agent；修改必须带当前 hash，防止静默覆盖。"/><SummaryStrip label="项目文档状态" items={items}/><p className="pw-live-note">由 patchwork_project_docs 读取/校验/写入；只允许这两个文件名，不授予权限。</p></section>
 }
