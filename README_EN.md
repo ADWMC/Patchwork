@@ -50,7 +50,7 @@ pnpm build:client
 npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 ```
 
-This creates a local tarball without publishing to npm or installing into DSH. The package version is `1.0.0`; see the [changelog](CHANGELOG.md) for released changes.
+This creates a local tarball without publishing to npm or installing into DSH. The package version is `1.0.1`; see the [changelog](CHANGELOG.md) for released changes.
 
 ### 2. Install into the DSH instance you choose
 
@@ -58,7 +58,7 @@ Replace `DSH_HOME` with an **initialized instance that already has its model con
 
 ```powershell
 $env:DSH_HOME = 'C:\dsh\patchwork-demo'
-dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-1.0.0.tgz"
+dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-1.0.1.tgz"
 ```
 
 Patchwork uses the host's model and permission settings. `engines.dsh` declares `>=0.2.1-rc.2 <0.3.0-0`; `@deepseek-ai/dsh-agent-preset`, `@deepseek-ai/dsh-home-paths` and `@deepseek-ai/dsh-llm` remain peer dependencies supplied by the target host, so the published package never pins an older copy over it. DSH 0.2.1-rc.2, 0.2.1-rc.5 and 0.2.2-alpha.3 pass the same 452-test suite. The bundled profile template still targets rc.5; other hosts can let `dsh plugin add` create the profile, or run `node scripts/set-dsh-version.mjs <version> --install` in a source checkout. Hosts older than rc.2 or newer than the 0.2.x line are refused by `engines.dsh`.

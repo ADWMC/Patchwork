@@ -1,6 +1,6 @@
 {
   "name": "@patchwork/coding-agent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Maintainable coding agent for DeepSeek Harness.",
   "repository": {
     "type": "git",

@@ -12,10 +12,18 @@ const controllers = new WeakMap(), live = new Set(), workers = new Map(), worksp
 const snapshotFailures = new WeakSet()
 const activeStatuses = new Set(['starting', 'running'])
 const digest = value => createHash('sha256').update(typeof value === 'string' || Buffer.isBuffer(value) ? value : JSON.stringify(value)).digest('hex')
+function normalizePath(path) {
+  if (process.platform !== 'win32') return path
+  // GitHub runners and some Windows APIs return extended-length `\\?\` paths.
+  // Strip them before comparing, or a valid in-workspace artifact looks absolute.
+  if (path.startsWith('\\\\?\\UNC\\')) return ('\\\\' + path.slice(7)).toLowerCase()
+  if (path.startsWith('\\\\?\\')) return path.slice(4).toLowerCase()
+  return path.toLowerCase()
+}
 function workspaceKey(cwd) {
   let path
   try { path = realpathSync(cwd) } catch { path = resolve(cwd) }
-  return process.platform === 'win32' ? path.toLowerCase() : path
+  return normalizePath(path)
 }
 export function managedWorker(agent) { return workers.get(agent?.session?.header?.id) }
 export function workerBinding(agent) { const b = managedWorker(agent); return b && !b.revoked && b.controller.valid(b.epoch) ? b : undefined }
@@ -282,10 +290,11 @@ export class SuperagentController {
       const next = structuredClone(this.state), job = next.jobs.find(j => j.id === id)
       if (!job || job.status !== 'review' || !job.evidence?.reviewable || evidenceVersion !== job.evidence.version) throw new Error('Current reviewable evidence version required')
       for (const artifact of accept ? job.evidence.artifacts ?? [] : []) {
-        const within = relative(this.workspace, realpathSync(artifact.path))
+        const resolved = realpathSync(artifact.path)
+        const within = relative(this.workspace, normalizePath(resolved))
         if (!within || within === '..' || within.startsWith('..' + (process.platform === 'win32' ? '\\' : '/')) || isAbsolute(within)) throw new Error('Artifact is outside the controller workspace')
         const s = statSync(artifact.path)
-        if (realpathSync(artifact.path) !== artifact.path || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
+        if (normalizePath(resolved) !== normalizePath(artifact.path) || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
       }
       job.disposition = { source: 'user-confirmed', accepted: accept === true, evidenceVersion, at: new Date().toISOString() }
       job.status = accept ? 'done' : 'blocked'; job.recovery = accept ? null : 'User rejected this result; correct and retry'
