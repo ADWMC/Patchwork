@@ -293,7 +293,7 @@ export class SuperagentController {
         const resolved = normalizePath(realpathSync(artifact.path))
         const separator = process.platform === 'win32' ? '\\' : '/'
         const within = resolved === this.workspace || resolved.startsWith(this.workspace + separator)
-        if (!within) throw new Error(`Artifact is outside the controller workspace: ${resolved}`)
+        if (!within) throw new Error(`Artifact is outside the controller workspace: artifact=${resolved} workspace=${this.workspace}`)
         const s = statSync(artifact.path)
         if (resolved !== normalizePath(artifact.path) || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
       }
