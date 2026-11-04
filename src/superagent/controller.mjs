@@ -1,6 +1,6 @@
 import { realpathSync, statSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
-import { resolve, relative, isAbsolute } from 'node:path'
+import { resolve } from 'node:path'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { isPatchworkAgent, requirePatchworkAgent } from '../scope.mjs'
 import { taskProjection, flushTasks } from '../task/store.mjs'
@@ -290,11 +290,12 @@ export class SuperagentController {
       const next = structuredClone(this.state), job = next.jobs.find(j => j.id === id)
       if (!job || job.status !== 'review' || !job.evidence?.reviewable || evidenceVersion !== job.evidence.version) throw new Error('Current reviewable evidence version required')
       for (const artifact of accept ? job.evidence.artifacts ?? [] : []) {
-        const resolved = realpathSync(artifact.path)
-        const within = relative(this.workspace, normalizePath(resolved))
-        if (!within || within === '..' || within.startsWith('..' + (process.platform === 'win32' ? '\\' : '/')) || isAbsolute(within)) throw new Error('Artifact is outside the controller workspace')
+        const resolved = normalizePath(realpathSync(artifact.path))
+        const separator = process.platform === 'win32' ? '\\' : '/'
+        const within = resolved === this.workspace || resolved.startsWith(this.workspace + separator)
+        if (!within) throw new Error(`Artifact is outside the controller workspace: ${resolved}`)
         const s = statSync(artifact.path)
-        if (normalizePath(resolved) !== normalizePath(artifact.path) || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
+        if (resolved !== normalizePath(artifact.path) || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
       }
       job.disposition = { source: 'user-confirmed', accepted: accept === true, evidenceVersion, at: new Date().toISOString() }
       job.status = accept ? 'done' : 'blocked'; job.recovery = accept ? null : 'User rejected this result; correct and retry'
