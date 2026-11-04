@@ -5,6 +5,8 @@ import { PANEL_CSS } from '../src/client/panel-styles.mjs'
 
 test('log presentation uses readable titles while preserving decision semantics', () => {
   assert.equal(logTitle({ mechanism: 'af', event: 'success' }), '接续执行完成')
+  assert.equal(logTitle({ mechanism: 'code', event: 'success' }), '代码检索完成')
+  assert.match(logReason({ reason: 'code-graph-started' }), /已启动/)
   assert.equal(logTitle({ mechanism: 'epr', event: 'decision', reason: 'retained' }), '关键证据已保留')
   assert.match(logReason({ reason: 'non-positive-saving' }), /预估节省不足/)
   assert.equal(logTitle({ mechanism: 'unknown', event: 'new-event' }), '机制运行记录')

@@ -3,8 +3,9 @@ import { createHash } from 'node:crypto'
 export const RECORD_TYPE = 'plugin:patchwork/diagnostic'
 export const LOG_LIMIT = 200
 export const LEVELS = new Set(['info', 'warn', 'error'])
-const MECHANISMS = new Set(['runtime', 'af', 'op', 'epr', 'occ', 'search', 'fetch', 'memory', 'improvement', 'browser'])
-const EVENTS = new Set(['loaded', 'inactive', 'boundary', 'decision', 'start', 'success', 'failure', 'noop', 'skipped', 'packed', 'recall', 'continued', 'incident', 'candidate', 'experiment', 'approval', 'rollback'])
+const MECHANISMS = new Set(['runtime', 'af', 'op', 'epr', 'occ', 'search', 'fetch', 'memory', 'improvement', 'browser', 'task', 'superagent', 'skill', 'evidence', 'settings', 'maintenance', 'code'])
+const EVENTS = new Set(['loaded', 'inactive', 'boundary', 'decision', 'start', 'success', 'failure', 'noop', 'skipped', 'packed', 'recall', 'continued', 'incident', 'candidate', 'experiment', 'approval', 'rollback',
+  'define', 'correct', 'artifact', 'check', 'assessment', 'cancel', 'handoff', 'inspect', 'submit', 'report', 'input', 'retry', 'pause', 'resume', 'reconcile', 'review', 'load', 'cite', 'compare', 'save', 'warning', 'blocked', 'propose', 'revise', 'confirm', 'forget', 'validity'])
 const REASONS = new Set([
   'enabled', 'no-tools', 'no-shell', 'shadow-failed', 'target-changed', 'command-failed', 'command-unverified', 'command-succeeded',
   'archive-failed', 'recall-failed', 'packed', 'recalled', 'scope-changed', 'exception', 'cancelled', 'timeout',
@@ -24,7 +25,13 @@ const REASONS = new Set([
   'invalid-url', 'ssrf-blocked', 'host-not-allowed', 'dns-failed', 'robots-denied', 'robots-unavailable',
   'response-too-large', 'unsupported-content-type', 'empty-content', 'transport-error', 'http-error',
   'improvement-started', 'improvement-completed', 'improvement-failed', 'provenance-required', 'user-confirmation-required',
-  'browser-completed', 'browser-failed', 'browser-no-progress',
+  'browser-completed', 'browser-failed', 'browser-no-progress', 'task-defined', 'task-corrected', 'task-artifact', 'task-check',
+  'task-assessment', 'task-candidate', 'task-cancelled', 'queue-submitted', 'queue-input', 'queue-retry', 'queue-review',
+  'queue-paused', 'queue-resumed', 'queue-cancelled', 'queue-reconciled', 'skill-loaded', 'evidence-cited', 'evidence-compared',
+  'settings-saved', 'structure-warning', 'evidence-hint', 'exploration-hint', 'memory-proposed', 'memory-revised', 'memory-confirmed', 'memory-forgotten', 'memory-validity',
+  'code-started', 'code-map', 'code-outline', 'code-find', 'code-references', 'code-search', 'code-failed',
+  'code-graph-status', 'code-graph-enabled', 'code-graph-disabled', 'code-graph-started', 'code-graph-stopped',
+  'code-callers', 'code-callees', 'code-impact', 'code-affected',
 ])
 const NUMBERS = ['sourceBytes', 'resultBytes', 'lines', 'offset', 'nextOffset', 'elapsedMs', 'contextTokens', 'afterTokens',
   'keepRecentTokens', 'estimatedSaving', 'measuredSaving', 'requests', 'remaining', 'carriedDebtTokens', 'breakeven', 'expectedRequests', 'evidenceItems', 'resultCount', 'providerCount', 'failedProviderCount']
@@ -32,6 +39,10 @@ const ERROR_CODES = new Set(['ENOSPC', 'EACCES', 'EPERM', 'ENOENT', 'EIO', 'ETIM
   'FETCH_INVALID_URL', 'FETCH_INVALID_OPTION', 'FETCH_SSRF_BLOCKED', 'FETCH_HOST_NOT_ALLOWED', 'FETCH_DNS_FAILED', 'FETCH_ROBOTS_DENIED',
   'FETCH_ROBOTS_UNAVAILABLE', 'FETCH_RESPONSE_TOO_LARGE', 'FETCH_UNSUPPORTED_CONTENT_TYPE', 'FETCH_EMPTY_CONTENT',
   'FETCH_TRANSPORT_ERROR', 'FETCH_HTTP_ERROR', 'FETCH_TIMEOUT', 'FETCH_ABORTED',
+  'CODE_INVALID_ACTION', 'CODE_INVALID_MODE', 'CODE_INVALID_REGEX', 'CODE_QUERY_REQUIRED', 'CODE_QUERY_TOO_LONG',
+  'CODE_SYMBOL_REQUIRED', 'CODE_PATH_REQUIRED', 'CODE_PATH_OUTSIDE_WORKSPACE', 'CODE_PATH_NOT_FOUND', 'CODE_PATH_NOT_FILE',
+  'CODE_FILE_NOT_INDEXED', 'CODE_WORKSPACE_REQUIRED', 'CODE_FAILED',
+  'CODE_GRAPH_CONFIG_INVALID', 'CODE_GRAPH_DISABLED', 'CODE_GRAPH_NOT_STARTED',
 ])
 
 export function fingerprint(value) {

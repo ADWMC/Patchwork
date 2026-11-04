@@ -1,6 +1,7 @@
 import { logDiagnostic } from '../logging/session-log.mjs'
 import { isPatchworkAgent, requirePatchworkAgent } from '../scope.mjs'
 import { decideCandidate, improvementSnapshot, proposeCandidate, runCandidateExperiment, recordIncident, rollbackCandidate } from './store.mjs'
+import { recentSourceReceipts } from './provenance.mjs'
 
 export const PATCHWORK_IMPROVEMENT_TOOL = 'patchwork_improvement'
 
@@ -9,6 +10,7 @@ const schema = { type: 'object', properties: {
   incident: { type: 'object', additionalProperties: true }, candidate: { type: 'object', additionalProperties: true }, experiment: { type: 'object', additionalProperties: true },
   eligibility: { type: 'object', additionalProperties: true }, incidents: { type: 'array', items: { type: 'object', additionalProperties: true } },
   candidates: { type: 'array', items: { type: 'object', additionalProperties: true } }, experiments: { type: 'array', items: { type: 'object', additionalProperties: true } },
+  receipts: { type: 'array', items: { type: 'object', additionalProperties: true } },
   automaticActivation: { type: 'string' }, activation: { type: 'string' },
   policy: { type: 'object', additionalProperties: true }, deduplicated: { type: 'boolean' },
 }, required: ['status'], additionalProperties: false }
@@ -19,7 +21,7 @@ export function registerImprovementTool(ctx, config = {}) {
   ctx.effect?.(() => () => cancellation.abort(), 'patchwork: cancel disposed improvement experiments')
   ctx.tools.register({
     name: PATCHWORK_IMPROVEMENT_TOOL,
-    description: 'Record failures and propose bounded Patchwork improvements. Candidates require real incident provenance and a baseline/candidate/held-out experiment. experiment runs the built-in isolated policy contract, not a model-quality benchmark; do not supply invented run metrics. Approval/trial apply only typed current-session policies after explicit user confirmation; rollback restores prior policy.',
+    description: 'Record failures and propose bounded Patchwork improvements. list includes recent source-receipt metadata; use a receipt id from receipts in incident.sourceReceiptIds. propose requires incidentIds, object, trigger, hypothesis, changeScope and typed patch. Candidates require real incident provenance and a baseline/candidate/held-out experiment. experiment runs the built-in isolated policy contract, not a model-quality benchmark; do not supply invented run metrics. Approval/trial apply only typed current-session policies after explicit user confirmation; rollback restores prior policy.',
     parameters: { type: 'object', properties: {
       action: { type: 'string', enum: ['list', 'incident', 'propose', 'experiment', 'approve', 'trial', 'rollback'] },
       kind: { type: 'string', enum: ['failure', 'correction', 'repeat', 'boundary', 'context-cost', 'ui-confusion', 'unverified-tool'] },
@@ -37,7 +39,7 @@ export function registerImprovementTool(ctx, config = {}) {
       logDiagnostic(ctx, exec, { mechanism: 'improvement', event: 'start', reason: 'improvement-started', provider: args?.action })
       try {
         let result
-        if (args.action === 'list') result = improvementSnapshot(agent)
+        if (args.action === 'list') result = { ...improvementSnapshot(agent), receipts: recentSourceReceipts(agent, { limit: 12 }) }
         else if (args.action === 'incident') result = recordIncident(agent, { ...args, action: args.actionText, sourceReceiptIds: args.sourceReceiptIds })
         else if (args.action === 'propose') result = proposeCandidate(agent, args)
         else if (args.action === 'experiment') result = await runCandidateExperiment(agent, args.candidateId, args.expectedRevision, { signal: exec.signal ? AbortSignal.any([exec.signal, cancellation.signal]) : cancellation.signal })

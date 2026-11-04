@@ -147,7 +147,7 @@ export function proposeCandidate(agent, input = {}) {
     sourceReceiptIds: incidentIds.flatMap(item => state.incidents.get(item).sourceReceiptIds), object: input.object, trigger: input.trigger,
     hypothesis: input.hypothesis, changeScope: input.changeScope, rollbackTarget: input.rollbackTarget || 'none', decision: 'proposed',
     activationScope: input.activationScope, patch: input.patch, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
-  if (!candidate.trigger || !candidate.hypothesis || !candidate.changeScope) return { status: 'failed', failureCode: 'IMPROVEMENT_CANDIDATE_FIELDS_REQUIRED' }
+  if (!candidate.trigger || !candidate.hypothesis || !candidate.changeScope) return { status: 'failed', failureCode: 'IMPROVEMENT_CANDIDATE_FIELDS_REQUIRED', missing: ['trigger', 'hypothesis', 'changeScope'].filter(key => !candidate[key]) }
   append(agent, state, 'candidate', candidate)
   return { status: 'committed', revision: state.revision, candidate: clean(candidate) }
 }

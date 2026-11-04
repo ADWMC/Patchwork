@@ -6,7 +6,7 @@
 > 实际采用的技能、四机制、任务回执及不采用项见[统一融合执行方案](upgrade/2026-10-30-integration.md)。
 > 当前运行时入口为 `src/runtime.mjs`；profile 根仅挂 Web 桥接，不采用下文的 systemPrompt 分段设计。
 >
-> 基座：当前 `@patchwork/coding-agent` 0.2.0 · DSH 0.2.0-rc.2
+> 基座：当前 `@patchwork/coding-agent` 0.2.0 · DSH 0.2.1-rc.5
 >
 > 目标：在**不牺牲正确性与可维护性**的前提下，显著降低长会话 token 消耗
 >

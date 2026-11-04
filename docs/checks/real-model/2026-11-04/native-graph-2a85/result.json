@@ -1,0 +1,81 @@
+{
+  "scenario": "native-code-graph",
+  "title": "Opt-in workspace graph started by the model",
+  "status": "passed",
+  "assertions": [
+    {
+      "id": "graph-status-observed",
+      "status": "passed",
+      "detail": "observed"
+    },
+    {
+      "id": "graph-start-observed",
+      "status": "passed",
+      "detail": "observed"
+    },
+    {
+      "id": "callers-observed",
+      "status": "passed",
+      "detail": "observed"
+    },
+    {
+      "id": "callees-observed",
+      "status": "passed",
+      "detail": "observed"
+    },
+    {
+      "id": "impact-observed",
+      "status": "passed",
+      "detail": "observed"
+    },
+    {
+      "id": "affected-observed",
+      "status": "passed",
+      "detail": "observed"
+    },
+    {
+      "id": "no-writes-or-shell",
+      "status": "passed",
+      "detail": "0 write/edit/shell calls"
+    },
+    {
+      "id": "no-tool-errors",
+      "status": "passed",
+      "detail": "0 tool errors"
+    }
+  ],
+  "task": {
+    "schemaVersion": 1,
+    "sessionId": "session-2a85cdda-e3a5-493a-a7e0-64e6aa1c0a03",
+    "taskId": "bd451916-72c0-4d69-84f9-f781f791effe",
+    "revision": 1,
+    "title": null,
+    "phase": "unassessed",
+    "understandingStatus": "unassessed",
+    "source": {
+      "kind": "observed-user-kind",
+      "eventId": "751d6a65-4004-4bd6-bb8e-38c78a769917"
+    },
+    "workspace": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace",
+    "references": [],
+    "instance": null,
+    "requirements": [],
+    "artifacts": [],
+    "receipts": [],
+    "candidates": [],
+    "corrections": [],
+    "inputIds": [
+      "84cf4066968d48c9d95bb86c04e8b2d385127dd3c9d8f22476dbc91917743e06"
+    ],
+    "brief": null,
+    "lastCorrection": null,
+    "status": "in-progress",
+    "policy": "structured-tools-only",
+    "persistence": "unavailable"
+  },
+  "toolErrors": 0,
+  "tools": [
+    "patchwork_code",
+    "read"
+  ]
+}

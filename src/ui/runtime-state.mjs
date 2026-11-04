@@ -1,10 +1,15 @@
 import { effectiveConfig, readUserConfig, configRevision } from '../config/user-config.mjs'
+import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import { isAbsolute } from 'node:path'
+import { readWorkspaceConfigSync } from '../code/workspace-config.mjs'
+import { isCodeGraphStarted } from '../code/tool.mjs'
 import { webRuntime } from './web-runtime.mjs'
 import { isPatchworkAgent, resolvePatchworkAgent } from '../scope.mjs'
 import { diagnosticSnapshot, logDiagnostic } from '../logging/session-log.mjs'
 import { fingerprint } from '../logging/schema.mjs'
 import { redactPreview } from '../logging/redact.mjs'
 import { taskProjection } from '../task/store.mjs'
+import { taskHandoff } from '../task/handoff.mjs'
 import { superagentSnapshot } from '../superagent/controller.mjs'
 import { retrievalSnapshot } from '../retrieval/ledger.mjs'
 import { memorySnapshot } from '../memory/store.mjs'
@@ -12,6 +17,9 @@ import { improvementSnapshot, recordIncident } from '../improvement/store.mjs'
 import { registerSourceReceipt } from '../improvement/provenance.mjs'
 import { revokePolicies } from '../improvement/policy.mjs'
 import { revokeMemoryOperations } from '../memory/store.mjs'
+import { snapshot as mechanismStatsSnapshot } from './mechanism-stats.mjs'
+import { planSnapshot } from '../mechanisms/online-context-compact/lifecycle.mjs'
+import { observationSnapshot } from '../mechanisms/observation-pack/index.mjs'
 
 export const STATE_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/state'
 const sessions = webRuntime.sessions
@@ -59,7 +67,73 @@ export function collectToolEvidence(exec, result) {
       action: '保留真实回执，等待有范围的候选和隔离实验',
     })
   }
+  // One bounded, model-visible nudge when exploration dominates and no edit
+  // has happened. It never blocks a legitimate search and is emitted once.
+  if (!state.explorationHinted && ['read', 'glob', 'grep', 'patchwork_code'].includes(exec.name)) {
+    const exploration = state.events.filter(event => ['read', 'glob', 'grep', 'patchwork_code'].includes(event.tool))
+    const edited = state.events.some(event => ['write', 'edit'].includes(event.tool))
+    if (exploration.length >= 8 && !edited) {
+      state.explorationHinted = true
+      state.pendingExplorationHint = '已连续进行多次源码探索且尚无编辑或验收。先用 patchwork_code map/outline 缩小范围；不要重复同一 grep/glob；到预算就报告卡点，不要继续换同义词。'
+      logDiagnostic(undefined, exec, { mechanism: 'maintenance', event: 'warning', reason: 'exploration-hint' })
+    }
+  }
   if (state.events.length > 100) { const removed = state.events.shift(); state.seen.delete(removed.id) }
+  logToolLifecycle(exec, result, canonical, exitCode)
+}
+
+const TASK_REASONS = { define: 'task-defined', correct: 'task-corrected', artifact: 'task-artifact', check: 'task-check', assessment: 'task-assessment', candidate: 'task-candidate', cancel: 'task-cancelled' }
+const QUEUE_REASONS = { submit: 'queue-submitted', input: 'queue-input', retry: 'queue-retry', review: 'queue-review', pause: 'queue-paused', resume: 'queue-resumed', cancel: 'queue-cancelled', reconcile: 'queue-reconciled' }
+
+/** Tool lifecycle diagnostics for capabilities whose own tool handlers do not log. */
+function logToolLifecycle(exec, result, canonical, exitCode) {
+  const name = exec?.name, action = exec?.arguments?.action
+  const failed = result?.isError || (Number.isInteger(exitCode) && exitCode !== 0) || canonical?.status === 'failed'
+  const level = failed ? 'warn' : 'info'
+  const emit = (mechanism, event, reason) => logDiagnostic(undefined, exec, { mechanism, event, reason, level, ...(Number.isInteger(exitCode) ? { exitCode } : {}) })
+  if (name === 'patchwork_task' && typeof action === 'string') {
+    const event = ['define', 'correct', 'artifact', 'check', 'assessment', 'candidate', 'cancel', 'handoff', 'inspect'].includes(action) ? action : 'decision'
+    emit('task', event, failed ? 'exception' : TASK_REASONS[action] ?? 'enabled')
+  } else if (name === 'patchwork_superagent' && typeof action === 'string') {
+    emit('superagent', action, failed ? 'exception' : QUEUE_REASONS[action] ?? 'enabled')
+  } else if (name === 'skill') {
+    emit('skill', 'load', failed ? 'exception' : 'skill-loaded')
+  } else if (name === 'patchwork_evidence' && typeof action === 'string') {
+    emit('evidence', action, failed ? 'exception' : action === 'compare' ? 'evidence-compared' : action === 'cite' ? 'evidence-cited' : 'enabled')
+  } else if (name === 'patchwork_browser') {
+    emit('browser', failed ? 'failure' : 'success', failed ? 'browser-failed' : 'browser-completed')
+  }
+}
+
+function explorationSnapshot(state) {
+  const events = state?.events ?? []
+  const counts = { read: 0, glob: 0, grep: 0, patchwork_code: 0 }
+  const seen = new Map()
+  let bytes = 0, duplicates = 0
+  for (const event of events) {
+    if (!(event.tool in counts)) continue
+    counts[event.tool]++
+    bytes += Number(event.bytes) || 0
+    const key = `${event.tool}\u0000${event.command ?? ''}\u0000${event.path ?? ''}`
+    const prior = seen.get(key) ?? 0
+    if (prior > 0) duplicates++
+    seen.set(key, prior + 1)
+  }
+  return { ...counts, duplicateQueries: duplicates, totalCalls: Object.values(counts).reduce((sum, value) => sum + value, 0), bytesRead: bytes }
+}
+
+function workspaceGraphSnapshot(agent) {
+  const cwd = agent?.session?.header?.cwd
+  if (typeof cwd !== 'string' || !isAbsolute(cwd)) return null
+  const info = readWorkspaceConfigSync(cwd)
+  const graph = info.config?.codeGraph
+  return {
+    status: info.status, configPath: '.patchwork/config.json', exists: info.status === 'loaded',
+    enabled: graph?.enabled === true, started: isCodeGraphStarted(cwd),
+    maxFiles: graph?.maxFiles ?? null, maxFileBytes: graph?.maxFileBytes ?? null,
+    tokenBudget: graph?.tokenBudget ?? null, exclude: graph?.exclude ?? [],
+    ...(info.failureCode ? { failureCode: info.failureCode } : {}),
+  }
 }
 
 export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
@@ -78,6 +152,7 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
       }
     } catch { /* Unavailable measurement remains unknown, never zero. */ }
   }
+  const stats = mechanismStatsSnapshot()
   return {
     schemaVersion: 1, generatedAt: new Date().toISOString(), sessionId,
     scope: 'current-process-session', status: state?.status ?? 'not-started',
@@ -91,6 +166,13 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
     }])),
     events: state ? [...state.events].reverse() : [],
     diagnostics: diagnosticSnapshot(state.agent),
+    stats,
+    exploration: explorationSnapshot(state),
+    code: { configured: loadedConfig.codeEnabled !== false, available: Boolean(state.agent.ctx?.tools?.get?.(`patchwork_code`, state.agent)), ...(stats.code ?? {}) },
+    codeGraph: workspaceGraphSnapshot(state.agent),
+    plan: planSnapshot(state.agent),
+    observations: observationSnapshot(state.agent),
+    taskHandoff: state ? (() => { try { return taskProjection(state.agent)?.title ? taskHandoff(state.agent) : null } catch { return null } })() : null,
     retrieval: retrievalSnapshot(state.agent),
     memory: memorySnapshot(state.agent, { includeValue: false, includeProject: false }),
     improvements: improvementSnapshot(state.agent),
@@ -123,6 +205,18 @@ export function registerRuntimeCollector(ctx, { rowConfig = {}, loadedConfig = {
     if (state) logDiagnostic(ctx, agent, { mechanism: 'runtime', event: 'loaded', reason: 'enabled' })
   })
   ctx.on('agent/status', ({ agent, status }) => { const state = track(agent); if (state) state.status = status })
+  ctx.on('agent/pre-step', async ({ agent }, next) => {
+    const decision = await next()
+    if (decision.kind !== 'enter' || !isPatchworkAgent(agent)) return decision
+    const state = sessions.get(idOf(agent))
+    if (!state?.pendingExplorationHint) return decision
+    const hint = state.pendingExplorationHint
+    state.pendingExplorationHint = null
+    return { ...decision, messages: [...decision.messages, createUserMessage({
+      content: [{ type: 'text', text: hint }],
+      source: { kind: 'patchwork', form: 'notice', summary: 'exploration hint' },
+    })] }
+  })
   ctx.on('tools/result', (exec, result) => { track(exec?.agent); collectToolEvidence(exec, result) })
   ctx.on('agent-preset/selected', sessionId => {
     const agent = ctx.get?.('agents')?.get?.(sessionId)

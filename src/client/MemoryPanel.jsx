@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, InlineEditor } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, InlineEditor, Switch } from '@deepseek-ai/dsh-client-ui-primitives'
 import { Input, Select } from './controls.jsx'
 import { EmptyState, PanelIcon, TechnicalDetails } from './panel-elements.jsx'
 import { Facets, SummaryStrip } from './workspace-elements.jsx'
@@ -33,6 +33,8 @@ export function MemoryPanel({ data, memoryAction, memoryQuery, onCurrent }) {
   const [refresh, setRefresh] = useState(0), [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('')
   const [readError, setReadError] = useState(''), [editor, setEditor] = useState(null), [confirmation, setConfirmation] = useState(null)
+  const [recallOpen, setRecallOpen] = useState(false), [recallQuery, setRecallQuery] = useState(''), [recallInclude, setRecallInclude] = useState(false)
+  const [recall, setRecall] = useState(null), [recallError, setRecallError] = useState(''), [recallLoading, setRecallLoading] = useState(false)
   const detailRef = useRef(null)
 
   useEffect(() => {
@@ -68,6 +70,14 @@ export function MemoryPanel({ data, memoryAction, memoryQuery, onCurrent }) {
     } catch (error) { setMessage(messageFor(error)); return false }
     finally { setBusy(false) }
   }
+  async function runRecall() {
+    setRecallLoading(true); setRecallError('')
+    try {
+      const result = await memoryQuery({ action: 'recall', query: recallQuery, includeProject: recallInclude ? 'true' : 'false', limit: '5' })
+      setRecall(result)
+    } catch (error) { setRecallError(messageFor(error)); setRecall(null) }
+    finally { setRecallLoading(false) }
+  }
   function request(action, entry, fields = {}) {
     if (action === 'confirm' && entry.visibility === 'session-private' && !entry.activationImpact?.length) return void act(action, entry.id)
     setConfirmation({ action, id: entry.id, fields, revision: snapshot.revision, names: [entry.key], shared: entry.visibility === 'project-shared', replacements: entry.activationImpact })
@@ -87,15 +97,24 @@ export function MemoryPanel({ data, memoryAction, memoryQuery, onCurrent }) {
   const saveDraft = () => { if (validDraft && !disabled) void act(editor.id ? 'revise' : 'propose', editor.id, { record: { key: editor.key, value: editor.value, kind: editor.kind, conditions: editor.conditions, visibility: editor.visibility } }, editor.revision) }
 
   return <>
-    <div className="pw-page-heading pw-heading-actions"><div><h2>记忆管理</h2><p>管理保存内容、适用条件与召回状态。</p></div><Button size="sm" variant="outline" disabled={disabled} onClick={() => openEditor()}>新增记忆</Button></div>
+    <div className="pw-page-heading pw-heading-actions"><div><h2>记忆管理</h2><p>管理保存内容、适用条件与召回状态。</p></div><div className="pw-actions"><Button size="sm" variant="outline" disabled={disabled} onClick={() => { setRecallOpen(value => !value); setRecallError('') }}>试召回</Button><Button size="sm" variant="outline" disabled={disabled} onClick={() => openEditor()}>新增记忆</Button></div></div>
     <p className="pw-live-note">自动注入已关闭。只在 Agent 显式召回时读取，单次最多 5 条；此管理页不会作为模型上下文发送。</p>
+    {recallOpen && <section className="pw-card pw-memory-recall" aria-label="记忆召回预览">
+      <h3>召回预览</h3><p className="pw-live-note">只读：按当前查询模拟 Agent 的显式召回，不改变任何记录。</p>
+      <div className="pw-toolbar"><div className="pw-search"><PanelIcon name="search"/><Input type="search" aria-label="召回查询" placeholder="查询标题、内容或适用条件" value={recallQuery} maxLength={256} onChange={event => setRecallQuery(event.target.value)}/></div><Button size="sm" variant="outline" disabled={recallLoading} onClick={runRecall}>{recallLoading ? '召回中…' : '执行召回'}</Button></div>
+      <div className="pw-actions"><Switch label="包含项目共享" checked={recallInclude} onChange={setRecallInclude}/><span className="pw-muted">默认只读本会话私有记忆</span></div>
+      {recallError && <p className="pw-error" role="alert">{recallError}</p>}
+      {recall && <><SummaryStrip label="召回结果统计" items={[{ label: '命中', value: recall.entries?.length ?? 0 }, { label: '上限', value: 5 }, { label: '范围', value: recall.includeProject ? '私有 + 项目' : '仅私有' }]}/>{recall.entries?.length ? recall.entries.map(entry => <article className="pw-memory-recall-row" key={entry.id}><div className="pw-heading-actions"><div><h3>{entry.key}</h3><p className="pw-muted">{scopeLabels[entry.visibility]} · {validityLabels[entry.validity]} · {entry.kind}</p></div><span className="pw-status">可按需召回</span></div><p className="pw-memory-preview">{entry.value}</p>{entry.conditions && <p className="pw-live-note">适用条件：{entry.conditions}</p>}</article>) : <EmptyState title="本次召回没有命中">只有已确认且有效的记忆会出现在这里；可调整查询或先确认提案。</EmptyState>}</>}
+      <p className="pw-live-note">召回结果只是候选事实，不授予工具、文件、发布或规则变更权限。</p>
+    </section>}
     {snapshot && <SummaryStrip label="所选范围记忆统计" items={[{ label: '待确认', value: snapshot.counts.proposed }, { label: '已确认', value: snapshot.counts.active }, { label: '历史', value: snapshot.counts.superseded }, { label: '已遗忘', value: snapshot.counts.revoked }]}/>}
     <section className="pw-card pw-memory-controls" aria-label="记忆筛选">
       <div className="pw-search"><PanelIcon name="search"/><Input type="search" aria-label="搜索记忆" placeholder="搜索标题、内容或适用条件" maxLength={256} value={query} onChange={event => filter(() => setQuery(event.target.value))}/></div>
-      <div className="pw-toolbar"><Select aria-label="记忆范围" value={scope} options={options(scopeLabels)} onChange={value => filter(() => setScope(value))}/><Select aria-label="记忆状态筛选" value={status} options={options(statusLabels)} onChange={value => filter(() => setStatus(value))}/><Select aria-label="记忆有效性筛选" value={validity} options={options(validityLabels)} onChange={value => filter(() => setValidity(value))}/><Button size="sm" variant="ghost" disabled={busy} onClick={() => setRefresh(value => value + 1)}>刷新记录</Button></div>
+      <div className="pw-toolbar"><Select aria-label="记忆范围" value={scope} options={options(scopeLabels)} onChange={value => filter(() => setScope(value))}/><Select aria-label="记忆有效性筛选" value={validity} options={options(validityLabels)} onChange={value => filter(() => setValidity(value))}/><Button size="sm" variant="ghost" disabled={busy} onClick={() => setRefresh(value => value + 1)}>刷新记录</Button></div>
       <Facets label="记忆快捷状态" value={status} onChange={value => filter(() => setStatus(value))} items={['all', 'proposed', 'active', 'superseded', 'revoked'].map(value => ({ value, label: statusLabels[value] }))}/>
       {snapshot?.quotas.map(quota => <p className="pw-muted" key={quota.visibility}>{scopeLabels[quota.visibility]}：{quota.used} / {quota.limit} 个保存版本（含待确认与历史）</p>)}
       {scope !== 'session-private' && <p className="pw-live-note">项目共享按工作目录隔离。其他 Patchwork 会话须显式包含项目记忆才能召回；此处的确认、暂停或遗忘会影响该共享记录。</p>}
+      {scope === 'session-private' && <p className="pw-live-note">项目共享记录需切换到「当前项目共享」查看；当前范围只显示本会话私有。</p>}
     </section>
     {(readError || data.memory?.failureCode) && <p role="alert" className="pw-error">{readError || errorLabels[data.memory.failureCode] || data.memory.failureCode}</p>}
     {message && <p className="pw-live-note" role="status">{message}</p>}
@@ -118,21 +137,21 @@ export function MemoryPanel({ data, memoryAction, memoryQuery, onCurrent }) {
       <div className="pw-actions"><Button size="sm" variant="primary" disabled={disabled} onClick={() => act(confirmation.action, confirmation.id, confirmation.fields, confirmation.revision)}>确认操作</Button><Button size="sm" variant="ghost" disabled={busy} onClick={() => setConfirmation(null)}>取消操作</Button></div>
     </section>}
     <div className="pw-memory-bulk"><span className="pw-muted">已选 {selected.length} 条</span><div className="pw-actions"><Button size="sm" variant="ghost" disabled={disabled || !entries.length} onClick={() => setSelected(selected.length ? [] : entries.filter(entry => entry.status !== 'revoked').map(entry => entry.id))}>{selected.length ? '取消选择' : '选择本页'}</Button><Button size="sm" variant="outline" disabled={disabled || !selected.length} onClick={exportSelected}>导出所选</Button><Button size="sm" variant="ghost" disabled={disabled || !selected.length} onClick={() => { const items = entries.filter(entry => selected.includes(entry.id)); setConfirmation({ action: 'forget-many', fields: { ids: items.map(entry => entry.id) }, revision: snapshot.revision, names: items.map(entry => entry.key), shared: items.some(entry => entry.visibility === 'project-shared') }) }}>遗忘所选</Button></div></div>
-    <div className="pw-memory-list" aria-busy={loading}>
+    <div className="pw-memory-workbench"><div className="pw-memory-list-column"><div className="pw-memory-list" aria-busy={loading}>
       {entries.map(entry => <article className="pw-card pw-memory-item" key={entry.id}>
         <div className="pw-heading-actions"><div><h3>{entry.key}</h3><p className="pw-muted">{scopeLabels[entry.visibility]} · {statusLabels[entry.status]} · {recallLabel(entry)} · 内容 v{entry.contentVersion ?? 1}</p></div><Button size="sm" variant="ghost" aria-label={`选择记忆：${entry.key}`} aria-pressed={selected.includes(entry.id)} disabled={disabled || entry.status === 'revoked'} onClick={() => setSelected(previous => previous.includes(entry.id) ? previous.filter(id => id !== entry.id) : [...previous, entry.id])}>{selected.includes(entry.id) ? '已选' : '选择'}</Button></div>
         <p className="pw-memory-preview">{entry.value?.slice(0, 160)}{entry.value?.length > 160 ? '…' : ''}</p>
         <div className="pw-actions"><Button size="sm" variant="outline" disabled={busy} onClick={() => { selectDetail(entry.id); setConfirmation(null) }}>查看详情</Button>{entry.status === 'proposed' && <Button size="sm" variant="outline" disabled={disabled} onClick={() => request('confirm', entry)}>确认</Button>}{entry.status === 'active' && <Button size="sm" variant="ghost" disabled={disabled} onClick={() => request('validity', entry, { validity: entry.validity === 'fresh' ? 'stale' : 'fresh' })}>{entry.validity === 'fresh' ? '暂停召回' : '恢复召回'}</Button>}{entry.status !== 'revoked' && <Button size="sm" variant="ghost" disabled={disabled} onClick={() => request('forget', entry)}>{entry.status === 'proposed' ? '丢弃' : '忘记'}</Button>}</div>
       </article>)}
-      {!entries.length && !loading && !readError && <EmptyState title={query || status !== 'all' || validity !== 'all' ? '没有匹配的记忆' : '当前范围还没有记忆'} icon="lock"><p>可手动新增提案，或让当前 Patchwork Agent 提议记忆。</p><Button size="sm" variant="outline" onClick={onCurrent}>查看本次证据</Button></EmptyState>}
+      {!entries.length && !loading && !readError && <EmptyState title={query || status !== 'all' || validity !== 'all' ? '没有匹配的记忆' : '当前范围还没有记忆'} icon="lock"><p>可手动新增提案，或让当前 Patchwork Agent 提议记忆。</p><div className="pw-actions">{scope === 'session-private' && <Button size="sm" variant="outline" onClick={() => filter(() => setScope('project-shared'))}>查看项目共享</Button>}<Button size="sm" variant="outline" onClick={onCurrent}>查看本次证据</Button></div></EmptyState>}
     </div>
     {snapshot && <div className="pw-memory-pagination"><Button size="sm" variant="ghost" disabled={disabled || offset === 0} onClick={() => { setOffset(Math.max(0, offset - 20)); setSelected([]); selectDetail(null) }}>上一页</Button><span className="pw-muted">{snapshot.entryCount ? `${offset + 1}–${Math.min(offset + entries.length, snapshot.entryCount)}` : '0'} / {snapshot.entryCount}</span><Button size="sm" variant="ghost" disabled={disabled || !snapshot.hasMore} onClick={() => { setOffset(offset + 20); setSelected([]); selectDetail(null) }}>下一页</Button></div>}
-    {record && <section ref={detailRef} className="pw-card pw-memory-detail" aria-label="记忆详情"><div className="pw-heading-actions"><h3>记忆详情</h3><Button size="sm" variant="ghost" onClick={() => selectDetail(null)}>收起详情</Button></div><h3>{record.key}</h3><p className="pw-memory-body">{record.value}</p>
+    </div>{record && <section ref={detailRef} className="pw-card pw-memory-detail" aria-label="记忆详情"><div className="pw-heading-actions"><h3>记忆详情</h3><Button size="sm" variant="ghost" onClick={() => selectDetail(null)}>收起详情</Button></div><h3>{record.key}</h3><p className="pw-memory-body">{record.value}</p>
       <dl className="pw-facts"><div><dt>适用条件</dt><dd>{record.conditions || '未限定；召回后仍需核对当前任务'}</dd></div><div><dt>类型 / 范围</dt><dd>{record.kind} · {scopeLabels[record.visibility]}</dd></div><div><dt>状态 / 有效性</dt><dd>{statusLabels[record.status]} · {validityLabels[record.validity]}</dd></div><div><dt>召回资格</dt><dd>{recallLabel(record)}</dd></div><div><dt>观察 / 确认</dt><dd>{time(record.observedAt)}<br/>{time(record.verifiedAt)}</dd></div><div><dt>记录 ID / 版本</dt><dd>{record.id}<br/>内容 v{record.contentVersion ?? 1} · 记录 r{record.revision}</dd></div></dl>
       <div className="pw-actions">{['active', 'proposed'].includes(record.status) && <Button size="sm" variant="outline" disabled={disabled} onClick={() => openEditor(record)}>修订记忆</Button>}<Button size="sm" variant="outline" disabled={disabled} onClick={() => openEditor(record, true)}>以此内容新建提案</Button>{record.status === 'active' && <Select aria-label="设置记忆有效性" value={record.validity} options={options({ fresh: validityLabels.fresh, stale: validityLabels.stale, conflicted: validityLabels.conflicted, expired: validityLabels.expired })} disabled={disabled} onChange={value => request('validity', record, { validity: value })}/>}</div>
       <TechnicalDetails title="来源与操作记录"><ul>{record.sources?.map((source, index) => <li key={index}>{sourceLabels[source.kind] ?? source.kind} · 会话 {source.sessionId}</li>)}</ul>{record.changes?.map((item, index) => <p key={index}>{actionLabels[item.action] ?? item.action} · r{item.revision} · {time(item.at)}{item.validity ? ` · ${validityLabels[item.validity]}` : ''}</p>)}<p className="pw-muted">最多保留最近 20 次状态操作；正文修订另存为版本，不原地覆盖。</p></TechnicalDetails>
       <TechnicalDetails title="内容版本历史">{snapshot.history?.map(item => <div className="pw-memory-history-row" key={item.id}><span>内容 v{item.contentVersion ?? 1} · r{item.revision} · {item.key} · {statusLabels[item.status]}</span><Button size="sm" variant="ghost" disabled={busy || item.id === record.id} onClick={() => selectDetail(item.id)}>查看此版本</Button></div>)}{snapshot.historyHasMore && <p>仅显示最近 50 个关联版本，更早版本可通过搜索和翻页查找。</p>}</TechnicalDetails>
-    </section>}
+    </section>}</div>
     <TechnicalDetails title="存储与恢复"><p>数据库版本 {snapshot?.revision ?? '未知'} · 撤销 epoch {snapshot?.namespaceEpoch ?? '未知'}。损坏时停止写入并保留原文件；停用所有写进程后，核对 memory.json.bak 再离线恢复。</p><p>遗忘是逻辑撤销，历史内容保留用于审查。记忆不会授予工具、目录、付费或发布权限。</p></TechnicalDetails>
   </>
 }

@@ -1,0 +1,191 @@
+{
+  "scenario": "task-check-output",
+  "title": "Task check returns output and no standalone shell",
+  "status": "passed",
+  "assertions": [
+    {
+      "id": "check-executed",
+      "status": "passed",
+      "detail": "2 check calls"
+    },
+    {
+      "id": "no-standalone-shell",
+      "status": "passed",
+      "detail": "0 standalone shell calls"
+    },
+    {
+      "id": "task-not-blocked",
+      "status": "passed",
+      "detail": "task=ready"
+    }
+  ],
+  "task": {
+    "schemaVersion": 1,
+    "sessionId": "session-3408efd6-dd5b-4891-a6f8-22fd7e931935",
+    "taskId": "d636012c-48fa-4fe6-9e3d-47a9612c9ea4",
+    "revision": 3,
+    "title": "登记并验收 sum.mjs 锚点与 npm test",
+    "phase": "verify",
+    "understandingStatus": "stated",
+    "source": {
+      "kind": "observed-user-kind",
+      "eventId": "7eac3df0-8edf-433c-98f0-ab29f9168607"
+    },
+    "workspace": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace",
+    "references": [],
+    "instance": null,
+    "requirements": [
+      {
+        "id": "sum-anchor",
+        "label": "sum.mjs 包含锚点 return a + b",
+        "kind": "artifact",
+        "required": true,
+        "targets": [
+          "sum-mjs"
+        ],
+        "coverage": [
+          "all"
+        ],
+        "status": "passed",
+        "evidence": [
+          {
+            "id": "493d748a-2a1a-47a6-8ad9-cbaf500c0233",
+            "requirementId": "sum-anchor",
+            "revision": 3,
+            "unit": "all",
+            "kind": "artifact",
+            "outcome": "passed",
+            "current": true,
+            "tool": "artifact-check",
+            "callId": "chatcmpl-tool-9f2a891366830358",
+            "exitCode": null,
+            "instanceId": null,
+            "targets": [
+              {
+                "id": "sum-mjs",
+                "version": "9707cfbc-5f34-4bfb-96f9-32fa92ce3311"
+              }
+            ],
+            "at": 1793729263170,
+            "strength": "structure-only"
+          }
+        ],
+        "failures": 0,
+        "assessment": null,
+        "userAcceptance": null
+      },
+      {
+        "id": "npm-test",
+        "label": "npm test 通过",
+        "kind": "command",
+        "required": true,
+        "targets": [],
+        "coverage": [
+          "all"
+        ],
+        "status": "passed",
+        "evidence": [
+          {
+            "id": "17dcf842-0d2e-4c68-be6e-e720ebe7b7cb",
+            "requirementId": "npm-test",
+            "revision": 3,
+            "unit": "all",
+            "kind": "command",
+            "outcome": "passed",
+            "current": true,
+            "tool": "pwsh",
+            "callId": "chatcmpl-tool-bdb2f7678554569c:check",
+            "exitCode": 0,
+            "instanceId": null,
+            "targets": [],
+            "at": 1793729274400,
+            "strength": "tool-execution"
+          }
+        ],
+        "failures": 0,
+        "assessment": null
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "sum-mjs",
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\sum.mjs",
+        "version": "9707cfbc-5f34-4bfb-96f9-32fa92ce3311",
+        "stamp": "45:1793725338358.3672:1793725338363.368",
+        "supersedes": null,
+        "status": "current"
+      }
+    ],
+    "receipts": [
+      {
+        "id": "493d748a-2a1a-47a6-8ad9-cbaf500c0233",
+        "requirementId": "sum-anchor",
+        "revision": 3,
+        "unit": "all",
+        "kind": "artifact",
+        "outcome": "passed",
+        "current": true,
+        "tool": "artifact-check",
+        "callId": "chatcmpl-tool-9f2a891366830358",
+        "exitCode": null,
+        "instanceId": null,
+        "targets": [
+          {
+            "id": "sum-mjs",
+            "version": "9707cfbc-5f34-4bfb-96f9-32fa92ce3311"
+          }
+        ],
+        "at": 1793729263170,
+        "strength": "structure-only"
+      },
+      {
+        "id": "2a747973-965a-4b44-928a-f6d9392f6c56",
+        "requirementId": "npm-test",
+        "revision": 3,
+        "unit": "all",
+        "kind": "command",
+        "outcome": "unknown",
+        "current": true,
+        "tool": "pwsh",
+        "callId": "chatcmpl-tool-bdb2f7678554569c:check",
+        "exitCode": null,
+        "instanceId": null,
+        "targets": [],
+        "at": 1793729266601,
+        "strength": "tool-execution"
+      },
+      {
+        "id": "17dcf842-0d2e-4c68-be6e-e720ebe7b7cb",
+        "requirementId": "npm-test",
+        "revision": 3,
+        "unit": "all",
+        "kind": "command",
+        "outcome": "passed",
+        "current": true,
+        "tool": "pwsh",
+        "callId": "chatcmpl-tool-bdb2f7678554569c:check",
+        "exitCode": 0,
+        "instanceId": null,
+        "targets": [],
+        "at": 1793729274400,
+        "strength": "tool-execution"
+      }
+    ],
+    "candidates": [],
+    "corrections": [],
+    "inputIds": [
+      "30d1466efb88e3c2c87393da84e46d921b45bacacd098164cf268ce3326b51c4"
+    ],
+    "lastCorrection": null,
+    "status": "ready",
+    "policy": "structured-tools-only",
+    "persistence": "native"
+  },
+  "toolErrors": 0,
+  "tools": [
+    "skill",
+    "patchwork_task",
+    "glob",
+    "read"
+  ]
+}

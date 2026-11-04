@@ -1,6 +1,7 @@
 import { configRevision, effectiveConfig, mergeUserConfigState, readUserConfig, validatePatch } from '../config/user-config.mjs'
 import { webRuntime } from './web-runtime.mjs'
 import { resolvePatchworkAgent } from '../scope.mjs'
+import { logDiagnostic } from '../logging/session-log.mjs'
 
 export const CONFIG_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/config'
 export const CONFIG_TOKEN_HEADER = 'x-patchwork-token'
@@ -65,6 +66,8 @@ export function registerConfigRoute(ctx, { token, rowConfig = {}, onSaved } = {}
           const { config: stored, revision } = await mergeUserConfigState(validated.value, req.headers['x-patchwork-revision'], () => Boolean(resolvePatchworkAgent(ctx, sessionId)))
           const config = effectiveConfig(rowConfig, stored)
           await onSaved?.(config)
+          const agent = resolvePatchworkAgent(ctx, sessionId)
+          if (agent) logDiagnostic(ctx, agent, { mechanism: 'settings', event: 'save', reason: 'settings-saved' })
           return reply(200, { ok: true, config, revision })
         } catch (error) {
           if (error?.code === 'patchwork-agent-required') return reply(403, { ok: false, reason: error.code })

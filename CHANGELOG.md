@@ -15,7 +15,39 @@
 
 - 可选浏览器组件安装器的 ZIP 读取依赖 `yauzl` 升至 `3.2.1`，修复畸形 NTFS 扩展时间戳可能触发越界异常的问题（GHSA-gmq8-994r-jv83）。
 
+### 修复
+
+- 修复在 DSH 0.2.1 及更新宿主上安装后所有 Agent preset 被禁用的问题。`@deepseek-ai/dsh-agent-preset` 与 `@deepseek-ai/dsh-home-paths` 不再作为发布包依赖被提升到 profile 根，而是声明为兼容范围 peer，由目标 DSH 的 base/web bundle 提供宿主同版本；本地测试用 devDependencies 固定 0.2.1-rc.5。此前精确依赖 `@deepseek-ai/dsh-agent-preset@0.2.0-rc.2` 会让 `dsh-app-boot` 的版本门禁禁用包括 `patchwork` 在内的全部 preset 行，导致技能、任务、记忆等工具整体不可见。升级方式：重新打包并用 `dsh plugin --profile <name> add <new-tarball>` 覆盖安装；若 profile 曾手动固定旧版 `@deepseek-ai/dsh-agent-preset`，需同步移除或升级到与宿主一致。
+- 设置页保存条不再使用底部 sticky 定位，窄栏和宽栏下都不会遮挡最后的配置项、提示与运行记录详情。
+- 工作台不再同时用下拉和快捷按钮重复表达同一状态；记忆状态、日志级别改为单一筛选入口，降低窄栏筛选区高度。
+- `patchwork_task` 的 `check` 现在返回有界命令输出（最多 4000 字符并带截断标记），模型无需为了查看输出再单独运行 shell；工具描述同步要求直接使用该输出，避免产物和验收被误标 stale。
+- 重开会话或页面后，持久化的主控队列会从原生记录惰性恢复并显示在主控视图；此前只有模型再次调用 inspect 才创建控制器。
+- 记忆页在默认“本会话私有”范围为空时提示项目共享记录存在，并提供“查看项目共享”入口；`patchwork_memory inspect` 对项目共享记录返回 `MEMORY_PROJECT_SCOPE_REQUIRED`，不再只报 `MEMORY_NOT_FOUND`。
+- 只读 Superagent 执行器在简单总结/读取任务中不再被要求登记 `patchwork_task` 和语义验收，减少无意义的 task/check 步骤；需要产物或行为验收的任务仍按原验收顺序执行。
+- `patchwork_improvement list` 返回最近来源回执元数据，`incident` 可直接使用其中的 id；候选缺少 trigger/hypothesis/changeScope 时返回具体缺失字段。
+- `obs_recall` 新增可选 `maxBytes`，可在 1..15360 字节内请求更小的精确页面；机制计数的维护提示拆分为结构/证据数量，避免汇总值与说明不一致。
+
 ### 变更
+
+- **依赖与宿主基线直接迁移到 DSH 0.2.1-rc.5**：开发依赖、peer 最低版本、`@deepseek-ai/cordis` 与 schemastery 统一升级；随包 profile 模板改用 `dsh-base` / `dsh-web-app@0.2.1-rc.5`；preset fixture 重命名为 `tests/fixtures/dsh-v0.2.1-rc.5.standard.patch.yml`，生成器不再引用 rc.2 源码 commit。`dsh-web-app@0.2.1-rc.5` 的 standard 工具行与旧 fixture 内容一致，因此 preset 工具行未变；真实组合 harness 补充 `session-projections` 和 `working-directory`，以匹配 rc.5 工具对投影与工作目录服务的依赖。历史日期文档、实验和检查记录保留当时的版本与结论。
+- 工作台重组为 **总览 / 执行 / 证据 / 管理 / 诊断 / 设置** 六个一级页面，每个重领域最多两个二级视图：执行（任务、主控）、证据（工具、检索）、管理（记忆、改进）、诊断（能力、日志）。一级和二级标签显示待处理数量；没有队列、检索或改进数据时隐藏对应二级视图，记忆在关闭或空数据时保留查看入口。宽屏下主控、日志和记忆使用列表/详情布局，机制与设置使用双列网格。
+- 任务、主控、技能加载、引用对比、配置保存、结构检查以及 UI 端记忆/改进操作统一写入诊断日志；新增任务、主控、技能、引用、设置、结构检查机制和对应事件文案，日志支持最近 15 分钟 / 1 小时 / 4 小时范围筛选。日志仍只保存白名单元数据，不记录提示词、命令原文或凭据。
+
+### 新增
+
+- 执行页新增任务 handoff 恢复快照、最近 20 次纠正历史和带确认的任务取消；主控页新增等待输入执行器的补充输入框、队列对账恢复入口、补充输入次数和超时预算。
+- 管理页新增记忆召回预览（只读、最多 5 条、可显式包含项目共享）和通用改进候选表单（rule / memory-policy / tool-flow / ui-copy 四类受限策略）；改进状态支持“已拒绝”筛选。
+- 检索证据新增独立来源对比：选择两条已发送摘录和同一顶层 JSON 字段，结果只返回 supported / conflict / unknown。
+- 诊断/能力新增机制执行计数、当前计划和本次运行归档句柄；计数明确标注为进程内执行事实，不代表 token、延迟或成本收益。
+- 设置页新增恢复默认、JSON 导出、校验后 JSON 导入和枚举中文标签；导入只进入草稿，仍需显式保存。
+
+- 新增只读本地代码检索 `patchwork_code`：`map` 生成有 token 预算的仓库地图，`outline` 读取单文件符号/导入，`find` 查定义，`references` 做词法引用，`search` 做字面量/词边界/正则检索。索引缓存放在 `DSH_HOME`，按 git HEAD 与文件 mtime 复用；跳过依赖、构建产物、二进制和敏感文件，路径必须留在当前工作区。模型真实调用已验证 map/find/references/search 链路；修复了搜索/引用结果含 `undefined` 导致宿主 “not lossless JSON” 的缺陷。
+- 新增按需工作区代码图：`patchwork_code graph-status/graph-enable/graph-start/graph-stop/callers/callees/impact/affected`。配置写入 `<workspace>/.patchwork/config.json`，默认关闭，由模型显式启用并启动；未启用/未启动分别返回 `CODE_GRAPH_DISABLED` / `CODE_GRAPH_NOT_STARTED`。实现为 Patchwork 原生词法调用图，不依赖 CodeGraph 的平台包、MCP 服务、watcher 或遥测。
+- `patchwork_task define` 支持可选 `brief`（goal、successCriteria、unknowns、assumptions、budget），随任务状态/压缩恢复保存，并在任务页显示；不改变授权，也不把 brief 当作验收。
+- Superagent 新增 `explore` 只读任务模式：只允许读取/代码检索，不登记任务验收，要求返回 findings/deadEnds/confidence；主控继续以原生执行器隔离上下文。
+- 诊断/能力新增本地代码检索计数和探索成本（read/grep/glob/code、重复查询、读入字节）；连续 8 次探索且无编辑时注入一次模型可见的软提示，不硬拦合法搜索。
+- 新增真实模型审计 schema/报告生成器和离线校验器：`scripts/real-model-audit.mjs` 从 session dump 生成 manifest、events、tool-calls、result、report；`scripts/verify-real-model-audit.mjs` 校验哈希、状态与 `mainDshTouched:false`。2026-11-04 的旧会话证据已迁移到 `docs/checks/real-model/2026-11-04/`。
+- 设置项增至 26 项，新增代码检索开关、索引文件上限与地图 token 预算；工作台“代码”分类可搜索、恢复默认、导入导出。
 
 - 重整仓库首页的安装路径、能力与边界说明，提供适配浅深色的横幅和双语导航；英文入口从 `README.en.md` 改为 `README_EN.md`，详细调研与验证记录继续由文档导航索引。
 

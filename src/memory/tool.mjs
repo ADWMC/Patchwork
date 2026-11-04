@@ -25,7 +25,7 @@ export function registerMemoryTool(ctx, config = {}) {
   if (config.memoryEnabled === false) return
   ctx.tools.register({
     name: PATCHWORK_MEMORY_TOOL,
-    description: 'Manage Patchwork memory explicitly inside the current Patchwork Agent scope. list returns at most five metadata rows with query/status/validity filters and offset pagination, never bodies or audit history. inspect reads one exact visible record on demand; recall returns at most five active fresh memories. Set includeProject explicitly to read shared project records. Proposals are never automatically active; confirmation/forget require the host user-confirmation channel. No automatic injection into ordinary model context.',
+    description: 'Manage Patchwork memory explicitly inside the current Patchwork Agent scope. list returns at most five metadata rows with query/status/validity filters and offset pagination, never bodies or audit history. inspect reads one exact visible record on demand; project-shared records require includeProject: true. recall returns at most five active fresh memories. Set includeProject explicitly to read shared project records. Proposals are never automatically active; confirmation/forget require the host user-confirmation channel. No automatic injection into ordinary model context.',
     parameters: {
       type: 'object',
       properties: {
@@ -57,12 +57,18 @@ export function registerMemoryTool(ctx, config = {}) {
           if (typeof args?.id !== 'string' || !args.id) result = { status: 'failed', failureCode: 'MEMORY_ID_REQUIRED' }
           else {
             const snapshot = await listMemory(agent, { id: args.id, scope: args.includeProject ? 'all' : 'session-private', limit: 1, signal })
-            result = snapshot.failureCode ? { status: 'failed', failureCode: snapshot.failureCode } : { status: 'indexed', record: snapshot.record, revision: snapshot.revision }
+            if (snapshot.record) result = { status: 'indexed', record: snapshot.record, revision: snapshot.revision }
+            else if (args.includeProject) result = { status: 'failed', failureCode: snapshot.failureCode ?? 'MEMORY_NOT_FOUND' }
+            else {
+              // A project-shared record is invisible without explicit inclusion; name the scope requirement instead of a bare not-found.
+              const all = await listMemory(agent, { id: args.id, scope: 'all', limit: 1, signal })
+              result = all.record ? { status: 'failed', failureCode: 'MEMORY_PROJECT_SCOPE_REQUIRED' } : { status: 'failed', failureCode: all.failureCode ?? snapshot.failureCode ?? 'MEMORY_NOT_FOUND' }
+            }
           }
         }
         else result = { status: 'failed', failureCode: 'MEMORY_INVALID_ACTION', entries: [] }
         cancellation.signal.throwIfAborted(); requirePatchworkAgent(agent)
-        logDiagnostic(ctx, exec, { mechanism: 'memory', event: result.status === 'failed' ? 'failure' : 'success', reason: result.status === 'failed' ? 'memory-failed' : 'memory-completed', provider: action, elapsedMs: Date.now() - started, resultCount: result.entries?.length ?? (result.record ? 1 : 0) })
+        logDiagnostic(ctx, exec, { mechanism: 'memory', event: result.status === 'failed' ? 'failure' : 'success', reason: result.status === 'failed' ? 'memory-failed' : 'memory-completed', level: result.status === 'failed' ? 'warn' : 'info', provider: action, elapsedMs: Date.now() - started, resultCount: result.entries?.length ?? (result.record ? 1 : 0) })
         return result
       } catch (error) {
         if (isPatchworkAgent(agent)) logDiagnostic(ctx, exec, { mechanism: 'memory', event: 'failure', reason: 'exception', provider: action, elapsedMs: Date.now() - started, error })

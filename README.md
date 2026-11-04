@@ -60,7 +60,7 @@ $env:DSH_HOME = 'C:\dsh\patchwork-demo'
 dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-0.2.0.tgz"
 ```
 
-Patchwork 复用宿主的模型与权限设置。依赖基线主要是 DSH `0.2.0-rc.2`，原生面板与真实调用验证使用隔离 DSH `0.2.1-rc.2`；完整依赖迁移仍未完成，不能据此承诺任意宿主版本兼容。
+Patchwork 复用宿主的模型与权限设置。`@deepseek-ai/dsh-agent-preset` 与 `@deepseek-ai/dsh-home-paths` 是 peer 依赖，由目标 DSH 的 base/web bundle 提供与宿主一致的版本；发布包不会携带旧版覆盖宿主。若 profile 曾手动固定旧版 `@deepseek-ai/dsh-agent-preset`，先移除或升级到与宿主一致，否则 DSH 的版本门禁会禁用 preset 行。依赖、随包 profile 模板、preset fixture 与真实调用基线均为 DSH `0.2.1-rc.5`；旧版宿主不再作为当前测试基线。
 
 ### 3. 选择 Agent，打开面板
 
@@ -80,8 +80,9 @@ Patchwork 复用宿主的模型与权限设置。依赖基线主要是 DSH `0.2.
 | **原生 Superagent** | 用 `patchwork_superagent` 管理持久队列、依赖与有界重试；默认两个读取槽，本模块在同一工作区内串行执行写任务。 |
 | **按需技能** | 默认注册 7 个核心技能，可显式试用 13 技能目录；目录只提供名称与描述，正文按需读取。 |
 | **信息检索** | `patchwork_search` 并行查询 Bing、Brave、DuckDuckGo 公共页面，无需 API key；`patchwork_fetch` 受控读取公开 URL。 |
+| **本地代码检索** | `patchwork_code` 提供仓库地图、文件 outline、符号定义、词法引用和文本/正则检索；只在当前工作区读取，跳过依赖、构建产物和敏感文件，结果有界。工作区代码图默认关闭，模型可先 `graph-enable` 写 `.patchwork/config.json`，再 `graph-start` 使用 callers/callees/impact/affected。 |
 | **显式记忆与改进** | 记忆管理支持搜索筛选、手动提案、版本修订、暂停恢复、来源历史、导出与批量遗忘；私有与共享分开确认，自动注入关闭。失败和纠正进入受控改进。 |
-| **原生工作台** | 待处理总览、主控列表 / 依赖详情、真实技能目录、验收筛选、检索来源与引用、记忆和改进管理；日志搜索 / 冻结 / 导出、23 项设置说明和差异核对。沿用 DSH 控件、浅暗主题与侧栏布局，见[扩充记录](docs/ui-community-expansion-2026-11-01.md)。 |
+| **原生工作台** | **总览 / 执行 / 证据 / 管理 / 诊断 / 设置**，二级视图按需显示并带待处理计数；任务 handoff 与纠正历史、主控补充输入 / 对账、记忆召回预览、通用改进候选、独立来源对比、机制计数 / 计划 / 归档、任务 / 主控 / 配置等日志、26 项设置及恢复默认 / 导入导出。宽屏使用列表 / 详情和双列布局，空数据动态隐藏；沿用 DSH 控件、浅暗主题与侧栏布局，见[扩充记录](docs/ui-community-expansion-2026-11-01.md)。 |
 
 模型的“完成”陈述不能替代真实验收。文件结构检查也不能证明语义正确；相关未知项需要单独说明。
 

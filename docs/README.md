@@ -12,6 +12,8 @@
 
 ## 当前功能与验证
 
+- [2026-11-04 三方案执行与真实模型验证](closure-2026-11-04.md) · [机器证据](checks/closure-2026-11-04.json)
+
 - [全功能工作台社区调研、扩充矩阵与实现](ui-community-expansion-2026-11-01.md) · [10 项目固定源码快照](checks/ui-community-expansion-2026-11-01.json)
 
 - [24 项闭环、恢复与验收入口](closure-2026-11-01.md) · [本轮机器证据](checks/closure-2026-11-01.json)
@@ -28,6 +30,9 @@
 - 记忆与改进：[产品体验方案](product-experience-evolution-plan-2026-10-31.md)、[融合设计](memory-evolution-design-2026-10-30.md)、[记忆再调研](memory-deep-dive-2026-10-31.md)
 - 技能与 UI：[技能融合方案](skills-fusion-plan-2026-10-31.md)、[执行记录](skills-fusion-execution-2026-10-31.md)、[UI 判断与配色](human-centered-ai-ui-research-2026-10-31.md)
 - 信息检索：[来源研究](information-retrieval-research-2026-10-31.md)、[执行方案](information-retrieval-execution-plan-2026-10-31.md)
+- 真实模型审计：[本轮证据盘点与缺口](real-model-audit-2026-11-04.md)、[审计闭环方案](plan-real-model-audit-2026-11-04.md)
+- 人类式认知：[认知脚手架方案](plan-human-like-agent-2026-11-04.md)
+- 代码检索：[Cursor 式本地检索与 Explore](plan-cursor-style-retrieval-2026-11-04.md)、[实现与真实模型证据](code-retrieval-2026-11-04.md)
 - 浏览器：[ZCode 研究](zcode-browser-research-2026-11-01.md)、[社区项目](browser-community-research-2026-11-01.md)、[指纹内核](fingerprint-browser-research-2026-11-01.md)
 - 提示词：[ZCode / OpenClaude 源码](zcode-openclaude-prompt-engineering-research-2026-10-31.md)、[社区样本取舍](system-prompts-community-research-2026-11-01.md)
 - [其余方案的执行路线](remaining-plans-execution-roadmap-2026-10-31.md)；历史状态保留，不推断全部完成。

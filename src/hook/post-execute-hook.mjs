@@ -3,6 +3,7 @@ import { isSourcePath } from '../structure/structure-check.mjs'
 import { record } from '../ui/mechanism-stats.mjs'
 import { EVIDENCE_HINT, noteShellEvidence, sessionKey, shouldHintEvidence } from '../quality/evidence-gate.mjs'
 import { isPatchworkAgent } from '../scope.mjs'
+import { logDiagnostic } from '../logging/session-log.mjs'
 
 /**
  * 只从「会改动文件」的工具参数里取路径。读取不属于结构检查的范围：
@@ -48,6 +49,7 @@ export function registerStructureHook(ctx, config = {}) {
           const check = await buildStructureWarning({ cwd, sessionId: sessionKey(exec.agent), files })
           if (check.prompt) {
             record('maintenance', 'structureWarnings')
+            logDiagnostic(ctx, exec, { mechanism: 'maintenance', event: 'warning', level: 'warn', reason: 'structure-warning' })
             additional.push(await noticeContext(check.prompt))
           }
         }
@@ -57,6 +59,7 @@ export function registerStructureHook(ctx, config = {}) {
         const key = sessionKey(exec.agent)
         const answer = textOf(result?.content)
         if (answer && shouldHintEvidence(key, answer)) {
+          logDiagnostic(ctx, exec, { mechanism: 'maintenance', event: 'warning', level: 'warn', reason: 'evidence-hint' })
           additional.push(await noticeContext(EVIDENCE_HINT))
         }
       }

@@ -1,30 +1,60 @@
 import { useState } from 'react'
-import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, Switch } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Input, Select } from './controls.jsx'
 import { EmptyState, TechnicalDetails, SectionHeading } from './panel-elements.jsx'
 import { Facets, RecordStatus, SearchField, SummaryStrip } from './workspace-elements.jsx'
 import { improvementBucket, textMatches } from './workspace-model.mjs'
-const decisionLabels = { proposed: '待验证', trial: '试用中', enabled: '已确认', revoked: '已回滚' }
+const decisionLabels = { proposed: '待验证', trial: '试用中', enabled: '已确认', revoked: '已回滚', rejected: '已拒绝' }
 const latencyText = value => Number.isFinite(value) && value >= 0 ? Math.round(value) : '未知'
+const objectLabels = { rule: '交付规则', 'memory-policy': '记忆策略', 'tool-flow': '工具流程', 'ui-copy': '界面文案' }
+const settingsFor = object => object === 'memory-policy' ? 'recallLimit' : object === 'tool-flow' ? 'requireCrossCheck' : object === 'ui-copy' ? 'reviewDetail' : 'verifyBeforeDelivery'
+const defaultPatchValue = object => object === 'memory-policy' ? 3 : object === 'ui-copy' ? 'compact' : true
 
 export function ImprovementPanel({ data, improvementAction }) {
   const [busy, setBusy] = useState(null), [message, setMessage] = useState('')
   const [query, setQuery] = useState(''), [filter, setFilter] = useState('all')
+  const [form, setForm] = useState(null)
   const state = data.improvements ?? { candidates: [], incidents: [], experiments: [] }
   const fullReview = state.policy?.reviewDetail === 'full'
   const visible = state.candidates.filter(candidate => (filter === 'all' || improvementBucket(candidate) === filter) && textMatches(query, candidate.trigger, candidate.hypothesis, candidate.patch?.setting, candidate.id))
-  async function act(action, id) {
-    setBusy(id); setMessage('')
+  async function act(action, id, extra = {}) {
+    setBusy(id ?? action); setMessage('')
     try {
-      await improvementAction(action, id, state.revision)
+      await improvementAction(action, id, state.revision, extra)
       setMessage(action === 'experiment' ? '隔离契约实验结束，查看证据与准入结果。' : action === 'rollback' ? '当前会话策略已回滚。' : action === 'propose' ? '已生成待审候选；尚未改变运行行为。' : '策略已应用于当前会话，其他会话保持原状态。')
-    } catch (error) { setMessage(`未完成：${error.message}。刷新核对版本后重试。`) }
+      return true
+    } catch (error) { setMessage(`未完成：${error.message}。刷新核对版本后重试。`); return false }
     finally { setBusy(null) }
   }
+  function openForm() {
+    setForm({ incidentId: state.incidents[0]?.id ?? '', object: 'rule', value: true, trigger: '', hypothesis: '' })
+    setMessage('')
+  }
+  async function submitForm() {
+    if (!form?.incidentId || !form.trigger.trim() || !form.hypothesis.trim()) return
+    const ok = await act('propose', form.incidentId, {
+      object: form.object,
+      trigger: form.trigger.trim(),
+      hypothesis: form.hypothesis.trim(),
+      changeScope: '当前会话的受限策略',
+      patch: { version: 1, setting: settingsFor(form.object), value: form.value },
+    })
+    if (ok) setForm(null)
+  }
   return <>
-    <div className="pw-page-heading"><h2>改进审查</h2><p>实际失败或纠正 → 候选 → 隔离实验 → 你确认 → 当前会话应用；随时回滚。</p></div>
+    <div className="pw-page-heading pw-heading-actions"><div><h2>改进审查</h2><p>实际失败或纠正 → 候选 → 隔离实验 → 你确认 → 当前会话应用；随时回滚。</p></div><Button size="sm" variant="outline" disabled={!state.incidents.length || busy !== null} onClick={openForm}>新建候选</Button></div>
     <SummaryStrip label="改进统计" items={[{ label: '实际问题', value: state.incidents.length }, { label: '待审候选', value: state.candidates.filter(item => improvementBucket(item) === 'pending').length }, { label: '当前生效', value: state.candidates.filter(item => item.applied).length }, { label: '已回滚', value: state.candidates.filter(item => item.decision === 'revoked').length }]}/>
     <SearchField label="搜索改进候选" value={query} onChange={setQuery} placeholder="搜索问题、假设或策略设置"/>
-    <Facets label="改进状态筛选" value={filter} onChange={setFilter} items={[{ value: 'all', label: '全部' }, { value: 'pending', label: '待审' }, { value: 'applied', label: '生效中' }, { value: 'revoked', label: '已回滚' }]}/>
+    <Facets label="改进状态筛选" value={filter} onChange={setFilter} items={[{ value: 'all', label: '全部' }, { value: 'pending', label: '待审' }, { value: 'applied', label: '生效中' }, { value: 'revoked', label: '已回滚' }, { value: 'rejected', label: '已拒绝' }]}/>
+    {form && <section className="pw-card pw-improvement-form" aria-label="新建改进候选"><SectionHeading title="新建候选" description="必须有真实问题来源；候选不会自动生效。"/>
+      <label>问题来源<Select aria-label="改进问题来源" value={form.incidentId} onChange={value => setForm({ ...form, incidentId: value })} options={state.incidents.map(item => ({ value: item.id, label: `${item.trigger} · ${item.kind}` }))}/></label>
+      <label>对象<Select aria-label="改进对象" value={form.object} onChange={value => setForm({ ...form, object: value, value: defaultPatchValue(value) })} options={Object.entries(objectLabels).map(([value, label]) => ({ value, label }))}/></label>
+      <label>候选值{settingsFor(form.object) === 'verifyBeforeDelivery' || settingsFor(form.object) === 'requireCrossCheck' ? <Switch label={settingsFor(form.object)} checked={form.value === true} onChange={value => setForm({ ...form, value })}/> : settingsFor(form.object) === 'recallLimit' ? <Input aria-label="召回上限" type="number" min={1} max={5} value={form.value} onChange={event => setForm({ ...form, value: Math.max(1, Math.min(5, Math.trunc(Number(event.target.value) || 1))) })}/> : <Select aria-label="审查详细度" value={form.value} onChange={value => setForm({ ...form, value })} options={[{ value: 'compact', label: '紧凑' }, { value: 'full', label: '完整' }]}/>}</label>
+      <label>触发条件<Input aria-label="改进触发条件" maxLength={160} value={form.trigger} onChange={event => setForm({ ...form, trigger: event.target.value })} placeholder="例如：交付前复核当前验收证据"/></label>
+      <label>假设<Input aria-label="改进假设" maxLength={500} value={form.hypothesis} onChange={event => setForm({ ...form, hypothesis: event.target.value })} placeholder="例如：提醒复核可减少遗漏；不宣称模型收益"/></label>
+      <p className="pw-live-note">受限策略：{settingsFor(form.object)} = {JSON.stringify(form.value)}；只影响当前会话。</p>
+      <div className="pw-actions"><Button size="sm" variant="primary" disabled={busy !== null || !form.incidentId || !form.trigger.trim() || !form.hypothesis.trim()} onClick={submitForm}>保存候选</Button><Button size="sm" variant="ghost" disabled={busy !== null} onClick={() => setForm(null)}>取消</Button></div>
+    </section>}
     <p className="pw-live-note">{fullReview ? '请核对来源、版本、实验差异、退化与副作用，再决定是否应用；可随时回滚。' : '核对证据后确认，必要时回滚。'}</p>
     {visible.length ? visible.map(candidate => {
       const experiment = [...state.experiments].reverse().find(item => item.candidateId === candidate.id)

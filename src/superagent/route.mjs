@@ -2,6 +2,7 @@ import { resolvePatchworkAgent } from '../scope.mjs'
 import { getController } from './controller.mjs'
 import { taskProjection, transitionTask, flushTasks } from '../task/store.mjs'
 import { webRuntime } from '../ui/web-runtime.mjs'
+import { logDiagnostic } from '../logging/session-log.mjs'
 
 export const SUPERAGENT_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/superagent'
 export function registerSuperagentRoute(ctx, { token } = {}) {
@@ -27,16 +28,32 @@ export function registerSuperagentRoute(ctx, { token } = {}) {
           if (task.revision !== body.baseRevision) throw new Error('task revision conflict')
           transitionTask(agent, { kind: 'user-review', id: body.id, baseRevision: body.baseRevision, accept: body.accept === true, userConfirmed: true, at: new Date().toISOString() })
           await flushTasks(agent)
+          logDiagnostic(ctx, agent, { mechanism: 'task', event: 'review', reason: 'queue-review' })
+          return reply(200, { ok: true, task: taskProjection(agent) })
+        }
+        if (body.action === 'task-cancel') {
+          const task = taskProjection(agent)
+          if (task.revision !== body.baseRevision) throw new Error('task revision conflict')
+          transitionTask(agent, { kind: 'cancel', baseRevision: body.baseRevision })
+          await flushTasks(agent)
+          logDiagnostic(ctx, agent, { mechanism: 'task', event: 'cancel', reason: 'task-cancelled' })
           return reply(200, { ok: true, task: taskProjection(agent) })
         }
         const controller = getController(agent)
-        controller.assertRevision(body.baseRevision)
+        if (body.action !== 'reconcile') controller.assertRevision(body.baseRevision)
         let queue
         if (body.action === 'review') queue = await controller.review(body.id, body.baseRevision, { accept: body.accept === true, evidenceVersion: body.evidenceVersion, userConfirmed: true })
         else if (body.action === 'retry') queue = await controller.retry(body.id, body.baseRevision)
+        else if (body.action === 'input') {
+          if (typeof body.input !== 'string' || !body.input.trim() || body.input.length > 4000) throw new Error('input must be 1..4000 characters')
+          queue = await controller.retry(body.id, body.baseRevision, body.input)
+        }
+        else if (body.action === 'reconcile') queue = await controller.reconcile()
         else if (body.action === 'resume') queue = await controller.resume(body.baseRevision)
         else if (body.action === 'pause' || body.action === 'cancel') queue = await controller.pause(body.action, body.action === 'cancel')
         else return reply(400, { ok: false, reason: 'unknown action' })
+        const reasons = { input: 'queue-input', retry: 'queue-retry', review: 'queue-review', pause: 'queue-paused', resume: 'queue-resumed', cancel: 'queue-cancelled', reconcile: 'queue-reconciled' }
+        logDiagnostic(ctx, agent, { mechanism: 'superagent', event: body.action, reason: reasons[body.action] ?? 'enabled' })
         return reply(200, { ok: true, queue })
       } catch (error) { return reply(/conflict/.test(error.message) ? 409 : 400, { ok: false, reason: error.message }) }
     } })

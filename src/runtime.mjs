@@ -10,6 +10,7 @@ import { initializeDiagnostics } from './logging/session-log.mjs'
 import { registerTaskLifecycle } from './task/lifecycle.mjs'
 import { registerSuperagent } from './superagent/index.mjs'
 import { registerRetrievalTools } from './retrieval/index.mjs'
+import { registerCodeTool } from './code/tool.mjs'
 import { registerMemoryTool } from './memory/tool.mjs'
 import { loadMemoryState } from './memory/store.mjs'
 import { registerImprovementTool } from './improvement/tool.mjs'
@@ -29,6 +30,7 @@ export async function apply(ctx, config) {
   registerTaskLifecycle(ctx, effective)
   registerSuperagent(ctx)
   registerRetrievalTools(ctx, effective)
+  registerCodeTool(ctx, effective)
   registerMemoryTool(ctx, effective)
   registerImprovementTool(ctx, effective)
   const skillNames = await registerPatchworkSkills(ctx, effective)

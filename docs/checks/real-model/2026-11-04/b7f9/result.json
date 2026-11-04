@@ -1,0 +1,46 @@
+{
+  "scenario": "smoke",
+  "title": "Session and model smoke",
+  "status": "passed",
+  "assertions": [
+    {
+      "id": "assistant-response",
+      "status": "passed",
+      "detail": "1 assistant messages"
+    },
+    {
+      "id": "no-tool-errors",
+      "status": "passed",
+      "detail": "0 tool errors"
+    }
+  ],
+  "task": {
+    "schemaVersion": 1,
+    "sessionId": "session-b7f981b3-e476-485a-aae3-c3d4d0bc0c02",
+    "taskId": "4bd475b0-07db-4351-a67d-96646741d1f7",
+    "revision": 1,
+    "title": null,
+    "phase": "unassessed",
+    "understandingStatus": "unassessed",
+    "source": {
+      "kind": "observed-user-kind",
+      "eventId": "afac017e-7925-46dd-a160-cb90c589a38e"
+    },
+    "workspace": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace",
+    "references": [],
+    "instance": null,
+    "requirements": [],
+    "artifacts": [],
+    "receipts": [],
+    "candidates": [],
+    "inputIds": [
+      "8a0ec14ca84b2c9c6a37506e5d4be69e610e2d7754153ed5bee11d57cbe90f78"
+    ],
+    "lastCorrection": null,
+    "status": "in-progress",
+    "policy": "structured-tools-only",
+    "persistence": "unavailable"
+  },
+  "toolErrors": 0,
+  "tools": []
+}

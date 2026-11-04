@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "runId": "explore-parent-ed19",
+  "scenario": "superagent-submit",
+  "status": "passed",
+  "startedAt": "2026-11-04T05:54:16.652Z",
+  "endedAt": "2026-11-04T05:54:16.652Z",
+  "gitHead": "9b606d10431de7550a54ab464179997ee83bc293",
+  "packageVersion": "0.2.0",
+  "dshVersion": "0.2.1-rc.5",
+  "model": {
+    "provider": "stepfun-isolated",
+    "id": "step-5-preview"
+  },
+  "preset": "patchwork",
+  "isolation": {
+    "mainDshTouched": false,
+    "dshHomeHash": null,
+    "workspaceHash": null,
+    "port": null
+  },
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "350fb56df08ce901f3c778c8ce8892dcb77bd18dd53bf1d7542838961ccea20c"
+  },
+  "session": {
+    "id": "session-ed1955b0-a6d6-4d13-ad62-3742cdfae7e2",
+    "rawSha256": "e3fad173716a5b444128684e0436c0b8ec41c9622b151d141cca048556c8a550",
+    "eventCount": 84
+  },
+  "assertions": [
+    {
+      "id": "explore-submitted",
+      "status": "passed",
+      "detail": "mode=explore observed"
+    },
+    {
+      "id": "no-parent-writes",
+      "status": "passed",
+      "detail": "0 parent write/edit calls"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "events.jsonl",
+      "sha256": "f602f7cde2286a8440a4bc624f2cfed2a4200681359581541c1cb8ec0706c3ba"
+    },
+    {
+      "path": "tool-calls.json",
+      "sha256": "0007b2386b9ab88bac08541629e799890d09e9bcff2416f48301cdec2f802f46"
+    },
+    {
+      "path": "result.json",
+      "sha256": "c650d2f397a66891e138e6782faffc0be463e87f4b26a5c00a0929358e999c3f"
+    },
+    {
+      "path": "prompt.md",
+      "sha256": "e6adb205fc8da1071d45233811057a6e9fc0890511270adc101dc21c220cd866"
+    },
+    {
+      "path": "report.md",
+      "sha256": "2d276da45dc5362dfb0a57dbf0025d72a90ce2b62d4c2f0b4e7288902aab290a"
+    }
+  ],
+  "redactions": [
+    "secret-like keys",
+    "long strings truncated"
+  ],
+  "limitations": [
+    "single run",
+    "model nondeterminism"
+  ]
+}

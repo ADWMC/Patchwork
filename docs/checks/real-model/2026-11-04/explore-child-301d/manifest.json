@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "runId": "explore-child-301d",
+  "scenario": "explore-child",
+  "status": "passed",
+  "startedAt": "2026-11-04T05:54:16.639Z",
+  "endedAt": "2026-11-04T05:54:16.639Z",
+  "gitHead": "9b606d10431de7550a54ab464179997ee83bc293",
+  "packageVersion": "0.2.0",
+  "dshVersion": "0.2.1-rc.5",
+  "model": {
+    "provider": "stepfun-isolated",
+    "id": "step-5-preview"
+  },
+  "preset": "patchwork",
+  "isolation": {
+    "mainDshTouched": false,
+    "dshHomeHash": null,
+    "workspaceHash": null,
+    "port": null
+  },
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "c5accda5e9e99206acf6a95c3f6e639c68b0a4165e384a8cd2e9f3f605819662"
+  },
+  "session": {
+    "id": "session-pw-301d4999-e7d0-4681-87b4-04cab90dd6f8",
+    "rawSha256": "0206a2578aa04643c214f2cf974a52eeee106d9e4186be8a577168d132c247c7",
+    "eventCount": 85
+  },
+  "assertions": [
+    {
+      "id": "code-tool-used",
+      "status": "passed",
+      "detail": "3 code calls"
+    },
+    {
+      "id": "report-ready",
+      "status": "passed",
+      "detail": "2 report calls"
+    },
+    {
+      "id": "no-writes-or-shell",
+      "status": "passed",
+      "detail": "0 write/edit/shell calls"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "events.jsonl",
+      "sha256": "b4839e97fa3b1b4353bfbd9bd5d2cdec10d649c5bae84fc5060f7e3a2d2d93e4"
+    },
+    {
+      "path": "tool-calls.json",
+      "sha256": "5489f916851b59b8c42a33531c1d990e70e913399593b8d53210bfd2086243b9"
+    },
+    {
+      "path": "result.json",
+      "sha256": "ca72843c6b9749c4bce62c1fd5bb80e8ac76ac59533332fb841e3663ada5f1aa"
+    },
+    {
+      "path": "prompt.md",
+      "sha256": "785575d1be742a8f88324f54f4c2104f70ed218269ff1bd19fcf671390660e3d"
+    },
+    {
+      "path": "report.md",
+      "sha256": "02d7cf87167e1456a70a42c814701818ee7cd92e61eddc067056057d3a2590be"
+    }
+  ],
+  "redactions": [
+    "secret-like keys",
+    "long strings truncated"
+  ],
+  "limitations": [
+    "single run",
+    "model nondeterminism"
+  ]
+}

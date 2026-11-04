@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "runId": "B",
+  "scenario": "memory-project-scope",
+  "status": "failed",
+  "startedAt": "2026-11-04T05:54:16.564Z",
+  "endedAt": "2026-11-04T05:54:16.564Z",
+  "gitHead": "9b606d10431de7550a54ab464179997ee83bc293",
+  "packageVersion": "0.2.0",
+  "dshVersion": "0.2.1-rc.5",
+  "model": {
+    "provider": "stepfun",
+    "id": "step-5-preview"
+  },
+  "preset": "patchwork",
+  "isolation": {
+    "mainDshTouched": false,
+    "dshHomeHash": null,
+    "workspaceHash": null,
+    "port": null
+  },
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "b3fefa8aeed626bae8b453b13c5a90e3a3bac0196f4696c0f5ecc71bae538b77"
+  },
+  "session": {
+    "id": "session-60e2fab0-db16-4fa4-8a3b-3c6acc130bea",
+    "rawSha256": "3223ddb253153235af2633be865c41f2d7b691a1c3f1bb8ec977d7d12b322ea0",
+    "eventCount": 67
+  },
+  "assertions": [
+    {
+      "id": "memory-proposed",
+      "status": "passed",
+      "detail": "propose call observed"
+    },
+    {
+      "id": "scope-required-error",
+      "status": "failed",
+      "detail": "[patchwork_memory]\n{\"status\":\"failed\",\"failureCode\":\"MEMORY_NOT_FOUND\"}"
+    },
+    {
+      "id": "scoped-inspect",
+      "status": "failed",
+      "detail": "missing scoped inspect call"
+    },
+    {
+      "id": "no-tool-errors",
+      "status": "passed",
+      "detail": "0 tool errors"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "events.jsonl",
+      "sha256": "53920703c1e43b6ec943dd53d033a19d45b2dec587fe6866d1a0856e9d490431"
+    },
+    {
+      "path": "tool-calls.json",
+      "sha256": "8ea528aa7603e3a586c059c284cb59d48925b938ced14236e7356ba54c24d991"
+    },
+    {
+      "path": "result.json",
+      "sha256": "078258a1c6c14eb4025d09a2ab03fcc5d6b5150ee349241c9ffbb2199e06080d"
+    },
+    {
+      "path": "prompt.md",
+      "sha256": "925cb7916807568cc9cc07209372c616ee60aa15786880da31999c2a635cb24b"
+    },
+    {
+      "path": "report.md",
+      "sha256": "6568f6525bb328b0e33ac11cb65ecd03433dd6019d09ade0066db1b2d0658dcb"
+    }
+  ],
+  "redactions": [
+    "secret-like keys",
+    "long strings truncated"
+  ],
+  "limitations": [
+    "single run",
+    "model nondeterminism"
+  ]
+}

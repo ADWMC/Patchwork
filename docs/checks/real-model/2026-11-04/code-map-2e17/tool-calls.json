@@ -1,0 +1,65 @@
+[
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "map"
+    },
+    "result": {
+      "isError": false,
+      "text": "[code-map] root=default-workspace files=4 truncated=no\n\n## Modules\n- .: 4 files, 2 symbols, 1 tests\n\n## Start here\n- README.md (markdown, 6 lines) — Demo Project\n- sum.mjs (javascript, 4 lines) — sum\n- package.json (json, 9 lines)"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "find",
+      "symbol": "sum"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] find\n{\"action\":\"find\",\"status\":\"ok\",\"symbol\":\"sum\",\"matches\":[{\"path\":\"sum.mjs\",\"line\":1,\"symbol\":\"sum\",\"kind\":\"definition\",\"symbolKind\":\"function\",\"signature\":\"export function sum(a, b) {\"}],\"definitions\":1,\"truncated\":false}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "references",
+      "symbol": "sum"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] references\n{\"action\":\"references\",\"status\":\"ok\",\"query\":\"sum\",\"mode\":\"word\",\"matches\":[{\"path\":\"sum.test.mjs\",\"line\":3,\"column\":10,\"text\":\"import { sum } from './sum.mjs'\",\"symbol\":null,\"kind\":\"match\"},{\"path\":\"sum.test.mjs\",\"line\":5,\"column\":7,\"text\":\"test('sum adds two numbers', () => {\",\"symbol\":null,\"kind\":\"match\"},{\"path\":\"sum.test.mjs\",\"line\":6,\"column\":16,\"text\":\"assert.equal(sum(2, 3), 5)\",\"symbol\":null,\"kind\":\"match\"},{\"path\":\"sum.mjs\",\"line\":1,\"column\":17,\"text\":\"export function sum(a, b) {\",\"symbol\":\"sum\",\"kind\":\"match\"}],\"scanned\":4,\"totalFiles\":4,\"truncated\":false,\"symbol\":\"sum\",\"lexical\":true,\"definitions\":1}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "search",
+      "query": "sum"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] search\n{\"action\":\"search\",\"status\":\"ok\",\"query\":\"sum\",\"mode\":\"literal\",\"matches\":[{\"path\":\"sum.test.mjs\",\"line\":3,\"column\":10,\"text\":\"import { sum } from './sum.mjs'\",\"symbol\":null,\"kind\":\"match\"},{\"path\":\"sum.test.mjs\",\"line\":5,\"column\":7,\"text\":\"test('sum adds two numbers', () => {\",\"symbol\":null,\"kind\":\"match\"},{\"path\":\"sum.test.mjs\",\"line\":6,\"column\":16,\"text\":\"assert.equal(sum(2, 3), 5)\",\"symbol\":null,\"kind\":\"match\"},{\"path\":\"sum.mjs\",\"line\":1,\"column\":17,\"text\":\"export function sum(a, b) {\",\"symbol\":\"sum\",\"kind\":\"match\"}],\"scanned\":4,\"totalFiles\":4,\"truncated\":false}"
+    }
+  },
+  {
+    "name": "read",
+    "arguments": {
+      "file_path": "sum.mjs"
+    },
+    "result": {
+      "isError": false,
+      "text": "<path>C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\sum.mjs</path>\n<type>file</type>\n<content>\n1: export function sum(a, b) {\n2:   return a + b\n3: }\n\n(End of file - total 3 lines)\n</content>"
+    }
+  },
+  {
+    "name": "read",
+    "arguments": {
+      "file_path": "sum.test.mjs"
+    },
+    "result": {
+      "isError": false,
+      "text": "<path>C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\sum.test.mjs</path>\n<type>file</type>\n<content>\n1: import test from 'node:test'\n2: import assert from 'node:assert/strict'\n3: import { sum } from './sum.mjs'\n4: \n5: test('sum adds two numbers', () => {\n6:   assert.equal(sum(2, 3), 5)\n7: })\n\n(End of file - total 7 lines)\n</content>"
+    }
+  }
+]

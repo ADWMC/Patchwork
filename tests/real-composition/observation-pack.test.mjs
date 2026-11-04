@@ -72,6 +72,12 @@ test('a large tool result becomes a handle and its original is archived byte for
     const archived = await readFile(dshHomePath('patchwork', 'observation-pack', SESSION_ID, 'objects', `${handle}.txt`), 'utf8')
     assert.equal(archived, plain.text)
 
+    // A caller-supplied byte cap returns a smaller bounded page, not the default window.
+    const small = await tools.execute({ callId: 'call-recall-small', rootCallId: 'call-recall-small', name: 'obs_recall', arguments: { id: handle, offset: 0, maxBytes: 100 }, agent, signal: new AbortController().signal })
+    assert.equal(small.isError, false)
+    assert.ok(Buffer.byteLength(small.value.chunk, 'utf8') <= 100)
+    assert.ok(small.value.nextOffset > 0 && small.value.nextOffset <= 100)
+
     // 分页召回逐页拼回，必须与原文逐字节相等。
     let offset = 0
     const pages = []

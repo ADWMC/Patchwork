@@ -26,6 +26,7 @@ test('native dispatcher checks task scope, runs real acceptance and revokes stol
     assert.equal(await readFile(join(cwd, 'plan.md'), 'utf8'), '# Plan')
     const checked = await call('patchwork_task', { action: 'check', baseRevision: taskState(agent).revision, id: 'test', tool: 'pwsh', command: "Write-Output 'REAL_TASK_OK'", description: 'Real acceptance command' })
     assert.equal(checked.isError, false)
+    assert.match(checked.value.output, /REAL_TASK_OK/)
     assert.equal(checked.value.task.status, 'ready')
     const revision = taskState(agent).revision
     const handoff = await call('patchwork_task', { action: 'handoff' })

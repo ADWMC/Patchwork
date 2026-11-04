@@ -27,3 +27,13 @@ export function resolveSourceReceipt(agent, id) {
   if (!isPatchworkAgent(agent) || typeof id !== 'string') return undefined
   return sources(agent).get(id)
 }
+/** Recent receipts are metadata only; the model uses their ids for incident provenance. */
+export function recentSourceReceipts(agent, { limit = 12, outcome, kind } = {}) {
+  if (!isPatchworkAgent(agent)) return []
+  const boundedLimit = Math.max(1, Math.min(24, Math.trunc(Number(limit) || 12)))
+  return [...sources(agent).values()]
+    .filter(record => (!outcome || record.outcome === outcome) && (!kind || record.kind === kind))
+    .sort((a, b) => String(b.at).localeCompare(String(a.at)))
+    .slice(0, boundedLimit)
+    .map(({ id, outcome: value, kind: type, revision, at }) => ({ id, outcome: value, kind: type, revision, at }))
+}

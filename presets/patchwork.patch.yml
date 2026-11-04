@@ -1,5 +1,4 @@
-# Generated from pinned DSH dsh-v0.2.1-rc.2 standard plus the scoped Patchwork runtime.
-# Source commit: 687f282e8625c6b8d11ff58211a90524be2e4317
+# Generated from pinned DSH dsh-v0.2.1-rc.5 standard plus the scoped Patchwork runtime.
 # gen-preset: host=0d398d2a6872a73a106cb3bd19303ecccf1637e1fcad4d0bf9d8a72d2c2c68f5
 
 - insert:

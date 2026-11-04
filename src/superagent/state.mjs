@@ -25,10 +25,10 @@ export function defineJobs(state, jobs, { concurrency = state.concurrency } = {}
     if (!Array.isArray(dependencies) || dependencies.length > 8 || new Set(dependencies).size !== dependencies.length) throw new Error('invalid job dependencies')
     dependencies.forEach(identifier)
     const timeoutMs = input.timeoutMs ?? 300000
-    if (input.mode !== undefined && !['read', 'write'].includes(input.mode)) throw new Error('mode must be read or write')
+    if (input.mode !== undefined && !['read', 'explore', 'write'].includes(input.mode)) throw new Error('mode must be read, explore or write')
     if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 900000) throw new Error('timeoutMs must be 1000..900000')
     next.jobs.push({ id, title: bounded(input.title, 160, 'title'), prompt: bounded(input.prompt, 8000, 'prompt'), dependencies,
-      timeoutMs, mode: input.mode === 'read' ? 'read' : 'write', status: 'queued', attempt: 0, childId: null, result: null, report: null, inputs: [] })
+      timeoutMs, mode: input.mode === 'write' ? 'write' : input.mode === 'explore' ? 'explore' : 'read', status: 'queued', attempt: 0, childId: null, result: null, report: null, inputs: [] })
   }
   for (const job of next.jobs) if (job.dependencies.some(id => id === job.id || !next.jobs.some(j => j.id === id))) throw new Error('missing or self job dependency')
   const visiting = new Set(), visited = new Set()
@@ -51,7 +51,7 @@ export function runnableJobs(state) {
   const candidates = state.jobs.filter(j => j.status === 'queued' && j.dependencies.every(id => state.jobs.find(x => x.id === id)?.status === 'done'))
   if (!slots) return []
   if (!running.length && candidates[0]?.mode === 'write') return [candidates[0]]
-  return candidates.filter(j => j.mode === 'read').slice(0, slots)
+  return candidates.filter(j => j.mode !== 'write').slice(0, slots)
 }
 export function reservedChildId() { return `session-pw-${randomUUID()}` }
 

@@ -15,6 +15,19 @@ import { reducibleLog } from '../src/mechanisms/evidence-preserving-reducer/cand
 const secret = 'synthetic_PRIVATE_log_value_0123456789'
 const entry = { mechanism: 'epr', event: 'decision', reason: 'retained-6-quotes' }
 
+test('task, queue, skill, evidence, settings and maintenance actions stay in the allowlist', () => {
+  for (const [mechanism, event, reason] of [
+    ['task', 'check', 'task-check'], ['superagent', 'input', 'queue-input'], ['skill', 'load', 'skill-loaded'],
+    ['evidence', 'compare', 'evidence-compared'], ['settings', 'save', 'settings-saved'], ['maintenance', 'warning', 'structure-warning'],
+  ]) {
+    const data = diagnosticData({ mechanism, event, reason })
+    assert.equal(data.mechanism, mechanism)
+    assert.equal(data.event, event)
+    assert.equal(data.reason, reason)
+  }
+  assert.equal(diagnosticData({ mechanism: 'unknown', event: 'success', reason: 'enabled' }), undefined)
+})
+
 // Unit-test adapter. Product-native Session persistence is checked separately.
 class RecordSession {
   constructor(id) { this.header = { id }; this.events = []; this.seq = 0 }

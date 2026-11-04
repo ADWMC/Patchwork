@@ -1,0 +1,55 @@
+{
+  "scenario": "fetch-evidence",
+  "title": "Public fetch and evidence citation",
+  "status": "passed",
+  "assertions": [
+    {
+      "id": "fetch-used",
+      "status": "passed",
+      "detail": "1 fetch calls"
+    },
+    {
+      "id": "evidence-cited",
+      "status": "passed",
+      "detail": "cite call expected"
+    },
+    {
+      "id": "no-tool-errors",
+      "status": "passed",
+      "detail": "0 tool errors"
+    }
+  ],
+  "task": {
+    "schemaVersion": 1,
+    "sessionId": "session-bbf6f8a2-957a-4ff8-94b4-1efb0b23e48e",
+    "taskId": "0d9d4c00-b615-4bb6-8c9b-0608c355271e",
+    "revision": 1,
+    "title": null,
+    "phase": "unassessed",
+    "understandingStatus": "unassessed",
+    "source": {
+      "kind": "observed-user-kind",
+      "eventId": "cbaffadc-2046-4183-9535-42b9da9badc8"
+    },
+    "workspace": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace",
+    "references": [],
+    "instance": null,
+    "requirements": [],
+    "artifacts": [],
+    "receipts": [],
+    "candidates": [],
+    "corrections": [],
+    "inputIds": [
+      "0541861c96a5670a51baa8d4b7daf4f28835e73449142c6aadf6e67e84f3b404"
+    ],
+    "lastCorrection": null,
+    "status": "in-progress",
+    "policy": "structured-tools-only",
+    "persistence": "unavailable"
+  },
+  "toolErrors": 0,
+  "tools": [
+    "patchwork_fetch",
+    "patchwork_evidence"
+  ]
+}

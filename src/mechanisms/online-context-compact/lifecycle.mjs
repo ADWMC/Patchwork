@@ -14,6 +14,16 @@ function sessionIdOf(agent) {
   return typeof id === 'string' && id !== '' ? id : undefined
 }
 
+/** Bounded read-only plan view for the session panel. */
+const planViews = new WeakMap()
+export function planSnapshot(agent) {
+  if (!isPatchworkAgent(agent)) return null
+  const state = planViews.get(agent.session)
+  if (!state) return null
+  const steps = (state.plan ?? []).slice(0, 24).map(step => ({ id: String(step.id).slice(0, 96), text: String(step.text).slice(0, 240), status: step.status }))
+  return { steps, completed: steps.filter(step => step.status === 'completed').length, remaining: steps.filter(step => step.status !== 'completed').length, lastDecision: state.lastDecision ?? null }
+}
+
 function averageInterval(intervals) {
   if (!Array.isArray(intervals) || intervals.length === 0) return 0
   return intervals.reduce((sum, value) => sum + value, 0) / intervals.length
@@ -70,12 +80,19 @@ export function registerOnlineContextCompact(ctx, config = {}) {
     return work
   }
 
+  ctx.on('agent/created', async ({ agent }) => {
+    if (!isPatchworkAgent(agent)) return
+    const sessionId = sessionIdOf(agent)
+    if (!sessionId) return
+    try { planViews.set(agent.session, await stateFor(sessionId)) } catch { /* A missing plan stays unavailable. */ }
+  })
+
   registerPlanTool(ctx, async ({ steps, exec }) => {
     const sessionId = sessionIdOf(exec.agent)
     if (!sessionId) return {}
     const lease = continuationLease(exec.agent)
     let boundary = false
-    await update(sessionId, state => {
+    const nextState = await update(sessionId, state => {
       const transition = analyzeTransition(state.plan, steps)
       let next = { ...state, plan: steps, completed: transition.completed }
       if (transition.newlyCompleted.length > 0) {
@@ -84,6 +101,7 @@ export function registerOnlineContextCompact(ctx, config = {}) {
       }
       return next
     })
+    planViews.set(exec.agent.session, nextState)
     if (boundary && canContinueTask(exec.agent, lease)) {
       boundaries.add(sessionId)
       leases.set(sessionId, lease)

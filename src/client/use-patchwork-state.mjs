@@ -123,9 +123,10 @@ export function usePatchworkState(sessionId) {
     return data
     } finally { mutations.current.delete(controller) }
   }
-  async function improvementAction(action, candidateId, expectedRevision) {
-    return mutate('improvementPath', { action, candidateId, incidentId: action === 'propose' ? candidateId : undefined, expectedRevision })
+  async function improvementAction(action, candidateId, expectedRevision, fields = {}) {
+    return mutate('improvementPath', { action, candidateId, incidentId: action === 'propose' ? candidateId : undefined, expectedRevision, ...fields })
   }
   const superagentAction = body => mutate('superagentPath', body)
-  return { snapshot, connection, error, save, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction, refresh: () => refresh(x => x+1) }
+  const evidenceAction = body => mutate('evidencePath', body)
+  return { snapshot, connection, error, save, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction, evidenceAction, refresh: () => refresh(x => x+1) }
 }

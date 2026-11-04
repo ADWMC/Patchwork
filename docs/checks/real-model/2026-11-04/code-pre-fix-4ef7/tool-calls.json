@@ -1,0 +1,154 @@
+[
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "map",
+      "tokenBudget": "[redacted]"
+    },
+    "result": {
+      "isError": false,
+      "text": "[code-map] root=default-workspace files=4 truncated=no\n\n## Modules\n- .: 4 files, 2 symbols, 1 tests\n\n## Start here\n- README.md (markdown, 6 lines) — Demo Project\n- sum.mjs (javascript, 4 lines) — sum\n- package.json (json, 9 lines)"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "find",
+      "symbol": "sum"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] find\n{\"action\":\"find\",\"status\":\"ok\",\"symbol\":\"sum\",\"matches\":[{\"path\":\"sum.mjs\",\"line\":1,\"symbol\":\"sum\",\"kind\":\"definition\",\"symbolKind\":\"function\",\"signature\":\"export function sum(a, b) {\"}],\"definitions\":1,\"truncated\":false}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "search",
+      "query": "sum"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: tool \"patchwork_code\" returned invalid output: value is not lossless JSON"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "search",
+      "mode": "word",
+      "query": "sum"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: tool \"patchwork_code\" returned invalid output: value is not lossless JSON"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "search",
+      "query": "sum",
+      "path": "."
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] search\n{\"action\":\"search\",\"status\":\"ok\",\"query\":\"sum\",\"mode\":\"literal\",\"matches\":[],\"scanned\":0,\"totalFiles\":0,\"truncated\":false}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "references",
+      "symbol": "sum"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: tool \"patchwork_code\" returned invalid output: value is not lossless JSON"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "search",
+      "glob": "*.mjs",
+      "query": "sum"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: tool \"patchwork_code\" returned invalid output: value is not lossless JSON"
+    }
+  },
+  {
+    "name": "glob",
+    "arguments": {
+      "pattern": "**/*"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: glob subprocess failed before reporting an outcome (ripgrep provider failure)"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "outline",
+      "path": "sum.mjs"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] outline\n{\"action\":\"outline\",\"status\":\"ok\",\"path\":\"sum.mjs\",\"language\":\"javascript\",\"lines\":4,\"symbols\":[{\"name\":\"sum\",\"kind\":\"function\",\"line\":1,\"signature\":\"export function sum(a, b) {\"}],\"imports\":[],\"test\":false,\"generated\":false}"
+    }
+  },
+  {
+    "name": "read",
+    "arguments": {
+      "file_path": "sum.mjs"
+    },
+    "result": {
+      "isError": false,
+      "text": "<path>C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\sum.mjs</path>\n<type>file</type>\n<content>\n1: export function sum(a, b) {\n2:   return a + b\n3: }\n\n(End of file - total 3 lines)\n</content>"
+    }
+  },
+  {
+    "name": "read",
+    "arguments": {
+      "file_path": "README.md"
+    },
+    "result": {
+      "isError": false,
+      "text": "<path>C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\README.md</path>\n<type>file</type>\n<content>\n1: # Demo Project\n2: \n3: - 包管理器：pnpm\n4: - 测试命令：npm test\n5: - 部署约束：必须使用隔离的 DSH_HOME，不能改动主 DSH。\n\n(End of file - total 5 lines)\n</content>"
+    }
+  },
+  {
+    "name": "read",
+    "arguments": {
+      "file_path": "package.json"
+    },
+    "result": {
+      "isError": false,
+      "text": "<path>C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\package.json</path>\n<type>file</type>\n<content>\n1: {\n2:   \"name\": \"demo-project\",\n3:   \"version\": \"0.0.0\",\n4:   \"private\": true,\n5:   \"scripts\": {\n6:     \"test\": \"node --test --test-isolation=none\"\n7:   }\n8: }\n\n(End of file - total 8 lines)\n</content>"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "outline",
+      "path": "sum.test.mjs"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] outline\n{\"action\":\"outline\",\"status\":\"ok\",\"path\":\"sum.test.mjs\",\"language\":\"javascript\",\"lines\":8,\"symbols\":[],\"imports\":[\"node:test\",\"node:assert/strict\",\"./sum.mjs\"],\"test\":true,\"generated\":false}"
+    }
+  },
+  {
+    "name": "read",
+    "arguments": {
+      "file_path": "sum.test.mjs"
+    },
+    "result": {
+      "isError": false,
+      "text": "<path>C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\sum.test.mjs</path>\n<type>file</type>\n<content>\n1: import test from 'node:test'\n2: import assert from 'node:assert/strict'\n3: import { sum } from './sum.mjs'\n4: \n5: test('sum adds two numbers', () => {\n6:   assert.equal(sum(2, 3), 5)\n7: })\n\n(End of file - total 7 lines)\n</content>"
+    }
+  }
+]

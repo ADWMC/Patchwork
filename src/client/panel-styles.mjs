@@ -69,6 +69,9 @@ export const PANEL_CSS = String.raw`
 .pw-section-heading button { color:var(--pw-muted); font-size:11px; padding:3px 0; height:auto; flex:none }
 .pw-section-heading button .pw-icon { width:12px; height:12px }
 .pw-page-heading { margin-bottom:2px; padding:2px 2px 0 }
+.pw-page-heading.pw-heading-actions { flex-wrap:wrap; align-items:flex-start }
+.pw-page-heading.pw-heading-actions > .pw-actions { flex:none; flex-wrap:wrap; justify-content:flex-start; max-width:100% }
+.pw-page-heading.pw-heading-actions > .pw-actions button { white-space:nowrap; width:auto; min-width:auto }
 .pw-heading-actions { display:flex; align-items:flex-start; justify-content:space-between; gap:12px }
 .pw-heading-actions>button { flex:none }
 .pw-row,.pw-check-row { display:flex; align-items:center; gap:12px; padding:16px 0; border-bottom:1px solid var(--pw-card-line); min-width:0 }
@@ -165,7 +168,23 @@ export const PANEL_CSS = String.raw`
 .pw-log-detail>h3 { font-size:15px; font-weight:500 }
 .pw-log-detail>.pw-muted { margin-top:6px; font-size:11px }
 .pw-log-reason { margin-top:16px!important; font-size:12px; color:var(--pw-secondary) }
-.pw-save { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:0; padding:14px 16px; border:1px solid var(--pw-card-line); border-radius:var(--pw-radius); background:var(--pw-surface); position:sticky; bottom:0; z-index:1 }
+.pw-save { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:0; padding:14px 16px; border:1px solid var(--pw-card-line); border-radius:var(--pw-radius); background:var(--pw-surface); position:static }
+.pw-tab-label { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-width:0 }
+.pw-tab-badge { min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:color-mix(in srgb,var(--pw-accent) 16%,transparent); color:var(--pw-accent); font-size:10px; line-height:16px; font-variant-numeric:tabular-nums }
+.pw-mechanism-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; min-width:0 }
+.pw-settings-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; min-width:0 }
+.pw-memory-workbench { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; min-width:0; align-items:start }
+.pw-memory-list-column { min-width:0 }
+.pw-memory-recall-row { border-top:.5px solid var(--pw-line); padding:12px 0; min-width:0 }
+.pw-memory-recall-row:first-of-type { border-top:0; padding-top:0 }
+.pw-improvement-form label { display:flex; flex-direction:column; gap:8px; margin-top:12px; font-size:12px; color:var(--pw-secondary) }
+.pw-improvement-form label>.pw-muted { margin-top:0 }
+.pw-plan-list { list-style:none; padding:0; margin:0 0 8px; display:flex; flex-direction:column; gap:8px }
+.pw-plan-list li { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:9px; align-items:start; padding:9px 0; border-bottom:.5px solid var(--pw-line); font-size:12px }
+.pw-plan-list li:last-child { border-bottom:0 }
+.pw-plan-list li[data-status=completed] span:nth-child(2) { color:var(--pw-muted); text-decoration:line-through }
+.pw-plan-list small { color:var(--pw-muted); font-size:10px; white-space:nowrap }
+.pw-archive-head { max-height:96px; overflow:auto; margin:8px 0 0; font-size:10px; line-height:1.6 }
 .pw-actions { display:flex; gap:8px; align-items:center }
 .pw-live-note { font-size:11px; color:var(--pw-muted); line-height:1.8; margin-top:8px!important }
 .pw-note { display:flex; align-items:flex-start; gap:10px; background:var(--pw-surface); border:1px solid var(--pw-card-line); border-radius:var(--pw-radius); padding:16px; margin:0; font-size:12px; flex-wrap:wrap }
@@ -246,6 +265,10 @@ export const PANEL_CSS = String.raw`
   .pw-record-list { max-height:580px }
   .pw-detail-pane { position:sticky; top:0 }
   .pw-setting-diff { grid-template-columns:minmax(120px,1fr) minmax(0,1fr) minmax(0,1fr) }
+  .pw-mechanism-grid { grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .pw-settings-grid { grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .pw-memory-workbench:has(.pw-memory-detail) { grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr) }
+  .pw-memory-workbench>.pw-memory-detail { position:sticky; top:0 }
 }
 @container patchwork (max-width:390px) {
   .pw-header { padding:12px 14px 10px }

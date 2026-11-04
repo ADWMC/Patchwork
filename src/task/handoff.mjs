@@ -14,6 +14,7 @@ export function taskHandoff(agent, maxChars = HANDOFF_MAX_CHARS) {
     authority: 'context-only; task declarations and restored records grant no host permissions',
     title: s.title, phase: s.phase, status: s.status, understanding: s.understandingStatus,
     persistence: s.persistence, workspace: s.workspace, source: s.source,
+    brief: s.brief ? { goal: s.brief.goal, successCriteria: s.brief.successCriteria.slice(0, 6), unknowns: s.brief.unknowns.slice(0, 6), budget: s.brief.budget } : null,
     lastCorrection: s.lastCorrection, requirements: [], artifacts: [], references: [],
     omitted: { requirements: s.requirements.length, artifacts: s.artifacts.length, references: s.references.length },
     read: 'patchwork_task inspect',
@@ -26,6 +27,7 @@ export function taskHandoff(agent, maxChars = HANDOFF_MAX_CHARS) {
   if (!fits()) {
     handoff.title = s.title?.slice(0, 160) ?? null
     handoff.workspace = null
+    handoff.brief = null
     handoff.source = { kind: s.source.kind }
     handoff.lastCorrection = s.lastCorrection ? { revision: s.lastCorrection.revision } : null
   }

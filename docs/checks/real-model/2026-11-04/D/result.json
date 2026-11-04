@@ -1,0 +1,53 @@
+{
+  "scenario": "superagent-explore",
+  "title": "Read-only explore returns findings without writes",
+  "status": "passed",
+  "assertions": [
+    {
+      "id": "superagent-submitted",
+      "status": "passed",
+      "detail": "1 submit calls"
+    },
+    {
+      "id": "no-writes",
+      "status": "passed",
+      "detail": "0 write/edit calls"
+    }
+  ],
+  "task": {
+    "schemaVersion": 1,
+    "sessionId": "session-42b3e6bb-fab0-4f01-afdc-21b3dbf7932f",
+    "taskId": "8a4d5915-8763-49fa-9f18-f50b1220321b",
+    "revision": 1,
+    "title": null,
+    "phase": "unassessed",
+    "understandingStatus": "unassessed",
+    "source": {
+      "kind": "observed-user-kind",
+      "eventId": "f31f717b-9735-4bd6-a7aa-8c98a44d7da3"
+    },
+    "workspace": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace",
+    "references": [],
+    "instance": null,
+    "requirements": [],
+    "artifacts": [],
+    "receipts": [],
+    "candidates": [],
+    "corrections": [],
+    "inputIds": [
+      "f5712d9b6ce348f5f8d14fa5b775363d3586c8da5eb377c4c425f75873527aac"
+    ],
+    "lastCorrection": null,
+    "status": "in-progress",
+    "policy": "structured-tools-only",
+    "persistence": "unavailable"
+  },
+  "toolErrors": 1,
+  "tools": [
+    "patchwork_superagent",
+    "read",
+    "list_agents",
+    "job_output",
+    "pwsh"
+  ]
+}

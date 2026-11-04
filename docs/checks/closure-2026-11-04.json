@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-04",
+  "packageVersion": "0.2.0",
+  "dshVersion": "0.2.1-rc.5",
+  "gitHead": "9b606d10431de7550a54ab464179997ee83bc293",
+  "status": "passed-with-declared-model-infrastructure-gap",
+  "checks": {
+    "automatedTests": {
+      "status": "passed",
+      "tests": 443,
+      "failed": 0
+    },
+    "clientBundle": {
+      "status": "passed"
+    },
+    "docsLinks": {
+      "status": "passed",
+      "markdownFiles": 185,
+      "localLinks": 433,
+      "broken": 0
+    },
+    "uiAcceptance": {
+      "status": "passed",
+      "checks": 19,
+      "viewports": 60,
+      "consoleErrors": 0,
+      "httpFailures": 0,
+      "modelRequests": 0,
+      "report": "docs/checks/ui-acceptance-2026-11-04.json"
+    },
+    "realModelAudit": {
+      "status": "verified-with-failures",
+      "runs": 21,
+      "statuses": {
+        "passed": 15,
+        "failed": 6
+      },
+      "index": "docs/checks/real-model/2026-11-04/index.json",
+      "taskCommandBlocker": "task-check-db31 on the older patchwork profile failed at the Windows Job runner; task-check-pass-5448 on the fresh regression profile passed with brief, artifact and npm test output, no standalone shell",
+      "nativeCodeGraph": "native-graph-2a85 passed; native-graph-pre-fix-1477 retained as a schema failure sample"
+    }
+  },
+  "boundaries": {
+    "mainDshTouched": false,
+    "hostBrowserAttached": false,
+    "vectorIndexAdded": false,
+    "nativeTreeSitterAdded": false,
+    "realModelReportsAreSingleRunEvidence": true
+  }
+}

@@ -9,7 +9,7 @@ const root = join(import.meta.dirname, '..')
 
 /** 宿主随包发布的 standard preset；源码检出或未装 dsh 时可能不存在。 */
 function hostStandardPath() {
-  return join(root, 'tests', 'fixtures', 'dsh-v0.2.1-rc.2.standard.patch.yml')
+  return join(root, 'tests', 'fixtures', 'dsh-v0.2.1-rc.5.standard.patch.yml')
 }
 
 // 注释与空行不参与比较：preset 声明里的说明文字是手工补充的。
@@ -102,7 +102,7 @@ test('committed host rows match the pinned DSH standard verbatim', t => {
 test('profile installs Patchwork as a bundle layer', () => {
   const profile = JSON.parse(readFileSync(join(root, 'profiles/patchwork/package.json'), 'utf8'))
   assert.equal(profile.dependencies['@patchwork/coding-agent'], JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version)
-  assert.equal(profile.dependencies['@deepseek-ai/dsh-base'], '0.2.1-rc.2')
-  assert.equal(profile.dependencies['@deepseek-ai/dsh-web-app'], '0.2.1-rc.2')
+  assert.equal(profile.dependencies['@deepseek-ai/dsh-base'], '0.2.1-rc.5')
+  assert.equal(profile.dependencies['@deepseek-ai/dsh-web-app'], '0.2.1-rc.5')
   assert.equal(profile.dsh.profile.bundles.includes('@patchwork/coding-agent'), true)
 })

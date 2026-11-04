@@ -68,7 +68,7 @@ export function createAgent({ id = 'test-agent', cwd = process.cwd(), sessionId 
   const agent = Object.assign(agentKey, {
     id,
     ctx: agentScope.ctx,
-    session: { header: { id: sessionId, cwd }, requestContext: () => ({ contextWindow: 200_000 }) },
+    session: { header: { id: sessionId, cwd }, requestContext: () => ({ contextWindow: 200_000 }), seq: 0, inheritedEventCount: 0, snapshotEvents: () => [], deriveMessages: () => [] },
     whenIdle: async () => {},
     runMaintenance: task => task(new AbortController().signal),
     followup: message => followups.push(message),

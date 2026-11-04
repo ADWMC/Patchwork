@@ -60,7 +60,7 @@ $env:DSH_HOME = 'C:\dsh\patchwork-demo'
 dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-0.2.0.tgz"
 ```
 
-Patchwork uses the host's model and permission settings. Dependencies mainly target DSH `0.2.0-rc.2`; native UI and real calls were validated on isolated DSH `0.2.1-rc.2`. The full dependency migration remains unfinished, so this does not establish compatibility with every host version.
+Patchwork uses the host's model and permission settings. `@deepseek-ai/dsh-agent-preset` and `@deepseek-ai/dsh-home-paths` are peer dependencies supplied by the target DSH base/web bundles, so the published package never pins an older copy over the host. If a profile still pins an older `@deepseek-ai/dsh-agent-preset`, remove it or align it with the host; otherwise the DSH version gate disables preset rows. The dependency baseline, bundled profile template, preset fixture and real-call verification all target DSH `0.2.1-rc.5`; older hosts are no longer the current test baseline.
 
 ### 3. Select the Agent and open the panel
 
@@ -80,8 +80,9 @@ The Patchwork panel shows a locked explanation in other Agent modes. Switching s
 | **Native Superagent** | `patchwork_superagent` manages persistent queues, dependencies and bounded retries. It defaults to two read slots; this module serializes writes within the same workspace. |
 | **On-demand skills** | Seven core skills are registered by default, with an opt-in catalog of thirteen. The catalog exposes names and descriptions; bodies load when requested. |
 | **Information retrieval** | `patchwork_search` queries public Bing, Brave and DuckDuckGo pages in parallel without an API key. `patchwork_fetch` performs controlled reads of public URLs. |
+| **Local code retrieval** | `patchwork_code` provides a workspace map, file outlines, symbol definitions, lexical references and text/regex search. Reads stay in the current workspace, skip dependencies, build outputs and sensitive files, and return bounded results. The workspace code graph is off by default: the model can `graph-enable` (writes `.patchwork/config.json`) and `graph-start` before using callers/callees/impact/affected. |
 | **Explicit memory and improvements** | Search, filters, manual proposals, versioned edits, pause/resume, provenance, export and bulk forgetting; private and shared scopes require separate confirmation. Automatic injection stays off. Improvements retain isolated contracts and session rollback. |
-| **Native workspace** | Actionable overview, queue/dependency details, actual skill catalog, acceptance filters, retrieval sources/citations, memory and improvement management; searchable/frozen/exportable logs, explanations and diffs for 23 settings. Uses DSH controls, light/dark tokens and sidebar layouts. See the [implementation record](docs/ui-community-expansion-2026-11-01.md). |
+| **Native workspace** | **Overview / Execution / Evidence / Management / Diagnostics / Settings**, with secondary views that appear on demand and carry pending counts; task handoff and correction history, queue input/reconcile, memory recall preview, generic improvement candidates, independent-source comparison, mechanism counters/plan/archive, task/queue/settings logs, 26 settings with reset/import/export. Wide panels use master-detail and two-column layouts, while empty views stay hidden. Uses DSH controls, light/dark tokens and sidebar layouts. See the [implementation record](docs/ui-community-expansion-2026-11-01.md). |
 
 A model's completion claim cannot replace real acceptance. File-structure checks do not establish semantic correctness; those unknowns need separate review.
 

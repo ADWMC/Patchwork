@@ -11,6 +11,12 @@ const item = { type: 'object', properties: {
   required: { type: 'boolean' }, targets: { type: 'array', description: 'Artifact ids; reuse exactly these ids when registering artifacts.', items: { type: 'string' } }, coverage: { type: 'array', minItems: 1, description: 'Required unit ids. Omit for one check; default is ["all"]. Never send []. check.unit must match one.', items: { type: 'string' } },
 }, required: ['id', 'label', 'kind'], additionalProperties: false }
 
+function boundedOutput(result, max = 4000) {
+  const text = (result?.content ?? []).filter(block => block?.type === 'text').map(block => block.text).join('\n')
+  if (!text) return null
+  return text.length > max ? `${text.slice(0, max)}\n[output truncated to ${max} characters]` : text
+}
+
 export function registerTaskLifecycle(ctx, config = {}) {
   registerActionChecks(ctx, config)
   ctx.on('agent/inbox/inserted', ({ agent, message }) => {
@@ -30,12 +36,17 @@ export function registerTaskLifecycle(ctx, config = {}) {
   })
   ctx.tools.register({
     name: 'patchwork_task',
-    description: 'Track multi-step edits, corrections, artifacts and acceptance; skip one-off read-only answers. All fields are TOP LEVEL, never nested in arguments. Inspect for current revision; handoff reads a bounded recovery snapshot without changing the task. Examples: {action:"artifact",baseRevision:3,id:"code",path:"C:/work/file.mjs"}; {action:"check",baseRevision:4,id:"tests",command:"node --test",description:"Run behavioral tests"}. check.id is the REQUIREMENT id; artifact.id must match requirement.targets. check EXECUTES the command and records a receipt, not attaches a previous shell result. Register final targets then call check directly: standalone shell calls invalidate artifacts, including read-only commands. Omit coverage/unit for one check. Model statements do not grant permissions. Semantic assessment remains unknown; host approvals still apply.',
+    description: 'Track multi-step edits, corrections, artifacts and acceptance; skip one-off read-only answers. All fields are TOP LEVEL, never nested in arguments. Inspect for current revision; handoff reads a bounded recovery snapshot without changing the task. define may include a brief (goal, successCriteria, unknowns, assumptions, budget) so goals and stop conditions survive compaction. Examples: {action:"artifact",baseRevision:3,id:"code",path:"C:/work/file.mjs"}; {action:"check",baseRevision:4,id:"tests",command:"node --test",description:"Run behavioral tests"}. check.id is the REQUIREMENT id; artifact.id must match requirement.targets. check EXECUTES the command, records a receipt and returns a bounded output preview; use that output instead of re-running the same command in a standalone shell. Standalone shell calls invalidate artifacts, including read-only commands. Register final targets then call check directly. Omit coverage/unit for one check. Model statements do not grant permissions. Semantic assessment remains unknown; host approvals still apply.',
     parameters: { type: 'object', properties: {
       action: { type: 'string', enum: ['inspect', 'handoff', 'define', 'correct', 'artifact', 'check', 'assessment', 'candidate', 'cancel'] },
       baseRevision: { type: 'integer', description: 'Required for every action except inspect/handoff. Use the current revision from inspect or handoff; do not guess.' },
       title: { type: 'string', description: 'Required for define. For correct, omit to keep the existing title.' },
       phase: { type: 'string', enum: ['analysis', 'plan', 'implement', 'verify'], description: 'Required for define; correct inherits it when omitted. Source edits require implement or verify; plan allows Markdown only, analysis allows no edits.' },
+      brief: { type: 'object', description: 'Optional cognitive frame for multi-step work: goal, success criteria, unknowns, assumptions and budgets. Not authorization. Omit for simple tasks.', properties: {
+        goal: { type: 'string', maxLength: 500 }, successCriteria: { type: 'array', maxItems: 12, items: { type: 'string', maxLength: 240 } },
+        unknowns: { type: 'array', maxItems: 12, items: { type: 'string', maxLength: 240 } }, assumptions: { type: 'array', maxItems: 12, items: { type: 'string', maxLength: 240 } },
+        budget: { type: 'object', properties: { maxSteps: { type: 'integer', minimum: 1, maximum: 200 }, maxSearchCalls: { type: 'integer', minimum: 1, maximum: 100 }, maxTokens: { type: 'integer', minimum: 1000, maximum: 2000000 } }, additionalProperties: false },
+      }, additionalProperties: false },
       requirements: { type: 'array', maxItems: 24, items: item }, references: { type: 'array', maxItems: 24, items: { type: 'string' } },
       affected: { type: 'array', items: { type: 'string' } }, needsClarification: { type: 'boolean' },
       instance: { type: 'object', properties: { id: { type: 'string' }, endpoint: { type: 'string' } }, required: ['id', 'endpoint'], additionalProperties: false },
@@ -47,19 +58,23 @@ export function registerTaskLifecycle(ctx, config = {}) {
       verdict: { type: 'string', enum: ['supported', 'contradicted', 'unknown'] },
       sourceReceiptId: { type: 'string' }, trigger: { type: 'string' }, label: { type: 'string' },
     }, required: ['action'], additionalProperties: false },
-    output: { schema: { type: 'object', properties: { task: { type: 'object', additionalProperties: true }, receipt: { type: 'object', additionalProperties: true }, handoff: { type: 'object', additionalProperties: true } }, required: ['task'], additionalProperties: false },
+    output: { schema: { type: 'object', properties: { task: { type: 'object', additionalProperties: true }, receipt: { type: 'object', additionalProperties: true }, handoff: { type: 'object', additionalProperties: true }, output: { type: 'string' } }, required: ['task'], additionalProperties: false },
       render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     async execute(args, exec) {
       const agent = exec.agent
       requirePatchworkAgent(agent)
-      let receipt
+      let receipt, output
       if (!['inspect', 'handoff'].includes(args.action) && !Number.isSafeInteger(args.baseRevision)) throw new Error('baseRevision required; inspect first')
       if (['define', 'correct'].includes(args.action)) transitionTask(agent, { kind: args.action, baseRevision: args.baseRevision, data: args })
       else if (args.action === 'artifact') {
         if (!args.id || !args.path) throw new Error('artifact requires TOP LEVEL baseRevision, id and absolute path. Example: {action:"artifact",baseRevision:3,id:"code",path:"C:/work/file.mjs"}')
         await registerArtifact(agent, args, args.baseRevision)
       }
-      else if (args.action === 'check') ({ receipt } = await executeAcceptance(agent, { ...args, tool: args.tool ?? 'pwsh', arguments: { command: args.command, description: args.description ?? 'Verify declared acceptance' } }, exec))
+      else if (args.action === 'check') {
+        const checked = await executeAcceptance(agent, { ...args, tool: args.tool ?? 'pwsh', arguments: { command: args.command, description: args.description ?? 'Verify declared acceptance' } }, exec)
+        receipt = checked.receipt
+        output = boundedOutput(checked.result)
+      }
       else if (args.action === 'assessment') transitionTask(agent, { kind: 'assessment', baseRevision: args.baseRevision, id: args.id, verdict: args.verdict })
       else if (args.action === 'cancel') transitionTask(agent, { kind: 'cancel', baseRevision: args.baseRevision })
       else if (args.action === 'candidate') transitionTask(agent, { kind: 'candidate', baseRevision: args.baseRevision, data: args })
@@ -70,7 +85,7 @@ export function registerTaskLifecycle(ctx, config = {}) {
         const handoff = taskHandoff(agent)
         return { task: { taskId: handoff.taskId, revision: handoff.revision, status: handoff.status }, handoff }
       }
-      return { task: taskProjection(agent), ...(receipt ? { receipt } : {}) }
+      return { task: taskProjection(agent), ...(receipt ? { receipt } : {}), ...(output ? { output } : {}) }
     },
   })
   ctx.commands.register({ name: 'patchwork-task', description: '查看当前任务、纠正版本和逐项验收（不授予权限）',

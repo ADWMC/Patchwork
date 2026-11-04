@@ -20,10 +20,10 @@ export async function inspectDelegatedAction(exec) {
   const name = exec.name, args = exec.arguments ?? {}
   if (name === 'patchwork_superagent') return ['inspect', 'report'].includes(args.action) ? undefined : 'executors cannot control the queue'
   if (name === 'patchwork_task') {
-    if (binding.mode === 'read' && args.action === 'check' && (args.command || args.tool || !args.rules)) return 'read assignments forbid command execution'
+    if (binding.mode !== 'write' && args.action === 'check' && (args.command || args.tool || !args.rules)) return 'read/explore assignments forbid command execution'
     return undefined
   }
-  if (!(binding.mode === 'read' ? readTools : writeTools).has(name)) return 'unsupported delegated effect channel; use the parent session'
+  if (!(binding.mode === 'write' ? writeTools : readTools).has(name)) return 'unsupported delegated effect channel; use the parent session'
   if (['pwsh', 'bash'].includes(name) && !executorShellAllowed(scope)) return 'shell cannot preserve the parent phase or read-only references; use structured tools'
   if (name === 'write' || name === 'edit') {
     if (scope?.title && scope.phase === 'analysis') return 'parent analysis phase is read-only'
@@ -91,13 +91,13 @@ export function registerSuperagent(ctx) {
   }, 'patchwork: superagent lifecycle')
   ctx.tools.register({
     name: 'patchwork_superagent',
-    description: 'DSH-internal Superagent controller: inspect queue/revision, submit explicit local tasks with dependencies, report from owned executor, input correction, retry, pause/resume/cancel, reconcile persisted native children after restart. Jobs use native DSH spawn, inherit permissions/model/preset and return only here. No external channels. Completed model turns are not acceptance. Ordinary small tasks need no queue. Root actions require current baseRevision; report is executor-only. Read jobs forbid shell/edits. Maximum 24 jobs, 1..4 slots (default 2), 3 attempts/job; writes serialize within this module/workspace. An uncertain interrupted assignment stays blocked until inspect/retry. Fields are TOP LEVEL.',
+    description: 'DSH-internal Superagent controller: inspect queue/revision, submit explicit local tasks with dependencies, report from owned executor, input correction, retry, pause/resume/cancel, reconcile persisted native children after restart. Jobs use native DSH spawn, inherit permissions/model/preset and return only here. No external channels. Completed model turns are not acceptance. Ordinary small tasks need no queue. Read/explore jobs forbid shell/edits; explore jobs return bounded findings without task acceptance. Maximum 24 jobs, 1..4 slots (default 2), 3 attempts/job; writes serialize within this module/workspace. An uncertain interrupted assignment stays blocked until inspect/retry. Fields are TOP LEVEL.',
     parameters: { type: 'object', properties: {
       action: { type: 'string', enum: ['inspect', 'submit', 'report', 'input', 'retry', 'pause', 'resume', 'cancel', 'reconcile'] },
       baseRevision: { type: 'integer' }, id: { type: 'string' }, input: { type: 'string', maxLength: 4000 },
       concurrency: { type: 'integer', minimum: 1, maximum: 4 }, status: { type: 'string', enum: ['ready', 'waiting', 'review', 'blocked', 'failed'] }, summary: { type: 'string', maxLength: 2000 },
       jobs: { type: 'array', maxItems: 24, items: { type: 'object', properties: {
-        id: { type: 'string' }, title: { type: 'string', maxLength: 160 }, prompt: { type: 'string', maxLength: 8000 }, mode: { type: 'string', enum: ['read', 'write'] },
+        id: { type: 'string' }, title: { type: 'string', maxLength: 160 }, prompt: { type: 'string', maxLength: 8000 }, mode: { type: 'string', enum: ['read', 'explore', 'write'] },
         dependencies: { type: 'array', maxItems: 8, items: { type: 'string' } }, timeoutMs: { type: 'integer', minimum: 1000, maximum: 900000 },
       }, required: ['id', 'title', 'prompt'], additionalProperties: false } },
     }, required: ['action'], additionalProperties: false },

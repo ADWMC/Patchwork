@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-04T05:54:16.983Z",
+  "runs": [
+    {
+      "runId": "6b6e",
+      "scenario": "smoke",
+      "status": "passed",
+      "report": "6b6e\\report.md"
+    },
+    {
+      "runId": "A",
+      "scenario": "task-check-output",
+      "status": "failed",
+      "report": "A\\report.md"
+    },
+    {
+      "runId": "B",
+      "scenario": "memory-project-scope",
+      "status": "failed",
+      "report": "B\\report.md"
+    },
+    {
+      "runId": "b7f9",
+      "scenario": "smoke",
+      "status": "passed",
+      "report": "b7f9\\report.md"
+    },
+    {
+      "runId": "C",
+      "scenario": "fetch-evidence",
+      "status": "passed",
+      "report": "C\\report.md"
+    },
+    {
+      "runId": "c87",
+      "scenario": "smoke",
+      "status": "failed",
+      "report": "c87\\report.md"
+    },
+    {
+      "runId": "code-map-2e17",
+      "scenario": "code-map",
+      "status": "passed",
+      "report": "code-map-2e17\\report.md"
+    },
+    {
+      "runId": "code-pre-fix-4ef7",
+      "scenario": "code-map",
+      "status": "failed",
+      "report": "code-pre-fix-4ef7\\report.md"
+    },
+    {
+      "runId": "D",
+      "scenario": "superagent-explore",
+      "status": "passed",
+      "report": "D\\report.md"
+    },
+    {
+      "runId": "D-child",
+      "scenario": "smoke",
+      "status": "passed",
+      "report": "D-child\\report.md"
+    },
+    {
+      "runId": "explore-child-301d",
+      "scenario": "explore-child",
+      "status": "passed",
+      "report": "explore-child-301d\\report.md"
+    },
+    {
+      "runId": "explore-parent-ed19",
+      "scenario": "superagent-submit",
+      "status": "passed",
+      "report": "explore-parent-ed19\\report.md"
+    },
+    {
+      "runId": "final",
+      "scenario": "smoke",
+      "status": "passed",
+      "report": "final\\report.md"
+    },
+    {
+      "runId": "I-child",
+      "scenario": "smoke",
+      "status": "passed",
+      "report": "I-child\\report.md"
+    },
+    {
+      "runId": "memory-scope-87d4",
+      "scenario": "memory-project-scope",
+      "status": "passed",
+      "report": "memory-scope-87d4\\report.md"
+    },
+    {
+      "runId": "native-graph-2a85",
+      "scenario": "native-code-graph",
+      "status": "passed",
+      "report": "native-graph-2a85\\report.md"
+    },
+    {
+      "runId": "native-graph-pre-fix-1477",
+      "scenario": "native-code-graph",
+      "status": "failed",
+      "report": "native-graph-pre-fix-1477\\report.md"
+    },
+    {
+      "runId": "rc5",
+      "scenario": "smoke",
+      "status": "passed",
+      "report": "rc5\\report.md"
+    },
+    {
+      "runId": "regression",
+      "scenario": "task-check-output",
+      "status": "passed",
+      "report": "regression\\report.md"
+    },
+    {
+      "runId": "task-check-db31",
+      "scenario": "task-check-output",
+      "status": "failed",
+      "report": "task-check-db31\\report.md"
+    },
+    {
+      "runId": "task-check-pass-5448",
+      "scenario": "task-check-output",
+      "status": "passed",
+      "report": "task-check-pass-5448\\report.md"
+    }
+  ]
+}

@@ -3,8 +3,33 @@ import { isAbsolute } from 'node:path'
 import { redactPreview } from '../logging/redact.mjs'
 
 export const TASK_RECORD = 'plugin:patchwork/task'
-export const LIMITS = { requirements: 24, artifacts: 24, coverage: 64, receipts: 32 }
+export const LIMITS = { requirements: 24, artifacts: 24, coverage: 64, receipts: 32, briefItems: 12 }
 const idPattern = /^[a-zA-Z0-9_.:-]{1,96}$/
+function briefText(value, max = 500) {
+  if (typeof value !== 'string' || !value.trim() || value.length > max) throw new Error('invalid bounded brief text')
+  return redactPreview(value).replace(/[\u0000-\u001f]/g, ' ').slice(0, max)
+}
+function briefList(value, max = LIMITS.briefItems) {
+  if (value === undefined) return []
+  return list(value, max).map(item => briefText(item, 240))
+}
+function briefBudget(value) {
+  if (value === undefined || value === null) return { maxSteps: null, maxSearchCalls: null, maxTokens: null }
+  if (typeof value !== 'object' || Array.isArray(value)) throw new Error('invalid brief budget')
+  const bound = (item, min, max) => item === undefined || item === null ? null : Number.isSafeInteger(item) && item >= min && item <= max ? item : (() => { throw new Error('invalid brief budget') })()
+  return { maxSteps: bound(value.maxSteps, 1, 200), maxSearchCalls: bound(value.maxSearchCalls, 1, 100), maxTokens: bound(value.maxTokens, 1000, 2000000) }
+}
+export function normalizeBrief(input) {
+  if (input === undefined || input === null) return null
+  if (typeof input !== 'object' || Array.isArray(input)) throw new Error('invalid task brief')
+  return {
+    goal: input.goal === undefined ? null : briefText(input.goal, 500),
+    successCriteria: briefList(input.successCriteria),
+    unknowns: briefList(input.unknowns),
+    assumptions: briefList(input.assumptions),
+    budget: briefBudget(input.budget),
+  }
+}
 export function taskId(value) {
   if (typeof value !== 'string' || !idPattern.test(value)) throw new Error('invalid task item id')
   return value
@@ -30,7 +55,7 @@ export function initialTask(sessionId, workspace) {
     phase: 'unassessed', understandingStatus: 'unassessed', source: { kind: 'unknown', eventId: null },
     workspace: typeof workspace === 'string' && isAbsolute(workspace) ? workspace : null,
     references: [], instance: null, requirements: [], artifacts: [], receipts: [],
-    candidates: [], inputIds: [], lastCorrection: null, status: 'in-progress', policy: 'structured-tools-only', persistence: 'unavailable' }
+    candidates: [], corrections: [], inputIds: [], brief: null, lastCorrection: null, status: 'in-progress', policy: 'structured-tools-only', persistence: 'unavailable' }
 }
 export function defineRequirements(input) {
   return unique(list(input, LIMITS.requirements).map(r => {
@@ -73,7 +98,8 @@ export function readTaskCheckpoint(input, sessionId, workspace) {
   next.taskId = taskId(input.taskId)
   if (input.title !== null) next = reduceTask(next, { kind: 'define', data: {
     title: input.title, phase: input.phase, references: input.references, instance: input.instance,
-    requirements: input.requirements, needsClarification: input.understandingStatus === 'needs-clarification' } })
+    requirements: input.requirements, brief: input.brief, needsClarification: input.understandingStatus === 'needs-clarification' } })
+  else next.brief = normalizeBrief(input.brief)
   next.revision = input.revision
   next.inputIds = unique(list(input.inputIds ?? [], 128).map(id => {
     if (typeof id !== 'string' || !/^[a-f0-9]{64}$/.test(id)) throw new Error('invalid task input fingerprint')
@@ -100,6 +126,11 @@ export function readTaskCheckpoint(input, sessionId, workspace) {
     return r
   })
   if (input.lastCorrection) next.lastCorrection = { revision: input.lastCorrection.revision, affected: list(input.lastCorrection.affected, LIMITS.requirements).map(taskId) }
+  next.corrections = list(input.corrections ?? [], 20).map(item => ({
+    revision: Number.isSafeInteger(item.revision) && item.revision >= 0 ? item.revision : 0,
+    affected: list(item.affected ?? [], LIMITS.requirements).map(taskId),
+    at: typeof item.at === 'string' && item.at.length <= 64 ? item.at : null,
+  }))
   next.persistence = 'native'
   next.status = ['cancelled', 'superseded'].includes(input.status) ? input.status : aggregateTask(next)
   return next
@@ -134,10 +165,12 @@ export function reduceTask(state, event) {
       next.revision++
       if (event.kind === 'define' && next.title) {
         next.taskId = next.taskId.split(':')[0] + ':r' + next.revision
-        next.artifacts = []; next.receipts = []; next.candidates = []
+        next.artifacts = []; next.receipts = []; next.candidates = []; next.corrections = []
       }
       next.title = safeLabel(title)
       next.phase = phase
+      if (event.kind === 'define') next.brief = normalizeBrief(data.brief)
+      else if (data.brief !== undefined) next.brief = normalizeBrief(data.brief)
       next.understandingStatus = data.needsClarification === true ? 'needs-clarification' : 'stated'
       next.references = unique(list(data.references ?? next.references, 24).map(absolute))
       if (!correcting || data.instance !== undefined) next.instance = data.instance ? { id: taskId(data.instance.id), endpoint: new URL(data.instance.endpoint).origin } : null
@@ -147,7 +180,11 @@ export function reduceTask(state, event) {
         list(affected, LIMITS.requirements).forEach(id => { if (!next.requirements.some(r => r.id === id)) throw new Error('unknown affected requirement') })
         next.requirements = next.requirements.map(r => affected.includes(r.id) ? stale(r) : r)
       }
-      if (event.kind === 'correct') next.lastCorrection = { revision: next.revision, affected: data.affected ?? next.requirements.map(r => r.id) }
+      if (event.kind === 'correct') {
+        const affected = data.affected ?? next.requirements.map(r => r.id)
+        next.lastCorrection = { revision: next.revision, affected }
+        next.corrections = [...(next.corrections ?? []), { revision: next.revision, affected, at: new Date().toISOString() }].slice(-20)
+      }
       next.status = 'in-progress'
       break
     }

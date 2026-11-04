@@ -27,7 +27,7 @@ product.
 
 The bundle declares two separate owners. `cordis.patch.yml` mounts the shared Web
 bridge at the profile root. `presets/patchwork.patch.yml` declares a preset that
-copies the pinned DSH 0.2.1-rc.2 standard fixture and appends
+copies the pinned DSH 0.2.1-rc.5 standard fixture and appends
 `@patchwork/coding-agent/runtime`. Only the Patchwork composition mounts model-side
 skills, tools, hooks and mechanisms. Switching away revokes those capabilities;
 the shared Web entry remains available with a locked explanation. Nothing reads

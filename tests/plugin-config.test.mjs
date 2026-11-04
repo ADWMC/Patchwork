@@ -38,6 +38,9 @@ test('the reducer route stays unset unless configured', () => {
     nativeFetchMaxChars: 6000,
     nativeFetchRobots: true,
     memoryEnabled: true,
+    codeEnabled: true,
+    codeMaxFiles: 4000,
+    codeTokenBudget: 2000,
   })
 })
 

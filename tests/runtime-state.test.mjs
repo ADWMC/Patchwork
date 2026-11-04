@@ -44,6 +44,10 @@ test('state route authenticates and releases its route on disposal', () => {
     assert.equal(ok.payload.sessionId, 'A')
     assert.equal(ok.payload.context.tokens, 123)
     assert.equal(ok.payload.mechanisms.actionFusion.active, true)
+    assert.equal(typeof ok.payload.stats, 'object')
+    assert.equal(ok.payload.plan, null)
+    assert.deepEqual(ok.payload.observations, [])
+    assert.equal(ok.payload.taskHandoff, null)
   } finally { first.dispose() }
   const second = boot()
   assert.ok(second.route)
@@ -91,6 +95,25 @@ test('bounded event previews deduplicate call IDs and retain unverified state', 
     assert.equal(events[0].text.length, 16000)
     assert.equal(events[0].truncated, true)
     assert.equal(events.at(-1).id, 'c2')
+  } finally { host.dispose() }
+})
+
+test('exploration counters and the one-shot soft hint stay bounded', async () => {
+  const host = boot()
+  try {
+    const a = agent('explore')
+    host.listeners.get('agent/created')({ agent: a })
+    for (let i = 0; i < 8; i++) collectToolEvidence({ agent: a, callId: `read-${i}`, name: 'read', arguments: { file_path: `src/${i}.mjs` } }, { content: [{ type: 'text', text: 'x' }] })
+    const state = runtimeSnapshot('explore')
+    assert.equal(state.exploration.read, 8)
+    assert.equal(state.exploration.totalCalls, 8)
+    const hook = host.listeners.get('agent/pre-step')
+    const next = async () => ({ kind: 'enter', messages: [] })
+    const once = await hook({ agent: a }, next)
+    assert.equal(once.messages.length, 1)
+    assert.equal(once.messages[0].source.summary, 'exploration hint')
+    const twice = await hook({ agent: a }, next)
+    assert.equal(twice.messages.length, 0)
   } finally { host.dispose() }
 })
 

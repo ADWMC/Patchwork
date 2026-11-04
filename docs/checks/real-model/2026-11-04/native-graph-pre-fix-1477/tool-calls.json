@@ -1,0 +1,151 @@
+[
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "graph-status"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] graph-status\n{\"action\":\"graph-status\",\"status\":\"ok\",\"enabled\":false,\"started\":false,\"configPath\":\".patchwork/config.json\",\"configExists\":false,\"configStatus\":\"missing\",\"maxFiles\":4000,\"maxFileBytes\":524288,\"tokenBudget\":2000,\"exclude\":[]}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "graph-enable"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] graph-enable\n{\"action\":\"graph-enable\",\"status\":\"ok\",\"enabled\":true,\"started\":false,\"configPath\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\\\\.patchwork\\\\config.json\",\"maxFiles\":4000,\"maxFileBytes\":524288,\"tokenBudget\":2000,\"exclude\":[]}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "graph-start"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: tool \"patchwork_code\" returned invalid output: \"value.symbols\" must be an array"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "graph-status"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] graph-status\n{\"action\":\"graph-status\",\"status\":\"ok\",\"enabled\":true,\"started\":true,\"configPath\":\".patchwork/config.json\",\"configExists\":true,\"configStatus\":\"loaded\",\"maxFiles\":4000,\"maxFileBytes\":524288,\"tokenBudget\":2000,\"exclude\":[]}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "callers",
+      "symbol": "addChain"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: tool \"patchwork_code\" returned invalid output: \"value.matches\" must be an array"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "callees",
+      "symbol": "addChain"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] callees\n{\"action\":\"callees\",\"status\":\"ok\",\"symbol\":\"addChain\",\"definitions\":1,\"callees\":[{\"name\":\"helper\",\"path\":\"chain.mjs\",\"line\":2,\"target\":{\"path\":\"chain.mjs\",\"line\":1},\"resolved\":true}],\"truncated\":false,\"lexical\":true}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "impact",
+      "symbol": "addChain"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] impact\n{\"action\":\"impact\",\"status\":\"ok\",\"symbol\":\"addChain\",\"depth\":2,\"impacted\":[{\"name\":\"runChain\",\"kind\":\"function\",\"path\":\"chain.mjs\",\"line\":3,\"callLine\":3,\"test\":false,\"depth\":1}],\"tests\":[],\"truncated\":false,\"lexical\":true}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "callers",
+      "symbol": "addChain"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: tool \"patchwork_code\" returned invalid output: \"value.matches\" must be an array"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "find",
+      "symbol": "addChain"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] find\n{\"action\":\"find\",\"status\":\"ok\",\"symbol\":\"addChain\",\"matches\":[{\"path\":\"chain.mjs\",\"line\":2,\"endLine\":2,\"symbol\":\"addChain\",\"kind\":\"definition\",\"symbolKind\":\"function\",\"signature\":\"export function addChain(value) { return helper(value) }\"}],\"definitions\":1,\"truncated\":false}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "outline",
+      "path": "chain.mjs"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] outline\n{\"action\":\"outline\",\"status\":\"ok\",\"path\":\"chain.mjs\",\"language\":\"javascript\",\"lines\":4,\"symbols\":[{\"name\":\"helper\",\"kind\":\"function\",\"line\":1,\"signature\":\"export function helper(value) { return value + 1 }\",\"endLine\":1},{\"name\":\"addChain\",\"kind\":\"function\",\"line\":2,\"signature\":\"export function addChain(value) { return helper(value) }\",\"endLine\":2},{\"name\":\"runChain\",\"kind\":\"function\",\"line\":3,\"signature\":\"export function runChain() { return addChain(2) }\",\"endLine\":4}],\"imports\":[],\"test\":false,\"generated\":false}"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "callers",
+      "path": "chain.mjs",
+      "symbol": "addChain"
+    },
+    "result": {
+      "isError": true,
+      "text": "Error: tool \"patchwork_code\" returned invalid output: \"value.matches\" must be an array"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "map"
+    },
+    "result": {
+      "isError": false,
+      "text": "[code-map] root=default-workspace files=7 truncated=no\n\n## Modules\n- .: 6 files, 5 symbols, 2 tests\n- .patchwork/: 1 files, 0 symbols\n\n## Start here\n- chain.mjs (javascript, 4 lines) — helper, addChain, runChain\n- README.md (markdown, 6 lines) — Demo Project\n- sum.mjs (javascript, 4 lines) — sum\n- package.json (json, 9 lines)\n- .patchwork/config.json (json, 11 lines)"
+    }
+  },
+  {
+    "name": "glob",
+    "arguments": {
+      "pattern": "**/*.test.*"
+    },
+    "result": {
+      "isError": false,
+      "text": "sum.test.mjs\nchain.test.mjs"
+    }
+  },
+  {
+    "name": "patchwork_code",
+    "arguments": {
+      "action": "affected",
+      "path": "chain.mjs"
+    },
+    "result": {
+      "isError": false,
+      "text": "[patchwork_code] affected\n{\"action\":\"affected\",\"status\":\"ok\",\"changed\":[\"chain.mjs\"],\"tests\":[\"chain.test.mjs\"],\"dependents\":[\"chain.test.mjs\"],\"truncated\":false,\"lexical\":true}"
+    }
+  }
+]

@@ -7,6 +7,7 @@ import { scopedAgent } from './helpers/agent.mjs'
 import { decideCandidate, improvementSnapshot, proposeCandidate, recordExperiment, recordIncident, rollbackCandidate, runCandidateExperiment } from '../src/improvement/store.mjs'
 import { isolatedEnvironment, runIsolatedCommand, validateIsolationSpec } from '../src/improvement/runner.mjs'
 import { IMPROVEMENT_ROUTE_PATH, registerImprovementRoute } from '../src/improvement/route.mjs'
+import { registerImprovementTool } from '../src/improvement/tool.mjs'
 
 function agent(id = 'improvement-session') {
   const a = scopedAgent({ session: { header: { id, cwd: process.cwd() } } })
@@ -16,10 +17,24 @@ function agent(id = 'improvement-session') {
 
 async function experiment(agent, candidateId) { return runCandidateExperiment(agent, candidateId, improvementSnapshot(agent).revision) }
 
+test('improvement tool list exposes recent receipt ids for incident provenance', async () => {
+  const a = agent('improvement-tool-list')
+  let tool, dispose
+  registerImprovementTool({ tools: { register(value) { tool = value } }, effect(fn) { dispose = fn() } })
+  const list = await tool.execute({ action: 'list' }, { agent: a })
+  assert.ok(list.receipts.some(receipt => receipt.id === 'receipt-1'))
+  const incident = await tool.execute({ action: 'incident', kind: 'failure', sourceReceiptIds: ['receipt-1'], trigger: 'tool failure', actionText: 'retain evidence' }, { agent: a })
+  assert.equal(incident.status, 'committed')
+  dispose()
+})
+
 test('improvement records are scope-bound, provenance-bound and proposal-first', () => {
   const a = agent('improvement-a')
   const incident = recordIncident(a, { kind: 'failure', sourceReceiptIds: ['receipt-1'], trigger: 'tool failed', action: 'retain evidence' })
   assert.equal(incident.status, 'committed')
+  const incomplete = proposeCandidate(a, { incidentIds: [incident.incident.id], object: 'rule', patch: { version: 1, setting: 'verifyBeforeDelivery', value: true } })
+  assert.equal(incomplete.failureCode, 'IMPROVEMENT_CANDIDATE_FIELDS_REQUIRED')
+  assert.deepEqual(incomplete.missing, ['trigger', 'hypothesis', 'changeScope'])
   const candidate = proposeCandidate(a, { incidentIds: [incident.incident.id], object: 'tool-flow', patch: { version: 1, setting: 'requireCrossCheck', value: true }, trigger: 'repeat failure', hypothesis: 'change flow', changeScope: 'current project', rollbackTarget: 'baseline' })
   assert.equal(candidate.candidate.decision, 'proposed')
   assert.equal(improvementSnapshot(a).automaticActivation, 'disabled')
@@ -85,6 +100,8 @@ test('improvement route enforces token, scope and CAS before recording a decisio
     assert.equal((await call({ action: 'trial', candidateId: candidate.candidate.id, expectedRevision: recorded.revision - 1 })).status, 409)
     assert.equal((await call({ action: 'trial', candidateId: candidate.candidate.id, expectedRevision: recorded.revision })).status, 200)
     assert.equal((await call({ action: 'list' }, { sessionId: 'improvement-route-standard' })).status, 403)
+    const generic = await call({ action: 'propose', incidentId: incident.incident.id, object: 'ui-copy', trigger: 'route generic', hypothesis: 'generic', changeScope: 'session', patch: { version: 1, setting: 'reviewDetail', value: 'full' }, expectedRevision: improvementSnapshot(a).revision })
+    assert.equal(generic.status, 200); assert.equal(generic.json.candidate.trigger, 'route generic')
   } finally { dispose?.() }
 })
 

@@ -1,17 +1,24 @@
 import { createElement, useState, useSyncExternalStore } from 'react'
 import { Button, SegmentedTabs } from '@deepseek-ai/dsh-client-ui-primitives'
 import { usePatchworkState } from './use-patchwork-state.mjs'
-import { SuperagentPanel } from './SuperagentPanel.jsx'
 import { validateSettings } from '../config/fields.mjs'
-import { LogPanel } from './LogPanel.jsx'
 import { EmptyState, PanelIcon } from './panel-elements.jsx'
-import { EvidencePanel, MechanismsPanel, OverviewPanel, SettingsPanel, settingsKeys } from './WorkspacePanels.jsx'
+import { DiagnosticsPanel, EvidencePanel, ExecutionPanel, ManagementPanel, OverviewPanel, SettingsPanel, settingsKeys } from './WorkspacePanels.jsx'
 import { logTime } from './log-presentation.mjs'
 
-const tabs = [['overview', '总览'], ['queue', '主控'], ['mechanisms', '机制'], ['evidence', '证据'], ['logs', '日志'], ['settings', '设置']]
+const tabs = [['overview', '总览'], ['execution', '执行'], ['evidence', '证据'], ['management', '管理'], ['diagnostics', '诊断'], ['settings', '设置']]
 const connectionLabels = { loading: '连接中', connected: '已连接', offline: '连接中断', unavailable: '等待会话' }
 
 export function PatchworkTitle() { return createElement('span', null, 'Patchwork') }
+
+function tabBadge(tab, data) {
+  if (!data) return 0
+  if (tab === 'execution') return (data.task?.requirements ?? []).filter(item => item.required && !['passed', 'accepted'].includes(item.status)).length + (data.superagent?.jobs ?? []).filter(job => ['failed', 'blocked', 'waiting', 'review'].includes(job.status)).length
+  if (tab === 'evidence') return (data.events ?? []).filter(event => event.outcome === 'failed').length + (data.retrieval?.entries ?? []).filter(entry => ['failed', 'partial'].includes(entry.status)).length
+  if (tab === 'management') return (data.memory?.counts?.proposed ?? 0) + (data.improvements?.candidates ?? []).filter(candidate => !candidate.applied && !['revoked', 'rejected'].includes(candidate.decision)).length
+  if (tab === 'diagnostics') return (data.diagnostics?.entries ?? []).filter(entry => entry.level === 'error').length
+  return 0
+}
 
 export function PatchworkPanel({ sessionId, sessionStore, useTabInfo }) {
   const allowed = useSyncExternalStore(sessionStore.subscribe,
@@ -25,9 +32,9 @@ export function PatchworkPanel({ sessionId, sessionStore, useTabInfo }) {
 }
 
 function SessionPanel({ sessionId }) {
-  const { snapshot: data, connection, error, save, refresh, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction } = usePatchworkState(sessionId)
+  const { snapshot: data, connection, error, save, refresh, exportLogs, memoryAction, memoryQuery, improvementAction, superagentAction, evidenceAction } = usePatchworkState(sessionId)
   const [tab, setTab] = useState('overview')
-  const [evidenceView, setEvidenceView] = useState('current')
+  const [views, setViews] = useState({ execution: 'task', evidence: 'tools', management: 'memory', diagnostics: 'capabilities' })
   const [draft, setDraft] = useState({})
   const [baseRevision, setBaseRevision] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -39,7 +46,10 @@ function SessionPanel({ sessionId }) {
   const ratio = draft.cacheWriteReadRatio ?? desired.cacheWriteReadRatio ?? 12.5
   const invalid = !validateSettings(draft).ok || ratio === '' || !Number.isFinite(Number(ratio)) || Number(ratio) < 0
   const prefix = 'pw-' + String(sessionId ?? 'none').replace(/[^a-zA-Z0-9-]/g, '')
-  function navigate(next, view) { setTab(next); if (view) setEvidenceView(view) }
+  function navigate(next, view) {
+    setTab(next)
+    if (view && Object.hasOwn(views, next)) setViews(previous => ({ ...previous, [next]: view }))
+  }
   function edit(key, value) {
     if (!dirty) setBaseRevision(data?.revision)
     setDraft(previous => { const next = { ...previous }; if (JSON.stringify(value) === JSON.stringify(desired[key])) delete next[key]; else next[key] = value; return next })
@@ -55,19 +65,23 @@ function SessionPanel({ sessionId }) {
     finally { setSaving(false) }
   }
   function discard() { setDraft({}); setConflict(null); setBaseRevision(null); setMessage(''); refresh() }
+  const setView = domain => value => setViews(previous => ({ ...previous, [domain]: value }))
   return <div className="pw-panel"><div className="pw-panel-inner">
     <header className="pw-header"><div className="pw-scope" title={sessionId}><strong>Patchwork</strong><span>当前会话</span></div><div className="pw-header-actions"><span className="pw-connection" title={data ? `更新于 ${logTime(data.generatedAt)}` : undefined}><span className="pw-dot" data-tone={connection === 'connected' ? 'success' : connection === 'offline' ? 'warn' : undefined}/>{connectionLabels[connection]}</span><Button size="sm" variant="ghost" aria-label="刷新" title="刷新会话状态" icon={<PanelIcon name="refresh"/>} onClick={refresh} disabled={saving}/></div></header>
-    <nav className="pw-nav"><SegmentedTabs label="Patchwork 页面" value={tab} onChange={setTab} items={tabs.map(([value, label]) => ({ value, label, id: prefix + '-' + value, panelId: prefix + '-panel' }))}/></nav>
+    <nav className="pw-nav"><SegmentedTabs label="Patchwork 页面" value={tab} onChange={setTab} items={tabs.map(([value, label]) => {
+      const count = tabBadge(value, data)
+      return { value, label: createElement('span', { className: 'pw-tab-label' }, label, count > 0 ? createElement('span', { className: 'pw-tab-badge' }, count) : null), id: prefix + '-' + value, panelId: prefix + '-panel' }
+    })}/></nav>
     <div className="pw-scroll">
       {connection === 'offline' && <div role="status" className="pw-note pw-warning"><PanelIcon name="activity"/><p>连接中断，当前显示上次快照。恢复前暂停保存与导出。{error}</p></div>}
       {connection === 'unavailable' && <EmptyState title="等待会话状态">选中或建立 Patchwork 会话后，运行状态会显示在这里。</EmptyState>}
       {connection === 'loading' && !data && <div aria-busy="true"><EmptyState title="正在连接会话">正在读取 DSH 的真实运行状态。</EmptyState></div>}
       {data && <section className={'pw-page pw-page-' + tab} id={prefix + '-panel'} role="tabpanel" aria-labelledby={prefix + '-' + tab}>
         {tab === 'overview' && <OverviewPanel data={data} pending={pending} navigate={navigate}/>}
-        {tab === 'queue' && <SuperagentPanel data={data} superagentAction={superagentAction}/>}
-        {tab === 'mechanisms' && <MechanismsPanel data={data}/>}
-        {tab === 'evidence' && <EvidencePanel data={data} view={evidenceView} setView={setEvidenceView} prefix={prefix} memoryAction={memoryAction} memoryQuery={memoryQuery} improvementAction={improvementAction} superagentAction={superagentAction}/>}
-        {tab === 'logs' && <LogPanel diagnostics={data.diagnostics} exportLogs={exportLogs} connected={connection === 'connected'}/>}
+        {tab === 'execution' && <ExecutionPanel data={data} view={views.execution} setView={setView('execution')} prefix={prefix} superagentAction={superagentAction}/>}
+        {tab === 'evidence' && <EvidencePanel data={data} view={views.evidence} setView={setView('evidence')} prefix={prefix} evidenceAction={evidenceAction}/>}
+        {tab === 'management' && <ManagementPanel data={data} view={views.management} setView={setView('management')} prefix={prefix} memoryAction={memoryAction} memoryQuery={memoryQuery} improvementAction={improvementAction}/>}
+        {tab === 'diagnostics' && <DiagnosticsPanel data={data} view={views.diagnostics} setView={setView('diagnostics')} prefix={prefix} exportLogs={exportLogs} connected={connection === 'connected'}/>}
         {tab === 'settings' && <SettingsPanel {...{data, draft, saving, invalid, ratio, conflict, dirty, message, pending, prefix, edit, persist, discard}} connected={connection === 'connected'}/>}
       </section>}
     </div>

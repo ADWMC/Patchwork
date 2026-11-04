@@ -9,6 +9,7 @@ import { persistController, restoreController } from './store.mjs'
 import { executorPrompt } from './prompt.mjs'
 
 const controllers = new WeakMap(), live = new Set(), workers = new Map(), workspaceLocks = new Map()
+const snapshotFailures = new WeakSet()
 const activeStatuses = new Set(['starting', 'running'])
 const digest = value => createHash('sha256').update(typeof value === 'string' || Buffer.isBuffer(value) ? value : JSON.stringify(value)).digest('hex')
 function workspaceKey(cwd) {
@@ -27,7 +28,17 @@ export function revokeExecutor(sessionId) {
   void entry?.activation?.dispose().catch(() => {})
 }
 export function existingController(agent) { return controllers.get(agent) }
-export function superagentSnapshot(agent) { return isPatchworkAgent(agent) ? controllers.get(agent)?.snapshot() ?? null : null }
+/** Snapshot the live queue, restoring persisted work once when a session is reopened. */
+export function superagentSnapshot(agent) {
+  if (!isPatchworkAgent(agent)) return null
+  const existing = controllers.get(agent)
+  if (existing) return existing.snapshot()
+  if (snapshotFailures.has(agent)) return null
+  try {
+    // Keep the restored controller so a queue-less session is not rescanned on every poll.
+    return new SuperagentController(agent).snapshot()
+  } catch { snapshotFailures.add(agent); return null }
+}
 
 export class SuperagentController {
   constructor(owner, { persist = persistController, restore = restoreController } = {}) {

@@ -47,7 +47,7 @@ node scripts/gen-preset.mjs
 ```
 
 安装前确认 profile 的宿主依赖与目标 DSH 版本兼容，不默认追逐 `alpha` 标签。
-仓库依赖基线主要为 0.2.0-rc.2，真实验证宿主为 0.2.1-rc.2；这不代表整体依赖已迁移。
+仓库依赖、profile 模板、preset fixture 与真实验证宿主均为 0.2.1-rc.5；旧版宿主不再作为当前测试基线。
 
 需要重启时，只操作明确识别的目标实例。开发验证使用独立 home/agents/work/端口，
 不停止或修改主 DSH。运行中的 standing preset mount 不保证安全热替换。

@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "runId": "rc5",
+  "scenario": "smoke",
+  "status": "passed",
+  "startedAt": "2026-11-04T05:54:16.713Z",
+  "endedAt": "2026-11-04T05:54:16.713Z",
+  "gitHead": "9b606d10431de7550a54ab464179997ee83bc293",
+  "packageVersion": "0.2.0",
+  "dshVersion": "0.2.1-rc.5",
+  "model": {
+    "provider": "stepfun",
+    "id": "step-5-preview"
+  },
+  "preset": "patchwork",
+  "isolation": {
+    "mainDshTouched": false,
+    "dshHomeHash": null,
+    "workspaceHash": null,
+    "port": null
+  },
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "4af59007ce65973de0f9716550df348017635ab7de686e02e72b08bd4f854c4d"
+  },
+  "session": {
+    "id": "session-627d2d3e-e73f-47bc-8dbd-7cdf90dd6058",
+    "rawSha256": "4705d565e2c294c1decfd0d7af4f34f2b83488d15b4afde8e7cf5519f0869ec7",
+    "eventCount": 24
+  },
+  "assertions": [
+    {
+      "id": "assistant-response",
+      "status": "passed",
+      "detail": "1 assistant messages"
+    },
+    {
+      "id": "no-tool-errors",
+      "status": "passed",
+      "detail": "0 tool errors"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "events.jsonl",
+      "sha256": "ad5f513492c3605cf7d02a494fc883be41c0efb2f6652747329250d8225d660b"
+    },
+    {
+      "path": "tool-calls.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "result.json",
+      "sha256": "14234f277683ccd671819f2cb24b59cdf01cad0012de512fc6f3d81bb32acba1"
+    },
+    {
+      "path": "prompt.md",
+      "sha256": "a6c9185b1bb7e44e94b0e6bbcd06e34e5cac40fb64b5e4ead9371376c969eb42"
+    },
+    {
+      "path": "report.md",
+      "sha256": "53d4e122e3876d366a44eb83535561b94fbb1ad39df3afffce5ace2d0e5e6ce3"
+    }
+  ],
+  "redactions": [
+    "secret-like keys",
+    "long strings truncated"
+  ],
+  "limitations": [
+    "single run",
+    "model nondeterminism"
+  ]
+}

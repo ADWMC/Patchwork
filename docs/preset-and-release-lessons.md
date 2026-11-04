@@ -26,6 +26,21 @@ standard configuration, replacing only the agent-owned portion such as its
 persona. Validate that the generated row set matches the host's standard set
 and record a content fingerprint to identify host upgrades versus local drift.
 
+## Defer host runtime packages to the host
+
+A plugin that declares an exact host package in `dependencies` can shadow the
+host's own copy after installation. The package manager hoists the plugin's
+version into the profile root, and the host then loads that copy for its own
+rows. When the host enforces per-plugin version gates, the stale copy disables
+every row that references it, including the plugin's own preset.
+
+Declare host-provided packages as peer dependencies with a range covering the
+supported host versions, and keep a matching version in `devDependencies` only
+for repository tests. The published package must not carry its own copy. Verify
+by packing the plugin, installing it into a fresh profile of the target host,
+and checking both the startup log for disabled rows and a real session's tool
+catalog.
+
 ## Register capabilities in their narrowest scope
 
 A capability package that registers agent tools or hooks should be mounted by

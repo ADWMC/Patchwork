@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { EmptyState, PanelIcon, SectionHeading, TechnicalDetails } from './panel-elements.jsx'
-import { Facets, SummaryStrip } from './workspace-elements.jsx'
+import { CopyButton, Facets, SummaryStrip } from './workspace-elements.jsx'
 import { Select } from './controls.jsx'
 
 const labels = { 'in-progress': '进行中', ready: '登记验收通过', partial: '部分验收', blocked: '已阻塞', cancelled: '已取消', superseded: '已替代',
@@ -10,9 +10,10 @@ const labels = { 'in-progress': '进行中', ready: '登记验收通过', partia
 const phases = ['analysis', 'plan', 'implement', 'verify']
 const tone = status => ['ready', 'passed'].includes(status) ? 'success' : ['failed', 'blocked', 'stale'].includes(status) ? 'warn' : undefined
 
-export function TaskEvidence({ task, expanded = false, onEvidence, reviewAction }) {
+export function TaskEvidence({ task, expanded = false, onEvidence, reviewAction, handoff }) {
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
+  const [confirmCancel, setConfirmCancel] = useState(false), [cancelBusy, setCancelBusy] = useState(false)
   const [filter, setFilter] = useState('all'), [kind, setKind] = useState('all')
   if (!task?.title) return <EmptyState title="尚未登记当前任务" icon="file"><p>Agent 登记任务后，这里会显示阶段与验收依据。</p><p>工具执行成功不会自动标记任务完成。</p></EmptyState>
   const requirements = task.requirements ?? []
@@ -22,6 +23,13 @@ export function TaskEvidence({ task, expanded = false, onEvidence, reviewAction 
     setBusy(true)
     try { await reviewAction({ action: 'task-review', id, accept, baseRevision: task.revision }); setMessage(accept ? '已接纳当前产物版本；后续变更会使接纳失效。' : '已撤回接纳，等待复核。') }
     catch (error) { setMessage(error.message) } finally { setBusy(false) }
+  }
+  async function cancelTask() {
+    setCancelBusy(true)
+    try {
+      await reviewAction({ action: 'task-cancel', baseRevision: task.revision })
+      setConfirmCancel(false); setMessage('任务已取消；外部进程和已写入文件不会自动回滚。')
+    } catch (error) { setMessage(error.message) } finally { setCancelBusy(false) }
   }
   async function copy(path) {
     try { await navigator.clipboard.writeText(path); setMessage('已复制完整路径') }
@@ -34,6 +42,19 @@ export function TaskEvidence({ task, expanded = false, onEvidence, reviewAction 
     <ol className="pw-stage-line" aria-label="登记任务阶段">{phases.map(phase => <li key={phase} aria-current={task.phase === phase ? 'step' : undefined}>{labels[phase]}</li>)}</ol>
     <p className="pw-muted">{pending ? `仍有 ${pending} 项必需验收未通过。` : requirements.some(r => r.required) ? '已登记的必需验收均通过。' : '尚未定义必需验收。'}阶段由 Agent 陈述。</p>
     </div>
+    {task.brief && <section className="pw-section" aria-label="任务简报"><SectionHeading title="任务简报" description="目标、成功标准、未知项与预算；不是权限，也不代替验收。"/>
+      <dl className="pw-facts">
+        {task.brief.goal && <div><dt>目标</dt><dd>{task.brief.goal}</dd></div>}
+        {task.brief.successCriteria?.length ? <div><dt>成功标准</dt><dd>{task.brief.successCriteria.join('；')}</dd></div> : null}
+        {task.brief.unknowns?.length ? <div><dt>未知项</dt><dd>{task.brief.unknowns.join('；')}</dd></div> : null}
+        {task.brief.assumptions?.length ? <div><dt>假设</dt><dd>{task.brief.assumptions.join('；')}</dd></div> : null}
+        <div><dt>预算</dt><dd>{[
+          task.brief.budget?.maxSteps ? `${task.brief.budget.maxSteps} 步` : null,
+          task.brief.budget?.maxSearchCalls ? `${task.brief.budget.maxSearchCalls} 次搜索` : null,
+          task.brief.budget?.maxTokens ? `${task.brief.budget.maxTokens} tokens` : null,
+        ].filter(Boolean).join(' · ') || '未设硬预算'}</dd></div>
+      </dl>
+    </section>}
     <section className="pw-section"><SectionHeading title="验收依据">{onEvidence && <Button size="sm" variant="ghost" onClick={onEvidence}>查看全部 <PanelIcon name="chevron"/></Button>}</SectionHeading>
       {expanded && <><SummaryStrip label="任务验收统计" items={[{ label: '验收项', value: requirements.length }, { label: '必需待验', value: pending }, { label: '产物', value: (task.artifacts ?? []).filter(item => item.status !== 'superseded').length }]}/><Facets label="验收状态筛选" value={filter} onChange={setFilter} items={[{ value: 'all', label: '全部' }, { value: 'pending', label: '待处理' }, { value: 'passed', label: '已通过' }, { value: 'stale', label: '已过期' }]}/><Select aria-label="验收类型筛选" value={kind} onChange={setKind} options={[{ value: 'all', label: '全部类型' }, { value: 'command', label: '实际工具执行' }, { value: 'artifact', label: '产物结构' }, { value: 'semantic', label: '语义评审' }]}/></>}
       {visible.length ? visible.map(r => <div className="pw-check-row" key={r.id}>
@@ -44,9 +65,13 @@ export function TaskEvidence({ task, expanded = false, onEvidence, reviewAction 
       </div>) : <p className="pw-muted">{requirements.length ? '没有匹配的验收项。' : '未定义必需验收，不能聚合为通过。'}</p>}
       {!expanded && pending > 0 && onEvidence && <Button className="pw-task-cta" size="sm" variant="primary" onClick={onEvidence}>查看待验项目 <PanelIcon name="chevron"/></Button>}
     </section>
+      {expanded && reviewAction && !['cancelled', 'superseded'].includes(task.status) && <section className="pw-section" aria-label="任务控制"><SectionHeading title="任务控制" description="取消只改变任务状态，不停止外部进程，也不回滚已写入文件。"/>
+        {confirmCancel ? <div className="pw-card pw-memory-confirm"><h3>取消当前任务？</h3><p>取消后不会自动恢复实施；需要继续时重新登记要求。</p><div className="pw-actions"><Button size="sm" variant="primary" disabled={cancelBusy} onClick={cancelTask}>确认取消任务</Button><Button size="sm" variant="ghost" disabled={cancelBusy} onClick={() => setConfirmCancel(false)}>返回查看</Button></div></div> : <Button size="sm" variant="ghost" onClick={() => setConfirmCancel(true)}>取消当前任务</Button>}
+      </section>}
     </div>
     {expanded && <>
       {(task.artifacts ?? []).some(a => a.status !== 'superseded') && <section className="pw-section"><SectionHeading title="任务产物"/>{task.artifacts.filter(a => a.status !== 'superseded').map(a => <div className="pw-row" key={a.id}><div className="pw-copy"><strong>{a.id}{a.status === 'changed' ? ' · 已变更，待重验' : ''}</strong><code className="pw-task-path">{a.path}</code><small>版本 {a.version.slice(0, 8)}{a.supersedes ? ` · 替代 ${a.supersedes}` : ''}</small></div><Button size="sm" variant="ghost" onClick={() => copy(a.path)} aria-label={`复制 ${a.id} 完整路径`}>复制路径</Button></div>)}<p className="pw-live-note" role="status">{message}</p></section>}
+      {handoff && <section className="pw-section"><SectionHeading title="恢复快照"><CopyButton label="复制交接 JSON" value={JSON.stringify(handoff, null, 2)}/></SectionHeading><p className="pw-live-note">只读、有界；用于恢复或压缩后继续，不扩大原始授权。</p><TechnicalDetails title="当前任务 handoff"><pre>{JSON.stringify(handoff, null, 2)}</pre></TechnicalDetails></section>}
       <TechnicalDetails title="任务范围与来源">
         <dl className="pw-facts"><div><dt>任务版本</dt><dd>{task.revision}</dd></div><div><dt>理解状态</dt><dd>{labels[task.understandingStatus] ?? '未知'}</dd></div><div><dt>工作区</dt><dd>{task.workspace ?? '未确认'}</dd></div><div><dt>参考对象</dt><dd>{task.references?.length ? task.references.map(path => <code key={path} className="pw-task-path">{path}</code>) : '未登记'}</dd></div><div><dt>独立实例</dt><dd>{task.instance ? `${task.instance.id} · ${task.instance.endpoint}（声明，未证明执行绑定）` : '未登记独立实例'}</dd></div><div><dt>记录</dt><dd>{task.persistence === 'native' ? '宿主原生记录' : task.persistence === 'failed' ? '失败，任务已阻塞' : '当前内存，原生记录不可用'}</dd></div><div><dt>来源</dt><dd>{task.source?.kind === 'observed-user-kind' ? '已观察 user 类型，不证明人类授权' : task.source?.kind ?? '未知'}</dd></div></dl>
         {task.lastCorrection && <p>最近纠正 r{task.lastCorrection.revision} · {task.lastCorrection.affected.join('、') || '无关联验收'}</p>}

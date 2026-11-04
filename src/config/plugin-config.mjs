@@ -31,4 +31,7 @@ export const Config = Schema.object({
   nativeFetchMaxChars: Schema.number().min(256).max(12000).step(1).default(6000),
   nativeFetchRobots: Schema.boolean().default(true),
   memoryEnabled: Schema.boolean().default(true),
+  codeEnabled: Schema.boolean().default(true),
+  codeMaxFiles: Schema.number().min(100).max(20000).step(1).default(4000),
+  codeTokenBudget: Schema.number().min(400).max(8000).step(1).default(2000),
 })

@@ -9,6 +9,7 @@ import { logDiagnostic } from '../../logging/session-log.mjs'
 import {
   EXCERPT_BYTES,
   HANDLE_PATTERN,
+  RECALL_MAX_BYTES,
   contentHashOf,
   countLines,
   handleFor,
@@ -32,6 +33,20 @@ export function sessionRoot(sessionId) {
 function sessionIdOf(agent) {
   const id = agent?.session?.header?.id
   return typeof id === 'string' && id !== '' ? id : undefined
+}
+
+/** Process-local handle index for the session panel; full content stays on disk. */
+const observationViews = new WeakMap()
+function observationView(agent) {
+  if (!agent?.session) return undefined
+  if (!observationViews.has(agent.session)) observationViews.set(agent.session, new Map())
+  return observationViews.get(agent.session)
+}
+export function observationSnapshot(agent) {
+  if (!isPatchworkAgent(agent)) return []
+  const view = observationView(agent)
+  if (!view) return []
+  return [...view.values()].slice(-50).reverse()
 }
 
 /**
@@ -94,6 +109,11 @@ async function replaceWithHandle(ctx, exec, result, decision) {
   }
   if (!isPatchworkAgent(exec.agent)) return decision
   logDiagnostic(ctx, exec, { mechanism: 'op', event: 'packed', reason: 'packed', handle, source: contentHashOf(body), sourceBytes: buffer.length, lines: lineCount })
+  const view = observationView(exec.agent)
+  if (view) {
+    view.set(handle, { handle, tool: exec.name, callId: exec.callId, bytes: buffer.length, lines: lineCount, at: new Date().toISOString(), head: pageText(buffer, 0, { maxBytes: EXCERPT_BYTES }).chunk })
+    if (view.size > 50) view.delete(view.keys().next().value)
+  }
   record('observationPack', 'packedResults')
   record('observationPack', 'packedBytes', buffer.length)
 
@@ -118,12 +138,13 @@ function registerRecallTool(ctx) {
   ctx.tools.register({
     name: RECALL_TOOL_NAME,
     description:
-      'Recall an exact page of a large tool result that was archived behind an observation handle. Returns the requested byte range verbatim plus the offset to continue from.',
+      'Recall an exact page of a large tool result that was archived behind an observation handle. Returns the requested byte range verbatim plus the offset to continue from. Set maxBytes for a smaller bounded page.',
     parameters: {
       type: 'object',
       properties: {
         id: { type: 'string', description: 'The obs_ handle shown in the placeholder.' },
         offset: { type: 'number', description: 'Byte offset to start from; omit or 0 for the beginning.' },
+        maxBytes: { type: 'number', description: `Optional byte limit for this page, bounded 1..${RECALL_MAX_BYTES}; omit for the normal page.` },
       },
       required: ['id'],
       additionalProperties: false,
@@ -151,14 +172,18 @@ function registerRecallTool(ctx) {
       const id = String(args?.id ?? '')
       if (!HANDLE_PATTERN.test(id)) throw new Error(`not an observation handle: ${id}`)
       const offset = Number.isFinite(args?.offset) ? Math.max(0, Math.trunc(args.offset)) : 0
+      const maxBytes = Number.isFinite(args?.maxBytes) ? Math.max(1, Math.min(RECALL_MAX_BYTES, Math.trunc(args.maxBytes))) : RECALL_MAX_BYTES
 
       const buffer = await readObject(sessionRoot(sessionId), id)
       requirePatchworkAgent(exec.agent)
-      const page = pageText(buffer, offset)
+      const page = pageText(buffer, offset, { maxBytes })
       try { await appendLedger(sessionRoot(sessionId), { kind: 'recall', handle: id, offset, nextOffset: page.nextOffset, callId: exec.callId, rootCallId: exec.rootCallId ?? exec.callId }, { authorize: () => isPatchworkAgent(exec.agent) }) }
       catch (error) { logDiagnostic(ctx, exec, { mechanism: 'op', event: 'failure', level: 'warn', reason: 'state-update-failed', error }) }
       requirePatchworkAgent(exec.agent)
       logDiagnostic(ctx, exec, { mechanism: 'op', event: 'recall', reason: 'recalled', handle: id, offset, nextOffset: page.nextOffset, resultBytes: Buffer.byteLength(page.chunk) })
+      const view = observationView(exec.agent)
+      const item = view?.get(id)
+      if (item) item.recalledAt = new Date().toISOString()
       return { id, offset, nextOffset: page.nextOffset, done: page.done, chunk: page.chunk }
     },
   })

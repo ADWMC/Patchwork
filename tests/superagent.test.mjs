@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { scopedAgent } from './helpers/agent.mjs'
 import { initialSuperagent, defineJobs, runnableJobs, restoreSuperagent } from '../src/superagent/state.mjs'
-import { SuperagentController, managedWorker, flushWorkerTask, revokeExecutor } from '../src/superagent/controller.mjs'
+import { SuperagentController, managedWorker, flushWorkerTask, revokeExecutor, superagentSnapshot } from '../src/superagent/controller.mjs'
 import { inspectDelegatedAction, registerSuperagent } from '../src/superagent/index.mjs'
 import { transitionTask } from '../src/task/store.mjs'
 import { restoreController, persistController } from '../src/superagent/store.mjs'
@@ -55,6 +55,9 @@ test('DAG validation, bounded jobs, explicit modes and read/write slot policy', 
   assert.throws(() => defineJobs(initial, [job('a'), job('a')]), /duplicate/)
   const s = defineJobs(initial, [job('a', 'read'), job('b', 'read'), job('c'), job('d', 'read', ['a'])])
   assert.deepEqual(runnableJobs(s).map(j => j.id), ['a', 'b'])
+  const explore = defineJobs(initial, [job('e', 'explore')])
+  assert.equal(explore.jobs[0].mode, 'explore')
+  assert.deepEqual(runnableJobs(explore).map(j => j.id), ['e'])
   s.jobs[0].status = 'running'; assert.deepEqual(runnableJobs(s).map(j => j.id), ['b'])
   s.jobs[0].status = 'done'; s.jobs[1].status = 'done'
   assert.deepEqual(runnableJobs(s).map(j => j.id), ['c'])
@@ -218,6 +221,7 @@ test('native session records require flush, preserve workspace and fail closed o
   const owner = scopedAgent({ session: new Session(), ctx: { get: name => name === 'sessions' ? { async flush() { flushed++ } } : undefined } })
   await persistController(owner, defineJobs(initialSuperagent('native-owner'), [job('a')]))
   assert.equal(flushed, 1); assert.equal(restoreController(owner).jobs[0].id, 'a')
+  assert.equal(superagentSnapshot(owner).jobs[0].id, 'a')
   owner.session.header.cwd = join(process.cwd(), 'elsewhere'); assert.throws(() => restoreController(owner), /workspace/)
   owner.session.header.cwd = process.cwd(); records[0].data.jobs[0].dependencies = ['a']; assert.throws(() => restoreController(owner), /self/)
 })
@@ -284,14 +288,17 @@ test('a running-checkpoint failure after native admission stops that exact child
 })
 
 test('dispatched executor capability brief agrees with guard across read/write and parent scope', async t => {
-  for (const [mode, phase, references] of [['read', 'analysis', []], ['write', 'implement', []], ['write', 'implement', [process.cwd()]], ['write', 'plan', []]]) {
+  for (const [mode, phase, references] of [['read', 'analysis', []], ['explore', 'analysis', []], ['write', 'implement', []], ['write', 'implement', [process.cwd()]], ['write', 'plan', []]]) {
     const f = await fixture(); t.after(() => f.c.close('test'))
     transitionTask(f.owner, { kind: 'define', baseRevision: 0, data: { title: 'Scoped parent', phase, references, requirements: [] } })
     await f.c.submit([job('brief', mode)], 0); await until(() => f.children.length === 1)
     const { spec, child } = f.children[0]
-    const data = JSON.parse(spec.request.prompt[0].text.split('\n\n').at(-1))
+    const prompt = spec.request.prompt[0].text
+    if (mode === 'read') assert.match(prompt, /do not register task requirements/)
+    if (mode === 'explore') assert.match(prompt, /EXPLORE assignment/)
+    const data = JSON.parse(prompt.split('\n\n').at(-1))
     assert.equal(data.mode, mode); assert.equal(data.parent.phase, phase)
-    for (const name of ['read', 'obs_recall', 'update_plan', 'patchwork_search', 'patchwork_fetch', 'pwsh', 'bash', 'todo_write', 'spawn', 'working_directory']) {
+    for (const name of ['read', 'patchwork_code', 'obs_recall', 'update_plan', 'patchwork_search', 'patchwork_fetch', 'pwsh', 'bash', 'todo_write', 'spawn', 'working_directory']) {
       const denied = await inspectDelegatedAction({ agent: child, name, arguments: {} })
       assert.equal(data.eligibleTools.includes(name), denied === undefined, `${mode}/${phase}/${name}`)
     }

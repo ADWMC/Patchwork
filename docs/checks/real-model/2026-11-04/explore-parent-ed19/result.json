@@ -1,0 +1,53 @@
+{
+  "scenario": "superagent-submit",
+  "title": "Explore job submitted and no writes in parent",
+  "status": "passed",
+  "assertions": [
+    {
+      "id": "explore-submitted",
+      "status": "passed",
+      "detail": "mode=explore observed"
+    },
+    {
+      "id": "no-parent-writes",
+      "status": "passed",
+      "detail": "0 parent write/edit calls"
+    }
+  ],
+  "task": {
+    "schemaVersion": 1,
+    "sessionId": "session-ed1955b0-a6d6-4d13-ad62-3742cdfae7e2",
+    "taskId": "8a00600d-83e4-4a2d-bbec-364b83b557e0",
+    "revision": 1,
+    "title": null,
+    "phase": "unassessed",
+    "understandingStatus": "unassessed",
+    "source": {
+      "kind": "observed-user-kind",
+      "eventId": "9af0ce51-40e2-47ad-8484-5803e4b2f0f3"
+    },
+    "workspace": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace",
+    "references": [],
+    "instance": null,
+    "requirements": [],
+    "artifacts": [],
+    "receipts": [],
+    "candidates": [],
+    "corrections": [],
+    "inputIds": [
+      "52b8ec41985dae984f5859af49b1e6fc27f542919bbc6009c606563cb977a84c"
+    ],
+    "brief": null,
+    "lastCorrection": null,
+    "status": "in-progress",
+    "policy": "structured-tools-only",
+    "persistence": "unavailable"
+  },
+  "toolErrors": 1,
+  "tools": [
+    "skill",
+    "glob",
+    "read",
+    "patchwork_superagent"
+  ]
+}

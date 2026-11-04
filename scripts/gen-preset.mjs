@@ -23,7 +23,7 @@ const declaration = [
 
 function hostStandard() {
   if (process.env.DSH_HOST_STANDARD_YML) return resolve(process.env.DSH_HOST_STANDARD_YML)
-  return join(root, 'tests', 'fixtures', 'dsh-v0.2.1-rc.2.standard.patch.yml')
+  return join(root, 'tests', 'fixtures', 'dsh-v0.2.1-rc.5.standard.patch.yml')
 }
 
 /**
@@ -47,7 +47,8 @@ function generate(standard) {
 const standardPath = hostStandard()
 const standard = await readFile(standardPath, 'utf8')
 // 手工补充的行内注释会在重跑时被覆盖；比对靠 tests/preset.test.mjs 的逐行核对。
-const generated = `# Generated from pinned DSH dsh-v0.2.1-rc.2 standard plus the scoped Patchwork runtime.\n# Source commit: 687f282e8625c6b8d11ff58211a90524be2e4317\n# gen-preset: host=${createHash('sha256').update(standard).digest('hex')}\n\n${generate(standard)}`
+const source = process.env.DSH_HOST_STANDARD_YML ? 'host standard override' : 'pinned DSH dsh-v0.2.1-rc.5 standard'
+const generated = `# Generated from ${source} plus the scoped Patchwork runtime.\n# gen-preset: host=${createHash('sha256').update(standard).digest('hex')}\n\n${generate(standard)}`
 await mkdir(outputDir, { recursive: true })
 const outputPath = resolve(outputDir, outputName)
 await writeFile(outputPath, generated)

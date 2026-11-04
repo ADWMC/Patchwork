@@ -9,5 +9,9 @@ export function scopedAgent(agent = {}, preset = 'patchwork') {
   agent.ctx = ctx
   agent.session ??= { header: { id: 'fixture-session' } }
   agent.session.header.id ??= agent.id ?? 'fixture-session'
+  agent.session.seq ??= 0
+  agent.session.inheritedEventCount ??= 0
+  agent.session.snapshotEvents ??= () => []
+  agent.session.deriveMessages ??= () => []
   return Object.assign(agent, { selectPreset: value => { current = value } })
 }

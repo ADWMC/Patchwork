@@ -1,0 +1,139 @@
+[
+  {
+    "name": "patchwork_task",
+    "arguments": {
+      "action": "inspect"
+    },
+    "result": {
+      "isError": false,
+      "text": "{\"task\":{\"schemaVersion\":1,\"sessionId\":\"session-pw-7da3793a-d0b4-49f6-a8d4-3747b4f27641\",\"taskId\":\"f4331077-7826-419b-a706-f16e222d41a4\",\"revision\":2,\"title\":null,\"phase\":\"unassessed\",\"understandingStatus\":\"unassessed\",\"source\":{\"kind\":\"observed-user-kind\",\"eventId\":\"bdf58fec-01f8-44e4-b8e3-b765fc12d924\"},\"workspace\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\",\"references\":[],\"instance\":null,\"requirements\":[],\"artifacts\":[],\"receipts\":[],\"candidates\":[],\"corrections\":[],\"lastCorrection\":null,\"status\":\"in-progress\",\"policy\":\"structured-tools-only\",\"persistence\":\"native\"}}"
+    }
+  },
+  {
+    "name": "read",
+    "arguments": {
+      "file_path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\README.md"
+    },
+    "result": {
+      "isError": false,
+      "text": "<path>C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\README.md</path>\n<type>file</type>\n<content>\n1: # Demo Project\n2: \n3: - 包管理器：pnpm\n4: - 测试命令：npm test\n5: - 部署约束：必须使用隔离的 DSH_HOME，不能改动主 DSH。\n\n(End of file - total 5 lines)\n</content>"
+    }
+  },
+  {
+    "name": "skill",
+    "arguments": {
+      "name": "patchwork"
+    },
+    "result": {
+      "isError": false,
+      "text": "<skill_content name=\"patchwork\">\n<skill_resources>\nBase directory for this skill: C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\home\\profiles\\rc5final\\node_modules\\@patchwork\\coding-agent\\assets\\skills\\patchwork\nResolve relative paths mentioned by this skill against the base directory before using them. Load referenced resources only as needed.\n</skill_resources>\n\n<skill_instructions>\n# Patchwork 总规则 · 技能导航\n\n## 身份\n\n你是长期维护代码的工程代理：目标不是尽快生成看起来可行的代码，而是让修改后的\n系统仍然容易理解、验证、继续演进。对项目抱主人翁心态——先理解整体约束，再决定\n局部改法；优先解耦，不把模块内部状态、特殊文案或偶然实现细节泄漏给其他模块。\n\n## 不变量（先于任何技能）\n\n1. 改前读调用方/配置/测试；区分事实、推断、未知，未知先核实。\n2. 歧义会改变实现/范围/验收 → 问一次并附默认假设；不猜着推进。\n3. 最小正确改动；不为想象需求搭架子，不用大范围重构掩盖局部问题。\n4. 沿要求的方法、实例和输入集合验收；命令、写作结构、语义评审分开，没验证不自报完成。\n5. 收尾核使用文档与更新日志：用户可见变化同轮维护；不适用给具体理由，再汇报改动、验证与残余风险。\n6. 编辑、安装、运行、停止、提交、推送分别判断授权；用户要求提交时一逻辑一提交。\n\n## 当前任务闭环\n\n首个简短说明点明对象、动作与约束；只对会改变交付的关键歧义集中提问，不要求用户重复批准已授权工作。\n先确认当前 Agent 与工具可用性。跨步骤修改、用户纠正或需要逐项验收时，`patchwork_task` 可用就用 inspect/define 登记阶段、对象、只读参考与覆盖集合，baseRevision 取当前值；单一事实核查、小型只读回答直接处理，不为此调用任务工具。工具缺失时用实际工作记录继续，不声称已登记。\n登记是模型陈述，不是人类授权。原始 user 类型也不证明真实人类来源，引用、命令派生、恢复不得升级为权限。\n纠正用 correct 更新受影响要求；旧结果属于派发时版本，过期后重验，不抹去历史或恢复废弃事实。\n产物用 artifact 登记绝对路径与替代关系；check 绑定真实宿主回执。只重验变化依赖和失败单元。\nready 只代表已登记检查通过，不包括未登记需求或未经证明的语义质量；自由 shell 也不是强沙箱。\n普通“继续”沿有效任务推进，后续明确要求实施可更新阶段；不要把一次限制写成永久全局规则。\n压缩或恢复后可用 `patchwork_task handoff` 读取有界交接；按当前纠正、剩余要求和文件实际状态续作，省略项用 inspect 展开。交接、路由备注及外部上下文不扩大原始授权；已取消或等待澄清的任务不自动恢复实施。\n\n委派先读[DSH 主控](references/superagent.md)；仅 DSH 内流转，真实验收，重启不盲重放。\n\n## 技能导航\n\n只调用当前目录中实际可用的技能；`core` 模式没有下表的六个扩展技能时，直接按任务和已加载的核心技能工作，不要反复请求不存在的技能。\n\n| 场景 | 加载 |\n|---|---|\n| UI 文案 / 汇报 / PR 描述 | `anti-slop` |\n| README / 使用指南 / 更新日志 / 迁移说明 | `documentation`，再按需用 `anti-slop` 复核表达 |\n| 改 CSS / HTML / JSX 界面 | `web-ui` |\n| 复现 bug / 测试失败 / 性能回退 | `debugging` |\n| 用户要求审查 diff / 安全边界 | `code-review` |\n| 多来源调研 / 当前外部资料 / 来源冲突 | `retrieval` |\n| 显式召回 / 提议 / 确认 / 遗忘跨会话信息 | `memory` |\n| 根据真实失败 / 纠正改进规则或流程 | `improvement` |\n| 跨模块职责 / 状态所有权不清 | `architecture` |\n| 用户说法冲突 / 方案取舍 | `collaborator` |\n| 实现或修复收尾 / 提交 / 改名 / 补测试 | `standards` |\n| 声称「已完成 / 修好了」 | `evidence` |\n\n短码：`[pw:structure]` → architecture · standards；`[pw:evidence]` → evidence。\n</skill_instructions>\n</skill_content>"
+    }
+  },
+  {
+    "name": "skill",
+    "arguments": {
+      "name": "evidence"
+    },
+    "result": {
+      "isError": false,
+      "text": "<skill_content name=\"evidence\">\n<skill_resources>\nResources for this skill are managed by provider \"runtime\".\nLoad referenced resources only as needed.\n</skill_resources>\n\n<skill_instructions>\n# 完成证据\n\n跨步骤交付需要逐项验收时，`patchwork_task` 可用就登记与用户要求一致的验收；小型只读结论可直接给来源与边界。工具不可用时以实际来源、命令和产物说明验证范围，不虚构调用：\n\n1. 代码：check 调用宿主 pwsh/bash，保存实际 callId、退出码和当前版本；isError=false 或无退出码为未知，不补 0。AF then_run 失败不被外层写入成功掩盖。\n2. 文档/写作：artifact 登记真实文件，artifact 类 check 可核长度/锚点；这只证明结构，事实、读者和表达仍需语义审查，assessment 的模型判断不自动通过。\n3. 调研：每个关键主张区分支持、矛盾、未知；来源须对应实际题名、版本与相关片段，不能因搜到相似结果就宣称支持。不足则补查或限缩结论。\n4. 全量任务：coverage 登记每个单元，不以成功数替代全集。方法、指标、真实客户端、目标实例遵守原要求；裸 API 不代替客户端，整段耗时不代替首字时间。\n\n输入/产物或要求变化后，相关验收 stale；新旧异步结果不混用。确定性方法错误首次出现就诊断；偶发失败按原因决定是否重试，别无差别整批重跑。明确取消、失败、部分完成与阻塞。\n\n**禁止**：「应该好了」「代码已生成」「看起来正常」；用道歉代替跑命令；只跑新写测试却说「全过」。\n\n交付前按 `standards` 核使用文档与更新日志是否覆盖本任务；文件存在不等于内容完整。不适用给具体理由。旧验证与本轮检查分开，不把历史测试数写成刚跑的结果。\n\n只报告实质残余风险、未知和必要的下一步；没有就直接结束，不加固定尾句。\n\n收到 `[pw:evidence]` → 检查当前任务的真实缺口，按任务类型补验收，不机械跑无关 shell。工具结果提示与 UI 状态不能硬拦最终文本，汇报必须自己保持一致。姿态 → `collaborator`。\n</skill_instructions>\n</skill_content>"
+    }
+  },
+  {
+    "name": "patchwork_task",
+    "arguments": {
+      "action": "define",
+      "baseRevision": 2,
+      "phase": "analysis",
+      "requirements": [
+        {
+          "id": "readme-constraints-source",
+          "kind": "artifact",
+          "label": "README.md 原文包含三条约束行（pnpm / npm test / 隔离 DSH_HOME）",
+          "required": true,
+          "targets": [
+            "readme-md"
+          ]
+        },
+        {
+          "id": "constraint-summaries",
+          "kind": "semantic",
+          "label": "三条中文概括忠实且恰好覆盖原文三条约束",
+          "required": true
+        }
+      ],
+      "title": "README.md 约束提取（只读验收）"
+    },
+    "result": {
+      "isError": false,
+      "text": "{\"task\":{\"schemaVersion\":1,\"sessionId\":\"session-pw-7da3793a-d0b4-49f6-a8d4-3747b4f27641\",\"taskId\":\"f4331077-7826-419b-a706-f16e222d41a4\",\"revision\":3,\"title\":\"README.md 约束提取（只读验收）\",\"phase\":\"analysis\",\"understandingStatus\":\"stated\",\"source\":{\"kind\":\"observed-user-kind\",\"eventId\":\"bdf58fec-01f8-44e4-b8e3-b765fc12d924\"},\"workspace\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\",\"references\":[],\"instance\":null,\"requirements\":[{\"id\":\"readme-constraints-source\",\"label\":\"README.md 原文包含三条约束行（pnpm / npm test / 隔离 DSH_HOME）\",\"kind\":\"artifact\",\"required\":true,\"targets\":[\"readme-md\"],\"coverage\":[\"all\"],\"status\":\"pending\",\"evidence\":[],\"failures\":0,\"assessment\":null},{\"id\":\"constraint-summaries\",\"label\":\"三条中文概括忠实且恰好覆盖原文三条约束\",\"kind\":\"semantic\",\"required\":true,\"targets\":[],\"coverage\":[\"all\"],\"status\":\"pending\",\"evidence\":[],\"failures\":0,\"assessment\":null}],\"artifacts\":[],\"receipts\":[],\"candidates\":[],\"corrections\":[],\"lastCorrection\":null,\"status\":\"in-progress\",\"policy\":\"structured-tools-only\",\"persistence\":\"native\"}}"
+    }
+  },
+  {
+    "name": "patchwork_task",
+    "arguments": {
+      "action": "artifact",
+      "baseRevision": 3,
+      "id": "readme-md",
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\patchwork-latest-20261103\\documents\\deepseek-harness\\default-workspace\\README.md"
+    },
+    "result": {
+      "isError": false,
+      "text": "{\"task\":{\"schemaVersion\":1,\"sessionId\":\"session-pw-7da3793a-d0b4-49f6-a8d4-3747b4f27641\",\"taskId\":\"f4331077-7826-419b-a706-f16e222d41a4\",\"revision\":4,\"title\":\"README.md 约束提取（只读验收）\",\"phase\":\"analysis\",\"understandingStatus\":\"stated\",\"source\":{\"kind\":\"observed-user-kind\",\"eventId\":\"bdf58fec-01f8-44e4-b8e3-b765fc12d924\"},\"workspace\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\",\"references\":[],\"instance\":null,\"requirements\":[{\"id\":\"readme-constraints-source\",\"label\":\"README.md 原文包含三条约束行（pnpm / npm test / 隔离 DSH_HOME）\",\"kind\":\"artifact\",\"required\":true,\"targets\":[\"readme-md\"],\"coverage\":[\"all\"],\"status\":\"pending\",\"evidence\":[],\"failures\":0,\"assessment\":null,\"userAcceptance\":null},{\"id\":\"constraint-summaries\",\"label\":\"三条中文概括忠实且恰好覆盖原文三条约束\",\"kind\":\"semantic\",\"required\":true,\"targets\":[],\"coverage\":[\"all\"],\"status\":\"pending\",\"evidence\":[],\"failures\":0,\"assessment\":null}],\"artifacts\":[{\"id\":\"readme-md\",\"path\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\\\\README.md\",\"version\":\"f712ff44-82c8-4c36-9eb7-66c7d38798ad\",\"stamp\":\"137:1793713645418.322:1793713718873.3806\",\"supersedes\":null,\"status\":\"current\"}],\"receipts\":[],\"candidates\":[],\"corrections\":[],\"lastCorrection\":null,\"status\":\"in-progress\",\"policy\":\"structured-tools-only\",\"persistence\":\"native\"}}"
+    }
+  },
+  {
+    "name": "patchwork_task",
+    "arguments": {
+      "action": "check",
+      "baseRevision": 4,
+      "id": "readme-constraints-source",
+      "rules": {
+        "anchors": [
+          "- 包管理器：pnpm",
+          "- 测试命令：npm test",
+          "- 部署约束：必须使用隔离的 DSH_HOME，不能改动主 DSH。"
+        ]
+      }
+    },
+    "result": {
+      "isError": false,
+      "text": "{\"task\":{\"schemaVersion\":1,\"sessionId\":\"session-pw-7da3793a-d0b4-49f6-a8d4-3747b4f27641\",\"taskId\":\"f4331077-7826-419b-a706-f16e222d41a4\",\"revision\":4,\"title\":\"README.md 约束提取（只读验收）\",\"phase\":\"analysis\",\"understandingStatus\":\"stated\",\"source\":{\"kind\":\"observed-user-kind\",\"eventId\":\"bdf58fec-01f8-44e4-b8e3-b765fc12d924\"},\"workspace\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\",\"references\":[],\"instance\":null,\"requirements\":[{\"id\":\"readme-constraints-source\",\"label\":\"README.md 原文包含三条约束行（pnpm / npm test / 隔离 DSH_HOME）\",\"kind\":\"artifact\",\"required\":true,\"targets\":[\"readme-md\"],\"coverage\":[\"all\"],\"status\":\"passed\",\"evidence\":[{\"id\":\"657a57a9-0171-4a1c-bfc2-a2e0018ec144\",\"requirementId\":\"readme-constraints-source\",\"revision\":4,\"unit\":\"all\",\"kind\":\"artifact\",\"outcome\":\"passed\",\"current\":true,\"tool\":\"artifact-check\",\"callId\":\"chatcmpl-tool-a89af5c7c8c998ef\",\"exitCode\":null,\"instanceId\":null,\"targets\":[{\"id\":\"readme-md\",\"version\":\"f712ff44-82c8-4c36-9eb7-66c7d38798ad\"}],\"at\":1793726011392,\"strength\":\"structure-only\"}],\"failures\":0,\"assessment\":null,\"userAcceptance\":null},{\"id\":\"constraint-summaries\",\"label\":\"三条中文概括忠实且恰好覆盖原文三条约束\",\"kind\":\"semantic\",\"required\":true,\"targets\":[],\"coverage\":[\"all\"],\"status\":\"pending\",\"evidence\":[],\"failures\":0,\"assessment\":null}],\"artifacts\":[{\"id\":\"readme-md\",\"path\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\\\\README.md\",\"version\":\"f712ff44-82c8-4c36-9eb7-66c7d38798ad\",\"stamp\":\"137:1793713645418.322:1793713718873.3806\",\"supersedes\":null,\"status\":\"current\"}],\"receipts\":[{\"id\":\"657a57a9-0171-4a1c-bfc2-a2e0018ec144\",\"requirementId\":\"readme-constraints-source\",\"revision\":4,\"unit\":\"all\",\"kind\":\"artifact\",\"outcome\":\"passed\",\"current\":true,\"tool\":\"artifact-check\",\"callId\":\"chatcmpl-tool-a89af5c7c8c998ef\",\"exitCode\":null,\"instanceId\":null,\"targets\":[{\"id\":\"readme-md\",\"version\":\"f712ff44-82c8-4c36-9eb7-66c7d38798ad\"}],\"at\":1793726011392,\"strength\":\"structure-only\"}],\"candidates\":[],\"corrections\":[],\"lastCorrection\":null,\"status\":\"partial\",\"policy\":\"structured-tools-only\",\"persistence\":\"native\"},\"receipt\":{\"id\":\"657a57a9-0171-4a1c-bfc2-a2e0018ec144\",\"requirementId\":\"readme-constraints-source\",\"revision\":4,\"unit\":\"all\",\"kind\":\"artifact\",\"outcome\":\"passed\",\"current\":true,\"exitCode\":null,\"tool\":\"artifact-check\",\"callId\":\"chatcmpl-tool-a89af5c7c8c998ef\",\"instanceId\":null,\"targets\":[{\"id\":\"readme-md\",\"version\":\"f712ff44-82c8-4c36-9eb7-66c7d38798ad\"}],\"at\":1793726011392}}"
+    }
+  },
+  {
+    "name": "patchwork_task",
+    "arguments": {
+      "action": "assessment",
+      "baseRevision": 4,
+      "id": "constraint-summaries",
+      "verdict": "unknown"
+    },
+    "result": {
+      "isError": false,
+      "text": "{\"task\":{\"schemaVersion\":1,\"sessionId\":\"session-pw-7da3793a-d0b4-49f6-a8d4-3747b4f27641\",\"taskId\":\"f4331077-7826-419b-a706-f16e222d41a4\",\"revision\":4,\"title\":\"README.md 约束提取（只读验收）\",\"phase\":\"analysis\",\"understandingStatus\":\"stated\",\"source\":{\"kind\":\"observed-user-kind\",\"eventId\":\"bdf58fec-01f8-44e4-b8e3-b765fc12d924\"},\"workspace\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\",\"references\":[],\"instance\":null,\"requirements\":[{\"id\":\"readme-constraints-source\",\"label\":\"README.md 原文包含三条约束行（pnpm / npm test / 隔离 DSH_HOME）\",\"kind\":\"artifact\",\"required\":true,\"targets\":[\"readme-md\"],\"coverage\":[\"all\"],\"status\":\"passed\",\"evidence\":[{\"id\":\"657a57a9-0171-4a1c-bfc2-a2e0018ec144\",\"requirementId\":\"readme-constraints-source\",\"revision\":4,\"unit\":\"all\",\"kind\":\"artifact\",\"outcome\":\"passed\",\"current\":true,\"tool\":\"artifact-check\",\"callId\":\"chatcmpl-tool-a89af5c7c8c998ef\",\"exitCode\":null,\"instanceId\":null,\"targets\":[{\"id\":\"readme-md\",\"version\":\"f712ff44-82c8-4c36-9eb7-66c7d38798ad\"}],\"at\":1793726011392,\"strength\":\"structure-only\"}],\"failures\":0,\"assessment\":null,\"userAcceptance\":null},{\"id\":\"constraint-summaries\",\"label\":\"三条中文概括忠实且恰好覆盖原文三条约束\",\"kind\":\"semantic\",\"required\":true,\"targets\":[],\"coverage\":[\"all\"],\"status\":\"unknown\",\"evidence\":[],\"failures\":0,\"assessment\":{\"verdict\":\"unknown\",\"source\":\"model-stated\"}}],\"artifacts\":[{\"id\":\"readme-md\",\"path\":\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\patchwork-latest-20261103\\\\documents\\\\deepseek-harness\\\\default-workspace\\\\README.md\",\"version\":\"f712ff44-82c8-4c36-9eb7-66c7d38798ad\",\"stamp\":\"137:1793713645418.322:1793713718873.3806\",\"supersedes\":null,\"status\":\"current\"}],\"receipts\":[{\"id\":\"657a57a9-0171-4a1c-bfc2-a2e0018ec144\",\"requirementId\":\"readme-constraints-source\",\"revision\":4,\"unit\":\"all\",\"kind\":\"artifact\",\"outcome\":\"passed\",\"current\":true,\"tool\":\"artifact-check\",\"callId\":\"chatcmpl-tool-a89af5c7c8c998ef\",\"exitCode\":null,\"instanceId\":null,\"targets\":[{\"id\":\"readme-md\",\"version\":\"f712ff44-82c8-4c36-9eb7-66c7d38798ad\"}],\"at\":1793726011392,\"strength\":\"structure-only\"}],\"candidates\":[],\"corrections\":[],\"lastCorrection\":null,\"status\":\"partial\",\"policy\":\"structured-tools-only\",\"persistence\":\"native\"}}"
+    }
+  },
+  {
+    "name": "patchwork_superagent",
+    "arguments": {
+      "action": "report",
+      "status": "review",
+      "summary": "README.md 已逐行读取（共 5 行，未修改任何文件）。提取恰好三条约束并附原文引用：1) 包管理器必须使用 pnpm——引用「包管理器：pnpm」；2) 测试命令为 npm test——引用「测试命令：npm test」；3) 部署必须使用隔离的 DSH_HOME，不能改动主 DSH——引用「部署约束：必须使用隔离的 DSH_HOME，不能改动主 DSH。」。交付 JSON：{\"file\":\"README.md\",\"constraints\":[{\"summary\":\"包管理器必须使用 pnpm\",\"quote\":\"包管理器：pnpm\"},{\"summary\":\"测试命令为 npm test\",\"quote\":\"测试命令：npm test\"},{\"summary\":\"部署必须使用隔离的 DSH_HOME，不能改动主 DSH\",\"quote\":\"部署约束：必须使用隔离的 DSH_HOME，不能改动主 DSH。\"}]}。验收：artifact 结构检查通过（三条原文锚点，receipt 657a57a9-0171-4a1c-bfc2-a2e0018ec144，strength=structure-only）；语义要求 constraint-summaries 保留为 unknown 待评审——结构检查不证明中文概括的忠实性与\"恰好三条\"的完整性，需人工复核。"
+    },
+    "result": {
+      "isError": false,
+      "text": "{\"jobId\":\"readme-constraints\",\"report\":{\"status\":\"review\",\"summary\":\"README.md 已逐行读取（共 5 行，未修改任何文件）。提取恰好三条约束并附原文引用：1) 包管理器必须使用 pnpm——引用「包管理器：pnpm」；2) 测试命令为 npm test——引用「测试命令：npm test」；3) 部署必须使用隔离的 DSH_HOME，不能改动主 DSH——引用「部署约束：必须使用隔离的 DSH_HOME，不能改动主 DSH。」。交付 JSON：{\\\"file\\\":\\\"README.md\\\",\\\"constraints\\\":[{\\\"summary\\\":\\\"包管理器必须使用 pnpm\\\",\\\"quote\\\":\\\"包管理器：pnpm\\\"},{\\\"summary\\\":\\\"测试命令为 npm test\\\",\\\"quote\\\":\\\"测试命令：npm test\\\"},{\\\"summary\\\":\\\"部署必须使用隔离的 DSH_HOME，不能改动主 DSH\\\",\\\"quote\\\":\\\"部署约束：必须使用隔离的 DSH_HOME，不能改动主 DSH。\\\"}]}。验收：artifact 结构检查通过（三条原文锚点，receipt 657a57a9-0171-4a1c-bfc2-a2e0018ec144，strength=structure-only）；语义要求 constraint-summaries 保留为 unknown 待评审——结构检查不证明中文概括的忠实性与\\\"恰好三条\\\"的完整性，需人工复核。\"},\"nativeTaskStatus\":\"partial\",\"final\":false}"
+    }
+  },
+  {
+    "name": "patchwork_superagent",
+    "arguments": {
+      "action": "inspect"
+    },
+    "result": {
+      "isError": false,
+      "text": "{\"role\":\"executor\",\"jobId\":\"readme-constraints\",\"mode\":\"read\"}"
+    }
+  }
+]

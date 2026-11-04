@@ -1,4 +1,4 @@
-export const mechanismLabels = { runtime: '运行时', af: 'AF', op: 'OP', epr: 'EPR', occ: 'OCC', search: '检索', fetch: '抓取', memory: '记忆', improvement: '改进', browser: '浏览器' }
+export const mechanismLabels = { runtime: '运行时', af: 'AF', op: 'OP', epr: 'EPR', occ: 'OCC', search: '检索', fetch: '抓取', memory: '记忆', improvement: '改进', browser: '浏览器', task: '任务', superagent: '主控', skill: '技能', evidence: '引用', settings: '设置', maintenance: '结构检查', code: '代码检索' }
 export const levelLabels = { info: '信息', warn: '警告', error: '错误' }
 
 const reasonLabels = {
@@ -25,6 +25,18 @@ const reasonLabels = {
   'state-update-failed': '状态写入失败，主任务继续', 'evaluation-failed': '评估失败，本次不压缩',
   'compact-failed': '压缩失败，保留原始上下文', 'archive-failed': '原文归档失败',
   'recall-failed': '原文召回失败', 'enabled': '机制已启用',
+  'task-defined': '任务要求已登记', 'task-corrected': '任务要求已纠正', 'task-artifact': '任务产物已登记', 'task-check': '任务验收已执行',
+  'task-assessment': '语义评审已记录', 'task-candidate': '候选经验已登记', 'task-cancelled': '任务已取消',
+  'queue-submitted': '主控队列已提交', 'queue-input': '已向执行器补充输入', 'queue-retry': '执行器已重试', 'queue-review': '执行器结果已复核',
+  'queue-paused': '主控队列已暂停', 'queue-resumed': '主控队列已继续', 'queue-cancelled': '主控队列已取消', 'queue-reconciled': '主控队列已对账',
+  'skill-loaded': '技能正文已按需加载', 'evidence-cited': '引用已绑定精确摘录', 'evidence-compared': '独立来源字段已对比',
+  'settings-saved': '配置已保存并等待重载', 'structure-warning': '文件结构建议已触发', 'evidence-hint': '缺少有效验收的提示已触发',
+  'code-started': '开始代码检索', 'code-map': '已生成仓库地图', 'code-outline': '已读取文件结构', 'code-find': '已查找符号定义',
+  'code-references': '已查找词法引用', 'code-search': '已完成代码文本检索', 'code-failed': '代码检索失败',
+  'code-graph-status': '已读取代码图状态', 'code-graph-enabled': '工作区代码图已启用', 'code-graph-disabled': '工作区代码图已停用',
+  'code-graph-started': '工作区代码图已启动', 'code-graph-stopped': '工作区代码图已停止',
+  'code-callers': '已查询调用者', 'code-callees': '已查询被调用者', 'code-impact': '已查询影响面', 'code-affected': '已查询受影响测试',
+  'memory-proposed': '记忆提案已创建', 'memory-revised': '记忆修订已创建', 'memory-confirmed': '记忆版本已确认', 'memory-forgotten': '记忆已停止召回', 'memory-validity': '记忆召回状态已更新',
 }
 const eventTitles = {
   browser: { success: '浏览器操作记录', failure: '浏览器操作未通过' },
@@ -37,6 +49,13 @@ const eventTitles = {
   op: { packed: '大输出已归档', recall: '原文片段已召回', failure: '归档处理异常' },
   epr: { decision: '证据约简评估', failure: '证据约简异常' },
   occ: { boundary: '到达计划边界', decision: '上下文压缩评估', start: '开始压缩上下文', success: '上下文压缩完成', noop: '上下文保持不变', failure: '上下文压缩异常', continued: '任务继续执行', skipped: '已跳过上下文压缩' },
+  task: { define: '任务要求已登记', correct: '任务要求已纠正', artifact: '任务产物已登记', check: '任务验收已执行', assessment: '语义评审已记录', candidate: '候选经验已登记', cancel: '任务已取消', handoff: '任务交接已读取', inspect: '任务状态已读取', review: '任务语义验收已复核' },
+  superagent: { submit: '主控队列已提交', report: '执行器已汇报', input: '已向执行器补充输入', retry: '执行器已重试', review: '执行器结果已复核', pause: '主控队列已暂停', resume: '主控队列已继续', cancel: '主控队列已取消', reconcile: '主控队列已对账' },
+  skill: { load: '技能正文已加载' },
+  evidence: { cite: '引用已绑定', compare: '独立来源已对比', list: '引用证据已读取' },
+  settings: { save: '配置已保存' },
+  code: { start: '开始代码检索', success: '代码检索完成', failure: '代码检索失败' },
+  maintenance: { warning: '结构或证据提示', blocked: '结构检查阻断' },
 }
 
 export function logTitle(entry) {

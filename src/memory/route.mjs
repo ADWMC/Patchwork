@@ -1,6 +1,7 @@
 import { resolvePatchworkAgent } from '../scope.mjs'
 import { webRuntime } from '../ui/web-runtime.mjs'
-import { confirmMemory, forgetMemory, forgetMemories, listMemory, proposeMemory, reviseMemory, setMemoryValidity } from './store.mjs'
+import { confirmMemory, forgetMemory, forgetMemories, listMemory, proposeMemory, recallMemory, reviseMemory, setMemoryValidity } from './store.mjs'
+import { logDiagnostic } from '../logging/session-log.mjs'
 
 export const MEMORY_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/memory'
 const routeKey = `exact\u0000${MEMORY_ROUTE_PATH}`
@@ -22,6 +23,11 @@ export function registerMemoryRoute(ctx, { token } = {}) {
       req.on('aborted', () => cancellation.abort())
       res.on?.('close', () => { if (!res.writableEnded) cancellation.abort() })
       if (req.method === 'GET') {
+        if (params.get('action') === 'recall') {
+          const recalled = await recallMemory(agent, { query: params.get('query') ?? '', includeProject: params.get('includeProject') === 'true', limit: Number(params.get('limit') ?? 5), signal: cancellation.signal })
+          if (resolvePatchworkAgent(ctx, id) !== agent) return reply(403, { ok: false, reason: 'patchwork-agent-required' })
+          return reply(200, { ok: true, ...recalled })
+        }
         const result = await listMemory(agent, { query: params.get('query') ?? '', scope: params.get('scope') ?? 'session-private', status: params.get('status') ?? 'all', validity: params.get('validity') ?? 'all', offset: Number(params.get('offset') ?? 0), limit: Number(params.get('limit') ?? 20), id: params.get('id') ?? undefined, includeValue: true, signal: cancellation.signal })
         if (resolvePatchworkAgent(ctx, id) !== agent) return reply(403, { ok: false, reason: 'patchwork-agent-required' })
         return reply(result.status === 'failed' ? 400 : 200, { ok: result.status !== 'failed', ...result })
@@ -40,6 +46,9 @@ export function registerMemoryRoute(ctx, { token } = {}) {
       else if (body?.action === 'revise') result = await reviseMemory(agent, body.id, body.record, body.expectedRevision, { userConfirmed: true, signal: cancellation.signal })
       else if (body?.action === 'validity') result = await setMemoryValidity(agent, body.id, body.expectedRevision, body.validity, { userConfirmed: true, signal: cancellation.signal })
       else return reply(400, { ok: false, reason: 'unsupported-memory-action' })
+      const memoryEvents = { propose: ['propose', 'memory-proposed'], revise: ['revise', 'memory-revised'], confirm: ['confirm', 'memory-confirmed'], forget: ['forget', 'memory-forgotten'], 'forget-many': ['forget', 'memory-forgotten'], validity: ['validity', 'memory-validity'] }
+      const [event, reason] = memoryEvents[body.action] ?? ['decision', 'enabled']
+      logDiagnostic(ctx, agent, { mechanism: 'memory', event, reason: result.status === 'failed' ? 'exception' : reason, level: result.status === 'failed' ? 'warn' : 'info' })
       if (result.status === 'failed') return reply(result.failureCode === 'MEMORY_REVISION_CONFLICT' ? 409 : 400, { ok: false, ...result })
       return reply(200, { ok: true, ...result })
     } })
