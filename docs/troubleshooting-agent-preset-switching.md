@@ -37,7 +37,7 @@ standard fixture 再追加 runtime；测试验证只有 Patchwork 实际组合�
 ```powershell
 npm pack --pack-destination "$env:USERPROFILE/.dsh/.tgz-cache"
 dsh plugin --profile web remove '@patchwork/coding-agent'
-dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-1.0.1.tgz"
+dsh plugin --profile web add "$env:USERPROFILE/.dsh/.tgz-cache/patchwork-coding-agent-1.0.2.tgz"
 ```
 
 改过宿主 standard 后重新生成声明文件（默认写回 `presets/patchwork.patch.yml`）：

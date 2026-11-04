@@ -50,7 +50,7 @@ pnpm build:client
 npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 ```
 
-该步骤只制作本地安装包，不发布到 npm，也不安装到 DSH。当前包版本为 `1.0.1`；发布变化见 [CHANGELOG](CHANGELOG.md)。
+该步骤只制作本地安装包，不发布到 npm，也不安装到 DSH。当前包版本为 `1.0.2`；发布变化见 [CHANGELOG](CHANGELOG.md)。
 
 ### 2. 安装到指定 DSH 实例
 
@@ -58,7 +58,7 @@ npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 
 ```powershell
 $env:DSH_HOME = 'C:\dsh\patchwork-demo'
-dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-1.0.1.tgz"
+dsh plugin --profile web add "$env:TEMP/patchwork-pack/patchwork-coding-agent-1.0.2.tgz"
 ```
 
 Patchwork 复用宿主的模型与权限设置。`engines.dsh` 声明支持 `>=0.2.1-rc.2 <0.3.0-0`；`@deepseek-ai/dsh-agent-preset`、`@deepseek-ai/dsh-home-paths` 与 `@deepseek-ai/dsh-llm` 仍以 peer 形式由目标宿主提供，发布包不会携带旧副本。0.2.1-rc.2、0.2.1-rc.5 与 0.2.2-alpha.3 已通过同一套 452 项测试；随包 profile 模板仍以 rc.5 为基线，其他版本可直接用 `dsh plugin add` 创建 profile，或在源码检出运行 `node scripts/set-dsh-version.mjs <version> --install`。旧于 rc.2 或高于 0.2.x 的宿主会被 `engines.dsh` 拒绝。
