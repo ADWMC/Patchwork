@@ -34,6 +34,19 @@ Patchwork is a **coding task plugin for DeepSeek Harness (DSH)**. It connects ta
 
 Select the **Patchwork Agent** to enable its capabilities. Other modes keep the host's own tools and sessions.
 
+**Real recording**: DeepSeek V4.1 Flash completes a 34-second maintenance task in an isolated DSH instance — fixing the `sum.mjs` addition bug → registering requirements and artifacts via `patchwork_task` → host `node --test` acceptance passing, with every receipt shown in the workbench:
+
+![Patchwork workbench recording: real task and acceptance](docs/assets/readme/workbench-demo.gif)
+
+<details>
+<summary>Workbench stills: execution view / evidence view</summary>
+
+![Execution view: task, phases and acceptance basis](docs/assets/readme/workbench-task.png)
+
+![Evidence view: tool receipts and verification states](docs/assets/readme/workbench-evidence.png)
+
+</details>
+
 <a id="why"></a>
 
 ## Why Patchwork

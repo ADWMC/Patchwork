@@ -34,6 +34,19 @@ Patchwork 是 **DeepSeek Harness（DSH）的代码任务插件**。它把任务�
 
 选择 **Patchwork Agent** 后启用专属能力；其他模式继续使用宿主自己的工具与会话。
 
+**真机实录**：DeepSeek V4.1 Flash 在隔离 DSH 实例中完成一个 34 秒的真实维护任务——修 `sum.mjs` 加法错误 → `patchwork_task` 登记要求与产物 → 宿主 `node --test` 验收通过，工作台同步显示每一步回执：
+
+![Patchwork 工作台实录：真实任务与验收](docs/assets/readme/workbench-demo.gif)
+
+<details>
+<summary>工作台静帧：执行视图 / 证据视图</summary>
+
+![执行视图：任务、阶段与验收依据](docs/assets/readme/workbench-task.png)
+
+![证据视图：工具回执与核验状态](docs/assets/readme/workbench-evidence.png)
+
+</details>
+
 <a id="why"></a>
 
 ## 为什么需要它
