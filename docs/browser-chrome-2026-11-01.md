@@ -17,4 +17,4 @@
 - 1264 px 深色、900 px 浅色、380 px 浅色、320 px 深色无水平溢出；确认标签页最先出现、导航紧随其后、真实画面足够可见，适配后校验图像原始宽度而非 CSS 缩放宽度。
 - 这次使用真实 DSH 注册表、测试 Agent 和隔离 HTTP／会话投影夹具；未运行完整 DSH App、未请求模型，也未操作用户浏览器或主 DSH。
 
-当前环境没有 Browser plugin，使用私有 Playwright 实例验证。截图、测试脚本、运行日志和构建产物保存在仓库外的 `../Patchwork-source-research/2026-11-01/browser-gap-qa`；机器可读结果见 [界面检查记录](checks/browser-chrome-2026-11-01.json)。包仍是本地未发布的 `0.2.0`，没有上传 npm。
+当前环境没有 Browser plugin，使用私有 Playwright 实例验证。截图、测试脚本、运行日志和构建产物保存在仓库外的 `../Patchwork-source-research/2026-11-01/browser-gap-qa`；机器可读结果见 界面检查记录。包仍是本地未发布的 `0.2.0`，没有上传 npm。

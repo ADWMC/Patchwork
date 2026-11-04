@@ -52,6 +52,6 @@
 
 这不是完整 DSH App 的端到端运行，也没有请求模型或运行 ZCode 产品对照。UI 使用实际组件和 DSH 主题，HTTP carrier 与会话投影由隔离测试夹具提供；浏览器和工具执行是真的。测试使用私有 Playwright 实例，因为当前会话没有 Browser plugin。测试结束清理所有临时内核与 `DSH_HOME`，未操作用户浏览器或主 DSH。
 
-机器可读结果、工具调用次数、截图、包内容检查及脚本/源码哈希见 [拆包验证记录](checks/browser-optional-package-2026-11-01.json)。浏览器包自身说明与更新日志位于 `packages/browser/README.md` 和 `packages/browser/CHANGELOG.md`。历史浏览器调研保留作为设计依据，其中旧源码位置、安装命令和主包内置描述以本篇迁移记录为准。
+机器可读结果、工具调用次数、截图、包内容检查及脚本/源码哈希见 拆包验证记录。浏览器包自身说明与更新日志位于 `packages/browser/README.md` 和 `packages/browser/CHANGELOG.md`。历史浏览器调研保留作为设计依据，其中旧源码位置、安装命令和主包内置描述以本篇迁移记录为准。
 
 验证记录随主包分发。为避免包中记录对自身 tarball 哈希形成递归，最终 tgz 的大小和 SHA-256 单独记录在外部测试目录的 `distribution-result.json`；压缩包大小不包含安装后依赖和浏览器内核。

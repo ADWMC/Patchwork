@@ -66,7 +66,7 @@ DSH 的 `dsh-app-boot` 在导入插件前检查清单：
 - alpha.3：用 alpha CLI 在独立 `DSH_HOME` 创建 `patchwork-alpha` profile，安装本地 tarball，`--dump-config` 含 `preset-patchwork`，`--no-open --port 0` 启动成功；
 - 两者都没有连接或修改主 DSH。
 
-机器证据见 [dsh-compat-2026-11-04.json](checks/dsh-compat-2026-11-04.json)。
+机器证据见 dsh-compat-2026-11-04.json。
 
 ## 6. 边界
 

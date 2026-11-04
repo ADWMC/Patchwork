@@ -151,7 +151,7 @@
 - [S14] 社区技能 [`emilkowalski/skills/apple-design`，固定提交 `a81dbca`](https://github.com/emilkowalski/skills/blob/a81dbca07f2217b7103e510c0f13f8d5b017afc9/skills/apple-design/SKILL.md)；该仓库标注 MIT。
 - [S15] Apple 官方 [Design principles](https://developer.apple.com/design/human-interface-guidelines/design-principles)。
 - [S16] Apple 官方 [Color](https://developer.apple.com/design/human-interface-guidelines/color)。
-- [P1] 本仓库 [`home-control-v1-evaluation.md`](experiments/skills-2026-10-31/home-control-v1-evaluation.md)。
+- [P1] 本仓库 `home-control-v1-evaluation.md`。
 - [P2] 本仓库 [`web-ui/SKILL.md`](../assets/skills/web-ui/SKILL.md)。
 - [P3] 本仓库 [`anti-template.md`](../assets/skills/web-ui/references/anti-template.md)。
 - [P4] 本仓库 [`product-experience-evolution-plan-2026-10-31.md`](product-experience-evolution-plan-2026-10-31.md)。

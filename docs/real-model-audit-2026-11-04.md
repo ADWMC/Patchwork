@@ -2,18 +2,18 @@
 
 状态：**证据盘点，不是全量通过声明**。本轮真实模型调用没有全部写成仓库报告；下面是现有证据、结论和缺口。
 
-> 2026-11-04 更新：已生成可离线校验的报告目录 [`docs/checks/real-model/2026-11-04/`](checks/real-model/2026-11-04/index.json)，把旧 A–D/I/regression 会话和本轮 code/memory/task 调用迁入 manifest/report；`npm run audit:verify` 通过。任务命令 check 仍被 Windows Job runner 基础设施错误阻塞，保留为 `task-check-db31` 失败样本。
+> 2026-11-04 更新：真实模型原始证据已从仓库移除，不再随 GitHub 上传。本地可用 `scripts/real-model-audit.mjs` 重新生成报告，用 `node scripts/verify-real-model-audit.mjs <外部目录>` 离线校验。任务命令 check 仍被 Windows Job runner 基础设施错误阻塞，保留为本地失败样本。
 
 环境：隔离 DSH `0.2.1-rc.5`，StepFun `step-5-preview`，独立 `DSH_HOME`、工作区、端口；主 DSH 未修改、未停止。
 原始证据：`C:\Users\Administrator\AppData\Local\Temp\patchwork-latest-20261103`（临时目录，可能被清理；未提交到仓库）。
 
 ## 1. 结论
 
-- 仓库里只有 2026-11-01 那轮的 `docs/checks/*`，不是本轮 11-03/04 真实模型调用的完整报告。
+- 仓库不再保存 `docs/checks/*` 原始机器证据；真实模型报告只在本地生成。
 - 本轮 A–J 面板/会话审计、`final`/`rc5` 冒烟、`regression` 复验，主要留下原始 JSONL dump、审计 txt 和截图，没有统一的 Markdown/JSON 汇总。
 - 其中 B 会话暴露的 `patchwork_memory inspect` 失败已在代码和单元测试中修复；2026-11-04 的 `memory-scope-87d4` 真实模型会话已复验 `MEMORY_PROJECT_SCOPE_REQUIRED` 与带 `includeProject:true` 的成功读取。
 - D 与 I 都是“读取 README 并总结”，却出现两种行为：I 直接 read + report；D/child 走了完整 task/语义验收并停在 `review/partial`。说明 read 任务的提示仍有模型相关波动。
-- `docs/checks/improvement-real.json` 明确 `modelRequests: 0`，不能算真实模型调用报告。
+- `docs/checks/improvement-real.json` 只是本地隔离验证输出，`modelRequests: 0`，不算真实模型调用报告，也不随仓库上传。
 
 ## 2. 会话清单
 

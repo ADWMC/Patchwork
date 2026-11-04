@@ -3,12 +3,18 @@ import assert from 'node:assert/strict'
 import { createServer as httpServer } from 'node:http'
 import { createServer as httpsServer } from 'node:https'
 import { connect } from 'node:net'
+import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const transport = new URL('../src/retrieval/http-client.mjs', import.meta.url).href
-const cert = new URL('./fixtures/tls/pinned.test.cert.pem', import.meta.url)
+const keyPath = fileURLToPath(new URL('./fixtures/tls/pinned.test.key.pem', import.meta.url))
+const certPath = fileURLToPath(new URL('./fixtures/tls/pinned.test.cert.pem', import.meta.url))
+// The TLS identity is a local, test-only fixture and is not stored in Git. Run
+// `openssl req -x509 -newkey rsa:2048 -nodes -keyout pinned.test.key.pem -out pinned.test.cert.pem -days 2 -subj /CN=pinned.test`
+// inside tests/fixtures/tls to enable these loopback transport tests.
+const tls = (await existsSync(keyPath)) && (await existsSync(certPath)) ? { key: await readFile(keyPath), cert: await readFile(certPath) } : null
 const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(https?|all|no)_proxy$/i.test(key)))
 async function serve(t, server) {
   const sockets = new Set()
@@ -20,7 +26,7 @@ async function serve(t, server) {
 async function childFetch(url, { proxy, approved = '127.0.0.1' } = {}) {
   const code = `import { nativeFetch } from ${JSON.stringify(transport)}; try {const r=await nativeFetch(${JSON.stringify(url)},{approvedAddresses:[{address:${JSON.stringify(approved)},family:4}],redirect:'manual',timeoutMs:10000,headers:{accept:'text/plain'}});console.log(JSON.stringify({status:r.status,location:r.headers.get('location'),body:await r.text()}));}catch(e){console.log(JSON.stringify({error:e.code??e.name,message:e.message}));}`
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ['--input-type=module', '-e', code], { windowsHide: true, env: { ...cleanEnv, NODE_EXTRA_CA_CERTS: fileURLToPath(cert), CURL_CA_BUNDLE: fileURLToPath(cert), ...(proxy ? { HTTPS_PROXY: proxy } : {}) } })
+    const child = spawn(process.execPath, ['--input-type=module', '-e', code], { windowsHide: true, env: { ...cleanEnv, NODE_EXTRA_CA_CERTS: certPath, CURL_CA_BUNDLE: certPath, ...(proxy ? { HTTPS_PROXY: proxy } : {}) } })
     let stdout = '', stderr = ''
     child.stdout.on('data', bytes => { stdout += bytes }); child.stderr.on('data', bytes => { stderr += bytes })
     child.on('error', reject); child.on('close', code => { try { if (code) throw new Error(stderr); resolve(JSON.parse(stdout)) } catch (error) { reject(error) } })
@@ -28,9 +34,9 @@ async function childFetch(url, { proxy, approved = '127.0.0.1' } = {}) {
 }
 // Only ephemeral loopback servers are contacted. Public admission tests are
 // separate: this tests the lower transport's destination/Host/TLS contract.
-test('real TLS sockets pin the approved IP, retain SNI/Host and never follow a redirect', async t => {
+test('real TLS sockets pin the approved IP, retain SNI/Host and never follow a redirect', { skip: !tls }, async t => {
   const requests = []
-  const server = httpsServer({ key: await readFile(new URL('./fixtures/tls/pinned.test.key.pem', import.meta.url)), cert: await readFile(cert) }, (req, res) => {
+  const server = httpsServer({ key: tls.key, cert: tls.cert }, (req, res) => {
     requests.push({ path: req.url, host: req.headers.host, sni: req.socket.servername })
     if (req.url === '/redirect') { res.writeHead(302, { location: 'https://elsewhere.invalid/private' }); res.end('moved') }
     else res.end('pinned transport')
@@ -42,9 +48,9 @@ test('real TLS sockets pin the approved IP, retain SNI/Host and never follow a r
   assert.equal(moved.status, 302); assert.equal(requests.length, 2)
   assert.ok((await childFetch(`https://wrong.test:${port}/`)).error, 'pinned IP must not disable hostname verification')
 })
-test('real curl proxy CONNECT uses approved IP and keeps end-to-end TLS identity', async t => {
+test('real curl proxy CONNECT uses approved IP and keeps end-to-end TLS identity', { skip: !tls }, async t => {
   let targetHost, targetSni
-  const origin = httpsServer({ key: await readFile(new URL('./fixtures/tls/pinned.test.key.pem', import.meta.url)), cert: await readFile(cert) }, (req, res) => { targetHost = req.headers.host; targetSni = req.socket.servername; res.end('proxy pinned') })
+  const origin = httpsServer({ key: tls.key, cert: tls.cert }, (req, res) => { targetHost = req.headers.host; targetSni = req.socket.servername; res.end('proxy pinned') })
   const originPort = await serve(t, origin), destinations = []
   const proxy = httpServer()
   proxy.on('connect', (req, socket, head) => {

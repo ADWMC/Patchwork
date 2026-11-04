@@ -7,14 +7,14 @@
 历史文件名 `artifacts/home-control-step5-v1.html`，20,032 字节，SHA256：
 `6c174ce3d88ef0e0c9492ad8fb432b1014caaefdb4d0fb6a07fe04e19232702c`。
 
-原实验记录模型在隔离工作区写出控制面板，功能检查通过；用户仍认为布局有模板味。功能通过不能反驳视觉评价；只有一组运行，不能推断技能提升幅度。详情保留在[原评估](../experiments/skills-2026-10-31/home-control-v1-evaluation.md)。原页面不随仓库发布。
+原实验记录模型在隔离工作区写出控制面板，功能检查通过；用户仍认为布局有模板味。功能通过不能反驳视觉评价；只有一组运行，不能推断技能提升幅度。详情保留在原评估。原页面不随仓库发布。
 
 ## Earth explorer raw
 
 历史文件名 `artifacts/earth-explorer-step5-v2-raw.html`，27,117 字节，SHA256：
 `872279bcdb3f4369665edf08d0fa9c61c06a8a37bc7602ac1a5f468f2a7d778d`。
 
-HTML 从最后一次被拒绝的写入参数中回收，是模型候选，**不是 Agent 成功交付**。重读[原评估](../experiments/skills-2026-10-31/web-ui-v2-evaluation.md)时必须保留这一失败边界。
+HTML 从最后一次被拒绝的写入参数中回收，是模型候选，**不是 Agent 成功交付**。重读原评估时必须保留这一失败边界。
 
 ## Earth explorer revision
 

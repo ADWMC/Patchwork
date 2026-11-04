@@ -46,8 +46,6 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Audit locked dependencies
         run: pnpm audit --audit-level=high
-      - name: Verify real-model audit evidence
-        run: npm run audit:verify
       - name: Run regression tests
         run: npm test
       - name: Check committed client bundles

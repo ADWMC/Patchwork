@@ -60,7 +60,7 @@ node scripts/setup-browser-backend.mjs --backend camoufox --executable 'E:\\veri
 
 ## 验证记录与复核方式
 
-[脱敏验收清单](checks/browser-gap-validation-2026-11-01.json)分开记录回归测试、真实浏览器、DSH 原生探针、界面验收和可选 SDK；每份原始证据记录文件名、字节数与 SHA256。清单不包含访问 token、Cookie、模型密钥、页面正文或本机个人目录。不把未测项目计入通过数。
+脱敏验收清单分开记录回归测试、真实浏览器、DSH 原生探针、界面验收和可选 SDK；每份原始证据记录文件名、字节数与 SHA256。清单不包含访问 token、Cookie、模型密钥、页面正文或本机个人目录。不把未测项目计入通过数。
 
 - `npm test`：264 项通过，失败、取消和跳过均为 0。
 - 真实独立 Edge `156.0.4314.58`：11 组通过，覆盖动作后验、本地身份自检、CDP 实时画面、焦点与接管、上传和单次下载、脱敏 trace 与截图、标签生命周期、有效 WebM、Windows DPAPI 登录恢复、双会话与撤权、鉴权 HTTP SSE。

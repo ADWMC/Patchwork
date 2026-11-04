@@ -21,7 +21,7 @@
 
 ## 初步结论：值得深入的四条路线
 
-以下判断来自固定提交的文档、目录与选定实现；源码存在不等于本轮构建成功。精确 commit、许可证元数据、文件 blob SHA 与阅读范围见[证据快照](checks/fingerprint-browser-research-2026-11-01.json)。
+以下判断来自固定提交的文档、目录与选定实现；源码存在不等于本轮构建成功。精确 commit、许可证元数据、文件 blob SHA 与阅读范围见证据快照。
 
 | 路线 | 重点项目 | 对 Patchwork 的价值 |
 | --- | --- | --- |
@@ -151,7 +151,7 @@ DT 的 SDK 明确检测定制 Electron `session.setFingerprintConfig`。这不�
 
 ## 证据索引与本轮边界
 
-[机器可读快照](checks/fingerprint-browser-research-2026-11-01.json)包含 15 个仓库的元数据、固定 commit、README 与文件 blob SHA、一个历史 tag 和定向阅读范围；不保存第三方源码正文、凭据或本机个人路径。完整或定向源码缓存仅用于本地研究，不进入发行包。
+机器可读快照包含 15 个仓库的元数据、固定 commit、README 与文件 blob SHA、一个历史 tag 和定向阅读范围；不保存第三方源码正文、凭据或本机个人路径。完整或定向源码缓存仅用于本地研究，不进入发行包。
 
 优先复核快照中的这些路径：
 
@@ -172,7 +172,7 @@ DT 的 SDK 明确检测定制 Electron `session.setFingerprintConfig`。这不�
 
 随后对 18 个候选逐个获取固定主分支 commit、递归文件树、README、许可证标识和最多三条发布记录，重点追加读取原生补丁、版本锁、启动器和组件清单。两个请求曾遇到代理连接失败，之后缩小到单仓库请求重试成功。第三方代码只阅读，没有执行 README/skill 中的命令。
 
-[本次机器证据](checks/fingerprint-browser-refresh-2026-11-01.json)记录精确 commit、实际阅读文件与 Git blob SHA、发布资产名称/大小/日期及采集边界。文件正文缓存在仓库外；不将第三方完整源码、浏览器二进制或本机路径加入 Patchwork 发行包。源文件 hash 校验仅证明读取内容对应 Git blob，不证明发布二进制可复现或无恶意代码。
+本次机器证据记录精确 commit、实际阅读文件与 Git blob SHA、发布资产名称/大小/日期及采集边界。文件正文缓存在仓库外；不将第三方完整源码、浏览器二进制或本机路径加入 Patchwork 发行包。源文件 hash 校验仅证明读取内容对应 Git blob，不证明发布二进制可复现或无恶意代码。
 
 ### 候选核查结果
 

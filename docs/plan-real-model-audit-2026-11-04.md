@@ -46,9 +46,9 @@ docs/checks/real-model/
 
 原则：
 
-- 仓库只存**脱敏后的证据**；原始 `session.v4.jsonl.zstd` 留在临时隔离目录，记录 hash。
+- 仓库**不存**真实模型原始/脱敏证据；报告目录放在仓库外的隔离目录，仓库只保留生成器与校验器。
 - prompt 可能含用户隐私：默认只存 `prompt.sha256` + 脱敏文本；需要完整 prompt 时由用户显式批准。
-- 截图如含敏感信息，先裁剪/遮罩再入库。
+- 截图如含敏感信息，先裁剪/遮罩再存入本地证据目录。
 
 ### 3.2 manifest schema
 
@@ -195,10 +195,10 @@ node scripts/real-model-audit.mjs \
 命令：
 
 ```bash
-npm run audit:verify
+node scripts/verify-real-model-audit.mjs /path/to/external-audit-dir
 ```
 
-可作为 CI 的离线检查，不消耗模型额度。
+只在本地对仓库外证据目录做离线检查，不进入 CI，也不消耗模型额度。
 
 ## 4. 场景矩阵
 
@@ -215,19 +215,19 @@ npm run audit:verify
 
 ## 5. 缺口关闭顺序
 
-1. **迁移现有原始证据**：A–J、final/rc5、regression 先生成 manifest/report（不重跑），把临时目录里的 txt/session 变成可复查记录。
+1. **迁移现有原始证据**：A–J、final/rc5、regression 在仓库外目录生成 manifest/report（不重跑），不写入 Git。
 2. **B 的真实模型复验**：修复 `MEMORY_PROJECT_SCOPE_REQUIRED` 后，跑 `memory-project-scope` 3 次。
 3. **D/I 重复实验**：同一只读 README 任务 3 次，统计 task 登记率、report 状态、步数。
 4. **E–H/J 文本化**：补 tab/控件/console error/布局断言；没有文本的截图不算报告。
 5. **c87 失败归档**：记录 Windows Job runner 失败、根因、fresh profile 修复证据；不要只留失败会话。
-6. **本轮 closure**：当前测试数、UI 验收、rc.5 冷启动、主 DSH 未触碰，写成 `docs/checks/real-model/2026-11-04/closure.json`。
+6. **本轮 closure**：当前测试数、UI 验收、rc.5 冷启动、主 DSH 未触碰，写在仓库外 closure 目录，不上传 Git。
 7. **聚合索引**：`index.json` 明确 `passed/partial/failed/not-run`；没有跑的场景必须写 `not-run`。
 
 ## 6. 分期
 
 | 阶段 | 交付 | 验收 |
 |---|---|---|
-| P0 | manifest/scenario schema、report generator、离线 verifier、迁移 A–J | `npm run audit:verify` 通过；每个 run 有报告；无密钥 |
+| P0 | manifest/scenario schema、report generator、离线 verifier、迁移 A–J | 本地 `node scripts/verify-real-model-audit.mjs <目录>` 通过；每个 run 有报告；无密钥 |
 | P1 | runner、task-check、memory-scope、superagent-read 三个场景 | 3 次运行有稳定结论；B 修复后真实模型通过或明确 partial |
 | P2 | UI 面板、fresh-profile、skill-load、完整矩阵 | 覆盖矩阵无空白；partial/failed 有原因；可重复 |
 | P3 | 可选 CI 离线校验、趋势报表 | 不消耗模型额度；历史报告可比较 |

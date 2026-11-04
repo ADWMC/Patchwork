@@ -51,24 +51,15 @@
     "cordis.patch.yml",
     "docs/browser-optional-package-2026-11-01.md",
     "docs/browser-runtime-integration-2026-11-01.md",
-    "docs/checks/browser-optional-package-2026-11-01.json",
     "docs/browser-chrome-2026-11-01.md",
     "docs/superagent-fusion-2026-11-01.md",
     "docs/superagent-native-2026-11-01.md",
     "docs/superagent-prompt-optimization-2026-11-01.md",
-    "docs/checks/superagent-prompt-optimization-2026-11-01.json",
     "docs/system-prompts-community-research-2026-11-01.md",
-    "docs/checks/system-prompts-community-2026-11-01.json",
-    "docs/checks/superagent-native-2026-11-01.json",
-    "docs/checks/superagent-fusion-2026-11-01.json",
-    "docs/checks/browser-chrome-2026-11-01.json",
     "docs/dsh-multi-version-2026-11-04.md",
-    "docs/checks/dsh-compat-2026-11-04.json",
     "docs/closure-2026-11-01.md",
     "docs/memory-management-2026-11-01.md",
     "docs/ui-community-expansion-2026-11-01.md",
-    "docs/checks/ui-community-expansion-2026-11-01.json",
-    "docs/checks/closure-2026-11-01.json",
     "docs/archive/removed-evidence.md"
   ],
   "scripts": {
@@ -84,7 +75,6 @@
     "test:acceptance:browser": "node packages/browser/tests/interaction.acceptance.mjs",
     "test:acceptance:native": "node packages/browser/tests/native-browser.acceptance.mjs",
     "audit:report": "node scripts/real-model-audit.mjs",
-    "audit:verify": "node scripts/verify-real-model-audit.mjs",
     "verify:closure": "node scripts/verify-closure.mjs"
   },
   "dsh": {

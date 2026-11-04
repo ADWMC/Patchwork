@@ -57,4 +57,4 @@
 
 损坏或权限错误不创建空库替代。保留原文件，停止同一 DSH_HOME 的全部写入进程后，由维护者核对上一有效版本 `memory.json.bak` 再离线恢复；恢复边界见[闭环指南](closure-2026-11-01.md#配置与记忆恢复)。当前管理页不提供在线全库回滚或安全擦除。
 
-回归入口为 `tests/memory-management.test.mjs`、`tests/memory-tool.test.mjs`；`tests/ui.acceptance.mjs` 使用真实本地 DSH 控件、独立浏览器及临时数据，验证新增、确认、修订、暂停恢复的真实召回结果、版本历史、分页、JSON 下载、批量遗忘与共享隔离。它不接管宿主浏览器，不调用付费模型。最终运行结果见[机器报告](checks/closure-2026-11-01.json)。
+回归入口为 `tests/memory-management.test.mjs`、`tests/memory-tool.test.mjs`；`tests/ui.acceptance.mjs` 使用真实本地 DSH 控件、独立浏览器及临时数据，验证新增、确认、修订、暂停恢复的真实召回结果、版本历史、分页、JSON 下载、批量遗忘与共享隔离。它不接管宿主浏览器，不调用付费模型。最终运行结果见机器报告。

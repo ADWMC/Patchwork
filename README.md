@@ -136,7 +136,7 @@ Patchwork 复用宿主的模型与权限设置。`engines.dsh` 声明支持 `>=0
 | 保留证据的工具结果裁剪 | `evidencePreservingReducer` | 关 |
 | 在线上下文压缩 | `onlineContextCompact` | 关 |
 
-[设计依据](docs/solpi-mechanisms-design.md) · [真实任务、失败样本与实验范围](docs/experiments/2026-10-30-solpi/report.md)
+[设计依据](docs/solpi-mechanisms-design.md) · 真实任务、失败样本与实验范围（本地实验目录，不上传）
 
 <a id="optional-browser"></a>
 

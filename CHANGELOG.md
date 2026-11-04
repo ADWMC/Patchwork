@@ -6,6 +6,7 @@
 
 - 设置页支持无会话只读预览：新增 `GET /api/plugins/patchwork-coding-agent/settings`，只返回当前 `DSH_HOME` 的配置快照（`config` / `loadedConfig` / `revision`），不返回任何会话状态。未连接 Patchwork 会话时，设置页可查看配置并标为只读；保存仍然走会话鉴权的 config 路由，连接后才会启用。
 - 新增“检查更新”：设置页手动触发 `POST /api/plugins/patchwork-coding-agent/update-check`，只读查询 GitHub `releases/latest`，比较 SemVer 并显示当前版本/最新版本/Release 链接。不自动检查、不发送凭据或会话状态；非 GitHub 来源或网络失败时只报告原因。
+- 仓库清理：不再跟踪真实模型原始证据、隔离实验报告、基准报告和测试 TLS 夹具；相关路径加入 `.gitignore`，文档与 CI 改为“本地生成/外部目录校验”。已上传文件按需求只清理当前树，不重写历史。
 
 ## 1.0.2（2026-11-04，仅 tag）
 
@@ -63,7 +64,7 @@
 - `patchwork_task define` 支持可选 `brief`（goal、successCriteria、unknowns、assumptions、budget），随任务状态/压缩恢复保存，并在任务页显示；不改变授权，也不把 brief 当作验收。
 - Superagent 新增 `explore` 只读任务模式：只允许读取/代码检索，不登记任务验收，要求返回 findings/deadEnds/confidence；主控继续以原生执行器隔离上下文。
 - 诊断/能力新增本地代码检索计数和探索成本（read/grep/glob/code、重复查询、读入字节）；连续 8 次探索且无编辑时注入一次模型可见的软提示，不硬拦合法搜索。
-- 新增真实模型审计 schema/报告生成器和离线校验器：`scripts/real-model-audit.mjs` 从 session dump 生成 manifest、events、tool-calls、result、report；`scripts/verify-real-model-audit.mjs` 校验哈希、状态与 `mainDshTouched:false`。2026-11-04 的旧会话证据已迁移到 `docs/checks/real-model/2026-11-04/`。
+- 新增真实模型审计 schema/报告生成器和离线校验器：`scripts/real-model-audit.mjs` 从 session dump 生成 manifest、events、tool-calls、result、report；`scripts/verify-real-model-audit.mjs` 校验哈希、状态与 `mainDshTouched:false`。真实模型原始证据只写仓库外目录，不上传 Git。
 - 通过 `pnpm-workspace.yaml` overrides 将 `undici` 升到 8.12.2、`fast-uri` 升到 3.1.9、`zod` 升到 4.6.6，处理 Dependabot 报告的传递依赖告警；完整测试通过。
 - 新增 `patchwork_project_docs`：受控读取/校验/创建/更新 `AGENTS.md` 与 `DESIGN.md`。更新必须匹配当前 sha256，只允许这两个文件名，路径限制在工作区，拒绝明显密钥和超大内容；不自动创建、不授予权限。诊断/能力页显示两文件状态，报告见[项目文档说明](docs/project-docs-2026-11-04.md)。
 - 设置项增至 26 项，新增代码检索开关、索引文件上限与地图 token 预算；工作台“代码”分类可搜索、恢复默认、导入导出。
@@ -206,4 +207,4 @@
 - 诊断元数据不复制提示词、完整命令或工具原文，但这不代表宿主历史、任务标题/路径和归档证据已全面脱敏。分享完整 ZIP 前仍需检查内容，原文证据不自动删除。
 - 尚无受控性能对照，不能据此宣称 token、延迟或自进化收益。
 
-实现、验证环境及失败记录见[融合执行报告](docs/upgrade/2026-10-30-integration.md)与[SoL 实验报告](docs/experiments/2026-10-30-solpi/report.md)；日志保留策略见[日志文档](docs/logging.md)。
+实现、验证环境及失败记录见[融合执行报告](docs/upgrade/2026-10-30-integration.md)与SoL 实验报告；日志保留策略见[日志文档](docs/logging.md)。

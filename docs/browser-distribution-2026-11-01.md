@@ -66,4 +66,4 @@ npm run pack:local -- --pack-destination 'C:\Temp\patchwork-release' --install -
 
 ## 验收与发行门槛
 
-资源管理阶段记录见[原报告](checks/browser-resources-2026-11-01.json)；统一安装器和真实 portable/Camoufox/录像验证见[组件报告](checks/browser-components-2026-11-01.json)。完整新 tgz 的干净实例安装、完整原生侧栏端到端、跨平台及长期内存压力测试仍是后续发行门槛，不以组件探针代替。
+资源管理阶段记录见原报告；统一安装器和真实 portable/Camoufox/录像验证见组件报告。完整新 tgz 的干净实例安装、完整原生侧栏端到端、跨平台及长期内存压力测试仍是后续发行门槛，不以组件探针代替。

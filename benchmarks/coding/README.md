@@ -47,10 +47,9 @@ node benchmarks/coding/run-isolated.mjs `
 没有真实 Agent run id、模型、DSH 版本和完整隐藏验收日志时，不得把 oracle 结果写成
 “Patchwork 解决了 8/8 代码问题”。对外文案模板见 [营销文案](marketing-copy.md)。
 
-当前仓库内的 [oracle 质量报告](reports/2026-10-31-oracle-quality.json) 可以公开为题集
-质量数据；它与 [Patchwork Contract Benchmark 报告](../patchwork/reports/2026-10-31-contract-summary.json)
-共同说明题集和插件合同的可复现性。模型完成率仍需单独的隔离 Agent run，不能从这两份
-确定性报告推导。
+本地生成的 oracle 质量报告（不随仓库上传）可以公开为题集质量数据；它与本地生成的
+Patchwork Contract Benchmark 报告共同说明题集和插件合同的可复现性。模型完成率仍需单独的
+隔离 Agent run，不能从这两份确定性报告推导。
 
 ## 接入真实 DSH Agent
 

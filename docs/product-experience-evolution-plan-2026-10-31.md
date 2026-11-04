@@ -320,7 +320,7 @@ UI 只呈现真实状态，不用提示词包装不确定性。可以改进：
 | [记忆系统再调研](memory-deep-dive-2026-10-31.md) | 5.2、6、8、P1 | 采用 `queued/committed/indexed`、读己之写、实际发送预算和删除后不复活；仍需实现和真宿主验证 |
 | [DSH 会话审查解决方案](archive/removed-evidence.md#private-session-audit) 与[升级建议](archive/removed-evidence.md#private-session-audit) | Incident、纠正、验收、失败止损和产品指标 | 作为用户失败模式和回归用例来源，不把每条纠正复制成提示词 |
 | [用户纠正专题](archive/removed-evidence.md#private-session-audit) 与[证据](archive/removed-evidence.md#private-session-audit) | 真实失败/纠正 → Incident | 只保留脱敏的失败机制、来源引用和验证要求，不复制私人原文 |
-| [SoL-Pi 机制设计](solpi-mechanisms-design.md)、[实验报告](experiments/2026-10-30-solpi/report.md)、[auto-research](../research/README.md)、[benchmark](../benchmark/README.md) | 运行时效率、实验和成本指标 | SoL-Pi 是运行时底座；研究和反事实度量不能直接证明用户体验收益 |
+| [SoL-Pi 机制设计](solpi-mechanisms-design.md)、实验报告、[auto-research](../research/README.md)、[benchmark](../benchmark/README.md) | 运行时效率、实验和成本指标 | SoL-Pi 是运行时底座；研究和反事实度量不能直接证明用户体验收益 |
 | [日志审查](logging-audit-2026-10-30.md) 与[日志文档](logging.md) | 改进生命周期日志和隐私边界 | 继续使用白名单元数据、引用和脱敏；不把日志当长期记忆正文 |
 | [Skills/UI/UX 调研](agent-skills-ui-ux-writing-coding-research-2026-10-29.md)、[去 AI 垃圾调研](anti-slop-skills-research-2026-10-29.md) | UI Review Card、提示文案、事实和行为保真 | 作为验收标准，不作为常驻长提示词 |
 | [信息检索调研与方案](information-retrieval-research-2026-10-31.md)、[独立检索提示词](../assets/prompts/retrieval-research-prompt.md) | 检索来源、DSH 工具契约、预算、引用、web 不可信边界和评测 | 已接入 `patchwork_search` 多 provider 无密钥 fallback；完整 ledger、引用 UI 和评测仍待后续阶段 |

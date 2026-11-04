@@ -38,7 +38,7 @@
 
 ### 地球 HTML 真实任务补测
 
-2026-10-31 又用隔离 DSH 的 StepFun `step-5-preview` 运行[地球任务](experiments/skills-2026-10-31/tasks/earth-web-ui.txt)。任务要求调用 `web-ui`，在空的隔离工作目录写单文件 HTML；原有 `artifacts/earth.html` 未读取或覆盖。四次尝试均保留，不能只展示最后成功的一次：
+2026-10-31 又用隔离 DSH 的 StepFun `step-5-preview` 运行地球任务。任务要求调用 `web-ui`，在空的隔离工作目录写单文件 HTML；原有 `artifacts/earth.html` 未读取或覆盖。四次尝试均保留，不能只展示最后成功的一次：
 
 | 尝试 | 结果 | 请求 / 耗时 |
 | --- | --- | --- |

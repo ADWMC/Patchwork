@@ -8,7 +8,7 @@
 
 后续增补见[开源指纹浏览器专项](fingerprint-browser-research-2026-11-01.md)：另查 15 个仓库与历史源码 tag，补充 Fury、AliasMode 和档案管理器，复核开源边界；下述数字继续表示本篇最初一轮的范围。
 
-使用 `gh search repos`、`gh api repos/...`、README、固定 commit 的目录树与源码，经本机配置的 HTTP 代理访问 GitHub。核对 26 个仓库的元数据与 README；其中 15 个主分支目录树、33 份源码/许可文件被拉取并定向阅读。机器可读清单见 [GitHub 调研快照](checks/browser-community-research-2026-11-01.json)。星数只是检索线索，不作为效果证明。
+使用 `gh search repos`、`gh api repos/...`、README、固定 commit 的目录树与源码，经本机配置的 HTTP 代理访问 GitHub。核对 26 个仓库的元数据与 README；其中 15 个主分支目录树、33 份源码/许可文件被拉取并定向阅读。机器可读清单见 GitHub 调研快照。星数只是检索线索，不作为效果证明。
 
 - **R：文档声明**。表示上游描述了能力，未等于我们复现。
 - **S：源码证据**。表示本轮看到对应实现；未等于完成安全审计或与 Patchwork 兼容。
@@ -127,7 +127,7 @@
 
 ## 补充：ZCode 专项（第 27 个项目）
 
-按用户补充要求，通过 GitHub CLI 另行核对 `zai-org/ZCode`，固定 commit 为 `a60ba6a7e5a06742270ca605f5d2cc2766afa7e1`。专项定向阅读 25 份源码/文档，记录见 [ZCode 浏览器专项](zcode-browser-research-2026-11-01.md)及[独立证据快照](checks/zcode-browser-research-2026-11-01.json)。本节是增补，不修改前一轮 26 个仓库、15 个目录树、33 份文件的历史统计。
+按用户补充要求，通过 GitHub CLI 另行核对 `zai-org/ZCode`，固定 commit 为 `a60ba6a7e5a06742270ca605f5d2cc2766afa7e1`。专项定向阅读 25 份源码/文档，记录见 [ZCode 浏览器专项](zcode-browser-research-2026-11-01.md)及独立证据快照。本节是增补，不修改前一轮 26 个仓库、15 个目录树、33 份文件的历史统计。
 
 值得吸收的是冻结 owner 与 generation、标签驻留/恢复、截图 surface 生命周期、输入目标校验、录制文件交付、后端能力裁剪、重复调用提醒及可信事实账本。当前 Desktop 采用 renderer `<webview>` + main guest/CDP，不能直接复制到 DSH Web 插件。所查内置浏览器还使用固定持久 partition，命令隔离不等于每会话独立 Cookie；Patchwork 保持会话私有档案和用户优先的强接管。
 

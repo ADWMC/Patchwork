@@ -1,1 +1,0 @@
-诊断这份隔离代码副本的测试失败，不要改文件。请只调用一次 pwsh 执行 node --test --test-reporter=spec tests/online-context-compact.test.mjs tests/observation-pack.test.mjs（timeoutMs 120000），然后根据工具实际返回，简明报告：总测试数/通过/失败数、失败测试名称、至少两条逐字失败证据、根因（代码契约与测试预期的冲突）、下一步最小修复。不必重新跑相同命令，不要联网，不要启动子 agent，不要读其他目录。遇到收据要区分命令失败和工具派发成功；如果证据不够就明确说不足。最终答复控制在600字以内。

@@ -1,1 +1,0 @@
-这是隔离副本中的两阶段机制审查任务。现在仅做第一阶段，不要修改源码，不联网，不启动子 agent。请先用 update_plan 建立两步计划：a 审查现有SoL实现（in_progress）；b 运行OCC回归并给出修复优先级（pending）。随后真实读取 src/mechanisms/online-context-compact/lifecycle.mjs、economics.mjs 和 src/mechanisms/evidence-preserving-reducer/candidate.mjs、provider.mjs（四个完整文件），指出最多三个剩余风险及代码依据。最后用 update_plan 把a改completed、b保留pending，并结束本轮，等待第二阶段指令。本轮不要执行测试，也不要提前宣称任务全部完成。最后答复200字以内。

@@ -45,7 +45,7 @@ node packages/browser/scripts/browser-components.mjs verify aliasmode --home C:\
 
 ## 真实验收与复跑
 
-机器证据见 [native-fingerprint-2026-11-01.json](checks/native-fingerprint-2026-11-01.json)。测试使用专用 `fingerprint-native-home`，不修改主 DSH、不连接用户宿主浏览器。原生内核与查看 UI 的私有 Edge 都独立启动；Browser 插件不可用，因此 UI 使用私有 Playwright 验证。
+机器证据见 native-fingerprint-2026-11-01.json。测试使用专用 `fingerprint-native-home`，不修改主 DSH、不连接用户宿主浏览器。原生内核与查看 UI 的私有 Edge 都独立启动；Browser 插件不可用，因此 UI 使用私有 Playwright 验证。
 
 测试通过实际 DSH/Cordis Loader、原生工具注册表与 Agent 作用域执行，未加载 Patchwork 主运行时、未发模型请求，也不是完整 DSH 客户端端到端模型回合。
 

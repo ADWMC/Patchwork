@@ -136,7 +136,7 @@ The implementation draws on SoL-Pi and uses individual switches. Execution count
 | Evidence-preserving tool-result reduction | `evidencePreservingReducer` | Off |
 | Online context compaction | `onlineContextCompact` | Off |
 
-[Design](docs/solpi-mechanisms-design.md) · [Real tasks, failed pilots and experiment scope](docs/experiments/2026-10-30-solpi/report.md) (Chinese)
+[Design](docs/solpi-mechanisms-design.md) · Real tasks, failed pilots and experiment scope (Chinese)
 
 <a id="optional-browser"></a>
 

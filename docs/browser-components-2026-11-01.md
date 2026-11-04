@@ -76,4 +76,4 @@ npm run components -- clean-cache chromium --home 'C:\Temp\patchwork-components'
 - [官方配对发行](https://github.com/daijro/camoufox/releases/tag/v156.0.1-beta.36)的资产元数据：平台资产、大小和 SHA256。固定六个平台条目见 `src/browser/components/catalog.mjs`，不跟随 latest。
 - [yauzl](https://github.com/thejoshwolfe/yauzl)：懒条目、条目大小检查和流式解压 API。依赖固定 3.2.0，许可证随 npm 依赖分发。
 
-本轮验证及明确未验证范围见 [组件验收报告](checks/browser-components-2026-11-01.json)。旧的资源/缺口报告保持其历史验收范围，不能替代本轮报告。
+本轮验证及明确未验证范围见 组件验收报告。旧的资源/缺口报告保持其历史验收范围，不能替代本轮报告。

@@ -39,7 +39,7 @@ Patchwork 因此让既有 Agent Playwright 页面成为唯一页面状态源。`
 
 在独立 `DSH_HOME` 中运行官方 DSH `0.2.1-rc.2`，并用 `dsh headless --patch docs/experiments/2026-11-01-browser/probe.overlay.yml` 调用真实探针。两个 Patchwork Agent 均只看到 `patchwork_browser`；普通 Agent 看不到。两个 Agent 分别导航到 `/first` 和 `/second` 后，第一个仍看到 `First session`（`firstSeesSecond: false`）。390×844 视口切换、PNG 截图图像块、关闭第一个 Agent 后第二个继续运行、工作目录内 `file://` 导航和目录外文件拒绝均通过。退出后未发现残留的 Playwright headless Edge/Chrome 进程。主 DSH 配置、会话及当前宿主浏览器未改动。
 
-初版单元测试覆盖标准 Agent 拒绝调用、两个 Patchwork Agent 状态分离及切走后的关闭。真实探针的一次中间运行出现第二个会话导航失败，未捕获到错误详情；随后连续三次完整通过。本轮扩展为 12 项浏览器单元测试，全仓 243 项全部通过，并完成 8 组真实 Edge 环境探针；具体断言与边界见[升级验收记录](browser-workspace-upgrade-2026-11-01.md)。长期并发压力、偶发启动失败和非 Windows 浏览器发现仍需单独验证；这些探针不等于模型 UI 质量验收。家居题结果见 [实验记录](experiments/2026-11-01-browser/home-control-result.md)。
+初版单元测试覆盖标准 Agent 拒绝调用、两个 Patchwork Agent 状态分离及切走后的关闭。真实探针的一次中间运行出现第二个会话导航失败，未捕获到错误详情；随后连续三次完整通过。本轮扩展为 12 项浏览器单元测试，全仓 243 项全部通过，并完成 8 组真实 Edge 环境探针；具体断言与边界见[升级验收记录](browser-workspace-upgrade-2026-11-01.md)。长期并发压力、偶发启动失败和非 Windows 浏览器发现仍需单独验证；这些探针不等于模型 UI 质量验收。家居题结果见 实验记录。
 
 可见浏览器初版另在独立 `DSH_HOME` 运行真实 DSH `0.2.1-rc.2` 验证：Agent 打开的页面可由侧栏拿到 JPEG；通过同一控制器模拟用户点击后，Agent 快照出现 `Clicked by user`；用户侧导航后 Agent 快照出现 `Shared page`；第二个 Patchwork Agent 仍保留自己的页面，普通 Agent 没有工具。初版 1440×900 窗口的侧栏导航与画面渲染通过。
 

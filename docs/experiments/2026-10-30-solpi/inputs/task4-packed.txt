@@ -1,3 +1,0 @@
-做一次真实源码完整性盘点，不修改文件、不联网、不启动子 agent。请只用一次 pwsh 执行：
-$files = @(Get-ChildItem src,tests -Recurse -File | Sort-Object FullName); $rows = @(); foreach ($f in $files) { $rel = [IO.Path]::GetRelativePath((Get-Location).Path, $f.FullName); $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $f.FullName).Hash; $row = 'FILE ' + $rel + ' BYTES=' + $f.Length + ' MODIFIED_UTC=' + $f.LastWriteTimeUtc.ToString('o') + ' SHA256=' + $hash; $rows += $row; Write-Output $row }; Write-Output ('SUMMARY files=' + $files.Count); Write-Output 'LAST_TWO_FILES'; $rows | Select-Object -Last 2
-根据实际返回，报告文件总数和最后两个文件的准确SHA256。不需要正文所有哈希。若得到 observation-pack 句柄，先看首尾摘录；足够答复就不要召回，证据不足再召回。最终只报告事实。

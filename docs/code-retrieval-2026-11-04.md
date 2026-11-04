@@ -92,19 +92,19 @@ brief 随任务 checkpoint/handoff 保存，在任务页显示；它不是授权
 
 ## 6. 真实模型证据
 
-2026-11-04 的隔离 DSH + StepFun `step-5-preview` 调用已生成可复查报告：
+2026-11-04 的隔离 DSH + StepFun `step-5-preview` 调用结论如下；原始报告不再随仓库上传：
 
-- `docs/checks/real-model/2026-11-04/code-map-2e17/`：`map → find → references → search` 全部成功，0 工具错误；模型报告 `sum.mjs:1` 定义、`sum.test.mjs:3/6` 引用，未用 shell/公网搜索。
-- `docs/checks/real-model/2026-11-04/code-pre-fix-4ef7/`：修复前同一类调用出现 5 次 `not lossless JSON`，保留为失败样本；修复后上述会话通过。
-- `docs/checks/real-model/2026-11-04/memory-scope-87d4/`：`MEMORY_PROJECT_SCOPE_REQUIRED` 后带 `includeProject:true` 成功读取。
+- `code-map-2e17`：`map → find → references → search` 全部成功，0 工具错误；模型报告 `sum.mjs:1` 定义、`sum.test.mjs:3/6` 引用，未用 shell/公网搜索。
+- `code-pre-fix-4ef7`：修复前同一类调用出现 5 次 `not lossless JSON`，保留为失败样本；修复后上述会话通过。
+- `memory-scope-87d4`：`MEMORY_PROJECT_SCOPE_REQUIRED` 后带 `includeProject:true` 成功读取。
 - `task-check-db31`：较旧 `patchwork` profile 上 brief/artifact 结构检查通过、未使用独立 shell；命令 check 被 Windows Job runner 基础设施错误阻塞，任务标记 `blocked`。同一代码在全新 `regression` profile 的 `task-check-pass-5448` 通过：brief + artifact + `npm test` 实际输出 1 pass / 0 fail，任务 `ready`。
 - `native-graph-2a85`：模型按需 `graph-status → graph-start → callers/callees/impact/affected` 全部成功；`addChain` 调用链为 `runChain → addChain → helper`，`chain.test.mjs` 被识别为受影响测试；`.patchwork/config.json` 已创建。修复前的 `native-graph-pre-fix-1477` 保留 schema 错误样本。
-- 旧会话 A–D/I/regression/6b6e/b7f9/c87/final/rc5 已迁移到同一目录，索引见 `index.json`；其中 A 的独立 shell、B 的旧 scope 行为、c87 的 runner 失败均保留为失败/历史证据。
+- 旧会话 A–D/I/regression/6b6e/b7f9/c87/final/rc5 已在本地迁移；其中 A 的独立 shell、B 的旧 scope 行为、c87 的 runner 失败均保留为本地失败/历史证据，不入库。
 
-离线校验：
+本地离线校验：
 
 ```bash
-npm run audit:verify
+node scripts/verify-real-model-audit.mjs /path/to/external-audit-dir
 ```
 
 校验 manifest schema、文件哈希、session id、断言和 `mainDshTouched:false`；不调用模型。

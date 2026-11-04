@@ -34,5 +34,3 @@ jobs:
           run_install: false
       - name: Audit locked dependencies
         run: pnpm audit --audit-level=high
-      - name: Verify real-model audit evidence
-        run: npm run audit:verify

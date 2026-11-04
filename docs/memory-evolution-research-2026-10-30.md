@@ -21,7 +21,7 @@
 | [UI/UX、写作与代码技能](agent-skills-ui-ux-writing-coding-research-2026-10-29.md) | 宿主入口/token/theme；技能触发/执行/结果；不同产物有不同验收 | 不把完整技能集合常驻全局；不把项目设计都套成一个模板 |
 | [去模板化技能](anti-slop-skills-research-2026-10-29.md) | 保留否定、范围、时序、归因；代码安全与行为保真；正常内容允许 no-op | 不用词表、删行数或 AI 检测分数作为质量代理 |
 | [会话审计方案](archive/removed-evidence.md#private-session-audit) | 用户纠正改变当前对象、范围和阶段；“看资料/设计”不自动授权实施 | 单次任务限制不升级为所有项目的永久偏好 |
-| [既有融合报告](upgrade/2026-10-30-integration.md)与[SoL 实验](experiments/2026-10-30-solpi/report.md) | 任务回执、隔离 preset、原生侧栏、OCC/EPR/OP 的现有边界 | 历史测试及真实调用属于原轮次；没有受控 A/B 不能声称性能或自进化收益 |
+| [既有融合报告](upgrade/2026-10-30-integration.md)与SoL 实验 | 任务回执、隔离 preset、原生侧栏、OCC/EPR/OP 的现有边界 | 历史测试及真实调用属于原轮次；没有受控 A/B 不能声称性能或自进化收益 |
 | [更新日志指南](changelog-guide.md) | 使用文档、发布说明和验证报告分别维护 | 方案不冒充新增功能；有实际用户行为变化的实施阶段再同步产品日志 |
 
 ## 3. 记忆系统：接口与证据模型

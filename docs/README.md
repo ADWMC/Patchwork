@@ -12,12 +12,12 @@
 
 ## 当前功能与验证
 
-- [2026-11-04 三方案执行与真实模型验证](closure-2026-11-04.md) · [机器证据](checks/closure-2026-11-04.json)
-- [DSH 多版本支持：0.2.1-rc.5 与 0.2.2-alpha.3](dsh-multi-version-2026-11-04.md) · [机器证据](checks/dsh-compat-2026-11-04.json)
+- [2026-11-04 三方案执行与真实模型验证](closure-2026-11-04.md) · 原始机器证据未随仓库上传
+- [DSH 多版本支持：0.2.1-rc.5 与 0.2.2-alpha.3](dsh-multi-version-2026-11-04.md) · 原始机器证据未随仓库上传
 
-- [全功能工作台社区调研、扩充矩阵与实现](ui-community-expansion-2026-11-01.md) · [10 项目固定源码快照](checks/ui-community-expansion-2026-11-01.json)
+- [全功能工作台社区调研、扩充矩阵与实现](ui-community-expansion-2026-11-01.md) · 10 项目固定源码快照
 
-- [24 项闭环、恢复与验收入口](closure-2026-11-01.md) · [本轮机器证据](checks/closure-2026-11-01.json)
+- [24 项闭环、恢复与验收入口](closure-2026-11-01.md) · 原始机器证据未随仓库上传
 
 - [DSH 内部 Superagent 主控](superagent-native-2026-11-01.md)、[提示词优化与实跑](superagent-prompt-optimization-2026-11-01.md)
 - [受控改进执行记录](improvement-execution-2026-10-31.md)
@@ -42,7 +42,7 @@
 
 ## 文件边界
 
-运行代码位于 `src/`，客户端构建载荷位于 `lib/`；浏览器所有权在 `packages/browser/`。`docs/checks/` 保存整理后的验证证据，`docs/experiments/` 保存可审查的隔离实验输入和驱动。
+运行代码位于 `src/`，客户端构建载荷位于 `lib/`；浏览器所有权在 `packages/browser/`。`docs/checks/` 只保留探针/驱动脚本；整理后的验证证据、真实模型审计、隔离实验报告和本地 TLS 夹具都不进入 Git 或发行包。
 
 最初的七技能静态展示页归档到 [archive/skills-preview](archive/skills-preview/README.md)，不作为当前 WebUI。研究源码副本、生成页面、截图、运行日志及私人会话审计移出仓库保存，不进入 Git 或发行包。不要为整理目录删除已有研究结论。
 

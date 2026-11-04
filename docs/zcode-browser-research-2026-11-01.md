@@ -14,7 +14,7 @@
 - **R** 表示上游说明或设计文档；**S** 表示已阅读对应实现；均不等同于实际运行、安全审计或兼容性证明。
 - 本轮没有安装或运行 ZCode，没有接入主 DSH、导入宿主登录数据或操纵宿主浏览器。
 
-机器可读证据、源码 blob SHA、阅读范围与固定 commit 链接见 [ZCode 调研快照](checks/zcode-browser-research-2026-11-01.json)。此前的[提示词与技能调研](zcode-openclaude-prompt-engineering-research-2026-10-31.md)继续有效；本篇专门补齐浏览器运行机制。前一轮 [26 项目社区调查](browser-community-research-2026-11-01.md)的统计不在此重算。
+机器可读证据、源码 blob SHA、阅读范围与固定 commit 链接见 ZCode 调研快照。此前的[提示词与技能调研](zcode-openclaude-prompt-engineering-research-2026-10-31.md)继续有效；本篇专门补齐浏览器运行机制。前一轮 [26 项目社区调查](browser-community-research-2026-11-01.md)的统计不在此重算。
 
 ## 2. 架构：浏览器运行态独立于一次模型调用
 
@@ -258,7 +258,7 @@ CDP `Page.setWebLifecycleState` 当前仍标记为 experimental，只定义 `fro
 
 探针状态为 `partial`，不是完整功能通过。协议唤醒命令耗时只是协议往返，不是有效解冻延迟指标。Chromium 的页面可见性和 Playwright 的 focus emulation 是待排查线索，尚未坐实根因。必须先满足阶段 A 的真实暂停/恢复验收，才接入生产冻结；完整回收则按阶段 B 补齐有界标签壳和恢复提示。
 
-原始脚本、最终结果与源码 SHA256 关联记录在[机器证据的 lifecycleFollowup](checks/zcode-browser-research-2026-11-01.json)。本地探针目录为 `C:/Users/Administrator/Documents/GitHub/Patchwork-source-research/2026-11-01/browser-gap-qa/`，其中 `lifecycle-feasibility.mjs` 和 `lifecycle-probe-plugin.mjs` 为本轮新增原型，不随插件发布。
+原始脚本、最终结果与源码 SHA256 关联记录在机器证据的 lifecycleFollowup。本地探针目录为 `C:/Users/Administrator/Documents/GitHub/Patchwork-source-research/2026-11-01/browser-gap-qa/`，其中 `lifecycle-feasibility.mjs` 和 `lifecycle-probe-plugin.mjs` 为本轮新增原型，不随插件发布。
 
 ### 7.7 同题比较应怎么做
 

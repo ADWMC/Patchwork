@@ -16,9 +16,9 @@ export function runNpm(args) {
 
 export function inspectPackage(pack) {
   const names = new Set(pack.files.map(file => file.path))
-  const required = ['LICENSE', 'THIRD_PARTY_NOTICES.md', 'CHANGELOG.md', 'src/index.mjs', 'src/runtime.mjs', 'lib/client.js', 'presets/patchwork.patch.yml', 'docs/browser-optional-package-2026-11-01.md', 'docs/browser-runtime-integration-2026-11-01.md', 'src/retrieval/browser-bridge.mjs', 'docs/checks/browser-optional-package-2026-11-01.json']
-  required.push('src/task/handoff.mjs', 'docs/superagent-fusion-2026-11-01.md', 'docs/checks/superagent-fusion-2026-11-01.json')
-  required.push('src/superagent/index.mjs', 'src/superagent/controller.mjs', 'src/superagent/state.mjs', 'src/superagent/store.mjs', 'src/superagent/prompt.mjs', 'docs/superagent-native-2026-11-01.md', 'docs/checks/superagent-native-2026-11-01.json')
+  const required = ['LICENSE', 'THIRD_PARTY_NOTICES.md', 'CHANGELOG.md', 'src/index.mjs', 'src/runtime.mjs', 'lib/client.js', 'presets/patchwork.patch.yml', 'docs/browser-optional-package-2026-11-01.md', 'docs/browser-runtime-integration-2026-11-01.md', 'src/retrieval/browser-bridge.mjs']
+  required.push('src/task/handoff.mjs', 'docs/superagent-fusion-2026-11-01.md')
+  required.push('src/superagent/index.mjs', 'src/superagent/controller.mjs', 'src/superagent/state.mjs', 'src/superagent/store.mjs', 'src/superagent/prompt.mjs', 'docs/superagent-native-2026-11-01.md')
   const missing = required.filter(path => !names.has(path))
   const forbidden = pack.files.filter(({ path }) => /(^|\/)(?:\.git|node_modules|\.dsh[^/]*|\.workbuddy|storages|logs|refs|artifacts|output|screenshots)(\/|$)|(^|\/)(?:\.env(?:\.[^/]*)?|credentials\.json|cookies\.json|storage-state\.json|manifest\.private\.json)$|\.(?:exe|dll|dylib|so|zip|tgz|log|pem|pfx|key)$/i.test(path)).map(file => file.path)
   const packageJson = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'))

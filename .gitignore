@@ -34,3 +34,10 @@ dsh-test-*.yml
 /docs/dsh-session-audit-*/
 *.private.json
 *.private.jsonl
+
+# Generated validation/audit evidence, isolated experiment runs and local TLS fixtures
+/docs/checks/real-model/
+/docs/experiments/
+/docs/checks/*.json
+/benchmarks/**/reports/*.json
+/tests/fixtures/tls/*.pem
