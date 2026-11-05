@@ -17,6 +17,7 @@
 | [Aider](https://github.com/Aider-AI/aider) | tree-sitter + PageRank repo map、token 预算 | 结构先验、按 token 裁剪、先地图后读文件 | 不把原生解析依赖塞进主包 |
 | [CodeGraph](https://github.com/colbymchenry/codegraph) | 预索引代码图、单一 explore、自动同步 | 按需代码图、单一入口、影响面 | 不引入 256MB 平台包、watcher、遥测；注意其“吞吐降 token 但残留上下文升高”的自述 |
 | [MemGPT/Letta](https://github.com/letta-ai/letta)、[deja-vu](https://github.com/vshulcz/deja-vu) | 分层记忆、会话归档、recall hooks、决策生命周期/陈旧标记、凭据脱敏 | scope/版本/时效/删除/脱敏；失败前先查历史 | 不自动注入、不默认上传、不把历史当指令 |
+| [llama.vscode](https://github.com/ggml-org/llama.vscode)（2026-11-05 复查） | 搜索三源顺序回退（DDG lite → DDG html → **Bing RSS**，带 referer）；RAG 两阶段检索：LLM 提关键词 → **BM25 粗排**（k1=1.5、b=0.75）→ embedding 余弦精排，无 embedding 服务降级 BM25 top-K；定行数 chunk + 超长回退截断 + 全局 chunk 上限；chunk 头自带 `File Name/From line/To line`；已发送 chunk 按 hash 去重 | Bing RSS provider（已落地，见 CHANGELOG 未发布节）；BM25 粗排给 `patchwork_code` 加排序 chunk 检索（纯本地、无模型依赖）；chunk 头定位格式；已入上下文的 chunk 按 hash 去重 | 不引入 embedding 服务器依赖；不用 LLM 提关键词（多一次模型调用，违背 code 工具确定性设计）；不抄 FIM 补全的 ring buffer（补全向，agent 不需要）；并行合并 vs 顺序回退是不同哲学，暂不改动（但记录：顺序回退在代理环境更稳） |
 
 ## 共同模式
 
@@ -35,3 +36,4 @@
 - 借 ACI 的“编辑后 lint”，但不新增语言专用依赖。
 - 借 CodeGraph 的按需图，不引入其平台包。
 - 借 deja-vu 的“先查历史”，但不自动注入会话。
+- 借 llama.vscode 的 Bing RSS 检索（已落地）与 BM25 粗排思路（`patchwork_code` 后续候选），不引入 embedding 依赖与 LLM 提关键词。
