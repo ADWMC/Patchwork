@@ -1,5 +1,5 @@
 export const SETTING_FIELDS = [
-  ['actionFusion', 'boolean', true, '接续执行', 'mechanism'], ['observationPack', 'boolean', false, '大输出归档', 'mechanism'], ['evidencePreservingReducer', 'boolean', false, '证据约简', 'mechanism'], ['onlineContextCompact', 'boolean', false, '上下文压缩', 'mechanism'],
+  ['actionFusion', 'boolean', true, '接续执行', 'mechanism'], ['observationPack', 'boolean', false, '大输出归档', 'mechanism'], ['evidencePreservingReducer', 'boolean', false, '证据约简', 'mechanism'], ['onlineContextCompact', 'boolean', false, '上下文压缩', 'mechanism'], ['taskMap', 'boolean', false, '任务锚定地图', 'mechanism'],
   ['cacheWriteReadRatio', 'number', 12.5, '缓存写入 / 读取成本比', 'mechanism', 0],
   ['reducerProvider', 'string', '', '约简 Provider（留空使用宿主默认）', 'reducer'], ['reducerModel', 'string', '', '约简模型（留空使用宿主默认）', 'reducer'], ['reducerMaxTokens', 'integer', 2048, '约简输出 token 上限', 'reducer', 256, 8192],
   ['nativeSearch', 'boolean', true, '无密钥搜索', 'retrieval'], ['nativeSearchProviders', 'providers', ['bing-rss', 'brave-html', 'uapis-keyless', 'tavily-keyless', 'duckduckgo-html'], '搜索来源（逗号分隔）', 'retrieval'], ['nativeSearchMaxResults', 'integer', 8, '每次搜索结果上限', 'retrieval', 1, 12], ['nativeSearchTimeoutMs', 'integer', 15000, '搜索超时（毫秒）', 'retrieval', 1000, 30000],

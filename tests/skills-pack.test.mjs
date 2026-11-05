@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../assets/skills', import.meta.url))
-const EXPECTED = ['anti-slop', 'architecture', 'code-review', 'collaborator', 'debugging', 'documentation', 'evidence', 'improvement', 'memory', 'patchwork', 'retrieval', 'standards', 'web-ui']
+const EXPECTED = ['anti-slop', 'architecture', 'code-review', 'collaborator', 'debt', 'debugging', 'documentation', 'evidence', 'improvement', 'memory', 'patchwork', 'retrieval', 'standards', 'web-ui']
 
 test('skill packs exist with frontmatter name+description and valid references', async () => {
   const dirs = (await readdir(root, { withFileTypes: true }))

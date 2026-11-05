@@ -59,7 +59,7 @@ The three most common coding-agent failures get a built-in answer:
 | After a correction, context is lost and you re-explain the same problem | **Corrections invalidate old evidence** and trigger a re-check; a read-only `handoff` gives bounded recovery without replaying the whole history |
 | Project conventions and your preferences keep evaporating | **Explicit memory**: session-private and project-shared records are confirmed separately, with revision checks, provenance and bulk forgetting; automatic injection stays off |
 
-Plus things that work out of the box: `patchwork_search` queries five keyless sources in parallel — Bing (RSS output), Brave and DuckDuckGo public pages, plus the uapis.cn and Tavily keyless JSON endpoints; `patchwork_code` maps the workspace, symbol definitions and lexical references; `patchwork_superagent` runs a persistent queue with dependencies and bounded retries; a 6-view native workbench covers tasks, evidence, logs and 26 settings.
+Plus things that work out of the box: `patchwork_search` queries five keyless sources in parallel — Bing (RSS output), Brave and DuckDuckGo public pages, plus the uapis.cn and Tavily keyless JSON endpoints; `patchwork_code` maps the workspace, symbol definitions and lexical references; `patchwork_superagent` runs a persistent queue with dependencies and bounded retries; a 6-view native workbench covers tasks, evidence, logs and 27 settings.
 
 > **Improvements start with failures and corrections from actual use.** Candidate rules, memory strategies and tool workflows require isolated validation and explicit user confirmation; an approved policy applies only to the current session and can be rolled back. Contract checks are not evidence of model-quality gains.
 
@@ -126,7 +126,7 @@ Native Session records persist task state. Controller executors inherit the DSH 
 | **Local code retrieval** | `patchwork_code` provides a workspace map, file outlines, symbol definitions, lexical references and text/regex search. Reads stay in the current workspace, skip dependencies, build outputs and sensitive files, and return bounded results. The workspace code graph is off by default: `graph-enable` (writes `.patchwork/config.json`) then `graph-start` unlocks callers/callees/impact/affected. |
 | **Project docs** | DSH injects `AGENTS.md`/`CLAUDE.md` automatically; `patchwork_project_docs` handles hash/CAS creation and updates for `AGENTS.md` and `DESIGN.md`, with no silent overwrite or permission grant. |
 | **Explicit memory and improvements** | Search, filters, manual proposals, versioned edits, pause/resume, provenance, export and bulk forgetting; private and shared scopes require separate confirmation. Automatic injection stays off. Improvements retain controlled policies. |
-| **Native workspace** | **Overview / Execution / Evidence / Management / Diagnostics / Settings**, six views covering task handoff and correction history, queue input/reconcile, memory recall preview, independent-source comparison, task/queue/settings logs, and 26 settings with reset/import/export. Wide panels use master-detail and two-column layouts. |
+| **Native workspace** | **Overview / Execution / Evidence / Management / Diagnostics / Settings**, six views covering task handoff and correction history, queue input/reconcile, memory recall preview, independent-source comparison, task/queue/settings logs, and 27 settings with reset/import/export. Wide panels use master-detail and two-column layouts. |
 
 A model's completion claim cannot replace real acceptance. File-structure checks do not establish semantic correctness; those unknowns need separate review.
 
@@ -136,7 +136,7 @@ A model's completion claim cannot replace real acceptance. File-structure checks
 | Catalog | Skills |
 | :--- | :--- |
 | Core, enabled by default | `patchwork` · `anti-slop` · `architecture` · `collaborator` · `evidence` · `standards` · `web-ui` |
-| Expanded, opt-in | Adds `debugging` · `code-review` · `retrieval` · `documentation` · `memory` · `improvement` to the core catalog |
+| Expanded, opt-in | Adds `debugging` · `code-review` · `retrieval` · `documentation` · `memory` · `improvement` · `debt` to the core catalog |
 
 Configure the expanded catalog on the preset's `patchwork-runtime` row:
 
@@ -157,6 +157,7 @@ SoL context mechanisms draw on SoL-Pi and use individual switches. Execution cou
 | Observation archive and recall | `observationPack` | Off |
 | Evidence-preserving tool-result reduction | `evidencePreservingReducer` | Off |
 | Online context compaction | `onlineContextCompact` | Off |
+| Task-Anchored Map | `taskMap` | Off |
 
 [Skill architecture](docs/architecture-collaborator-skills.md) · [Integration validation](docs/skills-fusion-execution-2026-10-31.md) · [Configuration and isolation](docs/upgrade/2026-10-29/isolation.md) · [SoL design](docs/solpi-mechanisms-design.md) (Chinese)
 

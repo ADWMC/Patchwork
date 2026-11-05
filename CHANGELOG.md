@@ -6,6 +6,12 @@
 
 ### 新增
 
+- 行为门（测试基建，无用户可见开关）：`tests/skill-behavior.test.mjs` 为全部 14 个技能各配遵守/违反双向探针并断言评分器判定，覆盖门确保新技能必须带探针；`tests/real-composition/behavior-contracts.test.mjs` 补上纠正使旧证据失效、语义验收保持 unknown 且仅宿主确认可接纳的契约级断言。
+- 妥协账本：有意留下的妥协按 `shortcut: <限制>, <何时升级>` 注释登记；改动文件已带登记时，宿主在 mutation 工具执行后把该文件的妥协顺手注入会话（按会话冷却，不重复）；扩展技能 `debt` 汇总全仓账本，标出可升级条目。约定写入 standards 技能。
+- 任务锚定地图（新机制，配置键 `taskMap`，默认关）：`patchwork_task define` 声明的引用与登记产物周围的符号（及代码图开启时的调用方）以有界 notice 注入会话；压缩后可再注入，correct 移走锚点即重建，任务取消后不再注入。Superagent 执行器简报携带父会话同一份锚定上下文。地图是 facts 不是指令，与文件实际状态不符时以文件和 `patchwork_code` 为准。
+
+### 新增
+
 - `patchwork_search` 新增两个免密钥 JSON 检索来源并默认启用：`uapis-keyless`（uapis.cn 聚合搜索，访客积分免注册）与 `tavily-keyless`（Tavily 匿名档，请求头声明 keyless 访问模式）。默认来源变为五个：bing-rss、brave-html、uapis-keyless、tavily-keyless、duckduckgo-html；任一来源失败、超时或返回空结果不阻塞其余来源，健康状态按来源分别记录。设置页来源白名单上限从 3 调整为 5。
 - 内置 HTTP 客户端支持 POST JSON 请求（请求体经 stdin 传递，不进入命令行参数；GET 行为不变），上述两个来源与既有检索共用公网地址检查、重定向契约与响应大小上限。
 

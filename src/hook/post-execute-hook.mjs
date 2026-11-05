@@ -1,4 +1,5 @@
 import { buildStructureWarning, isMutationTool } from '../structure/structure-warning.mjs'
+import { buildShortcutNotice } from '../structure/shortcut-ledger.mjs'
 import { isSourcePath } from '../structure/structure-check.mjs'
 import { record } from '../ui/mechanism-stats.mjs'
 import { EVIDENCE_HINT, noteShellEvidence, sessionKey, shouldHintEvidence } from '../quality/evidence-gate.mjs'
@@ -51,6 +52,12 @@ export function registerStructureHook(ctx, config = {}) {
             record('maintenance', 'structureWarnings')
             logDiagnostic(ctx, exec, { mechanism: 'maintenance', event: 'warning', level: 'warn', reason: 'structure-warning' })
             additional.push(await noticeContext(check.prompt))
+          }
+          const ledger = await buildShortcutNotice({ cwd, sessionId: sessionKey(exec.agent), files })
+          if (ledger.prompt) {
+            record('maintenance', 'shortcutNotices')
+            logDiagnostic(ctx, exec, { mechanism: 'maintenance', event: 'warning', level: 'info', reason: 'shortcut-ledger' })
+            additional.push(await noticeContext(ledger.prompt))
           }
         }
       }

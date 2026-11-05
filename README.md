@@ -59,7 +59,7 @@ Patchwork 是 **DeepSeek Harness（DSH）的代码任务插件**。它把任务�
 | 纠正之后上下文丢失，同一个问题反复解释 | **纠正使旧证据失效**并触发重新核对；只读 `handoff` 提供有界交接，不必整段重放历史 |
 | 项目约定和你的偏好反复丢失 | **显式记忆**：会话私有与项目共享分开确认，带版本校验、来源历史与批量遗忘；自动注入默认关闭 |
 
-再加几件开箱即用的事：`patchwork_search` 免密钥并行搜索五个来源——Bing（RSS 输出）、Brave、DuckDuckGo 公共页面，以及 uapis.cn、Tavily 的免密钥 JSON 接口；`patchwork_code` 在工作区内做仓库地图、符号定义与词法引用检索；`patchwork_superagent` 提供持久队列、依赖与有界重试的主控；6 视图原生工作台覆盖任务、证据、日志与 26 项设置。
+再加几件开箱即用的事：`patchwork_search` 免密钥并行搜索五个来源——Bing（RSS 输出）、Brave、DuckDuckGo 公共页面，以及 uapis.cn、Tavily 的免密钥 JSON 接口；`patchwork_code` 在工作区内做仓库地图、符号定义与词法引用检索；`patchwork_superagent` 提供持久队列、依赖与有界重试的主控；6 视图原生工作台覆盖任务、证据、日志与 27 项设置。
 
 > **改进的依据是用户实际遇到的失败和纠正。** 候选规则、记忆策略与工具流程需要隔离验证和用户确认；确认后仅在本会话实际应用，并可回滚恢复。契约通过不代表模型质量提升。
 
@@ -126,7 +126,7 @@ npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 | **本地代码检索** | `patchwork_code` 提供仓库地图、文件 outline、符号定义、词法引用和文本/正则检索；只在当前工作区读取，跳过依赖、构建产物和敏感文件，结果有界。工作区代码图默认关闭，模型可 `graph-enable` 写 `.patchwork/config.json`，再 `graph-start` 使用 callers/callees/impact/affected。 |
 | **项目文档** | DSH 自动注入 `AGENTS.md`/`CLAUDE.md`；`patchwork_project_docs` 负责 hash/CAS 创建与更新 `AGENTS.md`、`DESIGN.md`，不静默覆盖、不授予权限。 |
 | **显式记忆与改进** | 记忆管理支持搜索筛选、手动提案、版本修订、暂停恢复、来源历史、导出与批量遗忘；私有与共享分开确认，自动注入关闭。失败和纠正进入受控改进。 |
-| **原生工作台** | **总览 / 执行 / 证据 / 管理 / 诊断 / 设置** 六个视图，任务 handoff 与纠正历史、主控补充输入 / 对账、记忆召回预览、独立来源对比、任务 / 主控 / 配置日志、26 项设置及恢复默认 / 导入导出；宽屏使用列表 / 详情和双列布局。 |
+| **原生工作台** | **总览 / 执行 / 证据 / 管理 / 诊断 / 设置** 六个视图，任务 handoff 与纠正历史、主控补充输入 / 对账、记忆召回预览、独立来源对比、任务 / 主控 / 配置日志、27 项设置及恢复默认 / 导入导出；宽屏使用列表 / 详情和双列布局。 |
 
 模型的"完成"陈述不能替代真实验收。文件结构检查也不能证明语义正确；相关未知项需要单独说明。
 
@@ -136,7 +136,7 @@ npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 | 目录 | 技能 |
 | :--- | :--- |
 | 核心，默认启用 | `patchwork` · `anti-slop` · `architecture` · `collaborator` · `evidence` · `standards` · `web-ui` |
-| 扩展，显式试用 | 在核心之外增加 `debugging` · `code-review` · `retrieval` · `documentation` · `memory` · `improvement` |
+| 扩展，显式试用 | 在核心之外增加 `debugging` · `code-review` · `retrieval` · `documentation` · `memory` · `improvement` · `debt` |
 
 在 preset 的 `patchwork-runtime` 行配置扩展目录：
 
@@ -157,6 +157,7 @@ SoL 上下文机制实现参考 SoL-Pi，按机制开关启用。执行计数不
 | 观察归档与召回 | `observationPack` | 关 |
 | 保留证据的工具结果裁剪 | `evidencePreservingReducer` | 关 |
 | 在线上下文压缩 | `onlineContextCompact` | 关 |
+| 任务锚定地图 | `taskMap` | 关 |
 
 [技能架构](docs/architecture-collaborator-skills.md) · [融合验证](docs/skills-fusion-execution-2026-10-31.md) · [配置与隔离](docs/upgrade/2026-10-29/isolation.md) · [SoL 设计依据](docs/solpi-mechanisms-design.md)
 

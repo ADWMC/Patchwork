@@ -40,4 +40,4 @@
 - 借 deja-vu 的“先查历史”，但不自动注入会话。
 - 借 llama.vscode 的 Bing RSS 检索（已落地）与 BM25 粗排思路（`patchwork_code` 后续候选），不引入 embedding 依赖与 LLM 提关键词。
 - 借 edict 的停滞检测 + 升级阶梯（Superagent 队列后续候选）与 `_prev_state` resume，不照搬服务端强制阶段递进与御批门禁（默认关闭，如做必须 opt-in）。
-- 借 ponytail 的 `shortcut:` 注释约定 + 债务账本（最高优先候选）与会话启动助手地图（需先验证 DSH hook seam），不借 lazy senior dev 人设。
+- 借 ponytail 的 `shortcut:` 注释约定 + 债务账本（已落地：约定 + hook 顺手注入 + debt 技能）与任务锚定地图（已落地为 `taskMap` 机制：define 锚定、可再注入、执行器携带；比 ponytail 的正则会话地图更贴任务）及行为门第一层（已落地：22 探针 + 覆盖门 + 契约层），不借 lazy senior dev 人设。

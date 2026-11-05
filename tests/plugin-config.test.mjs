@@ -20,6 +20,7 @@ test('the reducer route stays unset unless configured', () => {
     observationPack: false,
     evidencePreservingReducer: false,
     onlineContextCompact: false,
+    taskMap: false,
     cacheWriteReadRatio: 12.5,
     reducerProvider: 'p',
     reducerModel: 'm',

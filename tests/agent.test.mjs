@@ -55,6 +55,7 @@ test('registers expanded DSH skills with catalog-safe descriptions', async () =>
     'architecture',
     'code-review',
     'collaborator',
+    'debt',
     'debugging',
     'documentation',
     'evidence',

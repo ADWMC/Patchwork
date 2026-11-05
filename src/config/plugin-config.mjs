@@ -12,6 +12,7 @@ export const Config = Schema.object({
   observationPack: Schema.boolean().default(false),
   evidencePreservingReducer: Schema.boolean().default(false),
   onlineContextCompact: Schema.boolean().default(false),
+  taskMap: Schema.boolean().default(false),
   reducerProvider: Schema.string(),
   reducerModel: Schema.string(),
   reducerMaxTokens: Schema.number().min(256).max(8192).step(1),

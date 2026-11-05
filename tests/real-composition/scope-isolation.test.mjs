@@ -37,7 +37,7 @@ test('native registries isolate the complete catalog and revoke it on recompose'
     assert.equal(active.tools.includes('patchwork_improvement'), true)
     assert.equal(active.tools.includes('patchwork_superagent'), true)
     assert.equal(active.tools.includes('patchwork_memory'), true)
-    assert.equal(active.skills.length, 13)
+    assert.equal(active.skills.length, 14)
     assert.deepEqual([...runtimeSnapshot('patchwork-B').skills.names].sort(), [...active.skills].sort())
     assert.equal(runtimeSnapshot('patchwork-B').skills.mode, 'expanded')
     assert.equal(runtimeSnapshot('patchwork-B').skills.bodies, 'on-demand')

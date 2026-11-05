@@ -7,6 +7,7 @@ import { taskProjection, flushTasks } from '../task/store.mjs'
 import { defineJobs, runnableJobs, reservedChildId, bounded } from './state.mjs'
 import { persistController, restoreController } from './store.mjs'
 import { executorPrompt } from './prompt.mjs'
+import { taskMapText } from '../mechanisms/task-map/index.mjs'
 
 const controllers = new WeakMap(), live = new Set(), workers = new Map(), workspaceLocks = new Map()
 const snapshotFailures = new WeakSet()
@@ -143,7 +144,9 @@ export class SuperagentController {
     try {
       const dependencies = job.dependencies.map(id => { const d = this.state.jobs.find(j => j.id === id); return { id, result: d.result } })
       const scope = this.assertScope()
-      const text = executorPrompt({ job, scope, dependencies })
+      // 任务锚定地图对子任务同样生效：父会话已启用时复用同一份锚定上下文。
+      const map = await taskMapText(this.owner).catch(() => '')
+      const text = executorPrompt({ job, scope: { ...scope, map }, dependencies })
       if (!this.valid(epoch)) return
       entry.activation = await this.runtime().startActivation({ provider: 'spawn', childId: job.childId, label: job.title,
         request: { parent: this.owner, cwd: this.owner.session.header.cwd, prompt: [{ type: 'text', text }], maxDepth: this.runtime().resolveMaxDepth?.() ?? 1 },

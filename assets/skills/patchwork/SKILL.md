@@ -46,7 +46,7 @@ description: Patchwork Agent 的编码与维护任务入口：识别任务边界
 
 ## 技能导航
 
-只调用实际可用的技能；缺少扩展技能时按核心技能工作。
+只调用实际可用的技能。
 
 | 场景 | 加载 |
 |---|---|
@@ -62,6 +62,7 @@ description: Patchwork Agent 的编码与维护任务入口：识别任务边界
 | 用户说法冲突 / 方案取舍 | `collaborator` |
 | 实现或修复收尾 / 提交 / 改名 / 补测试 | `standards` |
 | 声称「已完成 / 修好了」 | `evidence` |
+| 汇总 shortcut: 妥协登记 | `debt` |
 
 ## 冲突时
 
