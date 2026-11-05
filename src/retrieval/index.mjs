@@ -3,7 +3,7 @@ export { RETRIEVAL_RECORD, RETRIEVAL_LIMIT, normalizeRetrievalRecord, recordRetr
 export {
   NativeSearchError,
   NATIVE_SEARCH_DEFAULTS,
-  parseBingResults,
+  parseBingRss,
   parseBraveResults,
   parseDuckDuckGoResults,
   searchBing,

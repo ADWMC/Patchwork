@@ -320,7 +320,7 @@ try {
   report.checks.push('host Menu keyboard close, log sorting/filtering, frozen preview retains rows while native logging continues, resume/root-call filter and actual diagnostics download')
   await tab('设置')
   const providersField = page.getByLabel('搜索来源（逗号分隔）', { exact: true }), savedProviders = await providersField.inputValue()
-  await providersField.fill('bing-html'); await providersField.fill(savedProviders)
+  await providersField.fill('bing-rss'); await providersField.fill(savedProviders)
   assert.equal(await page.getByRole('button', { name: '保存更改', exact: true }).isDisabled(), true, 'equal provider arrays must not create a false draft')
   await page.getByLabel('每次搜索结果上限').fill('99'); assert.equal(await page.getByRole('button', { name: '保存更改', exact: true }).isDisabled(), true)
   await page.getByLabel('每次搜索结果上限').fill('7')

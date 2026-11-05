@@ -1,6 +1,6 @@
 import { nativeFetch } from './http-client.mjs'
 import { fetchPublicResponse } from './public-fetch.mjs'
-import { parseBingResults, parseBraveResults, parseDuckDuckGoResults, providerParsers } from './provider-parsers.mjs'
+import { parseBingRss, parseBraveResults, parseDuckDuckGoResults, providerParsers } from './provider-parsers.mjs'
 import { createHash } from 'node:crypto'
 
 const MAX_RESPONSE_BYTES = 2_000_000
@@ -8,7 +8,7 @@ const MAX_QUERY_LENGTH = 512
 const USER_AGENT = 'Patchwork-native-search/0.3'
 
 const PROVIDERS = Object.freeze({
-  'bing-html': { endpoint: 'https://www.bing.com/search', queryKey: 'q', family: 'bing' },
+  'bing-rss': { endpoint: 'https://www.bing.com/search', queryKey: 'q', params: { format: 'rss', count: '12' }, family: 'bing', headers: { referer: 'https://www.bing.com/' } },
   'brave-html': { endpoint: 'https://search.brave.com/search', queryKey: 'q', family: 'brave' },
   'duckduckgo-html': { endpoint: 'https://html.duckduckgo.com/html/', queryKey: 'q', params: { kp: '1' }, family: 'duckduckgo' },
 })
@@ -51,22 +51,22 @@ function providerUrl(provider, query, endpoint) {
   const url = new URL(endpoint ?? definition.endpoint)
   url.searchParams.set(definition.queryKey, query)
   for (const [key, value] of Object.entries(definition.params ?? {})) url.searchParams.set(key, value)
-  if (provider === 'bing-html') url.searchParams.set('count', '12')
   if (provider === 'brave-html') url.searchParams.set('source', 'web')
   return url
 }
 
 function normalizeProviderList(providers) {
-  const values = Array.isArray(providers) && providers.length ? providers : ['bing-html', 'brave-html', 'duckduckgo-html']
-  return [...new Set(values.map(value => String(value).trim()).filter(value => value && providerParsers[value]))]
+  const values = Array.isArray(providers) && providers.length ? providers : NATIVE_SEARCH_DEFAULTS.providers
+  return [...new Set(values.map(value => String(value).trim()).filter(value => value && PROVIDERS[value]))]
 }
 
 async function searchHtmlProvider({ provider, query, maxResults, timeoutMs, signal, fetchImpl, endpoint }) {
   const started = Date.now()
+  const definition = PROVIDERS[provider]
   const requester = fetchImpl === nativeFetch ? fetchPublicResponse : fetchImpl
   const response = await requester(providerUrl(provider, query, endpoint), {
     method: 'GET',
-    headers: { accept: 'text/html,application/xhtml+xml', 'user-agent': USER_AGENT },
+    headers: { accept: 'text/html,application/xhtml+xml', 'user-agent': USER_AGENT, ...(definition.headers ?? {}) },
     timeoutMs,
     signal: combinedSignal(signal, timeoutMs),
   })
@@ -74,7 +74,7 @@ async function searchHtmlProvider({ provider, query, maxResults, timeoutMs, sign
   const html = await responseText(response)
   const parsed = parser(html, maxResults)
   const elapsedMs = Date.now() - started
-  const parserSignal = provider === 'bing-html' ? /\bb_algo\b/i : provider === 'brave-html' ? /data-type\s*=\s*["']web["']/i : /\bresult__a\b/i
+  const parserSignal = provider === 'bing-rss' ? /<item\b/i : provider === 'brave-html' ? /data-type\s*=\s*["']web["']/i : /\bresult__a\b/i
   const status = parsed.results.length ? 'healthy' : parserSignal.test(html) ? 'parser_drift' : 'zero_result'
   return { provider, family: PROVIDERS[provider].family, sources: parsed.results, truncated: parsed.truncated, elapsedMs,
     health: { provider, family: PROVIDERS[provider].family, status, resultCount: parsed.results.length, elapsedMs } }
@@ -103,7 +103,7 @@ export async function searchDuckDuckGo({ query, maxResults = 8, timeoutMs = 1500
 }
 
 export async function searchBing({ query, maxResults = 8, timeoutMs = 15000, signal, fetchImpl = nativeFetch, endpoint } = {}) {
-  const result = await searchSingleProvider({ provider: 'bing-html', query, maxResults, timeoutMs, signal, fetchImpl, endpoint })
+  const result = await searchSingleProvider({ provider: 'bing-rss', query, maxResults, timeoutMs, signal, fetchImpl, endpoint })
   return { provider: result.provider, query: validateQuery(query), sources: result.sources, truncated: result.truncated, elapsedMs: result.elapsedMs, health: result.health }
 }
 
@@ -126,7 +126,7 @@ function mergeProviderResults(providerResults, maxResults, query) {
   const limit = boundedLimit(maxResults)
   const terms = queryTerms(query)
   const candidates = new Map()
-  const weights = { 'brave-html': 1.1, 'bing-html': 0.9, 'duckduckgo-html': 0.85 }
+  const weights = { 'brave-html': 1.1, 'bing-rss': 0.9, 'duckduckgo-html': 0.85 }
   for (const [providerIndex, provider] of providerResults.entries()) {
     for (const [rank, source] of provider.sources.entries()) {
       const existing = candidates.get(source.url)
@@ -194,9 +194,9 @@ export async function searchNativeWeb({ query, maxResults = 8, timeoutMs = 15000
 }
 
 export const NATIVE_SEARCH_DEFAULTS = Object.freeze({
-  providers: ['bing-html', 'brave-html', 'duckduckgo-html'],
+  providers: ['bing-rss', 'brave-html', 'duckduckgo-html'],
   maxResults: 8,
   timeoutMs: 15000,
 })
 
-export { parseBingResults, parseBraveResults, parseDuckDuckGoResults }
+export { parseBingRss, parseBraveResults, parseDuckDuckGoResults }

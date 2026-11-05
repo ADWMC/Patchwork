@@ -2,6 +2,12 @@
 
 记录面向使用者的变化、升级动作和影响使用的限制。收录与写作规则见[更新日志指南](docs/changelog-guide.md)。
 
+## 未发布（Unreleased）
+
+### 调整
+
+- `patchwork_search` 的 Bing 来源从 HTML 页面抓取改为 RSS 输出（`format=rss`）：同一引擎改用结构化 XML，标题、链接、摘要按元素解析，不再依赖结果页 class 结构；请求带 `referer` 并沿用既有的公网地址、重定向与大小检查。provider 标识 `bing-html` 更名为 `bing-rss`，已有配置里写 `bing-html` 的安装需要在设置页或 `patchwork/config.json` 改回 `bing-rss`；Brave、DuckDuckGo 两个来源与合并、健康状态语义不变。
+
 ## 1.0.0（2026-11-04 · 覆盖发布）
 
 - 设置页支持无会话只读预览：新增 `GET /api/plugins/patchwork-coding-agent/settings`，只返回当前 `DSH_HOME` 的配置快照（`config` / `loadedConfig` / `revision`），不返回任何会话状态。未连接 Patchwork 会话时，设置页可查看配置并标为只读；保存仍然走会话鉴权的 config 路由，连接后才会启用。

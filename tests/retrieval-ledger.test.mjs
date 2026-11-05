@@ -8,8 +8,8 @@ test('retrieval ledger stores bounded untrusted source metadata and omits raw qu
   const rawQuery = 'private query should never be persisted'
   recordRetrieval(agent, {
     operationId: 'call-ledger', status: 'partial', query: rawQuery, queryFingerprint: 'a'.repeat(64),
-    provider: 'patchwork-native-multi', providers: ['bing-html'], failedProviders: [{ provider: 'brave-html', code: 'SEARCH_TIMEOUT' }],
-    providerHealth: [{ provider: 'bing-html', family: 'bing', status: 'healthy', resultCount: 1, elapsedMs: 4 }],
+    provider: 'patchwork-native-multi', providers: ['bing-rss'], failedProviders: [{ provider: 'brave-html', code: 'SEARCH_TIMEOUT' }],
+    providerHealth: [{ provider: 'bing-rss', family: 'bing', status: 'healthy', resultCount: 1, elapsedMs: 4 }],
     sources: [{ title: 'Example', url: 'https://example.com/a#fragment', snippet: 'x'.repeat(1000) }], resultCount: 1, providerCount: 1, failedProviderCount: 1, elapsedMs: 6,
   })
   await flushRetrieval(agent)

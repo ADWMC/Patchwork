@@ -44,31 +44,6 @@ function unwrapDuckDuckGoUrl(rawHref) {
   return href
 }
 
-function decodeBase64Url(value) {
-  const raw = String(value ?? '')
-  const encoded = raw.startsWith('a1') ? raw.slice(2) : raw
-  if (!encoded || !/^[A-Za-z0-9_-]+={0,2}$/.test(encoded)) return undefined
-  try {
-    const padded = encoded.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - encoded.length % 4) % 4)
-    return Buffer.from(padded, 'base64').toString('utf8')
-  } catch {
-    return undefined
-  }
-}
-
-function unwrapBingUrl(rawHref) {
-  const href = normalizeUrl(rawHref, 'https://www.bing.com/search')
-  if (!href) return undefined
-  try {
-    const parsed = new URL(href)
-    if (parsed.hostname.endsWith('bing.com') && parsed.pathname === '/ck/a') {
-      const decoded = decodeBase64Url(parsed.searchParams.get('u'))
-      return normalizeUrl(decoded) ?? href
-    }
-  } catch { /* normalizeUrl already validated the URL. */ }
-  return href
-}
-
 function boundedLimit(maxResults) {
   return Math.max(1, Math.min(12, Math.trunc(Number(maxResults) || 8)))
 }
@@ -111,22 +86,23 @@ export function parseDuckDuckGoResults(html, maxResults = 8) {
   return { results, truncated: false }
 }
 
-/** Parse Bing's server-rendered result list and unwrap its redirect links. */
-export function parseBingResults(html, maxResults = 8) {
+/** Parse Bing's RSS feed, the structured form of its public result page. */
+export function parseBingRss(xml, maxResults = 8) {
   const limit = boundedLimit(maxResults)
   const results = []
   const seen = new Set()
-  const itemPattern = /<li\b[^>]*class\s*=\s*(["'])[^"']*\bb_algo\b[^"']*\1[^>]*>([\s\S]*?)<\/li>/gi
+  const itemPattern = /<item\b[^>]*>([\s\S]*?)<\/item>/gi
   let match
-  while ((match = itemPattern.exec(String(html ?? '')))) {
-    const item = match[2]
-    const link = /<h2\b[\s\S]*?<a\b[^>]*href\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a>/i.exec(item)
-    if (!link) continue
-    const url = unwrapBingUrl(link[2])
-    const title = textFromHtml(link[3])
+  while ((match = itemPattern.exec(String(xml ?? '')))) {
+    const item = match[1]
+    const rawTitle = /<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(item)?.[1] ?? ''
+    const rawLink = /<link\b[^>]*>([\s\S]*?)<\/link>/i.exec(item)?.[1] ?? ''
+    const rawSnippet = /<description\b[^>]*>([\s\S]*?)<\/description>/i.exec(item)?.[1] ?? ''
+    // RSS fields arrive entity-escaped; decode before stripping the markup inside.
+    const title = textFromHtml(decodeHtmlEntities(rawTitle))
+    const url = normalizeUrl(decodeHtmlEntities(rawLink), 'https://www.bing.com/search')
+    const snippet = textFromHtml(decodeHtmlEntities(rawSnippet))
     if (!url || !title) continue
-    const caption = /<div\b[^>]*class\s*=\s*(["'])[^"']*\bb_caption\b[^"']*\1[^>]*>[\s\S]*?<p\b[^>]*>([\s\S]*?)<\/p>/i.exec(item)
-    const snippet = caption ? textFromHtml(caption[2]) : ''
     pushUnique(results, seen, { title, url, ...(snippet ? { snippet } : {}) })
     if (results.length > limit) return { results: results.slice(0, limit), truncated: true }
   }
@@ -157,7 +133,7 @@ export function parseBraveResults(html, maxResults = 8) {
 
 export const providerParsers = Object.freeze({
   'duckduckgo-html': parseDuckDuckGoResults,
-  'bing-html': parseBingResults,
+  'bing-rss': parseBingRss,
   'brave-html': parseBraveResults,
 })
 

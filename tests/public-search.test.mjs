@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { NativeSearchError, parseBingResults, parseBraveResults, parseDuckDuckGoResults, searchDuckDuckGo, searchNativeWeb } from '../src/retrieval/public-search.mjs'
+import { NativeSearchError, parseBingRss, parseBraveResults, parseDuckDuckGoResults, searchDuckDuckGo, searchNativeWeb } from '../src/retrieval/public-search.mjs'
 
 const page = `
 <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com%2Fdocs%3Fa%3D1&amp;rut=ignored">Example &amp; Docs</a>
@@ -9,10 +9,12 @@ const page = `
 <a class="result__snippet" href="#">Second snippet</a>
 `
 
-const bingPage = ({ encodedUrl = 'https://example.com/bing' } = {}) => `
-<ol id="b_results">
-  <li class="b_algo"><h2><a href="https://www.bing.com/ck/a?u=a1${encodedUrl}">Bing result</a></h2><div class="b_caption"><p>Bing snippet</p></div></li>
-</ol>`
+const bingRss = `<?xml version="1.0" encoding="utf-8" ?>
+<rss version="2.0"><channel><title>Patchwork native search</title><link>https://www.bing.com/search?q=Patchwork</link>
+<item><title>Patchwork &amp; Docs</title><link>https://example.com/docs?a=1</link><description>A &lt;b&gt;useful&lt;/b&gt; snippet.</description></item>
+<item><title>Second result</title><link>https://second.example/path</link><description>Second snippet</description></item>
+<item><title>No link</title><description>Missing link</description></item>
+</channel></rss>`
 
 const bravePage = `
 <div class="snippet svelte-jmfu5f" data-pos="2" data-type="web">
@@ -32,9 +34,16 @@ test('parses bounded DuckDuckGo results into safe URL and text records', () => {
   }])
 })
 
-test('parses Bing redirects and Brave server-rendered snippets', () => {
-  const encoded = Buffer.from('https://example.com/bing').toString('base64url')
-  assert.deepEqual(parseBingResults(bingPage({ encodedUrl: encoded }), 3).results, [{ title: 'Bing result', url: 'https://example.com/bing', snippet: 'Bing snippet' }])
+test('parses Bing RSS items and skips entries without a link', () => {
+  assert.deepEqual(parseBingRss(bingRss, 3).results, [
+    { title: 'Patchwork & Docs', url: 'https://example.com/docs?a=1', snippet: 'A useful snippet.' },
+    { title: 'Second result', url: 'https://second.example/path', snippet: 'Second snippet' },
+  ])
+  assert.equal(parseBingRss(bingRss, 1).truncated, true)
+  assert.deepEqual(parseBingRss('<rss><channel></channel></rss>', 5).results, [])
+})
+
+test('parses Brave server-rendered snippets', () => {
   assert.deepEqual(parseBraveResults(bravePage, 3).results, [{ title: 'Brave result', url: 'https://brave.example/result', snippet: 'Brave snippet' }])
 })
 
@@ -64,24 +73,32 @@ test('native search rejects empty queries and provider failures with machine cod
 })
 
 test('native multi-search merges independent providers and records partial failure', async () => {
-  const encoded = Buffer.from('https://example.com/bing').toString('base64url')
+  const bingMerge = `<rss version="2.0"><channel><title>demo</title>
+<item><title>Shared doc</title><link>https://example.com/docs?a=1</link><description>Shared snippet</description></item>
+<item><title>Bing only</title><link>https://bing.example/only</link><description>Bing unique</description></item>
+</channel></rss>`
   const calls = []
   const result = await searchNativeWeb({
-    query: 'Patchwork',
+    query: 'demo query',
     maxResults: 4,
-    providers: ['bing-html', 'brave-html', 'duckduckgo-html'],
-    endpoints: { 'bing-html': 'https://bing.test/search', 'brave-html': 'https://brave.test/search', 'duckduckgo-html': 'https://duck.test/html/' },
-    fetchImpl: async url => {
+    providers: ['bing-rss', 'brave-html', 'duckduckgo-html'],
+    endpoints: { 'bing-rss': 'https://bing.test/search', 'brave-html': 'https://brave.test/search', 'duckduckgo-html': 'https://duck.test/html/' },
+    fetchImpl: async (url, options) => {
       calls.push(String(url))
-      if (String(url).includes('bing.test')) return { ok: true, status: 200, text: async () => bingPage({ encodedUrl: encoded }) }
+      if (String(url).includes('bing.test')) {
+        assert.equal(options.method, 'GET')
+        assert.equal(options.headers.referer, 'https://www.bing.com/')
+        assert.match(String(url), /format=rss/)
+        return { ok: true, status: 200, text: async () => bingMerge }
+      }
       if (String(url).includes('brave.test')) throw new Error('brave unavailable')
       return { ok: true, status: 200, text: async () => page }
     },
   })
-  assert.deepEqual(result.providers, ['bing-html', 'duckduckgo-html'])
+  assert.deepEqual(result.providers, ['bing-rss', 'duckduckgo-html'])
   assert.deepEqual(result.failedProviders, [{ provider: 'brave-html', code: 'SEARCH_PROVIDER_ERROR' }])
   assert.deepEqual(result.providerHealth.map(({ provider, family, status }) => ({ provider, family, status })), [
-    { provider: 'bing-html', family: 'bing', status: 'healthy' },
+    { provider: 'bing-rss', family: 'bing', status: 'healthy' },
     { provider: 'brave-html', family: 'brave', status: 'transport_error' },
     { provider: 'duckduckgo-html', family: 'duckduckgo', status: 'healthy' },
   ])
@@ -93,8 +110,8 @@ test('native multi-search merges independent providers and records partial failu
 test('provider health distinguishes parser drift and blocked responses', async () => {
   const drift = await searchNativeWeb({
     query: 'drift',
-    providers: ['bing-html'],
-    fetchImpl: async () => ({ ok: true, status: 200, text: async () => '<li class="b_algo"><div class="changed-result-shape">no parser match</div></li>' }),
+    providers: ['bing-rss'],
+    fetchImpl: async () => ({ ok: true, status: 200, text: async () => '<rss><channel><item><description>changed shape</description></item></channel></rss>' }),
   })
   assert.equal(drift.providerHealth[0].status, 'parser_drift')
   const blocked = await searchNativeWeb({

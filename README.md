@@ -59,7 +59,7 @@ Patchwork 是 **DeepSeek Harness（DSH）的代码任务插件**。它把任务�
 | 纠正之后上下文丢失，同一个问题反复解释 | **纠正使旧证据失效**并触发重新核对；只读 `handoff` 提供有界交接，不必整段重放历史 |
 | 项目约定和你的偏好反复丢失 | **显式记忆**：会话私有与项目共享分开确认，带版本校验、来源历史与批量遗忘；自动注入默认关闭 |
 
-再加几件开箱即用的事：`patchwork_search` 免密钥并行搜索 Bing / Brave / DuckDuckGo；`patchwork_code` 在工作区内做仓库地图、符号定义与词法引用检索；`patchwork_superagent` 提供持久队列、依赖与有界重试的主控；6 视图原生工作台覆盖任务、证据、日志与 26 项设置。
+再加几件开箱即用的事：`patchwork_search` 免密钥并行搜索 Bing（RSS 输出）、Brave、DuckDuckGo；`patchwork_code` 在工作区内做仓库地图、符号定义与词法引用检索；`patchwork_superagent` 提供持久队列、依赖与有界重试的主控；6 视图原生工作台覆盖任务、证据、日志与 26 项设置。
 
 > **改进的依据是用户实际遇到的失败和纠正。** 候选规则、记忆策略与工具流程需要隔离验证和用户确认；确认后仅在本会话实际应用，并可回滚恢复。契约通过不代表模型质量提升。
 
@@ -122,7 +122,7 @@ npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 | **任务与验收** | 用 `patchwork_task` 登记要求、阶段、纠正版本和产物；验收绑定实际宿主回执，失败、过期结果与未覆盖项不算通过。 |
 | **原生 Superagent** | 用 `patchwork_superagent` 管理持久队列、依赖与有界重试；默认两个读取槽，本模块在同一工作区内串行执行写任务。 |
 | **按需技能** | 默认注册 7 个核心技能，可显式试用 13 技能目录；目录只提供名称与描述，正文按需读取。 |
-| **信息检索** | `patchwork_search` 并行查询 Bing、Brave、DuckDuckGo 公共页面，无需 API key；`patchwork_fetch` 受控读取公开 URL。 |
+| **信息检索** | `patchwork_search` 并行查询 Bing（RSS 输出）、Brave、DuckDuckGo 公共页面，无需 API key；`patchwork_fetch` 受控读取公开 URL。 |
 | **本地代码检索** | `patchwork_code` 提供仓库地图、文件 outline、符号定义、词法引用和文本/正则检索；只在当前工作区读取，跳过依赖、构建产物和敏感文件，结果有界。工作区代码图默认关闭，模型可 `graph-enable` 写 `.patchwork/config.json`，再 `graph-start` 使用 callers/callees/impact/affected。 |
 | **项目文档** | DSH 自动注入 `AGENTS.md`/`CLAUDE.md`；`patchwork_project_docs` 负责 hash/CAS 创建与更新 `AGENTS.md`、`DESIGN.md`，不静默覆盖、不授予权限。 |
 | **显式记忆与改进** | 记忆管理支持搜索筛选、手动提案、版本修订、暂停恢复、来源历史、导出与批量遗忘；私有与共享分开确认，自动注入关闭。失败和纠正进入受控改进。 |
