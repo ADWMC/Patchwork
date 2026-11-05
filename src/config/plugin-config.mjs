@@ -21,7 +21,7 @@ export const Config = Schema.object({
   evidenceGate: Schema.boolean().default(true),
   taskPolicyMode: Schema.union(['structured', 'strict']).default('structured'),
   nativeSearch: Schema.boolean().default(true),
-  nativeSearchProviders: Schema.array(Schema.union(['bing-rss', 'brave-html', 'duckduckgo-html'])).default(['bing-rss', 'brave-html', 'duckduckgo-html']),
+  nativeSearchProviders: Schema.array(Schema.union(['bing-rss', 'brave-html', 'duckduckgo-html', 'uapis-keyless', 'tavily-keyless'])).default(['bing-rss', 'brave-html', 'uapis-keyless', 'tavily-keyless', 'duckduckgo-html']),
   nativeSearchMaxResults: Schema.number().min(1).max(12).step(1).default(8),
   nativeSearchTimeoutMs: Schema.number().min(1000).max(30000).step(1).default(15000),
   nativeFetch: Schema.boolean().default(true),

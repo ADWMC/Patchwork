@@ -4,6 +4,11 @@
 
 ## 未发布（Unreleased）
 
+### 新增
+
+- `patchwork_search` 新增两个免密钥 JSON 检索来源并默认启用：`uapis-keyless`（uapis.cn 聚合搜索，访客积分免注册）与 `tavily-keyless`（Tavily 匿名档，请求头声明 keyless 访问模式）。默认来源变为五个：bing-rss、brave-html、uapis-keyless、tavily-keyless、duckduckgo-html；任一来源失败、超时或返回空结果不阻塞其余来源，健康状态按来源分别记录。设置页来源白名单上限从 3 调整为 5。
+- 内置 HTTP 客户端支持 POST JSON 请求（请求体经 stdin 传递，不进入命令行参数；GET 行为不变），上述两个来源与既有检索共用公网地址检查、重定向契约与响应大小上限。
+
 ### 调整
 
 - `patchwork_search` 的 Bing 来源从 HTML 页面抓取改为 RSS 输出（`format=rss`）：同一引擎改用结构化 XML，标题、链接、摘要按元素解析，不再依赖结果页 class 结构；请求带 `referer` 并沿用既有的公网地址、重定向与大小检查。provider 标识 `bing-html` 更名为 `bing-rss`，已有配置里写 `bing-html` 的安装需要在设置页或 `patchwork/config.json` 改回 `bing-rss`；Brave、DuckDuckGo 两个来源与合并、健康状态语义不变。

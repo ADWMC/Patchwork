@@ -1,16 +1,21 @@
 import { nativeFetch } from './http-client.mjs'
-import { fetchPublicResponse } from './public-fetch.mjs'
+import { assertPublicTarget, fetchPublicResponse } from './public-fetch.mjs'
 import { parseBingRss, parseBraveResults, parseDuckDuckGoResults, providerParsers } from './provider-parsers.mjs'
 import { createHash } from 'node:crypto'
+import { lookup } from 'node:dns/promises'
+import { isIP } from 'node:net'
 
 const MAX_RESPONSE_BYTES = 2_000_000
 const MAX_QUERY_LENGTH = 512
+const MAX_SNIPPET_CHARS = 600
 const USER_AGENT = 'Patchwork-native-search/0.3'
 
 const PROVIDERS = Object.freeze({
-  'bing-rss': { endpoint: 'https://www.bing.com/search', queryKey: 'q', params: { format: 'rss', count: '12' }, family: 'bing', headers: { referer: 'https://www.bing.com/' } },
-  'brave-html': { endpoint: 'https://search.brave.com/search', queryKey: 'q', family: 'brave' },
-  'duckduckgo-html': { endpoint: 'https://html.duckduckgo.com/html/', queryKey: 'q', params: { kp: '1' }, family: 'duckduckgo' },
+  'bing-rss': { endpoint: 'https://www.bing.com/search', queryKey: 'q', params: { format: 'rss', count: '12' }, family: 'bing', kind: 'html', headers: { referer: 'https://www.bing.com/' } },
+  'brave-html': { endpoint: 'https://search.brave.com/search', queryKey: 'q', family: 'brave', kind: 'html' },
+  'duckduckgo-html': { endpoint: 'https://html.duckduckgo.com/html/', queryKey: 'q', params: { kp: '1' }, family: 'duckduckgo', kind: 'html' },
+  'uapis-keyless': { endpoint: 'https://uapis.cn/api/v1/search/aggregate', family: 'uapis', kind: 'json' },
+  'tavily-keyless': { endpoint: 'https://api.tavily.com/search', family: 'tavily', kind: 'json', headers: { 'x-tavily-access-mode': 'keyless' } },
 })
 
 export class NativeSearchError extends Error {
@@ -33,6 +38,11 @@ function boundedLimit(maxResults) {
   return Math.max(1, Math.min(12, Math.trunc(Number(maxResults) || 8)))
 }
 
+function boundedText(value, limit) {
+  const text = String(value ?? '').replace(/\s+/g, ' ').trim()
+  return text.length > limit ? `${text.slice(0, limit)}…` : text
+}
+
 function combinedSignal(signal, timeoutMs) {
   const timeout = AbortSignal.timeout(Math.max(1000, Math.min(30000, Math.trunc(Number(timeoutMs) || 15000))))
   return signal ? AbortSignal.any([signal, timeout]) : timeout
@@ -43,6 +53,72 @@ async function responseText(response) {
   const text = await response.text()
   if (Buffer.byteLength(text, 'utf8') > MAX_RESPONSE_BYTES) throw new NativeSearchError('search provider response exceeded the bounded response size', 'SEARCH_RESPONSE_TOO_LARGE')
   return text
+}
+
+function jsonProviderBody(provider, query, maxResults) {
+  if (provider === 'tavily-keyless') return JSON.stringify({ query, max_results: maxResults, include_answer: false })
+  return JSON.stringify({ query })
+}
+
+function jsonProviderSources(payload, maxResults) {
+  const raw = Array.isArray(payload?.results) ? payload.results : []
+  const sources = []
+  for (const item of raw) {
+    const url = typeof item?.url === 'string' ? item.url.trim() : ''
+    const title = boundedText(item?.title, 300) || url
+    const snippet = boundedText(item?.snippet ?? item?.content, MAX_SNIPPET_CHARS)
+    if (!url) continue
+    sources.push({ title, url, ...(snippet ? { snippet } : {}) })
+    if (sources.length >= maxResults) break
+  }
+  return { sources, truncated: raw.length > sources.length }
+}
+
+/** POST a keyless JSON search endpoint behind the same public-target guards as the HTML providers. */
+async function searchJsonProvider({ provider, query, maxResults, timeoutMs, signal, fetchImpl, endpoint }) {
+  const started = Date.now()
+  const definition = PROVIDERS[provider]
+  const budgetSignal = combinedSignal(signal, timeoutMs)
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json', 'user-agent': USER_AGENT, ...(definition.headers ?? {}) },
+    body: jsonProviderBody(provider, query, maxResults),
+    redirect: 'manual',
+    maxRedirects: 0,
+    timeoutMs,
+    maxBytes: MAX_RESPONSE_BYTES,
+    signal: budgetSignal,
+  }
+  let response
+  if (fetchImpl === nativeFetch) {
+    // The native path pins DNS to the approved addresses, closing the check-to-request gap.
+    let addresses
+    const target = await assertPublicTarget(endpoint ?? definition.endpoint, {
+      signal: budgetSignal,
+      lookupImpl: async (...args) => { addresses = await lookup(...args); return addresses },
+    })
+    const hostname = target.hostname.replace(/^\[|\]$/g, '')
+    addresses ??= [{ address: hostname, family: isIP(hostname) }]
+    budgetSignal.throwIfAborted()
+    response = await nativeFetch(target, { ...requestOptions, approvedAddresses: addresses })
+  } else {
+    response = await fetchImpl(endpoint ?? definition.endpoint, requestOptions)
+  }
+  if (fetchImpl === nativeFetch && response?.url && new URL(response.url).href !== new URL(endpoint ?? definition.endpoint).href) {
+    throw new NativeSearchError('transport followed an unapproved redirect', 'SEARCH_PROVIDER_ERROR')
+  }
+  const text = await responseText(response)
+  let payload
+  try {
+    payload = JSON.parse(text)
+  } catch {
+    throw new NativeSearchError('search provider returned malformed JSON', 'SEARCH_PROVIDER_ERROR')
+  }
+  const { sources, truncated } = jsonProviderSources(payload, maxResults)
+  const elapsedMs = Date.now() - started
+  const status = sources.length ? 'healthy' : 'zero_result'
+  return { provider, family: definition.family, sources, truncated, elapsedMs,
+    health: { provider, family: definition.family, status, resultCount: sources.length, elapsedMs } }
 }
 
 function providerUrl(provider, query, endpoint) {
@@ -82,17 +158,21 @@ async function searchHtmlProvider({ provider, query, maxResults, timeoutMs, sign
 
 async function searchSingleProvider({ provider, query, maxResults = 8, timeoutMs = 15000, signal, fetchImpl = nativeFetch, endpoint } = {}) {
   const normalized = validateQuery(query)
+  const definition = PROVIDERS[provider]
+  if (!definition) throw new NativeSearchError(`unknown native search provider: ${provider}`, 'SEARCH_UNKNOWN_PROVIDER')
   if (typeof fetchImpl !== 'function') throw new NativeSearchError('native search has no HTTP client', 'SEARCH_CLIENT_UNAVAILABLE')
+  const bounded = boundedLimit(maxResults)
   try {
-    return await searchHtmlProvider({ provider, query: normalized, maxResults: boundedLimit(maxResults), timeoutMs, signal, fetchImpl, endpoint })
+    if (definition.kind === 'json') return await searchJsonProvider({ provider, query: normalized, maxResults: bounded, timeoutMs, signal, fetchImpl, endpoint })
+    return await searchHtmlProvider({ provider, query: normalized, maxResults: bounded, timeoutMs, signal, fetchImpl, endpoint })
   } catch (error) {
     if (error instanceof NativeSearchError) {
       if (!error.provider) error.provider = provider
-      if (!error.family) error.family = PROVIDERS[provider].family
+      if (!error.family) error.family = definition.family
       throw error
     }
-    if (error?.name === 'AbortError' || error?.name === 'TimeoutError') throw new NativeSearchError('native search was cancelled or timed out', error.name === 'AbortError' ? 'SEARCH_ABORTED' : 'SEARCH_TIMEOUT', { provider, family: PROVIDERS[provider].family })
-    throw new NativeSearchError('native search provider request failed', 'SEARCH_PROVIDER_ERROR', { provider, family: PROVIDERS[provider].family })
+    if (error?.name === 'AbortError' || error?.name === 'TimeoutError') throw new NativeSearchError('native search was cancelled or timed out', error.name === 'AbortError' ? 'SEARCH_ABORTED' : 'SEARCH_TIMEOUT', { provider, family: definition.family })
+    throw new NativeSearchError('native search provider request failed', 'SEARCH_PROVIDER_ERROR', { provider, family: definition.family })
   }
 }
 
@@ -126,7 +206,7 @@ function mergeProviderResults(providerResults, maxResults, query) {
   const limit = boundedLimit(maxResults)
   const terms = queryTerms(query)
   const candidates = new Map()
-  const weights = { 'brave-html': 1.1, 'bing-rss': 0.9, 'duckduckgo-html': 0.85 }
+  const weights = { 'brave-html': 1.1, 'bing-rss': 0.9, 'duckduckgo-html': 0.85, 'tavily-keyless': 1.0, 'uapis-keyless': 0.95 }
   for (const [providerIndex, provider] of providerResults.entries()) {
     for (const [rank, source] of provider.sources.entries()) {
       const existing = candidates.get(source.url)
@@ -194,7 +274,7 @@ export async function searchNativeWeb({ query, maxResults = 8, timeoutMs = 15000
 }
 
 export const NATIVE_SEARCH_DEFAULTS = Object.freeze({
-  providers: ['bing-rss', 'brave-html', 'duckduckgo-html'],
+  providers: ['bing-rss', 'brave-html', 'uapis-keyless', 'tavily-keyless', 'duckduckgo-html'],
   maxResults: 8,
   timeoutMs: 15000,
 })

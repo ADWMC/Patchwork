@@ -47,6 +47,80 @@ test('parses Brave server-rendered snippets', () => {
   assert.deepEqual(parseBraveResults(bravePage, 3).results, [{ title: 'Brave result', url: 'https://brave.example/result', snippet: 'Brave snippet' }])
 })
 
+test('keyless JSON providers post bounded requests and map unified sources', async () => {
+  const calls = []
+  const result = await searchNativeWeb({
+    query: 'patchwork',
+    maxResults: 4,
+    providers: ['uapis-keyless', 'tavily-keyless'],
+    endpoints: { 'uapis-keyless': 'https://uapis.test/search', 'tavily-keyless': 'https://tavily.test/search' },
+    fetchImpl: async (url, options) => {
+      const request = { url: String(url), options }
+      calls.push(request)
+      const body = JSON.parse(options.body)
+      if (String(url).includes('uapis.test')) {
+        assert.equal(body.query, 'patchwork')
+        assert.ok(!('max_results' in body))
+        return { ok: true, status: 200, text: async () => JSON.stringify({ results: [
+          { title: 'Uapis hit', url: 'https://uapis.example/one', snippet: 'first' },
+          { title: 'No url', snippet: 'dropped' },
+          { title: 'Shared', url: 'https://shared.example/x', snippet: 'from uapis' },
+        ] }) }
+      }
+      assert.equal(body.query, 'patchwork')
+      assert.equal(body.max_results, 4)
+      assert.equal(body.include_answer, false)
+      assert.equal(options.headers['x-tavily-access-mode'], 'keyless')
+      assert.equal(options.headers['content-type'], 'application/json')
+      return { ok: true, status: 200, text: async () => JSON.stringify({ results: [
+        { title: 'Tavily hit', url: 'https://tavily.example/two', content: 'second' },
+        { title: 'Shared', url: 'https://shared.example/x', content: 'from tavily' },
+      ] }) }
+    },
+  })
+  assert.deepEqual(result.providers, ['uapis-keyless', 'tavily-keyless'])
+  assert.deepEqual(result.providerHealth.map(({ provider, family, status }) => ({ provider, family, status })), [
+    { provider: 'uapis-keyless', family: 'uapis', status: 'healthy' },
+    { provider: 'tavily-keyless', family: 'tavily', status: 'healthy' },
+  ])
+  for (const call of calls) {
+    assert.equal(call.options.method, 'POST')
+    assert.equal(call.options.redirect, 'manual')
+    assert.equal(call.options.maxRedirects, 0)
+  }
+  const urls = result.sources.map(source => source.url)
+  assert.deepEqual([...new Set(urls)].sort(), ['https://shared.example/x', 'https://tavily.example/two', 'https://uapis.example/one'])
+  const tavilySource = result.sources.find(source => source.url === 'https://tavily.example/two')
+  assert.equal(tavilySource.snippet, 'second')
+})
+
+test('keyless JSON providers report malformed payloads and empty results with codes', async () => {
+  const malformed = await searchNativeWeb({
+    query: 'x',
+    providers: ['uapis-keyless'],
+    endpoints: { 'uapis-keyless': 'https://uapis.test/search' },
+    fetchImpl: async () => ({ ok: true, status: 200, text: async () => '<html>not json</html>' }),
+  }).catch(error => error)
+  assert.equal(malformed.code, 'SEARCH_ALL_PROVIDERS_FAILED')
+  assert.equal(malformed.failedProviders[0].code, 'SEARCH_PROVIDER_ERROR')
+  const empty = await searchNativeWeb({
+    query: 'x',
+    providers: ['tavily-keyless'],
+    endpoints: { 'tavily-keyless': 'https://tavily.test/search' },
+    fetchImpl: async () => ({ ok: true, status: 200, text: async () => JSON.stringify({ results: [] }) }),
+  })
+  assert.deepEqual(empty.sources, [])
+  assert.equal(empty.providerHealth[0].status, 'zero_result')
+  const blocked = await searchNativeWeb({
+    query: 'x',
+    providers: ['tavily-keyless'],
+    endpoints: { 'tavily-keyless': 'https://tavily.test/search' },
+    fetchImpl: async () => ({ ok: false, status: 429, text: async () => '' }),
+  }).catch(error => error)
+  assert.equal(blocked.code, 'SEARCH_ALL_PROVIDERS_FAILED')
+  assert.equal(blocked.providerHealth[0].status, 'blocked')
+})
+
 test('searchDuckDuckGo uses a focused query and preserves provider metadata', async () => {
   let requested
   const result = await searchDuckDuckGo({

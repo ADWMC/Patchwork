@@ -28,6 +28,8 @@ function abortError() {
  * Fixed-argv HTTP client. Public callers provide approved addresses and manual
  * redirects; direct sockets and proxy CONNECT both use that pinned destination.
  * No shell is involved and no caller-controlled argument becomes an option.
+ * An optional `method`/`body` serves JSON POST endpoints; both default to the
+ * original GET behavior.
  */
 export function nativeFetch(url, options = {}) {
   const target = new URL(url)
@@ -41,7 +43,7 @@ function pinnedRequest(target, options) {
   const address = options.approvedAddresses[0]
   return new Promise((resolve, reject) => {
     const request = (target.protocol === 'https:' ? httpsRequest : httpRequest)(target, {
-      method: 'GET', headers: options.headers, agent: false, signal: options.signal,
+      method: options.method ?? 'GET', headers: options.headers, agent: false, signal: options.signal,
       lookup(_host, settings, callback) { callback(null, settings?.all ? [address] : address.address, address.family) },
     }, response => {
       const chunks = []; let bytes = 0
@@ -55,16 +57,23 @@ function pinnedRequest(target, options) {
     })
     request.on('error', reject)
     request.setTimeout(options.timeoutMs ?? 15000, () => request.destroy(Object.assign(new Error('request timeout'), { name: 'TimeoutError' })))
-    request.end()
+    request.end(options.body)
   })
 }
 
 function curlRequest(url, options = {}) {
   const timeoutMs = Math.max(1000, Math.min(30000, Number(options.timeoutMs) || 15000))
+  const hasBody = options.body !== undefined && options.body !== null
+  const extraHeaders = Object.entries(options.headers ?? {})
+    .filter(([key]) => !['accept', 'user-agent'].includes(key.toLowerCase()))
+    .flatMap(([key, value]) => ['--header', `${key}: ${value}`])
   const args = [
     // Windows Schannel curl does not consistently honor CURL_CA_BUNDLE itself.
     // Honor an explicit operator trust store without weakening TLS verification.
     ...(process.env.CURL_CA_BUNDLE ? ['--cacert', process.env.CURL_CA_BUNDLE] : []),
+    // A request body travels on stdin; argv only ever carries fixed literals.
+    ...(hasBody ? ['--request', 'POST', '--data-binary', '@-'] : []),
+    ...extraHeaders,
     ...(options.redirect === 'manual' ? [] : ['--location', '--max-redirs', String(Math.max(0, Math.min(10, Number(options.maxRedirects) || 5)))]), '--silent', '--show-error', '--fail-with-body', '--include',
     '--connect-timeout', String(Math.ceil(timeoutMs / 1000)),
     '--max-time', String(Math.ceil(timeoutMs / 1000)),
@@ -95,6 +104,11 @@ function curlRequest(url, options = {}) {
     const onAbort = () => { child.kill(); finish(reject, abortError()) }
     if (options.signal?.aborted) return onAbort()
     options.signal?.addEventListener('abort', onAbort, { once: true })
+    if (hasBody) {
+      // curl may exit before stdin closes (early failure); EPIPE must not escape.
+      child.stdin.on('error', () => {})
+      child.stdin.end(options.body)
+    }
     child.stdout.on('data', chunk => {
       bytes += chunk.length
       if (bytes > (options.maxBytes ?? MAX_RESPONSE_BYTES) + 65536) {

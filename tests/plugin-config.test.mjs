@@ -28,7 +28,7 @@ test('the reducer route stays unset unless configured', () => {
     evidenceGate: true,
     taskPolicyMode: 'structured',
     nativeSearch: true,
-    nativeSearchProviders: ['bing-rss', 'brave-html', 'duckduckgo-html'],
+    nativeSearchProviders: ['bing-rss', 'brave-html', 'uapis-keyless', 'tavily-keyless', 'duckduckgo-html'],
     nativeSearchMaxResults: 8,
     nativeSearchTimeoutMs: 15000,
     nativeFetch: true,

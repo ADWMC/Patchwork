@@ -6,7 +6,7 @@ import { textMatches } from './workspace-model.mjs'
 export const settingHelp = {
   actionFusion: '把文件编辑与必要校验接成一次受控操作。', observationPack: '保存完整原文，按需召回少量片段。', evidencePreservingReducer: '默认关闭；敏感输出拒绝外发。约简模型设置不改变主会话模型。', onlineContextCompact: '在计划边界评估上下文压缩，是否执行以实际日志为准。', cacheWriteReadRatio: '用于成本估计，无单位；不改变服务商的实际计费。',
   reducerProvider: '仅 EPR 使用；留空沿用宿主，不在此保存服务密钥。', reducerModel: '为约简指定模型；不会更改主会话模型。', reducerMaxTokens: '限制约简输出长度，不是主模型上下文窗口。',
-  nativeSearch: '启用无需服务密钥的公开页面搜索，可用性受上游页面影响。', nativeSearchProviders: '按配置顺序查询；可选 bing-rss、brave-html、duckduckgo-html。', nativeSearchMaxResults: '每次工具调用返回的结果数量上限。', nativeSearchTimeoutMs: '搜索总预算，超过预算返回实际失败状态。',
+  nativeSearch: '启用无需服务密钥的公开页面搜索，可用性受上游页面影响。', nativeSearchProviders: '按配置顺序查询；可选 bing-rss、brave-html、duckduckgo-html、uapis-keyless、tavily-keyless。', nativeSearchMaxResults: '每次工具调用返回的结果数量上限。', nativeSearchTimeoutMs: '搜索总预算，超过预算返回实际失败状态。',
   nativeFetch: '启用公开网页读取，保留公网地址和响应大小检查。', nativeFetchAllowedHosts: '可限定主机；空列表仍只允许经检查的公网主机。', nativeFetchTimeoutMs: '单次抓取总时间预算。', nativeFetchMaxBytes: '限制下载体积，避免大响应占满内存。', nativeFetchMaxChars: '限制返回给当前任务的摘录长度。', nativeFetchRobots: '启用时核对目标站点 robots.txt。',
   skillsEnabled: '为 Patchwork 注册技能目录，正文仍由模型按需读取。', skillsMode: '核心为 7 项；扩展模式加入调试、审查、检索、文档、记忆和改进。', evidenceGate: '交付前核对证据与要求，不能替代人工质量判断。', taskPolicyMode: 'structured / strict 控制已知结构化写入，不是操作系统沙箱。', memoryEnabled: '启用显式记忆工具；不会开启自动注入或跨会话共享。',
   codeEnabled: '启用只读本地代码地图、符号与文本检索；不读取依赖、构建产物或密钥文件。', codeMaxFiles: '单次索引的文件上限；超过时返回截断地图，不阻塞任务。', codeTokenBudget: '代码地图的默认 token 预算；结果仍受硬上限约束。',
