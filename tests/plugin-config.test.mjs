@@ -21,6 +21,7 @@ test('the reducer route stays unset unless configured', () => {
     evidencePreservingReducer: false,
     onlineContextCompact: false,
     taskMap: false,
+    superagentStallMs: 600000,
     cacheWriteReadRatio: 12.5,
     reducerProvider: 'p',
     reducerModel: 'm',

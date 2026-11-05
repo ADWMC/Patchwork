@@ -18,6 +18,7 @@ import {
   workspaceRoot,
 } from './code-index.mjs'
 import { enableWorkspaceGraph, readWorkspaceConfig, workspaceConfigInfo } from './workspace-config.mjs'
+import { searchChunks, CHUNK_DEFAULTS } from './chunks.mjs'
 
 export const PATCHWORK_CODE_TOOL = 'patchwork_code'
 const GRAPH_ACTIONS = new Set(['graph-status', 'graph-enable', 'graph-disable', 'graph-start', 'graph-stop'])
@@ -27,6 +28,13 @@ export function isCodeGraphStarted(root) { return activeGraphs.has(root) }
 
 function textResult(value) {
   if (value.action === 'map') return [{ type: 'text', text: value.text }]
+  if (value.action === 'chunks') {
+    const chunks = Array.isArray(value.chunks) ? value.chunks : []
+    const text = chunks.length
+      ? chunks.map(chunk => `${chunk.path}:${chunk.startLine}-${chunk.endLine} (score ${chunk.score}${chunk.enclosingSymbol ? `, in ${chunk.enclosingSymbol}` : ''})\n${chunk.preview}`).join('\n\n---\n\n')
+      : (value.message ?? 'no relevant chunks')
+    return [{ type: 'text', text }]
+  }
   return [{ type: 'text', text: `[${PATCHWORK_CODE_TOOL}] ${value.action}\n${JSON.stringify(value)}` }]
 }
 
@@ -67,11 +75,11 @@ export function registerCodeTool(ctx, config = {}) {
   const fallbackTokenBudget = Math.max(400, Math.min(CODE_DEFAULTS.maxTokenBudget, Math.trunc(Number(config.codeTokenBudget) || 2000)))
   ctx.tools.register({
     name: PATCHWORK_CODE_TOOL,
-    description: 'Read-only local code map, search, and opt-in workspace code graph. Use map/outline/find/references/search for normal exploration. The graph is disabled by default: graph-enable writes .patchwork/config.json, graph-start builds it, then callers/callees/impact/affected answer with a bounded lexical call graph. Graph actions are local workspace reads; they never grant permissions or use public web search. Results are bounded and exclude dependencies, build outputs and sensitive files.',
+    description: 'Read-only local code map, ranked chunk search, and opt-in workspace code graph. Use map/outline/find/references/search for normal exploration; chunks ranks fixed-line code blocks by BM25 relevance to a natural-language or identifier query (no model call). The graph is disabled by default: graph-enable writes .patchwork/config.json, graph-start builds it, then callers/callees/impact/affected answer with a bounded lexical call graph. Graph actions are local workspace reads; they never grant permissions or use public web search. Results are bounded and exclude dependencies, build outputs and sensitive files.',
     parameters: {
       type: 'object',
       properties: {
-        action: { type: 'string', enum: ['map', 'outline', 'find', 'references', 'search', ...GRAPH_ACTIONS, ...QUERY_ACTIONS] },
+        action: { type: 'string', enum: ['map', 'outline', 'find', 'references', 'search', 'chunks', ...GRAPH_ACTIONS, ...QUERY_ACTIONS] },
         path: { type: 'string', description: 'Workspace-relative or absolute file/directory; for affected, a comma-separated changed-file list.' },
         query: { type: 'string', description: 'Search text for search; may be literal, word-boundary or regex.' },
         symbol: { type: 'string', description: 'Symbol name for find/references/callers/callees/impact.' },
@@ -105,6 +113,7 @@ export function registerCodeTool(ctx, config = {}) {
           exclude: { type: 'array', items: { type: 'string' } }, callers: { type: 'array', items: { type: 'object', additionalProperties: true } },
           callees: { type: 'array', items: { type: 'object', additionalProperties: true } }, targets: { type: 'array', items: { type: 'object', additionalProperties: true } }, ambiguous: { type: 'boolean' }, impacted: { type: 'array', items: { type: 'object', additionalProperties: true } },
           tests: { type: 'array', items: { type: 'string' } }, dependents: { type: 'array', items: { type: 'string' } }, depth: { type: 'integer' },
+          query: { type: 'string' }, chunks: { type: 'array', items: { type: 'object', additionalProperties: true } },
         },
         required: ['action', 'status'], additionalProperties: true,
       },
@@ -116,7 +125,7 @@ export function registerCodeTool(ctx, config = {}) {
       const started = Date.now()
       logDiagnostic(ctx, exec, { mechanism: 'code', event: 'start', reason: 'code-started', provider: action })
       try {
-        if (!['map', 'outline', 'find', 'references', 'search'].includes(action) && !GRAPH_ACTIONS.has(action) && !QUERY_ACTIONS.has(action)) {
+        if (!['map', 'outline', 'find', 'references', 'search', 'chunks'].includes(action) && !GRAPH_ACTIONS.has(action) && !QUERY_ACTIONS.has(action)) {
           return failure(action, new CodeError('invalid patchwork_code action', 'CODE_INVALID_ACTION'))
         }
         const root = await workspaceRoot(agent)
@@ -172,6 +181,10 @@ export function registerCodeTool(ctx, config = {}) {
         else if (action === 'find') result = { action, status: 'ok', ...(await findDefinitions(index, { symbol: args?.symbol, maxResults: args?.maxResults ?? CODE_DEFAULTS.maxResults })) }
         else if (action === 'references') result = { action, status: 'ok', ...(await findReferences(index, { symbol: args?.symbol, maxResults: args?.maxResults ?? CODE_DEFAULTS.maxResults })) }
         else if (action === 'search') result = { action, status: 'ok', ...(await searchCode(index, { query: args?.query, mode: args?.mode ?? 'literal', caseSensitive: args?.caseSensitive !== false, path: args?.path, glob: args?.glob, maxResults: args?.maxResults ?? CODE_DEFAULTS.maxResults })) }
+        else if (action === 'chunks') {
+          if (!args?.query || !String(args.query).trim()) throw new CodeError('chunks requires a query', 'CODE_INVALID_QUERY')
+          result = { action, status: 'ok', query: String(args.query).trim(), chunks: await searchChunks({ cwd: agent.session?.header?.cwd, index, query: args.query, maxResults: args?.maxResults ?? CHUNK_DEFAULTS.maxResults, path: args?.path, glob: args?.glob }) }
+        }
         else if (action === 'callers') result = { action, status: 'ok', ...(await callersOf(index, { symbol: args?.symbol, maxResults: args?.maxResults ?? CODE_DEFAULTS.maxResults })) }
         else if (action === 'callees') result = { action, status: 'ok', ...(await calleesOf(index, { symbol: args?.symbol, maxResults: args?.maxResults ?? CODE_DEFAULTS.maxResults })) }
         else if (action === 'impact') result = { action, status: 'ok', ...(await impactOf(index, { symbol: args?.symbol, depth: args?.depth ?? 2 })) }

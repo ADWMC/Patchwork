@@ -3,6 +3,9 @@ import { randomUUID } from 'node:crypto'
 export const SUPERAGENT_RECORD = 'plugin:patchwork/superagent'
 export const MAX_JOBS = 24
 export const STATES = ['queued', 'starting', 'running', 'waiting', 'review', 'blocked', 'failed', 'cancelled', 'done']
+/** 停滞判定只看“活动中的作业”：终态与排队等待不算无进展。 */
+const LIVE_STALL_STATES = new Set(['starting', 'running', 'waiting', 'review'])
+export const STALL_LEVELS = { none: 0, review: 1, blocked: 2 }
 export function bounded(value, max, name) {
   if (typeof value !== 'string' || !value.trim() || value.length > max) throw new Error(`${name} must be nonempty and at most ${max} characters`)
   return value
@@ -28,7 +31,7 @@ export function defineJobs(state, jobs, { concurrency = state.concurrency } = {}
     if (input.mode !== undefined && !['read', 'explore', 'write'].includes(input.mode)) throw new Error('mode must be read, explore or write')
     if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 900000) throw new Error('timeoutMs must be 1000..900000')
     next.jobs.push({ id, title: bounded(input.title, 160, 'title'), prompt: bounded(input.prompt, 8000, 'prompt'), dependencies,
-      timeoutMs, mode: input.mode === 'write' ? 'write' : input.mode === 'explore' ? 'explore' : 'read', status: 'queued', attempt: 0, childId: null, result: null, report: null, inputs: [] })
+      timeoutMs, mode: input.mode === 'write' ? 'write' : input.mode === 'explore' ? 'explore' : 'read', status: 'queued', attempt: 0, childId: null, result: null, report: null, inputs: [], progressAt: new Date().toISOString(), stall: null })
   }
   for (const job of next.jobs) if (job.dependencies.some(id => id === job.id || !next.jobs.some(j => j.id === id))) throw new Error('missing or self job dependency')
   const visiting = new Set(), visited = new Set()
@@ -54,6 +57,51 @@ export function runnableJobs(state) {
   return candidates.filter(j => j.mode !== 'write').slice(0, slots)
 }
 export function reservedChildId() { return `session-pw-${randomUUID()}` }
+
+/** 停滞阈值由配置注入（毫秒；<=0 关闭扫描）。默认 10 分钟，与社区实现的量级一致。 */
+let stallThresholdMs = 600000
+export function setSuperagentStallConfig(thresholdMs) {
+  stallThresholdMs = Number.isFinite(thresholdMs) && thresholdMs > 0 ? Math.floor(thresholdMs) : 0
+}
+export function superagentStallConfig() { return { thresholdMs: stallThresholdMs } }
+
+/** 作业有任何推进（派发、回报、补充输入、评审）时调用：刷新进度并清除停滞标记。 */
+export function touchProgress(job, at = new Date().toISOString()) {
+  if (!job) return job
+  return { ...job, progressAt: at, stall: null }
+}
+
+export function stalledSeconds(job, now = Date.now()) {
+  if (!job?.progressAt) return 0
+  const started = Date.parse(job.progressAt)
+  if (!Number.isFinite(started)) return 0
+  return Math.max(0, Math.floor((now - started) / 1000))
+}
+
+/**
+ * 停滞扫描（纯函数）：超过阈值无进展的作业沿阶梯升级——
+ * 一级升 review（需要评审才能继续），二级升 blocked（需要干预）。
+ * 进度恢复（touchProgress 后 stall 已清）的作业不会被重复升级；
+ * 终态与排队作业不参与判定。返回新 state，无变化时返回原对象。
+ */
+export function sweepStalls(state, { thresholdMs, now = Date.now(), nowIso = new Date(now).toISOString() } = {}) {
+  if (!Number.isFinite(thresholdMs) || thresholdMs <= 0) return state
+  let changed = false
+  const jobs = state.jobs.map(job => {
+    if (!LIVE_STALL_STATES.has(job.status)) return job
+    const idle = now - Date.parse(job.progressAt ?? nowIso)
+    if (!Number.isFinite(idle) || idle <= thresholdMs) return job
+    const level = (job.stall?.level ?? STALL_LEVELS.none) + 1
+    if (level > STALL_LEVELS.blocked) return job
+    changed = true
+    const escalated = level === STALL_LEVELS.review
+      ? { ...job, status: 'review', stall: { level, since: job.stall?.since ?? nowIso, reason: `no progress for ${Math.floor(idle / 1000)}s` } }
+      : { ...job, status: 'blocked', stall: { level, since: job.stall?.since ?? nowIso, reason: `still stalled after escalation` } }
+    return escalated
+  })
+  if (!changed) return state
+  return { ...state, jobs, revision: state.revision + 1 }
+}
 
 export function restoreSuperagent(input, owner) {
   if (input?.schema !== 1 || input.owner !== owner || !Number.isSafeInteger(input.revision) || input.revision < 0

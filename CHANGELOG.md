@@ -9,6 +9,8 @@
 - 行为门（测试基建，无用户可见开关）：`tests/skill-behavior.test.mjs` 为全部 14 个技能各配遵守/违反双向探针并断言评分器判定，覆盖门确保新技能必须带探针；`tests/real-composition/behavior-contracts.test.mjs` 补上纠正使旧证据失效、语义验收保持 unknown 且仅宿主确认可接纳的契约级断言。
 - 妥协账本：有意留下的妥协按 `shortcut: <限制>, <何时升级>` 注释登记；改动文件已带登记时，宿主在 mutation 工具执行后把该文件的妥协顺手注入会话（按会话冷却，不重复）；扩展技能 `debt` 汇总全仓账本，标出可升级条目。约定写入 standards 技能。
 - 任务锚定地图（新机制，配置键 `taskMap`，默认关）：`patchwork_task define` 声明的引用与登记产物周围的符号（及代码图开启时的调用方）以有界 notice 注入会话；压缩后可再注入，correct 移走锚点即重建，任务取消后不再注入。Superagent 执行器简报携带父会话同一份锚定上下文。地图是 facts 不是指令，与文件实际状态不符时以文件和 `patchwork_code` 为准。
+- Superagent 停滞升级：队列作业超过 `superagentStallMs`（默认 10 分钟，0 关闭）无进展时沿阶梯升级——一级转评审、二级转阻塞，父会话收到 `executor-stalled` 通知；派发、回报、补充输入与评审都会刷新进度，终态与排队作业不参与判定。
+- `patchwork_code` 新增 `chunks` 动作：把工作区源文件切成定行块，用 BM25（k1=1.5、b=0.75）按查询相关性排序，返回块的文件行号、所在符号与有界预览；纯本地、无模型调用，测试与生成文件不参与（与 map 同规则）。
 
 ### 新增
 

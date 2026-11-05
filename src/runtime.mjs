@@ -5,6 +5,7 @@ import { registerUiGuidance } from './skills/ui-guidance.mjs'
 import { registerReviewCommand } from './review/review-command.mjs'
 import { registerStructureHook } from './hook/post-execute-hook.mjs'
 import { registerConfiguredMechanisms } from './mechanisms/index.mjs'
+import { setSuperagentStallConfig } from './superagent/state.mjs'
 import { registerRuntimeCollector } from './ui/runtime-state.mjs'
 import { initializeDiagnostics } from './logging/session-log.mjs'
 import { registerTaskLifecycle } from './task/lifecycle.mjs'
@@ -29,6 +30,7 @@ export async function apply(ctx, config) {
   const effective = effectiveConfig(rowConfig, readUserConfig())
   try { await loadMemoryState() } catch { /* Memory fails closed and exposes recovery; other scoped capabilities remain available. */ }
   registerTaskLifecycle(ctx, effective)
+  setSuperagentStallConfig(effective.superagentStallMs)
   registerSuperagent(ctx)
   registerRetrievalTools(ctx, effective)
   registerCodeTool(ctx, effective)

@@ -53,3 +53,37 @@ test('native composition validates opt-in workspace graph output schemas', { ski
     assert.ok(affected.value.tests.includes('chain.test.mjs'))
   } finally { await boot.dispose() }
 })
+
+test('native composition runs the chunks action and ranks relevant code blocks', { skip: !hostAvailable() }, async () => {
+  const boot = await bootPatchwork({ codeEnabled: true })
+  const cwd = await mkdtemp(join(tmpdir(), 'patchwork-chunks-compose-'))
+  try {
+    await mkdir(join(cwd, 'src'))
+    await writeFile(join(cwd, 'src', 'token.mjs'), [
+      '// 令牌签发与校验',
+      'export function issueToken(user) {',
+      '  return sign(user)',
+      '}',
+      '',
+      'export function verifyToken(token) {',
+      '  return unsign(token)',
+      '}',
+    ].join('\n'), 'utf8')
+    await writeFile(join(cwd, 'src', 'token.test.mjs'), 'issueToken({})\n', 'utf8')
+    const { createAgent } = await loadDriver()
+    const { agent, tools } = createAgent({ cwd })
+    let n = 0
+    const call = arguments_ => tools.execute({ agent, name: 'patchwork_code', arguments: arguments_, callId: `chunks-${++n}`, signal: new AbortController().signal })
+    const hits = await call({ action: 'chunks', query: 'verifyToken unsign' })
+    assert.equal(hits.isError, false, JSON.stringify(hits.content))
+    assert.equal(hits.value.chunks.length, 1)
+    assert.equal(hits.value.chunks[0].path, 'src/token.mjs')
+    assert.equal(hits.value.chunks[0].enclosingSymbol, 'verifyToken@6')
+    assert.ok(hits.value.chunks[0].score > 0)
+    assert.match(JSON.stringify(hits.content), /verifyToken/)
+    const empty = await call({ action: 'chunks', query: 'zebra unicorn' })
+    assert.deepEqual(empty.value.chunks, [])
+    const invalid = await call({ action: 'chunks' })
+    assert.equal(invalid.value.failureCode, 'CODE_INVALID_QUERY', '缺少 query 必须报错')
+  } finally { await boot.dispose() }
+})

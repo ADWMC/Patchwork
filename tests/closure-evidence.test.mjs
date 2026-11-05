@@ -67,8 +67,8 @@ test('real diff counts equal-length edits, additions, deletions and binary hashe
   assert.equal(result.binaryChanges, 1)
   assert.equal(result.files.find(item => item.path === 'deleted.mjs').afterHash, null)
 })
-test('all 27 user settings share one frontend/backend validation contract', () => {
-  assert.equal(SETTING_FIELDS.length, 27)
+test('all 28 user settings share one frontend/backend validation contract', () => {
+  assert.equal(SETTING_FIELDS.length, 28)
   assert.equal(validateSettings(Object.fromEntries(SETTING_FIELDS.map(field => [field.key, field.defaultValue]))).ok, true)
   for (const input of [{ nativeFetchTimeoutMs: 1 }, { nativeSearchProviders: [] }, { skillsMode: 'unknown' }, { nativeFetchAllowedHosts: ['http://localhost/'] }, { reducerMaxTokens: 1.5 }]) assert.equal(validateSettings(input).ok, false)
 })

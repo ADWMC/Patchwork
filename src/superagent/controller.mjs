@@ -4,7 +4,7 @@ import { resolve } from 'node:path'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { isPatchworkAgent, requirePatchworkAgent } from '../scope.mjs'
 import { taskProjection, flushTasks } from '../task/store.mjs'
-import { defineJobs, runnableJobs, reservedChildId, bounded } from './state.mjs'
+import { defineJobs, runnableJobs, reservedChildId, bounded, sweepStalls, touchProgress, stalledSeconds, superagentStallConfig } from './state.mjs'
 import { persistController, restoreController } from './store.mjs'
 import { executorPrompt } from './prompt.mjs'
 import { taskMapText } from '../mechanisms/task-map/index.mjs'
@@ -56,6 +56,10 @@ export class SuperagentController {
     this.workspace = workspaceKey(owner.session.header.cwd)
     this.active = new Map(); this.tail = Promise.resolve(); this.pumping = false; this.closed = false
     this.epoch = 0; this.stopping = false; this.persistence = this.state.revision ? 'native' : 'not-saved'
+    this.stallThresholdMs = superagentStallConfig().thresholdMs
+    // 停滞扫描：活动队列里有作业超阈值无进展时沿阶梯升级。unref 定时器不挂住进程。
+    this.stallTimer = setInterval(() => { if (this.valid()) void this.sweep().catch(() => {}) }, Math.min(Math.max(30000, this.stallThresholdMs / 4), 60000))
+    this.stallTimer.unref?.()
     controllers.set(owner, this); live.add(this)
   }
   runtime() { return this.owner.ctx.get('subagents') }
@@ -68,7 +72,7 @@ export class SuperagentController {
     return { owner: this.state.owner, revision: this.state.revision, status: this.stopping ? 'paused' : this.state.status,
       concurrency: this.state.concurrency, generation: this.state.generation,
       teardownFailures: this.teardownFailures ?? 0, quarantinedExecutors: [...this.active.values()].filter(entry => entry.quarantined).length,
-      jobs: this.state.jobs.map(({ prompt, inputs, ...job }) => ({ ...job, inputCount: inputs.length })),
+      jobs: this.state.jobs.map(({ prompt, inputs, ...job }) => ({ ...job, inputCount: inputs.length, stalledSec: stalledSeconds(job) })),
       persistence: this.persistence, channels: ['dsh-session'] }
   }
   async commit(next, epoch = this.epoch) {
@@ -109,6 +113,17 @@ export class SuperagentController {
     locks?.delete(childId); if (!locks?.size) workspaceLocks.delete(this.workspace)
     for (const other of live) if (other !== this && other.workspace === this.workspace) other.kick()
   }
+  /** 停滞扫描：超阈值无进展的作业升级（review → blocked），通知父会话后继续派发。 */
+  async sweep(now = Date.now()) {
+    const threshold = this.stallThresholdMs
+    if (!threshold || !this.valid()) return
+    const escalated = sweepStalls(this.state, { thresholdMs: threshold, now })
+    if (escalated === this.state) return
+    const changes = escalated.jobs.filter((job, index) => job !== this.state.jobs[index])
+    await this.serial(async () => { await this.commit(escalated) })
+    for (const job of changes) this.wake({ kind: 'executor-stalled', jobId: job.id, level: job.stall.level, status: job.status, stalledSec: stalledSeconds(job, now), reason: job.stall.reason })
+    this.kick()
+  }
   kick() {
     if (!this.valid()) return
     if (this.pumping) { this.kickPending = true; return }
@@ -123,7 +138,7 @@ export class SuperagentController {
         if (this.state.jobs.reduce((n, j) => n + j.attempt, 0) >= this.state.maxAttempts) { void this.pause('attempt budget reached').catch(() => {}); break }
         const epoch = this.epoch, next = structuredClone(this.state), job = next.jobs.find(j => j.id === candidate.id)
         if (job.attempt >= 3) { job.status = 'failed'; next.revision++; await this.commit(next, epoch); continue }
-        job.status = 'starting'; job.attempt++; job.childId = reservedChildId(); job.report = null; next.revision++
+        job.status = 'starting'; job.attempt++; job.childId = reservedChildId(); job.report = null; job.progressAt = new Date().toISOString(); job.stall = null; next.revision++
         const locks = lock ?? new Map(); locks.set(job.childId, job.mode); workspaceLocks.set(this.workspace, locks)
         try {
           await this.commit(next, epoch)
@@ -200,6 +215,8 @@ export class SuperagentController {
         reviewable: result.stopReason === 'completed' && task?.persistence === 'native' && task?.understandingStatus === 'stated' && artifactsCurrent && machineChecks.length > 0 && machineChecks.every(r => r.status === 'passed'),
         artifacts, semantic: task?.requirements?.filter(r => r.kind === 'semantic').map(r => ({ id: r.id, status: r.status })) ?? [] }
       job.evidence.version = digest(job.evidence)
+      const progressed = touchProgress(job)
+      job.progressAt = progressed.progressAt; job.stall = null
       next.revision++
       if (next.jobs.every(j => j.status === 'done')) next.status = 'completed'
       await this.commit(next, epoch)
@@ -219,7 +236,7 @@ export class SuperagentController {
       if (!this.valid(binding.epoch)) throw new Error('assignment revoked')
       captureWorkerTask(worker)
       const next = structuredClone(this.state), job = next.jobs.find(j => j.id === binding.jobId)
-      job.report = { status, summary }; next.revision++; await this.commit(next, binding.epoch)
+      job.report = { status, summary }; job.progressAt = new Date().toISOString(); job.stall = null; next.revision++; await this.commit(next, binding.epoch)
       return { jobId: job.id, report: job.report, nativeTaskStatus: binding.latestTask?.status ?? 'unverified', final: false }
     })
   }
@@ -274,6 +291,7 @@ export class SuperagentController {
       }
       for (const j of next.jobs) if (affected.has(j.id)) { j.status = j.id === id ? 'queued' : j.attempt ? 'blocked' : 'queued'; j.report = null; j.evidence = null; j.result = null; j.recovery = j.id === id ? null : 'upstream changed; retry after review' }
       if (input) target.inputs.push(input)
+      for (const j of next.jobs) if (affected.has(j.id)) { j.progressAt = new Date().toISOString(); j.stall = null }
       next.status = 'active'; next.revision++; await this.commit(next)
     })
     this.kick(); return this.snapshot()
@@ -301,6 +319,7 @@ export class SuperagentController {
         if (resolved !== normalizePath(artifact.path) || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
       }
       job.disposition = { source: 'user-confirmed', accepted: accept === true, evidenceVersion, at: new Date().toISOString() }
+      job.progressAt = new Date().toISOString(); job.stall = null
       job.status = accept ? 'done' : 'blocked'; job.recovery = accept ? null : 'User rejected this result; correct and retry'
       next.revision++
       if (next.jobs.every(j => j.status === 'done')) next.status = 'completed'
@@ -314,7 +333,7 @@ export class SuperagentController {
     const ids = new Set(this.state.jobs.map(j => j.childId))
     return { queue: this.snapshot(), children: (catalog ?? []).filter(c => ids.has(c.id ?? c.sessionId)).map(c => ({ id: c.id ?? c.sessionId, status: c.status ?? null })), policy: 'Uncertain assignments remain blocked; inspect child evidence, then explicitly retry. No automatic replay.' }
   }
-  async close(reason) { this.closed = true; live.delete(this); try { await this.pause(reason) } finally { controllers.delete(this.owner) } }
+  async close(reason) { this.closed = true; clearInterval(this.stallTimer); live.delete(this); try { await this.pause(reason) } finally { controllers.delete(this.owner) } }
 }
 export function getController(agent, options) { requirePatchworkAgent(agent); return controllers.get(agent) ?? new SuperagentController(agent, options) }
 export function captureWorkerTask(agent) {

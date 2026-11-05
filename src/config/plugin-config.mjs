@@ -13,6 +13,7 @@ export const Config = Schema.object({
   evidencePreservingReducer: Schema.boolean().default(false),
   onlineContextCompact: Schema.boolean().default(false),
   taskMap: Schema.boolean().default(false),
+  superagentStallMs: Schema.number().min(0).max(3600000).step(1000).default(600000),
   reducerProvider: Schema.string(),
   reducerModel: Schema.string(),
   reducerMaxTokens: Schema.number().min(256).max(8192).step(1),
