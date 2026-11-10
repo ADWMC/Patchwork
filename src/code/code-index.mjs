@@ -213,11 +213,12 @@ export async function workspaceRoot(agent) {
 export async function resolveWithin(root, requested, { file = false } = {}) {
   if (typeof requested !== 'string' || !requested.trim() || requested.length > 2048) throw new CodeError('a workspace-relative or absolute path is required', 'CODE_PATH_REQUIRED')
   const candidate = isAbsolute(requested) ? resolve(requested) : resolve(root, requested)
-  if (!inside(root, candidate)) throw new CodeError('path is outside the workspace', 'CODE_PATH_OUTSIDE_WORKSPACE')
+  const realRoot = await realpath(root).catch(() => root)
+  if (!inside(root, candidate) && !inside(realRoot, candidate)) throw new CodeError('path is outside the workspace', 'CODE_PATH_OUTSIDE_WORKSPACE')
   let target
   try { target = await realpath(candidate) }
   catch { throw new CodeError('path does not exist', 'CODE_PATH_NOT_FOUND') }
-  if (!inside(root, target)) throw new CodeError('path is outside the workspace', 'CODE_PATH_OUTSIDE_WORKSPACE')
+  if (!inside(root, target) && !inside(realRoot, target)) throw new CodeError('path is outside the workspace', 'CODE_PATH_OUTSIDE_WORKSPACE')
   if (file) {
     const info = await stat(target)
     if (!info.isFile()) throw new CodeError('path is not a file', 'CODE_PATH_NOT_FILE')
@@ -468,7 +469,11 @@ export async function findReferences(index, { symbol, maxResults = CODE_DEFAULTS
 
 export async function outlineCode(index, path) {
   const requested = await resolveWithin(index.root, path, { file: true })
-  const rel = normalizeRel(relative(index.root, requested))
+  let rel = normalizeRel(relative(index.root, requested))
+  if (rel.startsWith('..')) {
+    const realRoot = await realpath(index.root).catch(() => index.root)
+    rel = normalizeRel(relative(realRoot, requested))
+  }
   const record = recordByPath(index, rel)
   if (!record) throw new CodeError('file is not indexed (ignored, binary or outside limits)', 'CODE_FILE_NOT_INDEXED')
   return { path: record.path, language: record.language, lines: record.lines, symbols: record.symbols ?? [], imports: record.imports ?? [], test: record.test, generated: record.generated }

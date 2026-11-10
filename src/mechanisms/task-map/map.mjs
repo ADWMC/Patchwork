@@ -1,4 +1,5 @@
 import { relative, isAbsolute, resolve } from 'node:path'
+import { realpath } from 'node:fs/promises'
 import { buildCodeIndex, outlineCode, callersOf } from '../../code/code-index.mjs'
 import { isCodeGraphStarted } from '../../code/tool.mjs'
 
@@ -15,9 +16,13 @@ const MAP_BUDGET_CHARS = 1800
 const MAX_ANCHOR_FILES = 8
 const MAX_SYMBOLS_PER_FILE = 12
 
-function relativeOf(root, path) {
+function relativeOf(root, path, realRoot) {
   const absolute = isAbsolute(path) ? path : resolve(root, path)
-  const rel = relative(root, absolute).replace(/\\/g, '/')
+  let rel = relative(root, absolute).replace(/\\/g, '/')
+  if (rel.startsWith('..') && realRoot) {
+    const fromReal = relative(realRoot, absolute).replace(/\\/g, '/')
+    if (!fromReal.startsWith('..')) rel = fromReal
+  }
   return rel.startsWith('..') ? absolute.replace(/\\/g, '/') : rel
 }
 
@@ -35,8 +40,8 @@ function boundedJoin(parts, budget) {
   return out
 }
 
-async function anchorLine(index, root, path, { withCallers }) {
-  const rel = relativeOf(root, path)
+async function anchorLine(index, root, path, { withCallers, realRoot }) {
+  const rel = relativeOf(root, path, realRoot)
   let outline
   try { outline = await outlineCode(index, rel) } catch { return null }
   const symbols = (outline?.symbols ?? []).slice(0, MAX_SYMBOLS_PER_FILE).map(symbol => `${symbol.name}@${symbol.line}`)
@@ -69,10 +74,11 @@ export async function buildTaskMap({ cwd, references = [], artifacts = [], maxFi
     return { text: '', anchored: [] }
   }
   const withCallers = isCodeGraphStarted(cwd)
+  const realRoot = await realpath(cwd).catch(() => cwd)
   const limited = paths.slice(0, MAX_ANCHOR_FILES)
   const lines = []
   for (const path of limited) {
-    const line = await anchorLine(index, cwd, path, { withCallers })
+    const line = await anchorLine(index, cwd, path, { withCallers, realRoot })
     if (line) lines.push(line)
   }
   if (!lines.length) return { text: '', anchored: [] }
