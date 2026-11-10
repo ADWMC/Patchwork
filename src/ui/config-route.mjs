@@ -2,6 +2,7 @@ import { configRevision, effectiveConfig, mergeUserConfigState, readUserConfig, 
 import { webRuntime } from './web-runtime.mjs'
 import { resolvePatchworkAgent } from '../scope.mjs'
 import { logDiagnostic } from '../logging/session-log.mjs'
+import { crossSiteRequest } from './request-guard.mjs'
 
 export const CONFIG_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/config'
 export const CONFIG_TOKEN_HEADER = 'x-patchwork-token'
@@ -48,6 +49,7 @@ export function registerConfigRoute(ctx, { token, rowConfig = {}, onSaved } = {}
 
         if (req.method !== 'POST') return reply(405, { ok: false, reason: 'method-not-allowed' })
         if (req.headers[CONFIG_TOKEN_HEADER] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+        if (crossSiteRequest(req)) return reply(403, { ok: false, reason: 'cross-site-request' })
         const sessionId = new URL(req.url ?? CONFIG_ROUTE_PATH, 'http://localhost').searchParams.get('sessionId')
         if (!resolvePatchworkAgent(ctx, sessionId)) return reply(403, { ok: false, reason: 'patchwork-agent-required' })
 

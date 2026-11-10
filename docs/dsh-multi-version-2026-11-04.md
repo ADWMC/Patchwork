@@ -56,9 +56,9 @@ DSH 的 `dsh-app-boot` 在导入插件前检查清单：
 
 | 宿主 | 命令 | 结果 |
 |---|---|---|
-| 0.2.1-rc.2 | `node scripts/set-dsh-version.mjs 0.2.1-rc.2 --install` + `npm test` | 452 pass / 0 fail |
-| 0.2.1-rc.5 | `npm test` | 452 pass / 0 fail |
-| 0.2.2-alpha.3 | `node scripts/set-dsh-version.mjs 0.2.2-alpha.3 --install` + `npm test` | 452 pass / 0 fail |
+| 0.2.1-rc.2 | `node scripts/set-dsh-version.mjs 0.2.1-rc.2 --install` + `npm test` | 511 pass / 0 fail |
+| 0.2.1-rc.5 | `npm test` | 511 pass / 0 fail |
+| 0.2.2-alpha.3 | `node scripts/set-dsh-version.mjs 0.2.2-alpha.3 --install` + `npm test` | 511 pass / 0 fail |
 
 真实入口验证：
 

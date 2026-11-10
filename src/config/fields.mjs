@@ -1,3 +1,6 @@
+import { MODEL_PRESETS, detectModelPreset } from './model-presets.mjs'
+export { MODEL_PRESETS, detectModelPreset }
+
 export const SETTING_FIELDS = [
   ['actionFusion', 'boolean', true, '接续执行', 'mechanism'], ['observationPack', 'boolean', false, '大输出归档', 'mechanism'], ['evidencePreservingReducer', 'boolean', false, '证据约简', 'mechanism'], ['onlineContextCompact', 'boolean', false, '上下文压缩', 'mechanism'], ['taskMap', 'boolean', false, '任务锚定地图', 'mechanism'], ['superagentStallMs', 'integer', 600000, '主控作业停滞升级阈值（毫秒，0 关闭）', 'mechanism', 0, 3600000],
   ['cacheWriteReadRatio', 'number', 12.5, '缓存写入 / 读取成本比', 'mechanism', 0],
@@ -24,4 +27,49 @@ export function validateSettings(raw) {
     value[key] = item
   }
   return { ok: true, value }
+}
+
+export const CONFIG_PRESETS = {
+  craftsman: {
+    label: '工匠严谨模式 (Craftsman Mode)',
+    description: '严格执行品味契约、反证法假设核对、双轨回执验证与证据门禁。',
+    settings: {
+      actionFusion: true,
+      observationPack: true,
+      evidencePreservingReducer: true,
+      onlineContextCompact: true,
+      evidenceGate: true,
+      taskPolicyMode: 'strict',
+      nativeSearch: true,
+      nativeFetch: true,
+      codeEnabled: true,
+    },
+  },
+  agile: {
+    label: '敏捷工匠模式 (Agile Mode)',
+    description: '极速代码迭代，轻量验证，自动静默管理上下文与搜索。',
+    settings: {
+      actionFusion: true,
+      observationPack: false,
+      evidencePreservingReducer: false,
+      onlineContextCompact: false,
+      evidenceGate: false,
+      taskPolicyMode: 'structured',
+      nativeSearch: true,
+      nativeFetch: true,
+      codeEnabled: true,
+    },
+  },
+  explore: {
+    label: '只读探索模式 (Explore Mode)',
+    description: '只读代码拓扑索引与外部检索，严禁写入或变更。',
+    settings: {
+      actionFusion: true,
+      codeEnabled: true,
+      nativeSearch: true,
+      nativeFetch: true,
+      evidenceGate: true,
+      taskPolicyMode: 'structured',
+    },
+  },
 }

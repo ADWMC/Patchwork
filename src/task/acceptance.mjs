@@ -13,6 +13,20 @@ export async function artifactStamp(path) {
   if (!s.isFile()) throw new Error('artifact must be a file')
   return `${s.size}:${s.mtimeMs}:${s.ctimeMs}`
 }
+
+export async function captureVisualReceipt(agent, options = {}) {
+  try {
+    const { browserClient } = await import('../../packages/browser/src/browser/tool.mjs')
+    const client = browserClient(agent)
+    if (!client) return { visual: { status: 'skipped', reason: 'browser-not-attached' } }
+    if (options.url) await client.action({ action: 'open', url: options.url })
+    if (options.viewport) await client.action({ action: 'resize', ...options.viewport })
+    const receipt = await client.action({ action: 'screenshot' })
+    return { visual: { status: 'passed', screenshotPath: receipt.path } }
+  } catch (err) {
+    return { visual: { status: 'failed', reason: err.message } }
+  }
+}
 export async function registerArtifact(agent, data, baseRevision) {
   const state = taskState(agent)
   if (!isAbsolute(data.path)) throw new Error('absolute artifact path required')
@@ -79,9 +93,14 @@ export async function executeAcceptance(agent, args, exec) {
     try { if (await artifactStamp(a.path) !== a.stamp) current = false } catch { current = false }
   }
   if (before.instance) outcome = 'unknown' // Declared endpoint is not a verified execution environment.
+  let visual = null
+  if (args.visual) {
+    const v = await captureVisualReceipt(agent, typeof args.visual === 'object' ? args.visual : {})
+    visual = v?.visual
+  }
   const receipt = { id: randomUUID(), requirementId: requirement.id, revision, unit, kind: requirement.kind,
     outcome, current, exitCode, tool: taskId(tool), callId: safeLabel(callId, 256), instanceId: null,
-    targets: targets.map(({ id, version }) => ({ id, version })), at: Date.now() }
+    targets: targets.map(({ id, version }) => ({ id, version })), at: Date.now(), ...(visual ? { visual } : {}) }
   transitionTask(agent, { kind: 'receipt', receipt })
   if (!current && taskState(agent).revision === revision) transitionTask(agent, { kind: 'invalidate', targets: requirement.targets })
   await flushTasks(agent)

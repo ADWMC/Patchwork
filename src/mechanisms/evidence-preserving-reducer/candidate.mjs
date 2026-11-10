@@ -8,17 +8,9 @@ import {
 import { HANDLE_PREFIX } from '../observation-pack/observation.mjs'
 import { commandFailed } from '../../util/tool-outcome.mjs'
 import { redactPreview } from '../../logging/redact.mjs'
+import { isTextOnly, textOf } from '../../util/content-blocks.mjs'
 
 const SHELL_TOOLS = new Set(['bash', 'pwsh'])
-
-function isTextOnly(content) {
-  if (!Array.isArray(content) || content.length === 0) return false
-  return content.every(block => block?.type === 'text' && typeof block.text === 'string')
-}
-
-function textOf(content) {
-  return content.map(block => block.text).join('\n')
-}
 
 /**
  * 判定一次工具结果是否是可约简的诊断日志。

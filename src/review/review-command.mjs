@@ -3,7 +3,8 @@ import { fileURLToPath } from 'node:url'
 import { requirePatchworkAgent } from '../scope.mjs'
 
 const promptPath = fileURLToPath(new URL('../../assets/prompts/user-review-prompt.md', import.meta.url))
-const prompt = (await readFile(promptPath, 'utf8')).trim()
+let prompt = 'Review the current changes from a user perspective: find concrete bugs and UX defects, and state the evidence for each claim.'
+try { prompt = (await readFile(promptPath, 'utf8')).trim() } catch { /* A missing prompt must not break the runtime. */ }
 
 const DEFAULT_SCOPE = '当前工作区最近未提交的改动；没有改动时评审产品核心用户路径'
 

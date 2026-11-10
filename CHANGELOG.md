@@ -6,6 +6,16 @@
 
 ### 新增
 
+- 工匠认知架构 (Patchwork Craftsman Architecture)：
+  - 项目工程品味契约（`.patchwork/taste.md`）与轻量切片引擎（`TasteEngine`），在 `agent/pre-step` 拦截点按改动文件动态注入架构不变式、实现品味与绝对禁手规则（单步预算 < 500 tokens）。
+  - 品味哨兵（`Invariants Sentinel`）：静态阻止破坏性反模式，对空的 `catch {}` 块与删除测试断言的 diff 变更进行快速失败。
+  - 任务流去官僚化：`patchwork_task check` 传入 `path` 时自动关联注册产物目标，消除必须先执行 `artifact` 再 `check` 的官僚循环。
+  - 记忆系统静默暗流唤醒：在 `agent/pre-step` 自动检索当前项目已验证的 Top-3 鲜活记忆（< 300 tokens）注入上下文，告别模型因未卜先知而永不主动调用 `patchwork_memory(action: 'recall')` 的死穴。
+  - 工作流与模型认知双层预设：
+    - 工作流预设：一键应用工匠模式（Craftsman）、敏捷模式（Agile）、探索模式（Explore）。
+    - 模型认知预设：针对 DeepSeek（DSH 原生超长自省推理）与 StepFun（树状规划、防御性 Guard Clauses 与 8192 Token 饥饿防范）定制认知策略，支持在工程 `.patchwork/model-presets.json` 或全局 `~/.dsh/patchwork/model-presets.json` 动态覆盖自定义。
+  - 真实端到端测试与基准升级：自动化测试提升至 519 项，全部通过；工程闭包验证 9/9 项 100% 通过。
+
 - 行为门（测试基建，无用户可见开关）：`tests/skill-behavior.test.mjs` 为全部 14 个技能各配遵守/违反双向探针并断言评分器判定，覆盖门确保新技能必须带探针；`tests/real-composition/behavior-contracts.test.mjs` 补上纠正使旧证据失效、语义验收保持 unknown 且仅宿主确认可接纳的契约级断言。
 - 妥协账本：有意留下的妥协按 `shortcut: <限制>, <何时升级>` 注释登记；改动文件已带登记时，宿主在 mutation 工具执行后把该文件的妥协顺手注入会话（按会话冷却，不重复）；扩展技能 `debt` 汇总全仓账本，标出可升级条目。约定写入 standards 技能。
 - 任务锚定地图（新机制，配置键 `taskMap`，默认关）：`patchwork_task define` 声明的引用与登记产物周围的符号（及代码图开启时的调用方）以有界 notice 注入会话；压缩后可再注入，correct 移走锚点即重建，任务取消后不再注入。Superagent 执行器简报携带父会话同一份锚定上下文。地图是 facts 不是指令，与文件实际状态不符时以文件和 `patchwork_code` 为准。
@@ -16,6 +26,17 @@
 
 - `patchwork_search` 新增两个免密钥 JSON 检索来源并默认启用：`uapis-keyless`（uapis.cn 聚合搜索，访客积分免注册）与 `tavily-keyless`（Tavily 匿名档，请求头声明 keyless 访问模式）。默认来源变为五个：bing-rss、brave-html、uapis-keyless、tavily-keyless、duckduckgo-html；任一来源失败、超时或返回空结果不阻塞其余来源，健康状态按来源分别记录。设置页来源白名单上限从 3 调整为 5。
 - 内置 HTTP 客户端支持 POST JSON 请求（请求体经 stdin 传递，不进入命令行参数；GET 行为不变），上述两个来源与既有检索共用公网地址检查、重定向契约与响应大小上限。
+
+### 修复
+
+- 任务锚定地图的注入日志、能力状态卡与执行计数恢复可见：补齐 `taskMap` 机制、`inject` 事件与 `task-anchored-map` 原因码白名单；`shortcut-ledger` 不再被记为 `exception`。
+- 热重载关闭 `taskMap` 后不再继续向 Superagent 执行器注入地图；OCC 在会话销毁时清理按会话累积的状态映射。
+- 结构警告与妥协账本共用串行化的状态文件读写，避免并发丢失冷却计数。
+- 工作台轮询按文件 mtime 缓存项目文档、代码图配置与记忆快照，页面隐藏时退避到 10 秒；一次快照内任务投影只计算一次。
+- Superagent 产物校验改为异步读取并设置 8 MiB 上限，避免大文件阻塞事件循环。
+- robots.txt 支持 `Allow`、通配符与最长匹配优先；插件路由拒绝明显的跨站请求。
+- 收敛重复的路径、中止信号、内容块与 HTML 实体工具；资源文件缺失时评审、结构提醒与 UI 指导不再阻断运行时。
+- 文档同步：测试数 511、扩展技能 14 个、浏览器包 `dsh-tools` peer 下限与引擎一致。
 
 ### 调整
 
@@ -68,7 +89,7 @@
 - 工作台重组为 **总览 / 执行 / 证据 / 管理 / 诊断 / 设置** 六个一级页面，每个重领域最多两个二级视图：执行（任务、主控）、证据（工具、检索）、管理（记忆、改进）、诊断（能力、日志）。一级和二级标签显示待处理数量；没有队列、检索或改进数据时隐藏对应二级视图，记忆在关闭或空数据时保留查看入口。宽屏下主控、日志和记忆使用列表/详情布局，机制与设置使用双列网格。
 - 任务、主控、技能加载、引用对比、配置保存、结构检查以及 UI 端记忆/改进操作统一写入诊断日志；新增任务、主控、技能、引用、设置、结构检查机制和对应事件文案，日志支持最近 15 分钟 / 1 小时 / 4 小时范围筛选。日志仍只保存白名单元数据，不记录提示词、命令原文或凭据。
 - GitHub Actions 扩充：`Validate` 增加 pnpm 缓存、依赖审计和真模型审计证据校验；新增 `CodeQL` 静态分析、PR `Dependency review`、每周 `Security audit`，以及标签/手动触发的 `Package`（只上传两个 `.tgz`，不发布 npm、不创建 Release）。所有 Actions 固定到完整 commit SHA，不调用付费模型。
-- 支持 DSH 多版本：主包与可选浏览器包声明 `engines.dsh: ">=0.2.1-rc.2 <0.3.0-0"`；新增单次/批处理工具执行适配，兼容 0.2.2-alpha.3 的 `tools.execute({ calls })`；preset 归一化移除被删除的 `list-agents` 子路径，并同时携带新旧子代理模型选择键。0.2.1-rc.2、0.2.1-rc.5 与 0.2.2-alpha.3 均通过 452 项测试；新增 `DSH compatibility` 工作流与 `scripts/set-dsh-version.mjs`，详见[多版本说明](docs/dsh-multi-version-2026-11-04.md)。
+- 支持 DSH 多版本：主包与可选浏览器包声明 `engines.dsh: ">=0.2.1-rc.2 <0.3.0-0"`；新增单次/批处理工具执行适配，兼容 0.2.2-alpha.3 的 `tools.execute({ calls })`；preset 归一化移除被删除的 `list-agents` 子路径，并同时携带新旧子代理模型选择键。0.2.1-rc.2、0.2.1-rc.5 与 0.2.2-alpha.3 均通过 511 项测试；新增 `DSH compatibility` 工作流与 `scripts/set-dsh-version.mjs`，详见[多版本说明](docs/dsh-multi-version-2026-11-04.md)。
 
 ### 新增
 

@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto'
+import { readFileSync, statSync } from 'node:fs'
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
@@ -271,12 +272,32 @@ export async function recallMemory(agent, { query = '', includeProject = false, 
   return { status: 'indexed', revision: database.revision, entries, includeProject }
 }
 
+let snapshotCache = { path: null, stamp: null, database: null }
+
+/** The panel polls frequently; re-parse only when the file actually changed. */
+function readDatabaseSync(path) {
+  try {
+    const info = statSync(path)
+    const stamp = `${info.size}:${info.mtimeMs}:${info.ctimeMs}`
+    if (snapshotCache.path === path && snapshotCache.stamp === stamp) return { database: snapshotCache.database }
+    const database = normalizeDatabase(JSON.parse(readFileSync(path, 'utf8')))
+    snapshotCache = { path, stamp, database }
+    return { database }
+  } catch (error) {
+    snapshotCache = { path: null, stamp: null, database: null }
+    if (error?.code === 'ENOENT') return {}
+    return { error: error?.code === 'EACCES' ? 'MEMORY_READ_DENIED' : 'MEMORY_DATABASE_INVALID' }
+  }
+}
+
 export function memorySnapshot(agent, { includeValue = true, includeProject = true } = {}) {
   if (!isPatchworkAgent(agent)) return null
   const path = memoryPath()
   const state = states.get(path)
   if (state?.error) return { schemaVersion: 1, persistence: 'failed', failureCode: state.error, automaticInjection: 'disabled', recovery: 'Inspect memory.json; memory.json.bak contains the last validated version. Restore only after stopping writers.', revision: null, entries: [] }
-  const database = state?.database ?? emptyDatabase()
+  const fresh = readDatabaseSync(path)
+  if (fresh.error) return { schemaVersion: 1, persistence: 'failed', failureCode: fresh.error, automaticInjection: 'disabled', recovery: 'Inspect memory.json; memory.json.bak contains the last validated version. Restore only after stopping writers.', revision: null, entries: [] }
+  const database = fresh.database ?? state?.database ?? emptyDatabase()
   const visible = database.records.filter(record => readScope(record, agent, includeProject))
   const entries = visible.slice(-MEMORY_LIMIT).map(record => cleanRecord(record, { includeValue }))
   return { schemaVersion: 1, persistence: 'file', automaticInjection: 'disabled', namespaceEpoch: database.namespaceEpoch, revision: database.revision, entryCount: visible.length, hasMore: visible.length > entries.length, entries }

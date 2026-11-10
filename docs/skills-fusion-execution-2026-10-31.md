@@ -12,9 +12,9 @@
 
 1. 收紧原七技能的触发与行为边界：删除假二选一、固定重试、无条件任务登记等容易造成误判或额外调用的措辞；`patchwork` 负责导航，横切的验收、协作、标准按需加载。七个旧名称保留。
 2. 新增六个原生 DSH 技能和条件参考。检索技能复用来源治理与工具可用性检查；读到足够回答问题的官方原文后应停止，provider 因凭据或网络边界失败后不循环重试。`web-ui` 的已有参考继续按需读取，未直接安装第三方技能或用户 ZIP 中的指令。
-3. `src/skills/register.mjs` 默认注册七个 `core` 技能，显式 `skillsMode: expanded` 注册十三个，`skillsEnabled: false` 关闭；正文经宿主 `skill` 工具渐进披露，没有写入 systemPrompt。非 Patchwork Agent 的工具/技能隔离由现有注册与组合测试检查。
+3. `src/skills/register.mjs` 默认注册七个 `core` 技能，显式 `skillsMode: expanded` 注册十四个，`skillsEnabled: false` 关闭；正文经宿主 `skill` 工具渐进披露，没有写入 systemPrompt。非 Patchwork Agent 的工具/技能隔离由现有注册与组合测试检查。
 4. 对真实评审中暴露的额外任务工具调用，允许一次性只读任务不登记；未登记任务仍禁止结构化 `write/edit`。`/patchwork-review` 提示词明确禁止临时探针或写文件命令。对应守卫位于 `src/task/`，有回归测试。
-5. README、英文 README、CHANGELOG、更新日志指南及发行包清单与当前显式试用状态同步。扩展十三技能尚未证明质量提升；检索复测退化后默认目录已退回 `core`。
+5. README、英文 README、CHANGELOG、更新日志指南及发行包清单与当前显式试用状态同步。扩展十四技能尚未证明质量提升；检索复测退化后默认目录已退回 `core`。
 
 ## 隔离真实调用
 

@@ -1,5 +1,6 @@
 import { nativeFetch } from './http-client.mjs'
 import { assertPublicTarget, fetchPublicResponse } from './public-fetch.mjs'
+import { combinedSignal } from '../util/abort-signal.mjs'
 import { parseBingRss, parseBraveResults, parseDuckDuckGoResults, providerParsers } from './provider-parsers.mjs'
 import { createHash } from 'node:crypto'
 import { lookup } from 'node:dns/promises'
@@ -41,11 +42,6 @@ function boundedLimit(maxResults) {
 function boundedText(value, limit) {
   const text = String(value ?? '').replace(/\s+/g, ' ').trim()
   return text.length > limit ? `${text.slice(0, limit)}…` : text
-}
-
-function combinedSignal(signal, timeoutMs) {
-  const timeout = AbortSignal.timeout(Math.max(1000, Math.min(30000, Math.trunc(Number(timeoutMs) || 15000))))
-  return signal ? AbortSignal.any([signal, timeout]) : timeout
 }
 
 async function responseText(response) {

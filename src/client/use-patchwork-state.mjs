@@ -34,7 +34,11 @@ export function usePatchworkState(sessionId) {
       return () => { controller.abort() }
     }
     setConnection('loading')
+    let reading = false
+    const delay = () => (typeof document !== 'undefined' && document.hidden ? 10000 : 2000)
     async function read() {
+      if (reading) return
+      reading = true
       const current = version.current
       try {
         const response = await fetch(metadata.statePath+'?sessionId='+encodeURIComponent(sessionId), {
@@ -50,10 +54,25 @@ export function usePatchworkState(sessionId) {
         if (!stopped && current === version.current) { setSnapshot(data); setConnection('connected'); setError('') }
       } catch (e) {
         if (!stopped) { setConnection('offline'); setError(e.message) }
-      } finally { if (!stopped) timer = setTimeout(read, 2000) }
+      } finally {
+        reading = false
+        if (!stopped) timer = setTimeout(read, delay())
+      }
     }
+    // A hidden panel polls slowly; becoming visible refreshes immediately.
+    const onVisible = () => {
+      if (typeof document === 'undefined' || document.hidden || stopped) return
+      clearTimeout(timer)
+      void read()
+    }
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisible)
     void read()
-    return () => { stopped = true; controller.abort(); clearTimeout(timer) }
+    return () => {
+      stopped = true
+      controller.abort()
+      clearTimeout(timer)
+      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [sessionId, refreshKey])
 
   async function save(patch, revision) {

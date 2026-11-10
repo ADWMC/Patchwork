@@ -1,6 +1,7 @@
 import { nativeFetch } from '../retrieval/http-client.mjs'
 import { webRuntime } from './web-runtime.mjs'
 import { isNewer, packageVersion, releaseApiUrl, repositoryUrl } from '../util/version.mjs'
+import { crossSiteRequest } from './request-guard.mjs'
 
 export const UPDATE_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/update-check'
 const routeKey = `exact\u0000${UPDATE_ROUTE_PATH}`
@@ -64,6 +65,7 @@ export function registerUpdateRoute(ctx, { token } = {}) {
         }
         if (req.method !== 'POST') return reply(405, { ok: false, reason: 'method-not-allowed' })
         if (req.headers['x-patchwork-token'] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+        if (crossSiteRequest(req)) return reply(403, { ok: false, reason: 'cross-site-request' })
         try {
           const result = await checkForUpdate()
           return reply(200, result)

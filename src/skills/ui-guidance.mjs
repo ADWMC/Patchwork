@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { isPatchworkAgent } from '../scope.mjs'
+import { textOf } from '../util/content-blocks.mjs'
 
 const skillPath = fileURLToPath(new URL('../../assets/skills/web-ui/SKILL.md', import.meta.url))
 const referencePath = fileURLToPath(new URL('../../assets/skills/web-ui/references', import.meta.url))
@@ -12,30 +13,29 @@ export function matchesUiWork(text) {
   return typeof text === 'string' && surface.test(text) && action.test(text)
 }
 
-function textOf(message) {
-  return (message?.content ?? []).filter(block => block?.type === 'text').map(block => block.text).join('\n')
-}
-
 function bundledBody() {
-  const raw = readFileSync(skillPath, 'utf8').replace(/^\uFEFF/, '')
-  const end = raw.indexOf('\n---', 3)
-  return end < 0 ? raw.trim() : raw.slice(end + 4).trim()
+  try {
+    const raw = readFileSync(skillPath, 'utf8').replace(/^\uFEFF/, '')
+    const end = raw.indexOf('\n---', 3)
+    return end < 0 ? raw.trim() : raw.slice(end + 4).trim()
+  } catch { return '' }
 }
 
 /** Activate bundled UI guidance only for Patchwork UI work turns. */
 export function registerUiGuidance(ctx, config = {}, body) {
   if (config.skillsEnabled === false) return
   body ??= bundledBody()
+  if (!body) return
   const seen = new WeakMap()
   ctx.on('agent/pre-step', async ({ agent, messages }, next) => {
     const decision = await next()
     if (decision.kind !== 'enter' || !isPatchworkAgent(agent)) return decision
     const incoming = (messages ?? []).filter(message => message?.source?.kind === 'user')
-    const match = incoming.findLast(message => matchesUiWork(textOf(message)))
+    const match = incoming.findLast(message => matchesUiWork(textOf(message?.content ?? [])))
     if (!match) return decision
     let ids = seen.get(agent)
     if (!ids) seen.set(agent, ids = new Set())
-    const key = match.id ?? textOf(match)
+    const key = match.id ?? textOf(match?.content ?? [])
     if (ids.has(key)) return decision
     ids.add(key)
     if (ids.size > 32) ids.delete(ids.values().next().value)

@@ -2,7 +2,7 @@ import { registerActionFusion } from './action-fusion/index.mjs'
 import { registerObservationPack } from './observation-pack/index.mjs'
 import { registerEvidencePreservingReducer } from './evidence-preserving-reducer/index.mjs'
 import { registerOnlineContextCompact } from './online-context-compact/index.mjs'
-import { registerTaskMap } from './task-map/index.mjs'
+import { registerTaskMap, setTaskMapEnabled } from './task-map/index.mjs'
 
 /** 机制的中文名与配置键一一对应，命名与 configure 键保持同一个概念一个名字。 */
 const MECHANISM_LABELS = {
@@ -29,6 +29,9 @@ const MECHANISM_REGISTRARS = new Map([
  * 不一致，比直接报错更难排查。
  */
 export function registerConfiguredMechanisms(ctx, config = {}) {
+  // Module state survives a hot reload; always reflect the current config so a
+  // disabled task map cannot keep feeding Superagent executors.
+  setTaskMapEnabled(config.taskMap === true)
   for (const [key, label] of Object.entries(MECHANISM_LABELS)) {
     if (!config[key]) continue
     const register = MECHANISM_REGISTRARS.get(key)

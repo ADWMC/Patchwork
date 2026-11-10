@@ -4,7 +4,9 @@ import { registerActionChecks } from './action-check.mjs'
 import { executeAcceptance, registerArtifact } from './acceptance.mjs'
 import { flushTasks, taskProjection, taskSummary, transitionTask } from './store.mjs'
 import { HANDOFF_SOURCE, hasTaskHandoff, taskHandoff, taskHandoffText } from './handoff.mjs'
-import { currentPolicy, policyOutputs, revokePolicies } from '../improvement/policy.mjs'
+import { currentPolicy, policyOutputs } from '../improvement/policy.mjs'
+import { recallMemory } from '../memory/store.mjs'
+import { resolveModelPreset } from '../config/model-presets-loader.mjs'
 
 const item = { type: 'object', properties: {
   id: { type: 'string', description: 'Stable acceptance id, later used as check.id.' }, label: { type: 'string' }, kind: { type: 'string', enum: ['command', 'artifact', 'semantic'] },
@@ -17,7 +19,7 @@ function boundedOutput(result, max = 4000) {
   return text.length > max ? `${text.slice(0, max)}\n[output truncated to ${max} characters]` : text
 }
 
-export function registerTaskLifecycle(ctx, config = {}) {
+export function registerTaskLifecycle(ctx, config = {}, tasteEngine) {
   registerActionChecks(ctx, config)
   ctx.on('agent/inbox/inserted', ({ agent, message }) => {
     if (!isPatchworkAgent(agent) || message?.source?.kind === 'patchwork' || !message?.id) return
@@ -28,7 +30,28 @@ export function registerTaskLifecycle(ctx, config = {}) {
     const decision = await next()
     if (!isPatchworkAgent(agent) || decision.kind !== 'enter') return decision
     const policy = policyOutputs(currentPolicy(agent), { hasTask: Boolean(taskProjection(agent)?.title) })
-    const summary = taskHandoffText(agent) + (policy.deliveryReminder ? '\n' + policy.deliveryReminder : '')
+    let summary = taskHandoffText(agent) + (policy.deliveryReminder ? '\n' + policy.deliveryReminder : '')
+    try {
+      const activeModelPreset = resolveModelPreset(config, agent?.session?.header, agent?.session?.header?.cwd)
+      if (activeModelPreset?.cognitiveNudge) {
+        summary += '\n\n' + activeModelPreset.cognitiveNudge
+      }
+    } catch { /* Model cognitive nudge fails open */ }
+    if (tasteEngine) {
+      try {
+        const task = taskProjection(agent)
+        const affected = task?.affected ?? []
+        const tasteNotice = await tasteEngine.getContextInjection(affected)
+        if (tasteNotice) summary += '\n\n' + tasteNotice
+      } catch { /* Taste injection fails open */ }
+    }
+    try {
+      const recalled = await recallMemory(agent, { includeProject: true, limit: 3 })
+      if (recalled?.entries?.length > 0) {
+        const lines = recalled.entries.map(e => `• [${e.kind}] ${e.key}: ${e.value}`)
+        summary += `\n\n[Active Project Experience]\n${lines.join('\n')}`
+      }
+    } catch { /* Memory auto-feed fails open */ }
     if (hasTaskHandoff(agent, summary, decision.messages)) return decision
     return { ...decision, messages: [...decision.messages, createUserMessage({
       content: [{ type: 'text', text: summary }], source: { kind: 'patchwork', form: 'notice', summary: HANDOFF_SOURCE },
@@ -55,6 +78,7 @@ export function registerTaskLifecycle(ctx, config = {}) {
       command: { type: 'string', description: 'TOP LEVEL shell command that check executes itself. Do not pre-run it through shell just to attach a result. Register current targets first; never a nested arguments object.' },
       description: { type: 'string', description: 'Purpose of the check command.' },
       rules: { type: 'object', description: 'Required for check on an artifact requirement: inspect its registered target file for these structure rules. Command requirements instead use command/tool; assessment is only for semantic requirements.', properties: { minLength: { type: 'integer', description: 'Minimum character count (not bytes).' }, maxLength: { type: 'integer', description: 'Maximum character count (not bytes).' }, anchors: { type: 'array', items: { type: 'string' } } }, additionalProperties: false },
+      visual: { type: 'object', description: 'Optional visual verification options: url and viewport dimensions.', properties: { url: { type: 'string' }, viewport: { type: 'object', properties: { width: { type: 'integer' }, height: { type: 'integer' } } } }, additionalProperties: false },
       verdict: { type: 'string', enum: ['supported', 'contradicted', 'unknown'] },
       sourceReceiptId: { type: 'string' }, trigger: { type: 'string' }, label: { type: 'string' },
     }, required: ['action'], additionalProperties: false },
@@ -71,6 +95,12 @@ export function registerTaskLifecycle(ctx, config = {}) {
         await registerArtifact(agent, args, args.baseRevision)
       }
       else if (args.action === 'check') {
+        if (args.path && args.id && Number.isSafeInteger(args.baseRevision)) {
+          try {
+            await registerArtifact(agent, { id: args.id, path: args.path }, args.baseRevision)
+            args.baseRevision = taskProjection(agent).revision
+          } catch { /* Auto-register artifact when path is passed with check */ }
+        }
         const checked = await executeAcceptance(agent, { ...args, tool: args.tool ?? 'pwsh', arguments: { command: args.command, description: args.description ?? 'Verify declared acceptance' } }, exec)
         receipt = checked.receipt
         output = boundedOutput(checked.result)

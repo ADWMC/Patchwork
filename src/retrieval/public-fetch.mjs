@@ -1,6 +1,8 @@
 import { lookup } from 'node:dns/promises'
 import { isIP } from 'node:net'
 import { nativeFetch } from './http-client.mjs'
+import { combinedSignal } from '../util/abort-signal.mjs'
+import { decodeHtmlEntities as decodeEntities } from '../util/html-text.mjs'
 
 const MAX_URL_LENGTH = 4096
 const MAX_RESPONSE_BYTES = 2_000_000
@@ -28,11 +30,6 @@ export class NativeFetchError extends Error {
 function boundedNumber(value, fallback, min, max) {
   const number = Math.trunc(Number(value))
   return Number.isFinite(number) ? Math.max(min, Math.min(max, number)) : fallback
-}
-
-function combinedSignal(signal, timeoutMs) {
-  const timeout = AbortSignal.timeout(Math.max(1000, Math.min(30_000, Math.trunc(Number(timeoutMs) || NATIVE_FETCH_DEFAULTS.timeoutMs))) )
-  return signal ? AbortSignal.any([signal, timeout]) : timeout
 }
 
 export function normalizeFetchUrl(value) {
@@ -99,10 +96,6 @@ export async function assertPublicTarget(url, { allowedHosts = [], lookupImpl = 
   return target
 }
 
-function decodeEntities(value) {
-  return String(value ?? '').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'").replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&#(\d+);/g, (_, digits) => String.fromCodePoint(Number(digits))).replace(/&#x([\da-f]+);/gi, (_, digits) => String.fromCodePoint(parseInt(digits, 16)))
-}
-
 function htmlToMarkdown(html, maxChars) {
   let value = String(html ?? '').replace(/<!--[\s\S]*?-->/g, '').replace(/<\s*(script|style|noscript|template|svg|canvas)\b[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
   const title = /<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(value)?.[1]
@@ -117,10 +110,21 @@ function htmlToMarkdown(html, maxChars) {
   return { title: decodeEntities(title ? title.replace(/<[^>]+>/g, ' ') : '').replace(/\s+/g, ' ').trim(), excerpt: truncated ? `${value.slice(0, maxChars)}\n[… excerpt truncated …]` : value, truncated }
 }
 
+function robotsPattern(value) {
+  let out = '^'
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index]
+    if (char === '*') out += '.*'
+    else if (char === '$' && index === value.length - 1) out += '$'
+    else out += char.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+  }
+  return new RegExp(out)
+}
+
 function parseRobots(text, target) {
   const groups = []
-  let active = false
-  let rules = []
+  let current
+  let lastWasAgent = false
   for (const raw of String(text ?? '').split(/\r?\n/)) {
     const line = raw.split('#')[0].trim()
     if (!line) continue
@@ -129,14 +133,30 @@ function parseRobots(text, target) {
     const key = line.slice(0, separator).trim().toLowerCase()
     const value = line.slice(separator + 1).trim()
     if (key === 'user-agent') {
-      if (active && rules.length) groups.push(rules)
-      active = value === '*' || value.toLowerCase() === USER_AGENT.toLowerCase()
-      rules = active ? [] : rules
-    } else if (key === 'disallow' && active && value) rules.push(value)
+      if (!current || !lastWasAgent) { current = { agents: [], rules: [] }; groups.push(current) }
+      current.agents.push(value.toLowerCase())
+      lastWasAgent = true
+      continue
+    }
+    lastWasAgent = false
+    if (!current) continue
+    if ((key === 'allow' || key === 'disallow') && value) {
+      current.rules.push({ allow: key === 'allow', pattern: robotsPattern(value), length: value.length })
+    }
   }
-  if (active && rules.length) groups.push(rules)
+  const agent = USER_AGENT.toLowerCase()
+  const rules = groups
+    .filter(group => group.agents.some(name => name === '*' || agent.startsWith(name) || name === agent))
+    .flatMap(group => group.rules)
+  if (!rules.length) return true
   const path = `${target.pathname}${target.search}`
-  return !groups.flat().some(rule => path.startsWith(rule))
+  let best
+  for (const rule of rules) {
+    if (!rule.pattern.test(path)) continue
+    // robots.txt uses longest-match precedence; on a tie an Allow wins.
+    if (!best || rule.length > best.length || (rule.length === best.length && rule.allow)) best = rule
+  }
+  return best ? best.allow : true
 }
 
 async function responseBody(response, maxBytes) {

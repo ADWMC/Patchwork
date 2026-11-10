@@ -12,4 +12,3 @@ export {
   searchNativeWeb,
 } from './public-search.mjs'
 export { NativeFetchError, NATIVE_FETCH_DEFAULTS, normalizeFetchUrl, isPublicAddress, assertPublicTarget, fetchNativePage } from './public-fetch.mjs'
-export { PATCHWORK_MEMORY_TOOL, registerMemoryTool } from '../memory/tool.mjs'

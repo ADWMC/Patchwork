@@ -1,6 +1,7 @@
 import { effectiveConfig, readUserConfig, configRevision } from '../config/user-config.mjs'
 import { webRuntime } from './web-runtime.mjs'
 import { packageVersion } from '../util/version.mjs'
+import { crossSiteRequest } from './request-guard.mjs'
 
 export const SETTINGS_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/settings'
 const routeKey = `exact\u0000${SETTINGS_ROUTE_PATH}`
@@ -35,6 +36,7 @@ export function registerSettingsRoute(ctx, { token, rowConfig, loadedConfig } = 
         }
         if (req.method !== 'GET') return reply(405, { ok: false, reason: 'method-not-allowed' })
         if (req.headers['x-patchwork-token'] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+        if (crossSiteRequest(req)) return reply(403, { ok: false, reason: 'cross-site-request' })
         const userConfig = readUserConfig()
         const baseRow = rowConfig ?? webRuntime.rowConfig ?? {}
         const baseLoaded = loadedConfig ?? webRuntime.loadedConfig ?? {}

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { SettingsFields } from './SettingsFields.jsx'
-import { SETTING_FIELDS, validateSettings } from '../config/fields.mjs'
+import { CONFIG_PRESETS, MODEL_PRESETS, SETTING_FIELDS, validateSettings } from '../config/fields.mjs'
 import { SectionHeading, TechnicalDetails } from './panel-elements.jsx'
 import { Facets, SearchField, SummaryStrip } from './workspace-elements.jsx'
 const display = value => value === undefined ? '未知' : Array.isArray(value) ? value.join(', ') || '空列表' : typeof value === 'boolean' ? value ? '开启' : '关闭' : String(value) || '沿用宿主默认'
@@ -17,6 +17,19 @@ export function SettingsPanel({ data, draft, saving, invalid, conflict, dirty, m
   function resetDefaults() {
     for (const field of SETTING_FIELDS) edit(field.key, field.defaultValue)
     setNotice('已把全部可配置项恢复为默认值；仍需保存后生效。')
+  }
+  function applyPreset(presetKey) {
+    const preset = CONFIG_PRESETS[presetKey]
+    if (!preset) return
+    for (const [key, value] of Object.entries(preset.settings)) edit(key, value)
+    setNotice(`已应用「${preset.label}」预设；核对后保存。`)
+  }
+  function applyModelPreset(presetKey) {
+    const preset = MODEL_PRESETS[presetKey]
+    if (!preset) return
+    for (const [key, value] of Object.entries(preset.settings)) edit(key, value)
+    edit('modelPreset', presetKey)
+    setNotice(`已应用「${preset.label}」；已适配该模型思考逻辑与 Token 预算，核对后保存。`)
   }
   function exportConfig() {
     const blob = new Blob([JSON.stringify(desired, null, 2)], { type: 'application/json' })
@@ -43,6 +56,8 @@ export function SettingsPanel({ data, draft, saving, invalid, conflict, dirty, m
     {update?.ok === false && !updateError && <p className="pw-error" role="alert">更新检查失败：{update.reason}</p>}
     {update?.ok && update.supported === false && <p className="pw-muted">当前发布来源不是 GitHub Release，未启用更新检查。</p>}
     {update?.ok && update.supported !== false && <p className="pw-live-note" role="status">{update.updateAvailable ? `发现新版本 ${update.latest}（当前 ${update.current}）` : `已是最新版本 ${update.current}`}{update.url ? <>，<a href={update.url} target="_blank" rel="noreferrer">查看 Release</a></> : null}</p>}
+    <div className="pw-actions" style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}><span className="pw-muted" style={{ alignSelf: 'center', fontSize: '12px' }}>工作流预设：</span><Button size="sm" variant="outline" disabled={saving} onClick={() => applyPreset('craftsman')}>工匠模式</Button><Button size="sm" variant="outline" disabled={saving} onClick={() => applyPreset('agile')}>敏捷模式</Button><Button size="sm" variant="outline" disabled={saving} onClick={() => applyPreset('explore')}>探索模式</Button></div>
+    <div className="pw-actions" style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}><span className="pw-muted" style={{ alignSelf: 'center', fontSize: '12px' }}>模型认知预设：</span><Button size="sm" variant="outline" disabled={saving} onClick={() => applyModelPreset('deepseek')}>DeepSeek (DSH 原生)</Button><Button size="sm" variant="outline" disabled={saving} onClick={() => applyModelPreset('stepfun')}>StepFun (阶跃星辰)</Button></div>
     <SummaryStrip label="配置状态" items={[{ label: '可配置项', value: SETTING_FIELDS.length }, { label: '当前版本', value: data.version ?? '未知' }, { label: '草稿变更', value: dirty }, { label: '等待重载', value: pending }]}/>
     <SearchField label="搜索设置" value={query} onChange={setQuery} placeholder="搜索用途、名称或配置键"/>
     <Facets label="设置分类" value={group} onChange={setGroup} items={[['all', '全部'], ['mechanism', '执行'], ['reducer', '约简'], ['retrieval', '检索'], ['code', '代码'], ['skills', '技能'], ['memory', '记忆']].map(([value, label]) => ({ value, label }))}/>

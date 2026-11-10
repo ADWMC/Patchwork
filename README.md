@@ -76,7 +76,7 @@ $env:DSH_HOME = 'C:\dsh\patchwork-demo'
 dsh plugin --profile web add C:\downloads\patchwork-coding-agent-1.0.0.tgz
 ```
 
-Patchwork 复用宿主的模型与权限设置。兼容 `DSH >=0.2.1-rc.2 <0.3.0-0`：0.2.1-rc.2、0.2.1-rc.5 与 0.2.2-alpha.3 已通过同一套 **452 项测试**；旧于 rc.2 或高于 0.2.x 的宿主会被 `engines.dsh` 拒绝。设置页内置"检查更新"，手动查询 GitHub 最新 Release，不自动检查、不发送凭据。
+Patchwork 复用宿主的模型与权限设置。兼容 `DSH >=0.2.1-rc.2 <0.3.0-0`：0.2.1-rc.2、0.2.1-rc.5 与 0.2.2-alpha.3 已通过同一套 **511 项测试**；旧于 rc.2 或高于 0.2.x 的宿主会被 `engines.dsh` 拒绝。设置页内置"检查更新"，手动查询 GitHub 最新 Release，不自动检查、不发送凭据。
 
 ### 方式二：从源码打包
 
@@ -121,7 +121,7 @@ npm run pack:local -- --pack-destination "$env:TEMP/patchwork-pack"
 | :--- | :--- |
 | **任务与验收** | 用 `patchwork_task` 登记要求、阶段、纠正版本和产物；验收绑定实际宿主回执，失败、过期结果与未覆盖项不算通过。 |
 | **原生 Superagent** | 用 `patchwork_superagent` 管理持久队列、依赖与有界重试；默认两个读取槽，本模块在同一工作区内串行执行写任务。作业超阈值无进展时沿阶梯升级：一级转评审、二级转阻塞，并通知父会话。 |
-| **按需技能** | 默认注册 7 个核心技能，可显式试用 13 技能目录；目录只提供名称与描述，正文按需读取。 |
+| **按需技能** | 默认注册 7 个核心技能，可显式试用 14 技能目录；目录只提供名称与描述，正文按需读取。 |
 | **信息检索** | `patchwork_search` 并行查询五个免密钥来源：Bing（RSS 输出）、Brave、DuckDuckGo 公共页面与 uapis.cn、Tavily 的 keyless JSON 接口；单个来源失败或超时不阻塞其余来源。`patchwork_fetch` 受控读取公开 URL。 |
 | **本地代码检索** | `patchwork_code` 提供仓库地图、文件 outline、符号定义、词法引用、文本/正则检索和 BM25 排序的相关代码块检索（`chunks`，纯本地无模型调用）；只在当前工作区读取，跳过依赖、构建产物和敏感文件，结果有界。工作区代码图默认关闭，模型可 `graph-enable` 写 `.patchwork/config.json`，再 `graph-start` 使用 callers/callees/impact/affected。 |
 | **项目文档** | DSH 自动注入 `AGENTS.md`/`CLAUDE.md`；`patchwork_project_docs` 负责 hash/CAS 创建与更新 `AGENTS.md`、`DESIGN.md`，不静默覆盖、不授予权限。 |

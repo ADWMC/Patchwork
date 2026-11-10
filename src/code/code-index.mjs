@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto'
 import { mkdir, open, readFile, readdir, realpath, stat, writeFile } from 'node:fs/promises'
-import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
+import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'node:path'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
+import { inside } from '../util/path-safety.mjs'
+
+export { inside }
 
 export const CODE_INDEX_SCHEMA = 5
 export const CODE_DEFAULTS = Object.freeze({
@@ -205,11 +208,6 @@ export async function workspaceRoot(agent) {
   const info = await stat(root)
   if (!info.isDirectory()) throw new CodeError('workspace cwd is not a directory', 'CODE_WORKSPACE_REQUIRED')
   return root
-}
-
-export function inside(root, target) {
-  const rel = relative(root, target)
-  return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel) && !rel.includes(`..${sep}`))
 }
 
 export async function resolveWithin(root, requested, { file = false } = {}) {

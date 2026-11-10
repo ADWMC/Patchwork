@@ -28,11 +28,12 @@
 
 ## 调研与方案
 
+- 架构、品味与体验进化：[Patchwork 2.0 工匠架构与工具协同总方案](patchwork-craftsman-architecture-master-plan-2026-11-10.md) · [Taste、Break-UI 与架构重构调研](taste-and-architecture-evolution-research-2026-11-10.md)
 - 记忆与改进：[产品体验方案](product-experience-evolution-plan-2026-10-31.md)、[融合设计](memory-evolution-design-2026-10-30.md)、[记忆再调研](memory-deep-dive-2026-10-31.md)
 - 技能与 UI：[技能融合方案](skills-fusion-plan-2026-10-31.md)、[执行记录](skills-fusion-execution-2026-10-31.md)、[UI 判断与配色](human-centered-ai-ui-research-2026-10-31.md)
 - 信息检索：[来源研究](information-retrieval-research-2026-10-31.md)、[执行方案](information-retrieval-execution-plan-2026-10-31.md)
 - 真实模型审计：[本轮证据盘点与缺口](real-model-audit-2026-11-04.md)、[审计闭环方案](plan-real-model-audit-2026-11-04.md)
-- 人类式认知：[认知脚手架方案](plan-human-like-agent-2026-11-04.md)
+- 人类式认知：[商业级 Agent 解构与人类式思考编码方案](human-like-thinking-and-mature-agents-research-2026-11-10.md) · [认知脚手架方案](plan-human-like-agent-2026-11-04.md)
 - 代码检索：[Cursor 式本地检索与 Explore](plan-cursor-style-retrieval-2026-11-04.md)、[实现与真实模型证据](code-retrieval-2026-11-04.md)
 - 项目文档：[AGENTS.md / DESIGN.md 受控创建与更新](project-docs-2026-11-04.md)
 - Agent 社区对照（维护者备忘，不随包）：[社区项目借/不借](community-agent-patterns-2026-11-04.md)

@@ -1,4 +1,5 @@
-import { realpathSync, statSync, readFileSync } from 'node:fs'
+import { realpathSync } from 'node:fs'
+import { readFile, realpath, stat } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
@@ -12,6 +13,9 @@ import { taskMapText } from '../mechanisms/task-map/index.mjs'
 const controllers = new WeakMap(), live = new Set(), workers = new Map(), workspaceLocks = new Map()
 const snapshotFailures = new WeakSet()
 const activeStatuses = new Set(['starting', 'running'])
+// Hashing runs on every settle; cap artifact size so a huge file cannot stall
+// the controller. Oversized artifacts stay unverified.
+const MAX_EVIDENCE_ARTIFACT_BYTES = 8 * 1024 * 1024
 const digest = value => createHash('sha256').update(typeof value === 'string' || Buffer.isBuffer(value) ? value : JSON.stringify(value)).digest('hex')
 function normalizePath(path) {
   if (process.platform !== 'win32') return path
@@ -200,16 +204,24 @@ export class SuperagentController {
       const next = structuredClone(this.state), job = next.jobs.find(j => j.id === id)
       const output = (result.output ?? []).filter(b => b.type === 'text').map(b => b.text).join('\n').slice(0, 4000)
       job.result = { stopReason: result.stopReason, summary: output || result.diagnostic || '' }
-      const artifactsCurrent = task?.artifacts?.every(a => {
-        if (a.status !== 'current') return true
-        try { const s = statSync(a.path); return realpathSync(a.path) === a.path && `${s.size}:${s.mtimeMs}:${s.ctimeMs}` === a.stamp } catch { return false }
-      }) ?? false
+      const checks = new Map()
+      await Promise.all((task?.artifacts ?? []).map(async a => {
+        if (a.status !== 'current') { checks.set(a.id, { current: true, hash: null }); return }
+        try {
+          const s = await stat(a.path)
+          const resolved = await realpath(a.path)
+          const withinCap = s.size <= MAX_EVIDENCE_ARTIFACT_BYTES
+          const current = resolved === a.path && `${s.size}:${s.mtimeMs}:${s.ctimeMs}` === a.stamp && withinCap
+          checks.set(a.id, { current, hash: current ? digest(await readFile(a.path)) : null })
+        } catch { checks.set(a.id, { current: false, hash: null }) }
+      }))
+      const artifactsCurrent = task?.artifacts ? [...checks.values()].every(item => item.current) : false
       const verified = task?.status === 'ready' && task.understandingStatus === 'stated' && task.persistence === 'native' && artifactsCurrent
         && task.requirements.some(r => r.required && ['command', 'artifact'].includes(r.kind) && r.status === 'passed')
         && task.requirements.filter(r => r.required).every(r => r.status === 'passed')
       job.status = result.stopReason !== 'completed' ? 'failed' : job.report?.status === 'ready' && verified ? 'done'
         : ['waiting', 'blocked', 'failed'].includes(job.report?.status) ? job.report.status : 'review'
-      const artifacts = (task?.artifacts ?? []).filter(a => a.status === 'current').map(a => ({ ...a, hash: artifactsCurrent ? digest(readFileSync(a.path)) : null }))
+      const artifacts = (task?.artifacts ?? []).filter(a => a.status === 'current').map(a => ({ ...a, hash: artifactsCurrent ? checks.get(a.id)?.hash ?? null : null }))
       const machineChecks = task?.requirements?.filter(r => r.required && r.kind !== 'semantic') ?? []
       job.evidence = { taskId: task?.taskId ?? null, revision: task?.revision ?? null, status: task?.status ?? 'unverified', verified,
         reviewable: result.stopReason === 'completed' && task?.persistence === 'native' && task?.understandingStatus === 'stated' && artifactsCurrent && machineChecks.length > 0 && machineChecks.every(r => r.status === 'passed'),
@@ -311,12 +323,12 @@ export class SuperagentController {
       const next = structuredClone(this.state), job = next.jobs.find(j => j.id === id)
       if (!job || job.status !== 'review' || !job.evidence?.reviewable || evidenceVersion !== job.evidence.version) throw new Error('Current reviewable evidence version required')
       for (const artifact of accept ? job.evidence.artifacts ?? [] : []) {
-        const resolved = normalizePath(realpathSync.native(artifact.path))
+        const resolved = normalizePath(await realpath(artifact.path))
         const separator = process.platform === 'win32' ? '\\' : '/'
         const within = resolved === this.workspace || resolved.startsWith(this.workspace + separator)
         if (!within) throw new Error('Artifact is outside the controller workspace')
-        const s = statSync(artifact.path)
-        if (resolved !== normalizePath(artifact.path) || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || digest(readFileSync(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
+        const s = await stat(artifact.path)
+        if (resolved !== normalizePath(artifact.path) || `${s.size}:${s.mtimeMs}:${s.ctimeMs}` !== artifact.stamp || s.size > MAX_EVIDENCE_ARTIFACT_BYTES || digest(await readFile(artifact.path)) !== artifact.hash) throw new Error('Artifact changed; recheck before accepting')
       }
       job.disposition = { source: 'user-confirmed', accepted: accept === true, evidenceVersion, at: new Date().toISOString() }
       job.progressAt = new Date().toISOString(); job.stall = null

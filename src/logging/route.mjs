@@ -2,6 +2,7 @@ import { resolvePatchworkAgent } from '../scope.mjs'
 import { webRuntime } from '../ui/web-runtime.mjs'
 import { diagnosticSnapshot } from './session-log.mjs'
 import { fingerprint } from './schema.mjs'
+import { crossSiteRequest } from '../ui/request-guard.mjs'
 
 export const LOGS_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/logs'
 const routeKey = `exact\u0000${LOGS_ROUTE_PATH}`
@@ -19,6 +20,7 @@ export function registerDiagnosticRoute(ctx, { token }) {
         res.end(JSON.stringify(data))
       }
       if (req.headers['x-patchwork-token'] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+      if (crossSiteRequest(req)) return reply(403, { ok: false, reason: 'cross-site-request' })
       if (req.method !== 'GET') return reply(405, { ok: false, reason: 'method-not-allowed' })
       const id = new URL(req.url ?? LOGS_ROUTE_PATH, 'http://localhost').searchParams.get('sessionId')
       const agent = resolvePatchworkAgent(ctx, id)

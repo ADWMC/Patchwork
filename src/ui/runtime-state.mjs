@@ -2,7 +2,7 @@ import { effectiveConfig, readUserConfig, configRevision } from '../config/user-
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { isAbsolute, join } from 'node:path'
 import { createHash } from 'node:crypto'
-import { lstatSync, readFileSync } from 'node:fs'
+import { lstatSync, readFileSync, statSync } from 'node:fs'
 import { readWorkspaceConfigSync } from '../code/workspace-config.mjs'
 import { isCodeGraphStarted } from '../code/tool.mjs'
 import { webRuntime } from './web-runtime.mjs'
@@ -23,11 +23,12 @@ import { revokeMemoryOperations } from '../memory/store.mjs'
 import { snapshot as mechanismStatsSnapshot } from './mechanism-stats.mjs'
 import { planSnapshot } from '../mechanisms/online-context-compact/lifecycle.mjs'
 import { observationSnapshot } from '../mechanisms/observation-pack/index.mjs'
+import { crossSiteRequest } from './request-guard.mjs'
 
 export const STATE_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/state'
 const sessions = webRuntime.sessions
 const routeKey = `exact\u0000${STATE_ROUTE_PATH}`
-const keys = ['actionFusion', 'observationPack', 'evidencePreservingReducer', 'onlineContextCompact']
+const keys = ['actionFusion', 'observationPack', 'evidencePreservingReducer', 'onlineContextCompact', 'taskMap']
 const idOf = agent => agent?.session?.header?.id
 
 function sessionState(agent) {
@@ -125,25 +126,56 @@ function explorationSnapshot(state) {
   return { ...counts, duplicateQueries: duplicates, totalCalls: Object.values(counts).reduce((sum, value) => sum + value, 0), bytesRead: bytes }
 }
 
+const docsCache = new Map()
+const graphConfigCache = new Map()
+
 function projectDocsSnapshot(agent) {
   const cwd = agent?.session?.header?.cwd
   if (typeof cwd !== 'string' || !isAbsolute(cwd)) return null
   const read = name => {
+    const path = join(cwd, name)
     try {
-      const info = lstatSync(join(cwd, name))
+      const info = lstatSync(path)
       if (info.isSymbolicLink()) return { name, exists: true, symlink: true, bytes: null, sha256: null }
       if (info.size > 64 * 1024) return { name, exists: true, symlink: false, bytes: info.size, sha256: null, tooLarge: true }
-      const content = readFileSync(join(cwd, name), 'utf8')
-      return { name, exists: true, symlink: false, bytes: Buffer.byteLength(content, 'utf8'), sha256: createHash('sha256').update(content).digest('hex') }
-    } catch { return { name, exists: false, symlink: false, bytes: null, sha256: null } }
+      // The panel polls every few seconds; only re-read when the file changed.
+      const stamp = `${info.size}:${info.mtimeMs}:${info.ctimeMs}`
+      const cached = docsCache.get(path)
+      if (cached?.stamp === stamp) return cached.value
+      const content = readFileSync(path, 'utf8')
+      const value = { name, exists: true, symlink: false, bytes: Buffer.byteLength(content, 'utf8'), sha256: createHash('sha256').update(content).digest('hex') }
+      if (docsCache.size >= 32) docsCache.delete(docsCache.keys().next().value)
+      docsCache.set(path, { stamp, value })
+      return value
+    } catch {
+      docsCache.delete(path)
+      return { name, exists: false, symlink: false, bytes: null, sha256: null }
+    }
   }
   return { agents: read('AGENTS.md'), design: read('DESIGN.md') }
+}
+
+function readGraphConfig(cwd) {
+  const path = join(cwd, '.patchwork', 'config.json')
+  try {
+    const info = statSync(path)
+    const stamp = `${info.size}:${info.mtimeMs}:${info.ctimeMs}`
+    const cached = graphConfigCache.get(path)
+    if (cached?.stamp === stamp) return cached.value
+    const value = readWorkspaceConfigSync(cwd)
+    if (graphConfigCache.size >= 32) graphConfigCache.delete(graphConfigCache.keys().next().value)
+    graphConfigCache.set(path, { stamp, value })
+    return value
+  } catch {
+    graphConfigCache.delete(path)
+    return readWorkspaceConfigSync(cwd)
+  }
 }
 
 function workspaceGraphSnapshot(agent) {
   const cwd = agent?.session?.header?.cwd
   if (typeof cwd !== 'string' || !isAbsolute(cwd)) return null
-  const info = readWorkspaceConfigSync(cwd)
+  const info = readGraphConfig(cwd)
   const graph = info.config?.codeGraph
   return {
     status: info.status, configPath: '.patchwork/config.json', exists: info.status === 'loaded',
@@ -171,12 +203,20 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
     } catch { /* Unavailable measurement remains unknown, never zero. */ }
   }
   const stats = mechanismStatsSnapshot()
+  const userConfig = readUserConfig()
+  let task = null, handoff = null
+  if (state) {
+    try {
+      task = taskProjection(state.agent)
+      if (task?.title) handoff = taskHandoff(state.agent, undefined, task)
+    } catch { /* A degraded task stays null instead of blocking the snapshot. */ }
+  }
   return {
     schemaVersion: 1, generatedAt: new Date().toISOString(), sessionId,
     scope: 'current-process-session', status: state?.status ?? 'not-started',
     version: packageVersion,
-    config: effectiveConfig(rowConfig, readUserConfig()), loadedConfig,
-    revision: configRevision(), context,
+    config: effectiveConfig(rowConfig, userConfig), loadedConfig,
+    revision: configRevision(userConfig), context,
     skills: { names: [...state.skillNames ?? []], mode: loadedConfig.skillsMode ?? 'core', bodies: 'on-demand' },
     mechanisms: Object.fromEntries(keys.map(key => [key, {
       configured: loadedConfig[key] === true,
@@ -192,11 +232,11 @@ export function runtimeSnapshot(sessionId, rowConfig = {}, loadedConfig = {}) {
     projectDocs: projectDocsSnapshot(state.agent),
     plan: planSnapshot(state.agent),
     observations: observationSnapshot(state.agent),
-    taskHandoff: state ? (() => { try { return taskProjection(state.agent)?.title ? taskHandoff(state.agent) : null } catch { return null } })() : null,
+    taskHandoff: handoff,
     retrieval: retrievalSnapshot(state.agent),
     memory: memorySnapshot(state.agent, { includeValue: false, includeProject: false }),
     improvements: improvementSnapshot(state.agent),
-    task: taskProjection(state.agent),
+    task,
     superagent: superagentSnapshot(state.agent),
   }
 }
@@ -263,6 +303,7 @@ export function registerRuntimeState(ctx, { token }) {
         res.end(JSON.stringify(body))
       }
       if (req.headers['x-patchwork-token'] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+      if (crossSiteRequest(req)) return reply(403, { ok: false, reason: 'cross-site-request' })
       if (req.method !== 'GET') return reply(405, { ok: false, reason: 'method-not-allowed' })
       const id = new URL(req.url, 'http://localhost').searchParams.get('sessionId')
       if (!id || id.length > 256) return reply(400, { ok: false, reason: 'session-id-required' })

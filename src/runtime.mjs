@@ -17,6 +17,7 @@ import { registerMemoryTool } from './memory/tool.mjs'
 import { loadMemoryState } from './memory/store.mjs'
 import { registerImprovementTool } from './improvement/tool.mjs'
 import { loadImprovementState } from './improvement/store.mjs'
+import { TasteEngine } from './taste/engine.mjs'
 
 export const name = 'patchwork-runtime'
 export const inject = ['skills', 'commands', 'tools', 'agentPresets']
@@ -29,7 +30,8 @@ export async function apply(ctx, config) {
   const rowConfig = config ?? {}
   const effective = effectiveConfig(rowConfig, readUserConfig())
   try { await loadMemoryState() } catch { /* Memory fails closed and exposes recovery; other scoped capabilities remain available. */ }
-  registerTaskLifecycle(ctx, effective)
+  const tasteEngine = new TasteEngine(process.cwd())
+  registerTaskLifecycle(ctx, effective, tasteEngine)
   setSuperagentStallConfig(effective.superagentStallMs)
   registerSuperagent(ctx)
   registerRetrievalTools(ctx, effective)

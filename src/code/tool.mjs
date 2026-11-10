@@ -17,7 +17,7 @@ import {
   searchCode,
   workspaceRoot,
 } from './code-index.mjs'
-import { enableWorkspaceGraph, readWorkspaceConfig, workspaceConfigInfo } from './workspace-config.mjs'
+import { enableWorkspaceGraph, workspaceConfigInfo } from './workspace-config.mjs'
 import { searchChunks, CHUNK_DEFAULTS } from './chunks.mjs'
 
 export const PATCHWORK_CODE_TOOL = 'patchwork_code'
@@ -183,7 +183,7 @@ export function registerCodeTool(ctx, config = {}) {
         else if (action === 'search') result = { action, status: 'ok', ...(await searchCode(index, { query: args?.query, mode: args?.mode ?? 'literal', caseSensitive: args?.caseSensitive !== false, path: args?.path, glob: args?.glob, maxResults: args?.maxResults ?? CODE_DEFAULTS.maxResults })) }
         else if (action === 'chunks') {
           if (!args?.query || !String(args.query).trim()) throw new CodeError('chunks requires a query', 'CODE_INVALID_QUERY')
-          result = { action, status: 'ok', query: String(args.query).trim(), chunks: await searchChunks({ cwd: agent.session?.header?.cwd, index, query: args.query, maxResults: args?.maxResults ?? CHUNK_DEFAULTS.maxResults, path: args?.path, glob: args?.glob }) }
+          result = { action, status: 'ok', query: String(args.query).trim(), chunks: await searchChunks({ index, query: args.query, maxResults: args?.maxResults ?? CHUNK_DEFAULTS.maxResults, path: args?.path, glob: args?.glob }) }
         }
         else if (action === 'callers') result = { action, status: 'ok', ...(await callersOf(index, { symbol: args?.symbol, maxResults: args?.maxResults ?? CODE_DEFAULTS.maxResults })) }
         else if (action === 'callees') result = { action, status: 'ok', ...(await calleesOf(index, { symbol: args?.symbol, maxResults: args?.maxResults ?? CODE_DEFAULTS.maxResults })) }

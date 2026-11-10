@@ -76,7 +76,7 @@ $env:DSH_HOME = 'C:\dsh\patchwork-demo'
 dsh plugin --profile web add C:\downloads\patchwork-coding-agent-1.0.0.tgz
 ```
 
-Patchwork uses the host's model and permission settings. Compatible with `DSH >=0.2.1-rc.2 <0.3.0-0`: 0.2.1-rc.2, 0.2.1-rc.5 and 0.2.2-alpha.3 pass the same **452-test** suite; hosts older than rc.2 or beyond 0.2.x are refused by `engines.dsh`. The settings page has a manual "check for updates" that queries the latest GitHub Release — no automatic checks, no credentials sent.
+Patchwork uses the host's model and permission settings. Compatible with `DSH >=0.2.1-rc.2 <0.3.0-0`: 0.2.1-rc.2, 0.2.1-rc.5 and 0.2.2-alpha.3 pass the same **511-test** suite; hosts older than rc.2 or beyond 0.2.x are refused by `engines.dsh`. The settings page has a manual "check for updates" that queries the latest GitHub Release — no automatic checks, no credentials sent.
 
 ### Option 2: Build from source
 
@@ -121,7 +121,7 @@ Native Session records persist task state. Controller executors inherit the DSH 
 | :--- | :--- |
 | **Tasks and acceptance** | `patchwork_task` records requirements, phases, correction revisions and artifacts. Checks bind actual host receipts; failed, stale and incomplete results cannot pass. |
 | **Native Superagent** | `patchwork_superagent` manages persistent queues, dependencies and bounded retries. It defaults to two read slots; this module serializes writes within the same workspace. A job with no progress past the threshold escalates along a ladder: review, then blocked, with the parent session notified. |
-| **On-demand skills** | Seven core skills are registered by default, with an opt-in catalog of thirteen. The catalog exposes names and descriptions; bodies load when requested. |
+| **On-demand skills** | Seven core skills are registered by default, with an opt-in catalog of fourteen. The catalog exposes names and descriptions; bodies load when requested. |
 | **Information retrieval** | `patchwork_search` queries five keyless sources in parallel: Bing (RSS output), Brave and DuckDuckGo public pages, plus the uapis.cn and Tavily keyless JSON endpoints; a failing or timing-out source does not block the others. `patchwork_fetch` performs controlled reads of public URLs. |
 | **Local code retrieval** | `patchwork_code` provides a workspace map, file outlines, symbol definitions, lexical references, text/regex search and BM25-ranked relevant chunk retrieval (`chunks`, local-only, no model call). Reads stay in the current workspace, skip dependencies, build outputs and sensitive files, and return bounded results. The workspace code graph is off by default: `graph-enable` (writes `.patchwork/config.json`) then `graph-start` unlocks callers/callees/impact/affected. |
 | **Project docs** | DSH injects `AGENTS.md`/`CLAUDE.md` automatically; `patchwork_project_docs` handles hash/CAS creation and updates for `AGENTS.md` and `DESIGN.md`, with no silent overwrite or permission grant. |

@@ -3,8 +3,8 @@ import { createHash } from 'node:crypto'
 export const RECORD_TYPE = 'plugin:patchwork/diagnostic'
 export const LOG_LIMIT = 200
 export const LEVELS = new Set(['info', 'warn', 'error'])
-const MECHANISMS = new Set(['runtime', 'af', 'op', 'epr', 'occ', 'search', 'fetch', 'memory', 'improvement', 'browser', 'task', 'superagent', 'skill', 'evidence', 'settings', 'maintenance', 'code', 'docs'])
-const EVENTS = new Set(['loaded', 'inactive', 'boundary', 'decision', 'start', 'success', 'failure', 'noop', 'skipped', 'packed', 'recall', 'continued', 'incident', 'candidate', 'experiment', 'approval', 'rollback',
+const MECHANISMS = new Set(['runtime', 'af', 'op', 'epr', 'occ', 'taskMap', 'search', 'fetch', 'memory', 'improvement', 'browser', 'task', 'superagent', 'skill', 'evidence', 'settings', 'maintenance', 'code', 'docs'])
+const EVENTS = new Set(['loaded', 'inactive', 'boundary', 'decision', 'start', 'success', 'failure', 'noop', 'skipped', 'packed', 'recall', 'inject', 'continued', 'incident', 'candidate', 'experiment', 'approval', 'rollback',
   'define', 'correct', 'artifact', 'check', 'assessment', 'cancel', 'handoff', 'inspect', 'submit', 'report', 'input', 'retry', 'pause', 'resume', 'reconcile', 'review', 'load', 'cite', 'compare', 'save', 'warning', 'blocked', 'propose', 'revise', 'confirm', 'forget', 'validity'])
 const REASONS = new Set([
   'enabled', 'no-tools', 'no-shell', 'shadow-failed', 'target-changed', 'command-failed', 'command-unverified', 'command-succeeded',
@@ -28,7 +28,7 @@ const REASONS = new Set([
   'browser-completed', 'browser-failed', 'browser-no-progress', 'task-defined', 'task-corrected', 'task-artifact', 'task-check',
   'task-assessment', 'task-candidate', 'task-cancelled', 'queue-submitted', 'queue-input', 'queue-retry', 'queue-review',
   'queue-paused', 'queue-resumed', 'queue-cancelled', 'queue-reconciled', 'skill-loaded', 'evidence-cited', 'evidence-compared',
-  'settings-saved', 'structure-warning', 'evidence-hint', 'exploration-hint', 'memory-proposed', 'memory-revised', 'memory-confirmed', 'memory-forgotten', 'memory-validity',
+  'settings-saved', 'structure-warning', 'shortcut-ledger', 'task-anchored-map', 'evidence-hint', 'exploration-hint', 'memory-proposed', 'memory-revised', 'memory-confirmed', 'memory-forgotten', 'memory-validity',
   'code-started', 'code-map', 'code-outline', 'code-find', 'code-references', 'code-search', 'code-failed',
   'code-graph-status', 'code-graph-enabled', 'code-graph-disabled', 'code-graph-started', 'code-graph-stopped',
   'code-callers', 'code-callees', 'code-impact', 'code-affected',

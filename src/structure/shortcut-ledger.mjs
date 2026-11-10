@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { isAbsolute } from 'node:path'
+import { withHookState } from './hook-state.mjs'
 
 /**
  * 妥协账本：代码锚定的有意妥协登记。
@@ -40,18 +41,16 @@ function cooldownKey(sessionId, file, line) {
 
 /** 同一会话同一登记的提醒间隔，语义与结构警告冷却一致。 */
 async function firstForSession(sessionId, entries) {
-  const path = statePath()
-  let state = {}
-  try { state = JSON.parse(await readFile(path, 'utf8')) } catch { /* 首次或不可读 */ }
-  const fresh = []
-  for (const entry of entries) {
-    const key = cooldownKey(sessionId, entry.file, entry.line)
-    const previous = state[key] || 0
-    state[key] = previous + 1 >= COOLDOWN_ROUNDS ? 0 : previous + 1
-    if (previous === 0) fresh.push(entry)
-  }
-  try { await (await import('node:fs/promises')).writeFile(path, JSON.stringify(state)) } catch { /* 冷却是建议性的 */ }
-  return fresh
+  return withHookState(statePath(), state => {
+    const fresh = []
+    for (const entry of entries) {
+      const key = cooldownKey(sessionId, entry.file, entry.line)
+      const previous = state[key] || 0
+      state[key] = previous + 1 >= COOLDOWN_ROUNDS ? 0 : previous + 1
+      if (previous === 0) fresh.push(entry)
+    }
+    return fresh
+  })
 }
 
 function renderNotice(entries) {

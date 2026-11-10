@@ -1,7 +1,7 @@
-import { readFile, writeFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { withHookState } from './hook-state.mjs'
 
 /** 同一会话同一问题的提示间隔：避免每轮重复注入同一段提醒。 */
 export const COOLDOWN_ROUNDS = 30
@@ -21,20 +21,10 @@ function statePath() {
  */
 export async function shouldEmitPrompt(sessionId, warnings) {
   const key = warningKey(sessionId, warnings)
-  const path = statePath()
-  let state = {}
-  try {
-    state = JSON.parse(await readFile(path, 'utf8'))
-  } catch {
-    // 首次运行或状态不可读
-  }
-  const previous = state[key] || 0
-  const count = previous + 1
-  state[key] = count >= COOLDOWN_ROUNDS ? 0 : count
-  try {
-    await writeFile(path, JSON.stringify(state))
-  } catch {
-    // 冷却状态是建议性的
-  }
-  return previous === 0 || count >= COOLDOWN_ROUNDS
+  return withHookState(statePath(), state => {
+    const previous = state[key] || 0
+    const count = previous + 1
+    state[key] = count >= COOLDOWN_ROUNDS ? 0 : count
+    return previous === 0 || count >= COOLDOWN_ROUNDS
+  })
 }

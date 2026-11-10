@@ -1,5 +1,9 @@
-/** Validate an experiment's review eligibility, never auto-activate a candidate. */
-export function evaluateCandidate(record) {
+/**
+ * Structural lint for archived real-host experiments. This is deliberately
+ * separate from `improvement/store.mjs`, which gates current-session policy
+ * contracts; neither path auto-activates a candidate.
+ */
+export function evaluateRealHostCandidate(record) {
   const reasons = []
   for (const key of ['candidateId', 'parentId', 'hypothesis', 'changeScope', 'rollbackTarget']) {
     if (typeof record?.[key] !== 'string' || !record[key].trim()) reasons.push(`missing:${key}`)

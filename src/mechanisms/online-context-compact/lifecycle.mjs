@@ -58,7 +58,11 @@ export function registerOnlineContextCompact(ctx, config = {}) {
     if (isPatchworkAgent(agent) && message?.source?.kind !== 'patchwork') interrupt(sessionIdOf(agent))
   })
   ctx.on('agent-preset/selected', sessionId => interrupt(sessionId))
-  ctx.on('agent/disposed', ({ agent }) => interrupt(sessionIdOf(agent)))
+  ctx.on('agent/disposed', ({ agent }) => {
+    const sessionId = sessionIdOf(agent)
+    interrupt(sessionId)
+    if (sessionId) { states.delete(sessionId); updates.delete(sessionId) }
+  })
   ctx.effect?.(() => () => { for (const controller of active.values()) controller.abort(); active.clear() }, 'patchwork: compact cancellation')
 
   const stateFor = async sessionId => {

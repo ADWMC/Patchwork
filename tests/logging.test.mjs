@@ -19,6 +19,7 @@ test('task, queue, skill, evidence, settings and maintenance actions stay in the
   for (const [mechanism, event, reason] of [
     ['task', 'check', 'task-check'], ['superagent', 'input', 'queue-input'], ['skill', 'load', 'skill-loaded'],
     ['evidence', 'compare', 'evidence-compared'], ['settings', 'save', 'settings-saved'], ['maintenance', 'warning', 'structure-warning'],
+    ['taskMap', 'inject', 'task-anchored-map'], ['maintenance', 'warning', 'shortcut-ledger'],
   ]) {
     const data = diagnosticData({ mechanism, event, reason })
     assert.equal(data.mechanism, mechanism)

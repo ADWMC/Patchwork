@@ -1,4 +1,4 @@
-export const mechanismLabels = { runtime: '运行时', af: 'AF', op: 'OP', epr: 'EPR', occ: 'OCC', search: '检索', fetch: '抓取', memory: '记忆', improvement: '改进', browser: '浏览器', task: '任务', superagent: '主控', skill: '技能', evidence: '引用', settings: '设置', maintenance: '结构检查', code: '代码检索', docs: '项目文档' }
+export const mechanismLabels = { runtime: '运行时', af: 'AF', op: 'OP', epr: 'EPR', occ: 'OCC', taskMap: '任务地图', search: '检索', fetch: '抓取', memory: '记忆', improvement: '改进', browser: '浏览器', task: '任务', superagent: '主控', skill: '技能', evidence: '引用', settings: '设置', maintenance: '结构检查', code: '代码检索', docs: '项目文档' }
 export const levelLabels = { info: '信息', warn: '警告', error: '错误' }
 
 const reasonLabels = {
@@ -30,7 +30,7 @@ const reasonLabels = {
   'queue-submitted': '主控队列已提交', 'queue-input': '已向执行器补充输入', 'queue-retry': '执行器已重试', 'queue-review': '执行器结果已复核',
   'queue-paused': '主控队列已暂停', 'queue-resumed': '主控队列已继续', 'queue-cancelled': '主控队列已取消', 'queue-reconciled': '主控队列已对账',
   'skill-loaded': '技能正文已按需加载', 'evidence-cited': '引用已绑定精确摘录', 'evidence-compared': '独立来源字段已对比',
-  'settings-saved': '配置已保存并等待重载', 'structure-warning': '文件结构建议已触发', 'evidence-hint': '缺少有效验收的提示已触发',
+  'settings-saved': '配置已保存并等待重载', 'structure-warning': '文件结构建议已触发', 'shortcut-ledger': '已提醒登记过的有意妥协', 'task-anchored-map': '已注入任务锚定上下文', 'evidence-hint': '缺少有效验收的提示已触发', 'exploration-hint': '探索预算提示已触发',
   'code-started': '开始代码检索', 'code-map': '已生成仓库地图', 'code-outline': '已读取文件结构', 'code-find': '已查找符号定义',
   'code-references': '已查找词法引用', 'code-search': '已完成代码文本检索', 'code-failed': '代码检索失败',
   'code-graph-status': '已读取代码图状态', 'code-graph-enabled': '工作区代码图已启用', 'code-graph-disabled': '工作区代码图已停用',
@@ -50,6 +50,7 @@ const eventTitles = {
   op: { packed: '大输出已归档', recall: '原文片段已召回', failure: '归档处理异常' },
   epr: { decision: '证据约简评估', failure: '证据约简异常' },
   occ: { boundary: '到达计划边界', decision: '上下文压缩评估', start: '开始压缩上下文', success: '上下文压缩完成', noop: '上下文保持不变', failure: '上下文压缩异常', continued: '任务继续执行', skipped: '已跳过上下文压缩' },
+  taskMap: { inject: '任务锚定地图已注入' },
   task: { define: '任务要求已登记', correct: '任务要求已纠正', artifact: '任务产物已登记', check: '任务验收已执行', assessment: '语义评审已记录', candidate: '候选经验已登记', cancel: '任务已取消', handoff: '任务交接已读取', inspect: '任务状态已读取', review: '任务语义验收已复核' },
   superagent: { submit: '主控队列已提交', report: '执行器已汇报', input: '已向执行器补充输入', retry: '执行器已重试', review: '执行器结果已复核', pause: '主控队列已暂停', resume: '主控队列已继续', cancel: '主控队列已取消', reconcile: '主控队列已对账' },
   skill: { load: '技能正文已加载' },

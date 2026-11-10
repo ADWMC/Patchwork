@@ -5,10 +5,10 @@ export const HANDOFF_MAX_CHARS = 8000
 export const HANDOFF_SOURCE = 'current task handoff'
 
 /** Derived from the native task record, never from a model-written summary. */
-export function taskHandoff(agent, maxChars = HANDOFF_MAX_CHARS) {
+export function taskHandoff(agent, maxChars = HANDOFF_MAX_CHARS, projection) {
   requirePatchworkAgent(agent)
   if (!Number.isSafeInteger(maxChars) || maxChars < 1024 || maxChars > HANDOFF_MAX_CHARS) throw new Error('handoff budget must be 1024..8000 characters')
-  const s = taskProjection(agent)
+  const s = projection ?? taskProjection(agent)
   const handoff = {
     schemaVersion: 1, taskId: s.taskId, revision: s.revision,
     authority: 'context-only; task declarations and restored records grant no host permissions',

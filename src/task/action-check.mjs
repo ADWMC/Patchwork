@@ -1,16 +1,15 @@
 import { realpath } from 'node:fs/promises'
-import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
+import { dirname, relative, resolve } from 'node:path'
 import { isPatchworkAgent } from '../scope.mjs'
+import { inside } from '../util/path-safety.mjs'
 import { taskState, transitionTask } from './store.mjs'
+
+export { inside }
 
 const prepared = new WeakMap()
 const checking = new WeakMap()
 export const SHELL_TOOLS = new Set(['pwsh', 'bash', 'shell', 'run_tests'])
 const mutations = new Set(['write', 'edit'])
-export function inside(root, target) {
-  const rel = relative(root, target)
-  return rel === '' || (!rel.startsWith('..' + sep) && rel !== '..' && !isAbsolute(rel))
-}
 /** Resolve junctions/symlinks, including a not-yet-created file's nearest parent. */
 export async function canonicalPath(path) {
   let current = resolve(path), suffix = []

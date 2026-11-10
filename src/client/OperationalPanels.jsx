@@ -11,8 +11,9 @@ export const mechanisms = [
   { key: 'observationPack', code: 'OP', name: '大输出归档', description: '保存完整原文，按需读取少量片段。', boundary: '归档指针不是内容本身；调用召回工具后才得到对应原文。', log: 'op' },
   { key: 'evidencePreservingReducer', code: 'EPR', name: '证据约简', description: '保留可核对引用，缩短较长的工具观察。', boundary: '默认关闭，敏感输出拒绝外发；不能用缩短字数冒充质量提升。', log: 'epr' },
   { key: 'onlineContextCompact', code: 'OCC', name: '上下文压缩', description: '在计划边界评估是否需要整理上下文。', boundary: '配置开启不代表实际执行；查看决策日志确认压缩前后状态。', log: 'occ' },
+  { key: 'taskMap', code: 'TM', name: '任务锚定地图', description: '把任务声明的引用与登记产物周围的符号带入会话。', boundary: '地图是有界事实，不是指令；与文件实际状态不符时以文件和 patchwork_code 为准。', log: 'taskMap' },
 ]
-const skillLabels = { 'anti-slop': '去模板化复核', architecture: '架构设计', collaborator: '协作', evidence: '证据核对', patchwork: '工作流程', standards: '工程标准', 'web-ui': '界面设计', debugging: '故障排查', 'code-review': '代码审查', retrieval: '信息检索', documentation: '文档维护', memory: '记忆管理', improvement: '受控改进' }
+const skillLabels = { 'anti-slop': '去模板化复核', architecture: '架构设计', collaborator: '协作', evidence: '证据核对', patchwork: '工作流程', standards: '工程标准', 'web-ui': '界面设计', debugging: '故障排查', 'code-review': '代码审查', retrieval: '信息检索', documentation: '文档维护', memory: '记忆管理', improvement: '受控改进', debt: '技术债账本' }
 export function MechanismStatus({ item, data }) {
   const loaded = data.loadedConfig?.[item.key], active = data.mechanisms?.[item.key]?.active
   return <span className="pw-status" data-tone={active === true ? 'success' : undefined}>{loaded === false ? '未加载' : loaded !== true ? '未知' : active === true ? '已注册' : active === false ? '未注册' : '已加载'}</span>

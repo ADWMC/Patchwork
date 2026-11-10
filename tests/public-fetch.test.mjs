@@ -41,6 +41,18 @@ test('robots denial, unsupported content and bounded response have machine codes
   await assert.rejects(fetchNativePage({ url: 'https://example.com/large', robots: false, maxBytes: 1024, lookupImpl: publicLookup, fetchImpl: async url => response('x'.repeat(2048), { url: String(url) }) }), error => error.code === 'FETCH_RESPONSE_TOO_LARGE')
 })
 
+test('robots uses longest-match precedence and supports Allow and wildcards', async () => {
+  const robots = 'User-agent: *\nDisallow: /private/*\nAllow: /private/public/$\n'
+  const fetchPage = async url => String(url).endsWith('/robots.txt')
+    ? response(robots, { contentType: 'text/plain', url: String(url) })
+    : response('<p>readable</p>', { url: String(url) })
+  const allowed = await fetchNativePage({ url: 'https://example.com/private/public/', lookupImpl: publicLookup, fetchImpl: fetchPage })
+  assert.equal(allowed.robots.checked, true)
+  const denied = await fetchNativePage({ url: 'https://example.com/private/secret', lookupImpl: publicLookup, fetchImpl: fetchPage })
+    .then(() => null, error => error)
+  assert.equal(denied.code, 'FETCH_ROBOTS_DENIED')
+})
+
 test('redirects are rechecked against the fetch scope and cancellation is preserved', async () => {
   await assert.rejects(fetchNativePage({ url: 'https://example.com/start', robots: false, allowedHosts: ['example.com'], lookupImpl: publicLookup, fetchImpl: async () => response('<p>redirect</p>', { url: 'https://evil.example/final' }) }), error => error.code === 'FETCH_HOST_NOT_ALLOWED')
   await assert.rejects(fetchNativePage({ url: 'https://example.com/slow', robots: false, lookupImpl: publicLookup, fetchImpl: async () => { const error = new Error('cancel'); error.name = 'AbortError'; throw error } }), error => error instanceof NativeFetchError && error.code === 'FETCH_ABORTED')

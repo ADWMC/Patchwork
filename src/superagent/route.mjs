@@ -3,6 +3,7 @@ import { getController } from './controller.mjs'
 import { taskProjection, transitionTask, flushTasks } from '../task/store.mjs'
 import { webRuntime } from '../ui/web-runtime.mjs'
 import { logDiagnostic } from '../logging/session-log.mjs'
+import { crossSiteRequest } from '../ui/request-guard.mjs'
 
 export const SUPERAGENT_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/superagent'
 export function registerSuperagentRoute(ctx, { token } = {}) {
@@ -13,6 +14,7 @@ export function registerSuperagentRoute(ctx, { token } = {}) {
     const dispose = server.register({ kind: 'exact', path: SUPERAGENT_ROUTE_PATH, async handler(req, res) {
       const reply = (code, body) => { res.statusCode = code; res.setHeader('content-type', 'application/json'); res.setHeader('cache-control', 'no-store'); res.end(JSON.stringify(body)) }
       if (req.headers['x-patchwork-token'] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+      if (crossSiteRequest(req)) return reply(403, { ok: false, reason: 'cross-site-request' })
       const agent = resolvePatchworkAgent(ctx, new URL(req.url, 'http://localhost').searchParams.get('sessionId'))
       if (!agent) return reply(403, { ok: false, reason: 'patchwork-agent-required' })
       if (req.method !== 'POST') return reply(405, { ok: false, reason: 'method-not-allowed' })

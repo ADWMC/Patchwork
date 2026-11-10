@@ -5,6 +5,7 @@ import { record } from '../ui/mechanism-stats.mjs'
 import { EVIDENCE_HINT, noteShellEvidence, sessionKey, shouldHintEvidence } from '../quality/evidence-gate.mjs'
 import { isPatchworkAgent } from '../scope.mjs'
 import { logDiagnostic } from '../logging/session-log.mjs'
+import { textOf } from '../util/content-blocks.mjs'
 
 /**
  * 只从「会改动文件」的工具参数里取路径。读取不属于结构检查的范围：
@@ -15,14 +16,6 @@ function pathsIn(value, result = []) {
   else if (Array.isArray(value)) value.forEach(item => pathsIn(item, result))
   else if (value && typeof value === 'object') Object.values(value).forEach(item => pathsIn(item, result))
   return [...new Set(result)]
-}
-
-function textOf(content) {
-  if (!Array.isArray(content)) return ''
-  return content
-    .filter(block => block?.type === 'text')
-    .map(block => block.text)
-    .join('\n')
 }
 
 async function noticeContext(text) {

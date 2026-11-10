@@ -148,12 +148,13 @@ function ExplorationPanel({ exploration }) {
 }
 
 function MechanismStatsPanel({ stats }) {
-  const af = stats?.actionFusion ?? {}, op = stats?.observationPack ?? {}, epr = stats?.evidencePreservingReducer ?? {}, occ = stats?.onlineContextCompact ?? {}, maintenance = stats?.maintenance ?? {}
+  const af = stats?.actionFusion ?? {}, op = stats?.observationPack ?? {}, epr = stats?.evidencePreservingReducer ?? {}, occ = stats?.onlineContextCompact ?? {}, tm = stats?.taskMap ?? {}, maintenance = stats?.maintenance ?? {}
   const items = [
     { label: 'AF 接续', value: (af.fusedCalls ?? 0) + ' 次', title: `${af.succeededCalls ?? 0} 成功 / ${af.failedCalls ?? 0} 失败` },
     { label: 'OP 归档', value: (op.packedResults ?? 0) + ' 条', title: `${formatBytes(op.packedBytes) ?? '0 B'} 原文` },
     { label: 'EPR 约简', value: (epr.receipts ?? 0) + ' 条', title: `${formatBytes(epr.reducedBytes) ?? '0 B'} 缩减` },
     { label: 'OCC 压缩', value: (occ.compactions ?? 0) + ' 次', title: '仅执行计数' },
+    { label: 'TM 注入', value: (tm.injections ?? 0) + ' 次', title: '任务锚定地图注入次数' },
     { label: '维护提示', value: (maintenance.structureWarnings ?? 0) + (maintenance.evidenceBlocks ?? 0) + ' 次', title: `结构 ${maintenance.structureWarnings ?? 0} / 证据 ${maintenance.evidenceBlocks ?? 0}` },
   ]
   return <section className="pw-section" aria-label="机制执行计数"><SectionHeading title="执行计数" description="进程内计数，仅说明机制实际动作；不是 token、延迟或成本收益。"/><SummaryStrip label="机制执行计数" items={items.map(item => ({ label: item.label, value: item.value, tone: undefined }))}/><p className="pw-live-note">{items.map(item => `${item.label}：${item.title}`).join('；')}。计数不代替真实账单、正确性或任务通过。</p></section>

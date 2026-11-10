@@ -2,6 +2,7 @@ import { resolvePatchworkAgent } from '../scope.mjs'
 import { webRuntime } from '../ui/web-runtime.mjs'
 import { compareEvidence, evidenceSnapshot } from './evidence.mjs'
 import { logDiagnostic } from '../logging/session-log.mjs'
+import { crossSiteRequest } from '../ui/request-guard.mjs'
 
 export const EVIDENCE_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/evidence'
 const routeKey = `exact\u0000${EVIDENCE_ROUTE_PATH}`
@@ -15,6 +16,7 @@ export function registerEvidenceRoute(ctx, { token } = {}) {
     const dispose = server.register({ kind: 'exact', path: EVIDENCE_ROUTE_PATH, handler: async (req, res) => {
       const reply = (status, body) => { res.statusCode = status; res.setHeader('content-type', 'application/json'); res.setHeader('cache-control', 'no-store'); res.end(JSON.stringify(body)) }
       if (req.headers['x-patchwork-token'] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+      if (crossSiteRequest(req)) return reply(403, { ok: false, reason: 'cross-site-request' })
       const id = new URL(req.url ?? EVIDENCE_ROUTE_PATH, 'http://localhost').searchParams.get('sessionId')
       const agent = resolvePatchworkAgent(ctx, id)
       if (!agent) return reply(403, { ok: false, reason: 'patchwork-agent-required' })

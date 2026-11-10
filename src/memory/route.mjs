@@ -2,6 +2,7 @@ import { resolvePatchworkAgent } from '../scope.mjs'
 import { webRuntime } from '../ui/web-runtime.mjs'
 import { confirmMemory, forgetMemory, forgetMemories, listMemory, proposeMemory, recallMemory, reviseMemory, setMemoryValidity } from './store.mjs'
 import { logDiagnostic } from '../logging/session-log.mjs'
+import { crossSiteRequest } from '../ui/request-guard.mjs'
 
 export const MEMORY_ROUTE_PATH = '/api/plugins/patchwork-coding-agent/memory'
 const routeKey = `exact\u0000${MEMORY_ROUTE_PATH}`
@@ -15,6 +16,7 @@ export function registerMemoryRoute(ctx, { token } = {}) {
     const dispose = server.register({ kind: 'exact', path: MEMORY_ROUTE_PATH, handler: async (req, res) => {
       const reply = (status, body) => { res.statusCode = status; res.setHeader('content-type', 'application/json'); res.setHeader('cache-control', 'no-store'); res.end(JSON.stringify(body)) }
       if (req.headers['x-patchwork-token'] !== token) return reply(403, { ok: false, reason: 'forbidden' })
+      if (crossSiteRequest(req)) return reply(403, { ok: false, reason: 'cross-site-request' })
       const params = new URL(req.url ?? MEMORY_ROUTE_PATH, 'http://localhost').searchParams
       const id = params.get('sessionId')
       const agent = resolvePatchworkAgent(ctx, id)

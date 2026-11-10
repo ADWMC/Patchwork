@@ -57,7 +57,7 @@ function enclosingSymbol(file, startLine, endLine, queryTerms = []) {
  * 检索与 query 最相关的代码块。返回按 BM25 降序的块列表；零命中返回空数组，
  * 读取失败的文件按跳过处理（检索是增强，不是关卡）。
  */
-export async function searchChunks({ cwd, index, query, maxResults = CHUNK_DEFAULTS.maxResults, path, glob } = {}) {
+export async function searchChunks({ index, query, maxResults = CHUNK_DEFAULTS.maxResults, path, glob } = {}) {
   const question = String(query ?? '').trim()
   if (!question) throw new Error('chunks requires a query')
   const limit = Math.max(1, Math.min(20, Math.trunc(Number(maxResults) || CHUNK_DEFAULTS.maxResults)))

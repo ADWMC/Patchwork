@@ -5,6 +5,7 @@ import { isPatchworkAgent, requirePatchworkAgent } from '../../scope.mjs'
 import { logDiagnostic } from '../../logging/session-log.mjs'
 import { assertTaskRevision, taskRevision } from '../../task/action-check.mjs'
 import { executeTool } from '../../util/tool-execute.mjs'
+import { textOf } from '../../util/content-blocks.mjs'
 
 const FUSABLE_TOOLS = ['write', 'edit']
 const SHELL_TOOLS = ['pwsh', 'bash']
@@ -12,13 +13,6 @@ const SHELL_TOOLS = ['pwsh', 'bash']
 // Agent-local shadows outlive a standing-composition context unless explicitly
 // disposed. Track their owners so preset switches revoke the exact registrations.
 const registeredAgents = new WeakMap()
-
-function textOf(content) {
-  return (content ?? [])
-    .filter(block => block?.type === 'text')
-    .map(block => block.text)
-    .join('\n')
-}
 
 function messageOf(error) {
   return error instanceof Error ? error.message : String(error)

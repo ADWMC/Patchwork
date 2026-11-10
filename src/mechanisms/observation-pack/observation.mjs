@@ -1,4 +1,7 @@
 import { createHash } from 'node:crypto'
+import { isTextOnly, textOf } from '../../util/content-blocks.mjs'
+
+export { isTextOnly, textOf }
 
 export { contentHashOf } from '../../util/content-archive.mjs'
 
@@ -20,15 +23,6 @@ export function tailText(buffer, maxBytes = TAIL_EXCERPT_BYTES) {
   let start = Math.max(0, buffer.length - maxBytes)
   while (start < buffer.length && (buffer[start] & 0xc0) === 0x80) start += 1
   return buffer.subarray(start).toString('utf8')
-}
-
-export function isTextOnly(content) {
-  if (!Array.isArray(content) || content.length === 0) return false
-  return content.every(block => block?.type === 'text' && typeof block.text === 'string')
-}
-
-export function textOf(content) {
-  return content.map(block => block.text).join('\n')
 }
 
 /**

@@ -36,8 +36,14 @@ export async function registerPatchworkSkills(ctx, config = {}) {
   if (config.skillsEnabled === false) return []
   const mode = config.skillsMode ?? 'core'
   if (mode !== 'core' && mode !== 'expanded') throw new Error(`invalid skillsMode: ${mode}`)
+  const warn = message => {
+    try {
+      if (typeof ctx.logger?.warn === 'function') ctx.logger.warn(message)
+      else console.warn(message)
+    } catch { /* Startup warnings cannot break skill registration. */ }
+  }
   if (!ctx.skills?.register) {
-    console.warn('[patchwork] skills service unavailable; skill catalog not registered')
+    warn('[patchwork] skills service unavailable; skill catalog not registered')
     return []
   }
 
@@ -45,7 +51,7 @@ export async function registerPatchworkSkills(ctx, config = {}) {
   try {
     entries = await readdir(skillsRoot, { withFileTypes: true })
   } catch {
-    console.warn('[patchwork] assets/skills missing; no skills registered')
+    warn('[patchwork] assets/skills missing; no skills registered')
     return []
   }
 

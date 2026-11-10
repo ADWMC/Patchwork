@@ -51,9 +51,11 @@ export async function taskMapText(agent) {
   return text
 }
 
+export function setTaskMapEnabled(value) { enabled = value === true }
+
 export function registerTaskMap(ctx, config = {}) {
-  if (config.taskMap === false) return
-  enabled = true
+  setTaskMapEnabled(config.taskMap !== false)
+  if (!enabled) return
   ctx.on('agent/pre-step', async ({ agent, messages }, next) => {
     const decision = await next()
     if (decision.kind !== 'enter' || !isPatchworkAgent(agent)) return decision
